@@ -1,0 +1,70 @@
+model: models.dgns.CGMM.CGMM
+experiment: incremental
+higher_results_are_better: True
+dataset-getter: datasets.provider.IncrementalDataProvider
+device: cpu
+grid:
+  layer_config:
+    batch_size:
+      - 100000  # for EM we want full batch training.
+    shuffle:
+      - True
+    previous_layers_to_use: "1"  # multiple layers: "1,2,4"
+    concatenate_on_axis: 1  # must be > 0
+    max_layers:
+      - 5
+    A:
+      - 1
+    C:
+      - 10
+    node_type:
+      - discrete
+    unibigram:
+      - False
+    aggregation:
+      - mean
+    infer_with_posterior:
+      - True
+    epochs:
+      - 20
+    self_arc:
+      - False
+    wrapper:
+      - training.core.engine.IncrementalTrainingEngine
+    loss:
+      - training.core.callback.loss.CGMMLoss
+    optimizer:
+      - training.core.callback.optimizer.CGMMOptimizer
+    arbitrary_function_config:  # Define the information for the arbitrary function
+      batch_size:
+        - 32
+      epochs:
+        - 50
+      dim_embedding:
+        - 32
+      optimizer:
+        -
+          class_name: training.core.callback.optimizer.Optimizer
+          args:
+            optimizer_class_name: torch.optim.Adam
+            lr: 0.01
+            weight_decay: 0.
+      loss:
+        - training.core.callback.loss.MulticlassClassificationLoss
+      scorer:
+        - training.core.callback.score.MulticlassAccuracyScore
+      predictor:
+        - models.predictors.GraphPredictor.CGMMMLPGraphPredictor
+      wrapper:
+        - training.core.engine.TrainingEngine
+      early_stopper:
+        -
+          class_name:
+            - training.core.callback.early_stopping.PatienceEarlyStopper
+          args:
+            patience:
+              - 5
+            monitor: val_loss
+            mode: min
+      shuffle:
+        - False

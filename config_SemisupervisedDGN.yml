@@ -1,0 +1,82 @@
+model: models.dgns.ToyDGN.ToyDGN
+experiment: semi-supervised
+higher_results_are_better: True
+dataset-getter: datasets.provider.DataProvider
+device: cpu
+grid:
+  unsupervised_config:
+      batch_size:
+        - 32
+      epochs:
+        - 3
+      dim_embedding:
+        - 5
+      num_layers:
+        - 2
+      aggregation:
+        - mean
+      optimizer:
+      -
+        class_name: training.core.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr: 0.01
+          weight_decay: 0.
+      scheduler:
+        - null
+      loss:
+        - training.core.callback.loss.LinkPredictionLoss
+      scorer:
+         - null
+      predictor:
+        - models.predictors.LinkPredictor.SimpleLinkPredictor
+      wrapper:
+        - training.core.engine.TrainingEngine
+      gradient_clipping:
+        - null
+      early_stopper:
+        - null
+      shuffle:
+        - True
+
+  supervised_config:
+      batch_size:
+        - 32
+      epochs:
+        - 20
+      dim_embedding:
+        - 5
+      num_layers:
+        - 2
+      aggregation:
+        - mean
+      optimizer:
+      -
+        class_name: training.core.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr: 0.01
+          weight_decay: 0.
+      scheduler:
+        - null
+      loss:
+        - training.core.callback.loss.MulticlassClassificationLoss
+      scorer:
+        - training.core.callback.score.MulticlassAccuracyScore
+      predictor:
+        - models.predictors.GraphPredictor.LinearGraphPredictor
+      wrapper:
+        - training.core.engine.TrainingEngine
+      gradient_clipping:
+        - null
+      early_stopper:
+        -
+          class_name:
+            - training.core.callback.early_stopping.PatienceEarlyStopper
+          args:
+            patience:
+              - 5
+            monitor: val_loss
+            mode: min
+      shuffle:
+        - True
