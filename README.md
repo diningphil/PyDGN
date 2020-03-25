@@ -13,7 +13,7 @@ If you happen to use or modify this code, please remember to cite our tutorial p
 
 If you are interested in a rigorous evaluation of Deep Graph Networks, check this out:
 
-[Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning Representations (ICLR 2020).*
+[Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
 *Missing features*
 - Support to multiprocessing in GPU is not provided yet, but single GPU support is enabled.
