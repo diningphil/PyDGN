@@ -147,6 +147,7 @@ class IncrementalTask(Experiment):
         torch.manual_seed(0)
 
         batch_size = self.model_config.layer_config['batch_size']
+        arbitrary_logic_batch_size = self.model_config.layer_config['arbitrary_function_config']['batch_size']
         shuffle = self.model_config.layer_config['shuffle'] \
             if 'shuffle' in self.model_config.layer_config else True
 
@@ -201,8 +202,8 @@ class IncrementalTask(Experiment):
 
             train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train')
             val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation')
-            train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle, extra=train_out)
-            val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle, extra=val_out)
+            train_loader = dataset_getter.get_inner_train(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=train_out)
+            val_loader = dataset_getter.get_inner_val(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=val_out)
 
             # Stopping criterion based on training of the model
             stop = new_layer.stopping_criterion(depth, max_layers, train_loss, train_score, val_loss, val_score,
@@ -233,6 +234,7 @@ class IncrementalTask(Experiment):
         :return: (training accuracy, test accuracy)
         """
         batch_size = self.model_config.layer_config['batch_size']
+        arbitrary_logic_batch_size = self.model_config.layer_config['arbitrary_function_config']['batch_size']
         shuffle = self.model_config.layer_config['shuffle'] \
             if 'shuffle' in self.model_config.layer_config else True
 
@@ -292,9 +294,9 @@ class IncrementalTask(Experiment):
             train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train')
             val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation')
             test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test')
-            train_loader = dataset_getter.get_outer_train(batch_size=batch_size, shuffle=shuffle, extra=train_out)
-            val_loader = dataset_getter.get_outer_val(batch_size=batch_size, shuffle=shuffle, extra=val_out)
-            test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle, extra=test_out)            
+            train_loader = dataset_getter.get_outer_train(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=train_out)
+            val_loader = dataset_getter.get_outer_val(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=val_out)
+            test_loader = dataset_getter.get_outer_test(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=test_out)            
 
             # Stopping criterion based on training of the model
             stop = new_layer.stopping_criterion(depth, max_layers, train_loss, train_score, val_loss, val_score,
