@@ -22,7 +22,7 @@ grid:
     unibigram:
       - False
     aggregation:
-      - mean
+      - sum
     infer_with_posterior:
       - True
     epochs:
@@ -39,7 +39,7 @@ grid:
       batch_size:
         - 32
       epochs:
-        - 50
+        - 2000
       dim_embedding:
         - 32
       optimizer:
@@ -63,7 +63,7 @@ grid:
             - training.core.callback.early_stopping.PatienceEarlyStopper
           args:
             patience:
-              - 5
+              - 500
             monitor: val_loss
             mode: min
       shuffle:
