@@ -48,4 +48,4 @@ This is a joint project with **Marco Podda** ([Github](https://github.com/marcop
 If you find a bug, please open an issue to report it, and we will do our best to solve it. For generic/technical questions, please email us rather than opening an issue.
 
 ## License:
-PyDGN is GPL 3.0 licensed, as found in the LICENSE file.
+PyDGN is GPL 3.0 licensed, as written in the LICENSE file.
