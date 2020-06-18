@@ -37,7 +37,7 @@ Remember that [PyTorch MacOS Binaries dont support CUDA, install from source if 
     python PrepareDatasets.py --config-file [your config file]
 
 ### Launch an experiment in debug mode (see also Wiki)
-    python LaunchExperiments.py --config-file [your config file] --data-root [root folder of your data] --dataset-name [name of the dataset] --dataset-class [class that handles the dataset] --final-training-runs [how many final runs when evaluating on test. Results are averaged] --debug
+    python Launch_Experiments.py --config-file [your config file] --data-root [root folder of your data] --dataset-name [name of the dataset] --dataset-class [class that handles the dataset] --final-training-runs [how many final runs when evaluating on test. Results are averaged] --debug
 
 ## Credits:
 This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda)/[Homepage](https://sites.google.com/view/marcopodda/home)), whom I thank for his relentless dedication.
