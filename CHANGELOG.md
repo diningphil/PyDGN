@@ -7,8 +7,10 @@ We use PyDGN on a daily basis for our internal projects. In this first release t
 
 ### Added
 - Progress bars show the status of the experiments (with average completion time) for outer and inner cross validation (CV).
+![](https://github.com/diningphil/PyDGN/blob/master/images/progress.png)
 - Tensorboard visualization is activated by default when using a Plotter.
 - A new profiler keeps track of the time spent on each event (see Event engine).
+![](https://github.com/diningphil/PyDGN/blob/master/images/profiler.png)
 - All experiments can be interrupted at any time and resumed gracefully (the engine looks for the last checkpoint).
 
 ### Changed
