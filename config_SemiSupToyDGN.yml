@@ -1,18 +1,22 @@
 model: models.dgns.ToyDGN.ToyDGN
 experiment: semi-supervised
 higher_results_are_better: True
+log_every: 1
 dataset-getter: datasets.provider.DataProvider
 device: cpu
+num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
+pin_memory: False  # True only with --debug option and GPU device
 grid:
   unsupervised_config:
+      checkpoint: True
       batch_size:
         - 32
       epochs:
-        - 3
+        - 10
       dim_embedding:
         - 5
       num_layers:
-        - 2
+        - 3
       aggregation:
         - mean
       optimizer:
@@ -38,14 +42,14 @@ grid:
         - null
       shuffle:
         - True
-
   supervised_config:
+      checkpoint: True
       batch_size:
         - 32
       epochs:
         - 20
       dim_embedding:
-        - 5
+        - 10
       num_layers:
         - 2
       aggregation:
@@ -76,7 +80,10 @@ grid:
           args:
             patience:
               - 5
-            monitor: val_loss
-            mode: min
+            monitor: validation_Multiclass Accuracy # (train_,validation_)[name_of_the_scorer_or_loss_to_monitor]
+            mode: max
+            checkpoint: True
+      plotter:
+        - training.core.callback.plotter.Plotter
       shuffle:
         - True

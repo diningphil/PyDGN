@@ -1,0 +1,12 @@
+root: DATA/
+splits: SPLITS/
+name: PROTEINS
+splitter: datasets.splitter.Splitter  # default
+class_name: datasets.datasets.TUDataset
+inner_folds: 1
+outer_folds: 3
+seed: 42
+transforms:
+    - class_name: datasets.transforms.ConstantIfEmpty
+      args:
+        value: 1

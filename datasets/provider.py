@@ -11,14 +11,17 @@ class DataProvider:
     """
     This class is responsible for building the dataset at runtime.
     """
-    def __init__(self, data_root, dataset_class, dataset_name, outer_folds=10, inner_folds=1):
+    def __init__(self, data_root, splits_root, dataset_class, dataset_name, outer_folds, inner_folds, num_workers, pin_memory):
         """
         Initializes the object with all the relevant information
         :param data_root: the path of the root folder in which data is stored
+        :param splits_root: the path of the splits folder in which data splits are stored
         :param dataset_class: the class of the dataset
         :param dataset_name: the name of the dataset
         :param outer_folds: the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
         :param inner_folds: the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
+        :param num_workers: the number of workers to use in the DataLoader. A value > 0 triggers multiprocessing. Useful to prefetch data from disk to GPU. 
+        :param pin_memory: should be True when working on GPU. 
         """
         self.data_root = data_root
         self.dataset_class = dataset_class
@@ -30,8 +33,11 @@ class DataProvider:
         self.outer_k = None
         self.inner_k = None
 
+        self.splits_root = splits_root
         self.splitter = None
         self.dataset = None
+        self.num_workers = num_workers
+        self.pin_memory = pin_memory
 
     def set_outer_k(self, k):
         """
@@ -51,7 +57,7 @@ class DataProvider:
 
     def _get_splitter(self):
         if self.splitter is None:
-            self.splitter = load_splitter(self.dataset_name, self.outer_folds, self.inner_folds)
+            self.splitter = load_splitter(self.dataset_name, self.splits_root, self.outer_folds, self.inner_folds)
         return self.splitter
 
     def _get_dataset(self):
@@ -65,9 +71,9 @@ class DataProvider:
         shuffle = kwargs.pop("shuffle", False)
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler, **kwargs)
+            dataloader = DataLoader(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
         else:
-            dataloader = DataLoader(dataset, shuffle=False, **kwargs)
+            dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
 
         return dataloader
 
@@ -130,22 +136,26 @@ class DataProvider:
         indices = splitter.outer_folds[self.outer_k].test_idxs
         return self._get_loader(indices, **kwargs)
 
-    def get_dim_features(self):
+    def get_dim_node_features(self):
         """
-        Returns the number of features of the dataset
-        :return: an arbitrary object that depends on the implementation of the dataset num_features property
+        Returns the number of node features of the dataset
+        :return: an arbitrary object that depends on the implementation of the dataset
         """
-        dataset = self._get_dataset()
-        return dataset.num_features
+        return self._get_dataset().dim_node_features
+
+    def get_dim_edge_features(self):
+        """
+        Returns the number of node features of the dataset
+        :return: an arbitrary object that depends on the implementation of the dataset
+        """
+        return self._get_dataset().dim_edge_features
 
     def get_dim_target(self):
         """
         Returns the dimension of the target for the task
         :return: an arbitrary object that depends on the implementation of the dataset num_classes property
         """
-        # TODO: what if it is a regression problem?
-        dataset = self._get_dataset()
-        return dataset.num_classes
+        return self._get_dataset().dim_target
 
 
 class IncrementalDataProvider(DataProvider):
@@ -175,9 +185,9 @@ class IncrementalDataProvider(DataProvider):
         shuffle = kwargs.pop("shuffle", False)
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler, **kwargs)
+            dataloader = DataLoader(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
         else:
-            dataloader = DataLoader(dataset, shuffle=False, **kwargs)
+            dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
 
         return dataloader
 

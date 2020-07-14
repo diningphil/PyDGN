@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold, train_test_split
 
 from utils.serialization import load_yaml, save_yaml
 
@@ -44,7 +44,7 @@ class Splitter:
         splits = load_yaml(path)
 
         n_outer_folds = len(splits["outer_folds"])
-        n_inner_folds = len(splits["inner_folds"])
+        n_inner_folds = len(splits["inner_folds"][0])
         seed = splits["seed"]
 
         obj = cls(n_outer_folds=n_outer_folds, n_inner_folds=n_inner_folds, seed=seed)
@@ -60,45 +60,48 @@ class Splitter:
 
         return obj
 
-    def __init__(self, n_outer_folds=5, n_inner_folds=5, seed=42, stratify=True):
+    def __init__(self, n_outer_folds=5, n_inner_folds=5, seed=42, stratify=True, shuffle=True):
         """
         Initializes the splitter
         :param n_outer_folds: number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
         :param n_inner_folds: number of inner folds (model selection). 1 means hold-out, >1 means k-fold
         :param seed: random seed for reproducibility (on the same machine)
         :param stratify: whether to apply stratification or not (should be true for classification tasks)
+        :param shuffle: whether to apply shuffle or not
         """
         self.outer_folds = []
         self.inner_folds = []
         self.processed = False
         self.stratify = stratify
+        self.shuffle= shuffle
 
         self.n_outer_folds = n_outer_folds
         self.n_inner_folds = n_inner_folds
         self.seed = seed
 
-    def _get_splitter(self, n_splits, stratified, test_size, shuffle):
+    def _get_splitter(self, n_splits, stratified, test_size):
         if n_splits == 1:
+            # TODO we should be able to shuffle also here!
             if stratified:
                 splitter = StratifiedShuffleSplit(n_splits, test_size=test_size, random_state=self.seed)
             else:
                 splitter = ShuffleSplit(n_splits, test_size=test_size, random_state=self.seed)
         elif n_splits > 1:
             if stratified:
-                splitter = StratifiedKFold(n_splits, shuffle=shuffle, random_state=self.seed)
+                splitter = StratifiedKFold(n_splits, shuffle=self.shuffle, random_state=self.seed)
             else:
-                splitter = KFold(n_splits, shuffle=shuffle, random_state=self.seed)
+                splitter = KFold(n_splits, shuffle=self.shuffle, random_state=self.seed)
         else:
             raise ValueError(f"'n_splits' must be >=1, got {n_splits}")
 
         return splitter
 
-    def split(self, idxs, targets=None, test_size=0.2, shuffle=True):
+    def split(self, idxs, targets=None, test_size=0.1):
         """
         Computes the splits
         :param idxs: the indices of the dataset
         :param targets: targets used for stratification
-        :param test_size: percentage of test set when using an hold-out split. Default value is 0.2.
+        :param test_size: percentage of test set when using an hold-out split. Default value is 0.1.
         :param shuffle: whether to shuffle indices
         :return:
         """
@@ -110,15 +113,13 @@ class Splitter:
             outer_splitter = self._get_splitter(
                 n_splits=self.n_outer_folds,
                 stratified=stratified,
-                test_size=test_size,
-                shuffle=shuffle)
+                test_size=test_size)
 
             for train_idxs, test_idxs in outer_splitter.split(outer_idxs, y=targets):
                 inner_splitter = self._get_splitter(
                     n_splits=self.n_inner_folds,
                     stratified=stratified,
-                    test_size=test_size,
-                    shuffle=shuffle)
+                    test_size=test_size)
 
                 inner_fold_splits = []
                 inner_idxs = outer_idxs[train_idxs]
@@ -129,8 +130,6 @@ class Splitter:
                     inner_fold_splits.append(inner_fold)
                 self.inner_folds.append(inner_fold_splits)
 
-                # train and test indices are returned in order. Even when splits are stratified, this can be a problem
-                # e.g. they are ordered by size of the graph etc.
                 np.random.shuffle(train_idxs)
                 np.random.shuffle(test_idxs)
                 outer_fold = OuterFold(train_idxs.tolist(), test_idxs.tolist())
@@ -148,4 +147,6 @@ class Splitter:
         savedict["inner_folds"] = []
         for inner_split in self.inner_folds:
             savedict["inner_folds"].append([i.todict() for i in inner_split])
+
         save_yaml(savedict, path)
+

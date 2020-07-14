@@ -1,8 +1,0 @@
-root: DATA
-name: NCI1
-class_name: datasets.datasets.TUDataset
-inner_folds: 1
-outer_folds: 1
-seed: 42
-other_args:  # will be added to kwargs when istantiating the dataset class
-  use_node_attr: False  # no effect on NCI1, it is just an example

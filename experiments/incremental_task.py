@@ -4,16 +4,18 @@ import shutil
 from experiments.experiment import Experiment
 from torch_geometric.data import Data
 from torch.utils.data.sampler import SequentialSampler
+import torch
 
 
 class IncrementalTask(Experiment):
 
     def __init__(self, model_configuration, exp_path):
         super(IncrementalTask, self).__init__(model_configuration, exp_path)
+        self.root_exp_path = exp_path  # to distinguish from layers' exp_path
         self.output_folder = os.path.join(exp_path, 'outputs')
         self._concat_axis = self.model_config.layer_config['concatenate_on_axis']
 
-    def _create_extra_dataset(self, prev_outputs_to_consider, mode):
+    def _create_extra_dataset(self, prev_outputs_to_consider, mode, depth):
         # Load previous outputs if any according to prev. layers to consider (ALL TENSORS)
         v_outs, e_outs, g_outs, vo_outs, eo_outs, go_outs = self._load_outputs(mode, prev_outputs_to_consider)
 
@@ -85,6 +87,8 @@ class IncrementalTask(Experiment):
             'graph_other_outputs': None,
         }
 
+        # print(f"Loading outputs of layers {prev_outputs_to_consider}, will be concatenated in reverse order")
+
         for prev in prev_outputs_to_consider:
             for path, o_key in [(os.path.join(self.output_folder, mode, f'vertex_output_{prev}.pt'), 'vertex_outputs'),
                                 (os.path.join(self.output_folder, mode, f'edge_output_{prev}.pt'), 'edge_outputs'),
@@ -99,11 +103,12 @@ class IncrementalTask(Experiment):
                     if outs is None:
                         # print('None!')
                         outs = [None] * len(out)
-                    else:
-                        pass
-                        # print('Not none!')
+
+                    # print(path, o_key, len(out))
+                    # print(out[0].shape)
 
                     for graph_id in range(len(out)):  # iterate over graphs
+
                         outs[graph_id] = out[graph_id] if outs[graph_id] is None \
                             else torch.cat((out[graph_id], outs[graph_id]), self._concat_axis)
 
@@ -113,7 +118,7 @@ class IncrementalTask(Experiment):
             outs_dict['graph_outputs'], outs_dict['vertex_other_outputs'], \
             outs_dict['edge_other_outputs'], outs_dict['graph_other_outputs']
 
-    def _store_outputs(self, mode, depth, v_tensor_list, e_tensor_list=None, g_tensor_list=None, 
+    def _store_outputs(self, mode, depth, v_tensor_list, e_tensor_list=None, g_tensor_list=None,
                        vo_tensor_list=None, eo_tensor_list=None, go_tensor_list=None):
 
         if not os.path.exists(os.path.join(self.output_folder, mode)):
@@ -144,15 +149,16 @@ class IncrementalTask(Experiment):
         :return: (training accuracy, validation/test accuracy)
         """
 
-        torch.manual_seed(0)
-
         batch_size = self.model_config.layer_config['batch_size']
         arbitrary_logic_batch_size = self.model_config.layer_config['arbitrary_function_config']['batch_size']
         shuffle = self.model_config.layer_config['shuffle'] \
             if 'shuffle' in self.model_config.layer_config else True
+        arbitrary_logic_shuffle = self.model_config.layer_config['arbitrary_function_config']['shuffle'] \
+            if 'shuffle' in self.model_config.layer_config['arbitrary_function_config'] else True
 
         # Instantiate the Dataset
-        dim_features = dataset_getter.get_dim_features()
+        dim_node_features = dataset_getter.get_dim_node_features()
+        dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
 
         layers = []
@@ -167,15 +173,18 @@ class IncrementalTask(Experiment):
         depth = 1
         while not stop and depth <= max_layers:
 
+            # Change exp path to allow Stop & Resume
+            self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}')
+
             prev_outputs_to_consider = [(depth - int(x)) for x in l_prec if (depth - int(x)) > 0]
 
-            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train')
-            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation')
+            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
+            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
             train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle, extra=train_out)
             val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle, extra=val_out)
-            
+
             # Instantiate the Model
-            new_layer = self.create_incremental_model(dim_features, dim_target, depth, prev_outputs_to_consider)
+            new_layer = self.create_incremental_model(dim_node_features, dim_edge_features, dim_target, depth, prev_outputs_to_consider)
 
             # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
             incremental_training_wrapper = self.create_incremental_wrapper(new_layer)
@@ -199,34 +208,44 @@ class IncrementalTask(Experiment):
 
             # Consider all previous layers now, i.e. gather all the embeddings
             prev_outputs_to_consider = [l for l in range(1, depth+1)]
+            prev_outputs_to_consider.reverse()
 
-            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train')
-            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation')
-            train_loader = dataset_getter.get_inner_train(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=train_out)
-            val_loader = dataset_getter.get_inner_val(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=val_out)
+            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
+            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
+            train_loader = dataset_getter.get_inner_train(batch_size=arbitrary_logic_batch_size,
+                                                            shuffle=arbitrary_logic_shuffle, extra=train_out)
+            val_loader = dataset_getter.get_inner_val(batch_size=arbitrary_logic_batch_size,
+                                                        shuffle=arbitrary_logic_shuffle, extra=val_out)
+
+            # Change exp path to allow Stop & Resume
+            self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_stopping_criterion')
 
             # Stopping criterion based on training of the model
             stop = new_layer.stopping_criterion(depth, max_layers, train_loss, train_score, val_loss, val_score,
                                                 dict_per_layer, self.model_config.layer_config, logger=logger)
 
+            # Change exp path to allow Stop & Resume
+            self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_arbitrary_config')
+
             # Execute arbitrary logic e.g. to compute scores
             d = new_layer.arbitrary_logic(self, train_loader, self.model_config.layer_config, is_last_layer=stop,
-                                          validation_loader=val_loader, test_loader=None,
-                                          logger=logger, device=self.model_config.device)
+                                            validation_loader=val_loader, test_loader=None,
+                                            logger=logger, device=self.model_config.device)
 
             # Append layer
             layers.append(new_layer)
             dict_per_layer.append(d)
-            depth += 1
 
             # Give priority to arbitrary function
             stop = d['stop'] if 'stop' in d else stop
+
+            depth += 1
 
         # CLEAR OUTPUTS TO SAVE SPACE
         for mode in ['train', 'validation']:
             shutil.rmtree(os.path.join(self.output_folder, mode), ignore_errors=True)
 
-        return float(dict_per_layer[-1]['train_score']), float(dict_per_layer[-1]['validation_score'])
+        return dict_per_layer[-1]['train_score'], dict_per_layer[-1]['validation_score']
 
     def run_test(self, dataset_getter, logger, other=None):
         """
@@ -237,9 +256,12 @@ class IncrementalTask(Experiment):
         arbitrary_logic_batch_size = self.model_config.layer_config['arbitrary_function_config']['batch_size']
         shuffle = self.model_config.layer_config['shuffle'] \
             if 'shuffle' in self.model_config.layer_config else True
+        arbitrary_logic_shuffle = self.model_config.layer_config['arbitrary_function_config']['shuffle'] \
+            if 'shuffle' in self.model_config.layer_config['arbitrary_function_config'] else True
 
         # Instantiate the Dataset
-        dim_features = dataset_getter.get_dim_features()
+        dim_node_features = dataset_getter.get_dim_node_features()
+        dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
 
         layers = []
@@ -254,17 +276,21 @@ class IncrementalTask(Experiment):
         depth = 1
         while not stop and depth <= max_layers:
 
+            # Change exp path to allow Stop & Resume
+            self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}')
+
             prev_outputs_to_consider = [(depth - int(x)) for x in l_prec if (depth - int(x)) > 0]
 
-            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train')
-            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation')
-            test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test')
+            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
+            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
+            test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test', depth=depth)
             train_loader = dataset_getter.get_outer_train(batch_size=batch_size, shuffle=shuffle, extra=train_out)
             val_loader = dataset_getter.get_outer_val(batch_size=batch_size, shuffle=shuffle, extra=val_out)
-            test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle, extra=test_out)            
+            test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle, extra=test_out)
 
             # Instantiate the Model
-            new_layer = self.create_incremental_model(dim_features, dim_target, depth, prev_outputs_to_consider)
+            new_layer = self.create_incremental_model(dim_node_features, dim_edge_features, dim_target,
+                                                      depth, prev_outputs_to_consider)
 
             # Instantiate the wrapper (it handles the training loop and inference phase by abstracting the specifics)
             incremental_training_wrapper = self.create_incremental_wrapper(new_layer)
@@ -291,17 +317,26 @@ class IncrementalTask(Experiment):
             # Consider all previous layers now, i.e. gather all the embeddings
             prev_outputs_to_consider = [l for l in range(1, depth+1)]
 
-            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train')
-            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation')
-            test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test')
-            train_loader = dataset_getter.get_outer_train(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=train_out)
-            val_loader = dataset_getter.get_outer_val(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=val_out)
-            test_loader = dataset_getter.get_outer_test(batch_size=arbitrary_logic_batch_size, shuffle=shuffle, extra=test_out)            
+            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
+            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
+            test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test', depth=depth)
+            train_loader = dataset_getter.get_outer_train(batch_size=arbitrary_logic_batch_size,
+                                                          shuffle=arbitrary_logic_shuffle, extra=train_out)
+            val_loader = dataset_getter.get_outer_val(batch_size=arbitrary_logic_batch_size,
+                                                      shuffle=arbitrary_logic_shuffle, extra=val_out)
+            test_loader = dataset_getter.get_outer_test(batch_size=arbitrary_logic_batch_size,
+                                                        shuffle=arbitrary_logic_shuffle, extra=test_out)
+
+            # Change exp path to allow Stop & Resume
+            self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_stopping_criterion')
 
             # Stopping criterion based on training of the model
-            stop = new_layer.stopping_criterion(depth, max_layers, train_loss, train_score, val_loss, val_score,
+            stop = new_layer.stopping_criterion(self, depth, max_layers, train_loss, train_score, val_loss, val_score,
                                                 dict_per_layer, self.model_config.layer_config,
                                                 logger=logger)
+
+            # Change exp path to allow Stop & Resume
+            self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_arbitrary_config')
 
             # Execute arbitrary logic e.g. to compute scores
             d = new_layer.arbitrary_logic(self, train_loader, self.model_config.layer_config,
@@ -312,14 +347,15 @@ class IncrementalTask(Experiment):
             # Append layer
             layers.append(new_layer)
             dict_per_layer.append(d)
-            depth += 1
 
             # Give priority to arbitrary function
             stop = d['stop'] if 'stop' in d else stop
+
+            depth += 1
 
         # CLEAR OUTPUTS TO SAVE SPACE
         for mode in ['train', 'validation', 'test']:
             shutil.rmtree(os.path.join(self.output_folder, mode), ignore_errors=True)
 
         # Use last training and test scores
-        return  float(dict_per_layer[-1]['train_score']), float(dict_per_layer[-1]['test_score'])
+        return dict_per_layer[-1]['train_score'], dict_per_layer[-1]['test_score']

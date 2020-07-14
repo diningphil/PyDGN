@@ -1,3 +1,4 @@
+import json
 from copy import deepcopy
 from utils.serialization import load_yaml, save_yaml
 
@@ -26,7 +27,10 @@ class Grid:
         self.dataset_name = dataset_name
         self.experiment = self.configs_dict['experiment']
         self.higher_results_are_better = self.configs_dict['higher_results_are_better']
+        self.log_every = self.configs_dict['log_every']
         self.device = self.configs_dict['device']
+        self.num_dataloader_workers = self.configs_dict['num_dataloader_workers']
+        self.pin_memory = self.configs_dict['pin_memory']
         self.model = self.configs_dict['model']
         self.dataset_getter = self.configs_dict['dataset-getter']
         self.hparams = self._gen_configs()
@@ -44,8 +48,11 @@ class Grid:
                         "data_root": self.data_root,
                         "model": self.model,
                         "device": self.device,
+                        "num_dataloader_workers": self.num_dataloader_workers,
+                        "pin_memory": self.pin_memory,
                         "experiment": self.experiment,
-                        "higher_results_are_better": self.higher_results_are_better})
+                        "higher_results_are_better": self.higher_results_are_better,
+                        "log_every": self.log_every})
 
         return configs
 
@@ -134,7 +141,7 @@ class Grid:
 
     @property
     def exp_name(self):
-        return f"{self.model.split('.')[-1]}_{self.dataset_name.split('.')[-1]}"
+        return f"{self.model.split('.')[-1]}_{self.dataset_name}"
 
     @property
     def num_configs(self):
@@ -170,3 +177,6 @@ class Config:
 
     def save(self, path):
         save_yaml(self.config_dict, path)
+
+    def __str__(self):
+        return json.dumps(self.config_dict, sort_keys=True, indent=4)

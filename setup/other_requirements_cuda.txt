@@ -1,8 +1,4 @@
-pyyaml
-requests==2.22.0
 torch-scatter==2.0.4+cu101
 torch-sparse==0.6.0+cu101
 torch-spline-conv==1.2.0+cu101
 torch-geometric==1.4.2
-matplotlib==3.0.3
-seaborn==0.9.0

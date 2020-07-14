@@ -7,6 +7,8 @@ class Scheduler(EventHandler):
     Scheduler is the main event handler for schedulers. Just pass a PyTorch scheduler together with its arguments in the
     configuration file.
     """
+    __name__ = 'scheduler'
+
     def __init__(self, scheduler_class_name, optimizer, **kwargs):
         self.scheduler = s2c(scheduler_class_name)(optimizer, **kwargs)
 

@@ -7,10 +7,11 @@ class ToyDGN(nn.Module):
     """
     Simple Deep Graph Network that can be used to test the library
     """
-    def __init__(self, dim_features, dim_target, predictor_class, config):
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, predictor_class, config):
         """
         Initializes the model.
-        :param dim_features: arbitrary object holding node/edge feature information
+        :param dim_node_features: arbitrary object holding node feature information
+        :param dim_edge_features: arbitrary object holding edge feature information
         :param dim_target: arbitrary object holding target information
         :param predictor_class: the class of the predictor that will classify node/graph embeddings produced by this DGN
         :param config: the configuration dictionary to extract further hyper-parameters
@@ -24,11 +25,13 @@ class ToyDGN(nn.Module):
         if self.aggregation == 'max':
             self.fc_max = nn.Linear(dim_embedding, dim_embedding)
 
-        self.predictor = predictor_class(dim_features=dim_embedding*num_layers, dim_target=dim_target, config=config)
+        self.predictor = predictor_class(dim_node_features=dim_embedding*num_layers,
+                                         dim_edge_features=dim_edge_features,
+                                         dim_target=dim_target, config=config)
 
         self.layers = nn.ModuleList([])
         for i in range(num_layers):
-            dim_input = dim_features if i == 0 else dim_embedding
+            dim_input = dim_node_features if i == 0 else dim_embedding
 
             conv = SAGEConv(dim_input, dim_embedding)
             # Overwrite aggregation method (default is set to mean

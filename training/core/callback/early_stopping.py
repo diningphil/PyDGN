@@ -1,7 +1,11 @@
+import os
 import operator
 import numpy as np
 import copy
+import torch
+from pathlib import Path
 
+from training.core.utils import atomic_save
 from training.core.event.handler import EventHandler
 
 
@@ -10,19 +14,22 @@ class EarlyStopper(EventHandler):
     EarlyStopper is the main event handler for optimizers. Just create a subclass that implements an early stopping
     method.
     """
-    def __init__(self, monitor, mode):
+    __name__ = 'early stopper'
+
+    def __init__(self, monitor, mode, checkpoint=False):
         super().__init__()
         self.monitor = monitor
         self.best_metric = None
-        
+        self.checkpoint = checkpoint
+
         if 'min' in mode:
-            self.operator = operator.lt
+            self.operator = operator.le
         elif 'max' in mode:
-            self.operator = operator.gt
+            self.operator = operator.ge
         else:
             raise NotImplementedError('Mode not understood by early stopper.')
 
-        assert 'test' not in monitor, "Do not apply early stopping to test metrics!"
+        assert 'test' not in monitor, "Do not apply early stopping to the test set!"
 
     def on_epoch_end(self, state):
         """
@@ -31,32 +38,42 @@ class EarlyStopper(EventHandler):
         If it is time to stop, updates the stop_training field of the state.
         :param state: the State object that is shared by the TrainingEngine during training
         """
-        
-        assert self.monitor in state.epoch_results, f'{self.monitor} not found in epoch_results.'
-    
+
+        assert self.monitor in state.epoch_results['scores'], f'{self.monitor} not found in epoch_results'
+
         if not hasattr(state, 'best_epoch_results'):
             state.update(best_epoch_results=state.epoch_results)
             state.best_epoch_results['best_epoch'] = state.epoch
-            state.best_epoch_results[self.monitor] = state.epoch_results[self.monitor]
+            state.best_epoch_results['scores'][self.monitor] = state.epoch_results['scores'][self.monitor]
             state.best_epoch_results['model_state'] = copy.deepcopy(state.model.state_dict())
             state.best_epoch_results['optimizer_state'] = state.optimizer_state  # computed by optimizer
+            state.best_epoch_results['scheduler_state'] = state['scheduler_state']  # computed by scheduler
             stop_training = False
+            if self.checkpoint:
+                atomic_save(state.best_epoch_results, Path(state.exp_path,
+                           state.BEST_CHECKPOINT_FILENAME))
         else:
-            metric_to_compare = state.epoch_results[self.monitor]
-            best_metric = state.best_epoch_results[self.monitor]
-            
+            metric_to_compare = state.epoch_results['scores'][self.monitor]
+            best_metric = state.best_epoch_results['scores'][self.monitor]
+
             if self.operator(metric_to_compare, best_metric):
 
-                # print(f'New best: {metric_to_compare}')                                
+                # print(f'New best: {metric_to_compare}')
                 state.update(best_epoch_results=state.epoch_results)
                 state.best_epoch_results['best_epoch'] = state.epoch
-                state.best_epoch_results[self.monitor] = metric_to_compare
+                state.best_epoch_results['scores'][self.monitor] = metric_to_compare
                 state.best_epoch_results['model_state'] = copy.deepcopy(state.model.state_dict())
                 state.best_epoch_results['optimizer_state'] = state.optimizer_state  # computed by optimizer
+                state.best_epoch_results['scheduler_state'] = state['scheduler_state']  # computed by scheduler
+                if self.checkpoint:
+                    atomic_save(state.best_epoch_results, Path(state.exp_path,
+                               state.BEST_CHECKPOINT_FILENAME))
+        if state.stop_training:
+            self.logger.warning(f"Early stopping: epoch {state.epoch} - best epoch {best_epoch} - patience {self.patience}")
 
             # Regarless of improvement or not
             stop_training = self.stop(state, metric_to_compare)
-            state.update(stop_training=stop_training)                
+            state.update(stop_training=stop_training)
 
     def stop(self, state, metric):
         """
@@ -70,10 +87,10 @@ class EarlyStopper(EventHandler):
 
 class PatienceEarlyStopper(EarlyStopper):
     """ Early Stopper that implements patience """
-    def __init__(self, monitor, mode, patience=30):
-        super().__init__(monitor, mode)
+    def __init__(self, monitor, mode, patience=30, checkpoint=False):
+        super().__init__(monitor, mode, checkpoint)
         self.patience = patience
-    
+
     def stop(self, state, metric):
         """
         Returns true when the early stopping technique decides it is time to stop.
@@ -83,10 +100,5 @@ class PatienceEarlyStopper(EarlyStopper):
         """
 
         best_epoch = state.best_epoch_results['best_epoch']
-
         stop_training = (state.epoch - best_epoch) >= self.patience
-
-        if state.stop_training:
-            self.logger.warning(f"Early stopping: epoch {state.epoch} - best epoch {best_epoch} - patience {self.patience}")
-
         return stop_training

@@ -11,4 +11,5 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     pip install torch==1.4.0
 fi
 
+pip install -r setup/requirements.txt
 pip install -r setup/other_requirements_cpu.txt --find-links https://pytorch-geometric.com/whl/torch-1.4.0.html

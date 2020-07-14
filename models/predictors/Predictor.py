@@ -2,9 +2,10 @@ import torch
 
 
 class GraphPredictor(torch.nn.Module):
-    def __init__(self, dim_features, dim_target, config):
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
         super().__init__()
-        self.dim_features = dim_features
+        self.dim_node_features = dim_node_features
+        self.dim_edge_features = dim_edge_features
         self.dim_target = dim_target
         self.config = config
 
@@ -14,9 +15,10 @@ class GraphPredictor(torch.nn.Module):
 
 
 class NodePredictor(torch.nn.Module):
-    def __init__(self, dim_features, dim_target, config):
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
         super().__init__()
-        self.dim_features = dim_features
+        self.dim_node_features = dim_node_features
+        self.dim_edge_features = dim_edge_features
         self.dim_target = dim_target
         self.config = config
 
@@ -26,9 +28,10 @@ class NodePredictor(torch.nn.Module):
 
 
 class LinkPredictor(torch.nn.Module):
-    def __init__(self, dim_features, dim_target, config):
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
         super().__init__()
-        self.dim_features = dim_features
+        self.dim_node_features = dim_node_features
+        self.dim_edge_features = dim_edge_features
         self.dim_target = dim_target
         self.config = config
 

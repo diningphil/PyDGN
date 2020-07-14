@@ -1,6 +1,8 @@
 import warnings
 from pathlib import Path
 import numpy as np
+import os
+import shutil
 
 import torch
 from torch_geometric.datasets import TUDataset
@@ -10,27 +12,21 @@ from config.utils import s2c
 from datasets.splitter import Splitter
 from utils.utils import get_or_create_dir, check_argument
 
-
-DATA_DIR = Path("DATA")
-SPLITS_DIR = Path("SPLITS")
-
 DEFAULTS = {
-    "root": "DATA",
+    "root": "DATA/",
+    "splits": "SPLITS/",
     "inner_folds": 1,
     "outer_folds": 10,
     "seed": 42
 }
 
-
 def has_targets(dataset):
     return all(d.y is not None for d in dataset)
-
 
 def get_targets(dataset):
     return np.array([d.y.item() for d in dataset])
 
-
-def preprocess_data(options):
+def preprocess_data(options, splitter, delete_processed_data):
     kwargs = DEFAULTS.copy()
     kwargs.update(**options)
 
@@ -38,11 +34,21 @@ def preprocess_data(options):
         raise ValueError("You must specify 'class_name' in your kwargs.")
 
     data_root = Path(kwargs.pop("root"))
+    splits_root = Path(kwargs.pop("splits"))
     outer_folds = kwargs.pop("outer_folds")
     inner_folds = kwargs.pop("inner_folds")
     seed = kwargs.pop("seed")
     stratify = kwargs.pop("stratify", False)
     other_kwargs = kwargs.pop('other_args', {})
+
+    # Enables re-generation of the 'processed' folder
+    if delete_processed_data:
+        processed_folder = Path(data_root, kwargs['name'], 'processed')
+        if os.path.exists(processed_folder):
+            print(f"Deleting old processed data in {processed_folder}")
+            shutil.rmtree(processed_folder)
+        else:
+            print(f"No old processed data to delete in {processed_folder}")
 
     dataset_class = s2c(kwargs.pop("class_name"))
 
@@ -81,21 +87,18 @@ def preprocess_data(options):
     dataset = dataset_class(root=data_root, **kwargs)
 
     # Store dataset arguments
-    kwargs_path = Path(data_root, kwargs['name'], 'processed', 'dataset_kwargs.pt')
+    kwargs_path = Path(data_root, dataset.name, 'processed', 'dataset_kwargs.pt')
     torch.save(kwargs, kwargs_path)
 
-    splits_dir = get_or_create_dir(SPLITS_DIR / dataset.name)
+    splits_dir = get_or_create_dir(splits_root / dataset.name)
     splits_path = splits_dir / f"{dataset.name}_outer{outer_folds}_inner{inner_folds}.yml"
 
     if not splits_path.exists():
-        splitter = Splitter(
-            n_outer_folds=outer_folds,
-            n_inner_folds=inner_folds,
-            seed=seed,
-            stratify=stratify)
         targets = get_targets(dataset) if has_targets(dataset) else None
         splitter.split(range(len(dataset)), targets=targets)
         splitter.save(splits_path)
+    else:
+        print("Data splits are already present, I will not overwrite them.")
 
 
 def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
@@ -104,23 +107,16 @@ def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
     # Load arguments
     kwargs_path = Path(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
     kwargs = torch.load(kwargs_path)
-    assert kwargs.pop('name') == dataset_name
 
     with warnings.catch_warnings():
         # suppress PyG warnings
         warnings.simplefilter("ignore")
+        dataset = dataset_class(data_root, **kwargs)
 
-        dataset = dataset_class(data_root, dataset_name, **kwargs)
-
-    # TODO ADD SUPPORT FOR TRANSFORM AND PRE-FILTERS
-    # patch for PyG and pre_transform filters
-    # data, slices = torch.load(data_root / dataset_name / "processed" / "data.pt")
-    # dataset.data = data
-    # dataset.slices = slices
     return dataset
 
 
-def load_splitter(dataset_name, outer_folds, inner_folds):
-    splits_dir = SPLITS_DIR / dataset_name
+def load_splitter(dataset_name, split_root, outer_folds, inner_folds):
+    splits_dir = split_root / dataset_name
     splits_path = splits_dir / f"{dataset_name}_outer{outer_folds}_inner{inner_folds}.yml"
     return Splitter.load(splits_path)

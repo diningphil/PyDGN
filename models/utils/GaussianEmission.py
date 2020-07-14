@@ -14,24 +14,17 @@ class GaussianEmission:
     NOTE: THE IMPLEMENTATION USES DIAGONAL COVARIANCE MATRICES TO SCALE LINEARLY WITH THE NUMBER OF FEATURES.
     """
 
-    def __init__(self, f, c, device):
-        self.device = device
+    def __init__(self, f, c):
         self.F = f  # features dimension
         self.C = c  # clusters
 
-        if 'cuda' in device:
-            self.mu = torch.rand((self.C, self.F), dtype=torch.float64).cuda()
-            # Sigma is diagonal! it holds the standard deviation terms, which have to be squared!
-            self.var = torch.rand((self.C, self.F), dtype=torch.float64).cuda()  # at least var 1
-            self.pi = torch.DoubleTensor([math.pi]).cuda()
-        else:
-            self.mu = torch.rand((self.C, self.F), dtype=torch.float64)
-            # Sigma is diagonal! it holds the standard deviation terms, which have to be squared!
-            self.var = torch.rand((self.C, self.F), dtype=torch.float64)  # at least var 1
-            self.pi = torch.DoubleTensor([math.pi])
+        self.mu = torch.rand((self.C, self.F), dtype=torch.float32)
+        # Sigma is diagonal! it holds the standard deviation terms, which have to be squared!
+        self.var = torch.rand((self.C, self.F), dtype=torch.float32)  # at least var 1
+        self.pi = torch.FloatTensor([math.pi])
 
-        self.eps = 1e-80  # Laplace smoothing
-        self.var_threshold = 1e-80
+        self.eps = 1e-8  # Laplace smoothing
+        self.var_threshold = 1e-8
 
         # Initialize parameters
         self.mu_numerator = None
@@ -39,13 +32,24 @@ class GaussianEmission:
         self.var_numerator = None
         self.var_denominator = None
 
+        self.device = None
+
         self.init_accumulators()
         self.initialized = False
+
 
     def to(self, device):
         self.mu.to(device)
         self.var.to(device)
-        self.pi.to(device)
+        self.pi = self.pi.to(device)
+        self.device = device
+
+        self.mu_numerator = self.mu_numerator.to(device)
+        self.mu_denominator = self.mu_denominator.to(device)
+
+        self.var_numerator = self.var_numerator.to(device)
+        self.var_denominator = self.var_denominator.to(device)
+
 
     def initialize(self, data):
         """
@@ -60,16 +64,16 @@ class GaussianEmission:
         # I do not want the gaussian to collapse on a single data point
         # self.mu = data[idxs]
         # '''
-        print("Initializing mu with subset of samples...")
-        codes, distortion = scipy.cluster.vq.kmeans(data.detach().numpy()[:], self.C, iter=20, thresh=1e-05)
 
-        if 'cuda' in self.device:
-            self.mu[:codes.shape[0], :] = torch.from_numpy(codes).cuda()
-            self.var[:, :] = torch.std(data, dim=0).cuda()
-        else:
-            self.mu[:codes.shape[0], :] = torch.from_numpy(codes)
-            self.var[:, :] = torch.std(data, dim=0)
+        print("Initializing mu with subset of samples...")
+        codes, distortion = scipy.cluster.vq.kmeans(data.cpu().detach().numpy()[:], self.C, iter=20, thresh=1e-05)
+        self.mu[:codes.shape[0], :] = torch.from_numpy(codes)
+        self.var[:, :] = torch.std(data, dim=0)
+
+        self.mu = self.mu.to(self.device)
+        self.var = self.var.to(self.device)
         print("Done.")
+
 
     def export_parameters(self):
         return {'mu': self.mu, 'sigma': self.var}
@@ -86,7 +90,7 @@ class GaussianEmission:
         :param var:
         :return:
         """
-        return torch.exp(-((data.double() - mean) ** 2) / (2 * var)) / (torch.sqrt(2 * self.pi * var))
+        return torch.exp(-((data.float() - mean) ** 2) / (2 * var)) / (torch.sqrt(2 * self.pi * var))
 
     def multivariate_diagonal_pdf(self, data, mean, var):
         """
@@ -96,7 +100,7 @@ class GaussianEmission:
         :param var:
         :return:
         """
-        diff = (data.double() - mean)
+        diff = (data.float() - mean)
 
         '''
         first_log_term = - torch.log(torch.sqrt(2 * self.pi * var))
@@ -109,9 +113,8 @@ class GaussianEmission:
         num = torch.exp(- (diff * diff)/(0.5*var) )
         probs = torch.prod(num / normaliser, dim=1)
         '''
-
         log_normaliser = -0.5 * (torch.log(2 * self.pi) + torch.log(var))
-        log_num = - (diff * diff) / (0.5 * var)
+        log_num = - (diff * diff) / (2 * var)
         log_probs = torch.sum(log_num + log_normaliser, dim=1)
         probs = torch.exp(log_probs)
 
@@ -133,16 +136,13 @@ class GaussianEmission:
         EM updates the parameters in batch, but needs to accumulate statistics in mini-batch style.
         :return:
         """
-        if 'cuda' in self.device:
-            self.mu_numerator = torch.full([self.C, self.F], self.eps, dtype=torch.float64).cuda()
-            self.mu_denominator = torch.full([self.C, 1], self.eps * self.C, dtype=torch.float64).cuda()
-            self.var_numerator = torch.full([self.C, self.F], self.eps, dtype=torch.float64).cuda()
-            self.var_denominator = torch.full([self.C, 1], self.eps * self.C, dtype=torch.float64).cuda()
-        else:
-            self.mu_numerator = torch.full([self.C, self.F], self.eps, dtype=torch.float64)
-            self.mu_denominator = torch.full([self.C, 1], self.eps * self.C, dtype=torch.float64)
-            self.var_numerator = torch.full([self.C, self.F], self.eps, dtype=torch.float64)
-            self.var_denominator = torch.full([self.C, 1], self.eps * self.C, dtype=torch.float64)
+        self.mu_numerator = torch.full([self.C, self.F], self.eps, dtype=torch.float32)
+        self.mu_denominator = torch.full([self.C, 1], self.eps * self.C, dtype=torch.float32)
+        self.var_numerator = torch.full([self.C, self.F], self.eps, dtype=torch.float32)
+        self.var_denominator = torch.full([self.C, 1], self.eps * self.C, dtype=torch.float32)
+
+        if self.device is not None:
+            self.to(self.device)
 
     def get_distribution_of_labels(self, labels):
         """
@@ -150,6 +150,7 @@ class GaussianEmission:
         :param labels:
         :return: a distribution associated to each layer
         """
+
         if not self.initialized:
             self.initialized = True
             self.initialize(labels)
@@ -169,12 +170,22 @@ class GaussianEmission:
 
         assert not torch.isnan(emission_of_labels).any(), (torch.sum(torch.isnan(emission_of_labels)))
 
-        return emission_of_labels
+        return emission_of_labels.detach()
+
+    def infer(self, p_Q):
+        """
+        Compute probability of a label given the probability P(Q) as argmax_y \sum_i P(y|Q=i)P(Q=i)
+        :param p_Q: tensor of size ?xC
+        :return:
+        """
+        # We simply compute P(y|x) = \sum_i P(y|Q=i)P(Q=i|x) for each node
+        inferred_y = torch.mm(p_Q, self.mu)  # ?xF
+        return inferred_y
 
     def update_accumulators(self, posterior_estimate, labels):
 
         # labels = torch.squeeze(labels)  # removes dimensions of size 1 (current is ?x1)
-        labels = labels.double()
+        labels = labels.float()
 
         for i in range(0, self.C):
             reshaped_posterior = torch.reshape(posterior_estimate[:, i], (-1, 1))  # for broadcasting with F > 1
@@ -199,11 +210,9 @@ class GaussianEmission:
         :return:
         """
         self.mu = self.mu_numerator / self.mu_denominator
-        self.var = self.var_numerator / self.var_denominator
 
-        self.var[self.var != self.var] = self.var_threshold
-        self.var[self.var < self.var_threshold] = self.var_threshold
+        # Laplace smoothing
+        self.var = (self.var_numerator + self.var_threshold) / (self.var_denominator + self.C*self.var_threshold)
 
-        # print(self.var_numerator)
-        # print(self.var_denominator)
-        # print(self.var)
+        # print(f'Mean values are: {self.mu}')
+        # print(f'Std values are: {torch.sqrt(self.var)}')

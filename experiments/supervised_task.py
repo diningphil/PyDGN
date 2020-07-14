@@ -1,5 +1,5 @@
 from experiments.experiment import Experiment
-import torch
+
 
 class SupervisedTask(Experiment):
 
@@ -17,13 +17,14 @@ class SupervisedTask(Experiment):
             if 'shuffle' in self.model_config.supervised_config else True
 
         # Instantiate the Dataset
-        dim_features = dataset_getter.get_dim_features()
+        dim_node_features = dataset_getter.get_dim_node_features()
+        dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
         train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle)
         val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle)
 
         # Instantiate the Model
-        model = self.create_supervised_model(dim_features, dim_target)
+        model = self.create_supervised_model(dim_node_features, dim_edge_features, dim_target)
 
         # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
         supervised_training_wrapper = self.create_supervised_wrapper(model)
@@ -36,7 +37,7 @@ class SupervisedTask(Experiment):
                                                                     test_loader=None,
                                                                     max_epochs=self.model_config.supervised_config['epochs'],
                                                                     logger=logger)
-        return float(train_score), float(val_score)
+        return train_score, val_score
 
     def run_test(self, dataset_getter, logger, other=None):
         """
@@ -48,14 +49,15 @@ class SupervisedTask(Experiment):
             if 'shuffle' in self.model_config.supervised_config else True
 
         # Instantiate the Dataset
-        dim_features = dataset_getter.get_dim_features()
+        dim_node_features = dataset_getter.get_dim_node_features()
+        dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
         train_loader = dataset_getter.get_outer_train(batch_size=batch_size, shuffle=shuffle)
         val_loader = dataset_getter.get_outer_val(batch_size=batch_size, shuffle=shuffle)
         test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle)
 
         # Instantiate the Model
-        model = self.create_supervised_model(dim_features, dim_target)
+        model = self.create_supervised_model(dim_node_features, dim_edge_features, dim_target)
 
         # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
         supervised_training_wrapper = self.create_supervised_wrapper(model)
@@ -69,4 +71,4 @@ class SupervisedTask(Experiment):
                                                                     max_epochs=self.model_config.supervised_config['epochs'],
                                                                     logger=logger)
 
-        return float(train_score), float(test_score)
+        return train_score, test_score

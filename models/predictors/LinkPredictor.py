@@ -6,8 +6,8 @@ from models.predictors.Predictor import LinkPredictor
 
 class SimpleLinkPredictor(LinkPredictor):
 
-    def __init__(self, dim_features, dim_target, config):
-        super().__init__(dim_features, dim_target, config)
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
+        super().__init__(dim_node_features, dim_edge_features, dim_target, config)
 
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch

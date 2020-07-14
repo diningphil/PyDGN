@@ -12,13 +12,13 @@ class Loss(nn.Module, EventHandler):
     method, though sometimes more complex implementations are required.
     """
 
-    name = "loss"
+    __name__ = "loss"
     op = operator.lt  # less than to determine improvement
 
     def __init__(self):
         super().__init__()
         self.batch_losses = None
-        self.num_graphs = None
+        self.num_targets = None
 
     def on_training_epoch_start(self, state):
         """
@@ -26,24 +26,24 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses = []
-        self.num_graphs = 0
+        self.num_targets = 0
 
     def on_training_batch_end(self, state):
         """
         Updates the array of batch losses
         :param state: the shared State object
         """
-        self.batch_losses.append(state.batch_loss.item() * state.batch_num_graphs)
-        self.num_graphs += state.batch_num_graphs
+        self.batch_losses.append(state.batch_loss.item() * state.batch_num_targets)
+        self.num_targets += state.batch_num_targets
 
     def on_training_epoch_end(self, state):
         """
         Computes a loss value for the entire epoch
         :param state: the shared State object
         """
-        state.update(epoch_loss=torch.tensor(self.batch_losses).sum()/self.num_graphs)
+        state.update(epoch_loss=torch.tensor(self.batch_losses).sum()/self.num_targets)
         self.batch_losses = None
-        self.num_graphs = None
+        self.num_targets = None
 
     def on_eval_epoch_start(self, state):
         """
@@ -51,14 +51,14 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses = []
-        self.num_graphs = 0
+        self.num_targets = 0
 
     def on_eval_epoch_end(self, state):
         """
         Computes a loss value for the entire epoch
         :param state: the shared State object
         """
-        state.update(epoch_loss=torch.tensor(self.batch_losses).sum()/self.num_graphs)
+        state.update(epoch_loss=torch.tensor(self.batch_losses).sum()/self.num_targets)
         self.batch_losses = None
 
     def on_eval_batch_end(self, state):
@@ -66,16 +66,29 @@ class Loss(nn.Module, EventHandler):
         Updates the array of batch losses
         :param state: the shared State object
         """
-        self.batch_losses.append(state.batch_loss.item() * state.batch_num_graphs)
-        self.num_graphs += state.batch_num_graphs
+        self.batch_losses.append(state.batch_loss.item() * state.batch_num_targets)
+        self.num_targets += state.batch_num_targets
+
+    def on_compute_metrics(self, state):
+        """
+        Computes the loss
+        :param state: the shared State object
+        """
+        outputs, targets = state.batch_outputs, state.batch_targets
+        loss = self.forward(targets, *outputs)
+        state.update(batch_loss=loss)
 
     def on_backward(self, state):
         """
         Computes the gradient of the computation graph
         :param state: the shared State object
         """
-        assert state.mode == State.TRAINING
-        state.batch_loss.backward()
+        try:
+            state.batch_loss.backward()
+        except Exception as e:
+            # Here we catch potential multiprocessing related issues
+            # see https://github.com/pytorch/pytorch/wiki/Autograd-and-Fork
+            print(e)
 
     def forward(self, targets, *outputs):
         """
@@ -105,7 +118,7 @@ class RegressionLoss(Loss):
 
     def forward(self, targets, *outputs):
         outputs = outputs[0]
-        loss = self.loss(outputs, targets)
+        loss = self.loss(outputs.squeeze(), targets.squeeze())
         return loss
 
 
@@ -163,7 +176,7 @@ class CGMMLoss(Loss):
 
     # Simply ignore targets
     def forward(self, targets, *outputs):  # IMPORTANT: This method assumes the batch size is the size of the dataset
-        likelihood = outputs[0].detach()
+        likelihood = outputs[0]
 
         if self.training:
             self.new_likelihood = likelihood
@@ -171,12 +184,12 @@ class CGMMLoss(Loss):
         return likelihood
 
     def on_backward(self, state):
-        assert state.mode == State.TRAINING
         pass
-    
+
     def on_training_epoch_end(self, state):
         super().on_training_epoch_end(state)
 
         if (self.new_likelihood - self.old_likelihood) <= 0:
             state.stop_training = True
         self.old_likelihood = self.new_likelihood
+
