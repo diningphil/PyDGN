@@ -19,6 +19,7 @@ class HoldOutSelection:
         """
         self.inner_folds = 1
         self.max_processes = max_processes
+        self.higher_is_better = higher_is_better
         if higher_is_better:
             self.operator = operator.gt
         else:
@@ -36,7 +37,7 @@ class HoldOutSelection:
         :param no_configurations: number of possible configurations
         """
 
-        best_vl = -float('inf')
+        best_vl = -float('inf') if self.higher_is_better else float('inf')
 
         for i in range(1, no_configurations+1):
             try:
@@ -56,11 +57,7 @@ class HoldOutSelection:
             except Exception as e:
                 print(e)
 
-        #print('Model selection winner for experiment', folder, 'is config ', best_i, ':')
-        #for k in best_config.keys():
-        #    print('\t', k, ':', best_config[k])
-
-        return best_config
+        return best_config, best_i
 
     def model_selection(self, outer_fold_id, dataset_getter, experiment_class, exp_path, model_configs, debug, other, snd_queue):
         """
@@ -110,10 +107,10 @@ class HoldOutSelection:
 
                 config_id += 1
 
-        best_config = self.process_results(HOLDOUT_MS_FOLDER, config_id)
+        best_config, best_config_id = self.process_results(HOLDOUT_MS_FOLDER, config_id)
 
         with open(os.path.join(HOLDOUT_MS_FOLDER, self.WINNER_CONFIG_FILENAME), 'w') as fp:
-            json.dump(best_config, fp)
+            json.dump(dict(best_config=best_config, best_config_id=best_config_id), fp)
 
         return best_config
 

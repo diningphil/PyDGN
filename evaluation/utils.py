@@ -3,6 +3,7 @@ import sys
 import time
 import tqdm
 import datetime
+import threading
 
 
 def clear_screen():
@@ -30,7 +31,7 @@ class ProgressManager:
 
     def _init_selection_pbar(self, i, j):
         position = i*self.inner_folds + j
-        pbar = tqdm.tqdm(total=self.no_configs, ncols=60, ascii=True,
+        pbar = tqdm.tqdm(total=self.no_configs, ncols=self.ncols, ascii=True,
                          position=position, unit="config",
                          bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
         pbar.set_description(f'Out_{i+1}/Inn_{j+1}')
@@ -40,7 +41,7 @@ class ProgressManager:
 
     def _init_assessment_pbar(self, i):
         position = self.outer_folds*self.inner_folds + i
-        pbar = tqdm.tqdm(total=self.final_runs, ncols=60, ascii=True,
+        pbar = tqdm.tqdm(total=self.final_runs, ncols=self.ncols, ascii=True,
                          position=position, unit="config",
                          bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
         pbar.set_description(f'Final run {i+1}')
@@ -49,12 +50,17 @@ class ProgressManager:
         return pbar
 
 
-    def __init__(self, outer_folds, inner_folds, no_configs, final_runs):
+    def __init__(self, outer_folds, inner_folds, no_configs, final_runs, show=True):
+        self.ncols = 100
         self.outer_folds = outer_folds
         self.inner_folds = inner_folds
         self.no_configs = no_configs
         self.final_runs = final_runs
         self.pbars = []
+        self.show = show
+
+        if not self.show:
+            return
 
         clear_screen()
         self.show_header()
@@ -69,13 +75,19 @@ class ProgressManager:
 
         self.times = [{} for _ in range(len(self.pbars))]
 
+        def refresh_timer():
+            threading.Timer(60.0, refresh_timer).start()
+            self.refresh()
+
+        refresh_timer()
+
     def show_header(self):
         '''
         \033[F --> move cursor to the beginning of the previous line
         \033[A --> move cursor up one line
         \033[<N>A --> move cursor up N lines
         '''
-        print(f'\033[F\033[A{"*"*20} Experiment Progress {"*"*20}\n')
+        print(f'\033[F\033[A{"*"*((self.ncols-21)//2 + 1)} Experiment Progress {"*"*((self.ncols-21)//2)}\n')
 
     def show_footer(self):
         pass  # need to work how how to print after tqdm
@@ -85,19 +97,30 @@ class ProgressManager:
         self.show_header()
         for i, pbar in enumerate(self.pbars):
 
-            completion_times = [delta for k, (delta, completed) in self.times[i].items() if completed]
+            # When resuming, do not consider completed exp. (delta approx. < 1)
+            completion_times = [delta for k, (delta, completed) in self.times[i].items() if completed and delta > 1]
 
             if len(completion_times) > 0:
+                min_seconds = min(completion_times)
+                max_seconds = max(completion_times)
                 mean_seconds = sum(completion_times)/len(completion_times)
             else:
+                min_seconds = 0
+                max_seconds = 0
                 mean_seconds = 0
-            mean = str(datetime.timedelta(seconds=mean_seconds))
-            pbar.set_postfix_str(f'(1 cfg every {mean})')
+
+            mean_time = str(datetime.timedelta(seconds=mean_seconds)).split('.')[0]
+            min_time = str(datetime.timedelta(seconds=min_seconds)).split('.')[0]
+            max_time = str(datetime.timedelta(seconds=max_seconds)).split('.')[0]
+            pbar.set_postfix_str(f'min:{min_time}|avg:{mean_time}|max:{max_time}')
 
             pbar.refresh()
         self.show_footer()
 
     def update_state(self, msg):
+        if not self.show:
+            return
+
         try:
             type = msg.get('type')
 

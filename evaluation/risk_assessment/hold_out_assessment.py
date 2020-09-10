@@ -53,7 +53,7 @@ class HoldOutAssessment:
             #    print(future.result())
 
         # Show progress
-        with ProgressManager(self.outer_folds, self.model_selector.inner_folds, len(self.model_configs), self.final_training_runs) as progress:
+        with ProgressManager(self.outer_folds, self.model_selector.inner_folds, len(self.model_configs), self.final_training_runs, show=not debug) as progress:
             def read_all_msgs(q, timeout=1):
                 try:
                     while True: # Read all messages
@@ -116,6 +116,8 @@ class HoldOutAssessment:
 
             # Set up a log file for this experiment (I am in a forked process)
             logger = Logger(str(os.path.join(experiment.exp_path, 'experiment.log')), mode='a')
+
+            logger.log('Configuration: \n' + str(best_config['config']))
 
             training_scores, test_scores = [], []
 

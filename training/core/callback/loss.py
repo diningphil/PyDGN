@@ -1,7 +1,11 @@
+import time
 import operator
+from itertools import product
 import torch
 import torch.nn as nn
-from torch.nn.modules.loss import MSELoss, L1Loss
+from torch.distributions.normal import Normal
+from torch.nn.modules.loss import MSELoss, L1Loss, BCELoss
+from datasets.splitter import to_lower_triangular
 from training.core.event.handler import EventHandler
 from training.core.event.state import State
 
@@ -75,7 +79,15 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         outputs, targets = state.batch_outputs, state.batch_targets
-        loss = self.forward(targets, *outputs)
+        loss_output = self.forward(targets, *outputs)
+
+        if isinstance(loss_output, tuple):
+            # Allow loss to produce intermediate results that speed up
+            # Score computation. Loss callback MUST occur before the score one.
+            loss, extra = loss_output
+            state.update(batch_loss_extra=extra)
+        else:
+            loss = loss_output
         state.update(batch_loss=loss)
 
     def on_backward(self, state):
@@ -134,18 +146,6 @@ class MulticlassClassificationLoss(ClassificationLoss):
         self.loss = nn.CrossEntropyLoss(reduction=reduction)
 
 
-class LinkPredictionLoss(ClassificationLoss):
-
-    # Simply ignore targets
-    def forward(self, targets, *outputs):
-        _, z, out, adj = outputs
-        link_loss = adj - out
-        link_loss = torch.norm(link_loss, p=2)
-        # link_loss = link_loss / adj.numel()
-
-        return link_loss
-
-
 class MeanSquareErrorLoss(RegressionLoss):
     def __init__(self, reduction='mean'):
         super().__init__()
@@ -156,6 +156,17 @@ class MeanAverageErrorLoss(RegressionLoss):
     def __init__(self, reduction='mean'):
         super().__init__()
         self.loss = L1Loss(reduction=reduction)
+
+
+class Trento6d93_31_Loss(RegressionLoss):
+    def __init__(self, reduction='mean'):
+        super().__init__()
+        self.loss = L1Loss(reduction=reduction)
+
+    def forward(self, targets, *outputs):
+        outputs = torch.relu(outputs[0])
+        loss = self.loss(torch.log(1+outputs), torch.log(1+targets))
+        return loss
 
 
 class CGMMLoss(Loss):
@@ -193,3 +204,23 @@ class CGMMLoss(Loss):
             state.stop_training = True
         self.old_likelihood = self.new_likelihood
 
+
+class LinkPredictionLoss(Loss):
+
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, targets, *outputs):
+        node_embs = outputs[1]
+        _, pos_edges, neg_edges = targets[0]
+
+        loss_edge_index = torch.cat((pos_edges, neg_edges), dim=1)
+        loss_target = torch.cat((torch.ones(pos_edges.shape[1]),
+                                  torch.zeros(neg_edges.shape[1])))
+
+        # Taken from https://github.com/rusty1s/pytorch_geometric/blob/master/examples/link_pred.py
+        x_j = torch.index_select(node_embs, 0, loss_edge_index[0])
+        x_i = torch.index_select(node_embs, 0, loss_edge_index[1])
+        link_logits = torch.einsum("ef,ef->e", x_i, x_j)
+        loss =  torch.nn.functional.binary_cross_entropy_with_logits(link_logits, loss_target)
+        return loss

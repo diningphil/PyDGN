@@ -85,7 +85,7 @@ class Experiment:
         return self._create_model(dim_node_features, dim_edge_features, dim_target,
                                   predictor_classname, self.model_config.layer_config)
 
-    def _create_wrapper(self, config, model, wrapper_classname, device, log_every):
+    def _create_wrapper(self, config, model, wrapper_classname, device, log_every, checkpoint):
         """
         Instantiates the training engine (see training.core.engine). It looks for pre-defined fields in the
         configuration file, i.e. 'loss', 'scorer', 'optimizer', 'scheduler', 'gradient_clipping', 'early_stopper' and
@@ -95,6 +95,8 @@ class Experiment:
         :param model: the core model that need be trained
         :param wrapper_classname: string containing the dotted path of the class associated with the training engine
         :param device:
+        :param log_every:
+        :param checkpoint:
         :return: a training engine implementing (see training.core.engine.TrainingEngine for the base class
         doing most of the work)
         """
@@ -122,12 +124,11 @@ class Experiment:
         plot_class, plot_args = self._return_class_and_args(config, 'plotter')
         plotter = plot_class(exp_path=self.exp_path, **plot_args) if plot_class is not None else None
 
-        checkpoint = config.get('checkpoint', False)
-
         wrapper = s2c(wrapper_classname)(model=model, loss=loss,
                                          optimizer=optimizer, scorer=scorer, scheduler=scheduler,
                                          early_stopper=early_stopper, gradient_clipping=grad_clipper,
-                                         device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every, checkpoint=checkpoint)
+                                         device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every,
+                                         checkpoint=checkpoint)
         return wrapper
 
     def create_supervised_wrapper(self, model):
@@ -135,21 +136,24 @@ class Experiment:
         device = self.model_config.device
         wrapper_classname = self.model_config.supervised_config['wrapper']
         log_every = self.model_config.log_every
-        return self._create_wrapper(self.model_config.supervised_config, model, wrapper_classname, device, log_every)
+        checkpoint = self.model_config.supervised_config.get('checkpoint', False)
+        return self._create_wrapper(self.model_config.supervised_config, model, wrapper_classname, device, log_every, checkpoint)
 
     def create_unsupervised_wrapper(self, model):
         """ Instantiates the training engine by using the 'unsupervised_config' key in the config file """
         device = self.model_config.device
         log_every = self.model_config.log_every
         wrapper_classname = self.model_config.unsupervised_config['wrapper']
-        return self._create_wrapper(self.model_config.unsupervised_config, model, wrapper_classname, device, log_every)
+        checkpoint = self.model_config.unsupervised_config.get('checkpoint', False)
+        return self._create_wrapper(self.model_config.unsupervised_config, model, wrapper_classname, device, log_every, checkpoint)
 
     def create_incremental_wrapper(self, model):
         """ Instantiates the training engine by using the 'layer_config' key in the config file """
         device = self.model_config.device
         log_every = self.model_config.log_every
         wrapper_classname = self.model_config.layer_config['wrapper']
-        return self._create_wrapper(self.model_config.layer_config, model, wrapper_classname, device, log_every)
+        checkpoint = self.model_config.layer_config.get('checkpoint', False)
+        return self._create_wrapper(self.model_config.layer_config, model, wrapper_classname, device, log_every, checkpoint)
 
     def run_valid(self, get_train_val, logger, other=None):
         """

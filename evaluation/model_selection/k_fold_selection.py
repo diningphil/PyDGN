@@ -24,6 +24,7 @@ class KFoldSelection:
         """
         self.inner_folds = inner_folds
         self.max_processes = max_processes
+        self.higher_is_better = higher_is_better
         if higher_is_better:
             self.operator = operator.gt
         else:
@@ -42,8 +43,8 @@ class KFoldSelection:
         :param no_configurations: number of possible configurations
         """
 
-        best_avg_vl = -float('inf')
-        best_std_vl = 100.
+        best_avg_vl = -float('inf') if self.higher_is_better else float('inf')
+        best_std_vl = float('inf')
 
         for i in range(1, no_configurations+1):
             try:
@@ -63,11 +64,7 @@ class KFoldSelection:
             except Exception as e:
                 print(e)
 
-        #print('Model selection winner for experiment', folder, 'is config ', best_i, ':')
-        #for k in best_config.keys():
-        #    print('\t', k, ':', best_config[k])
-
-        return best_config
+        return best_config, best_i
 
     def model_selection(self, outer_fold_id, dataset_getter, experiment_class, exp_path, model_configs, debug, other, snd_queue):
         """
@@ -125,10 +122,10 @@ class KFoldSelection:
 
                 config_id += 1
 
-        best_config = self.process_results(KFOLD_FOLDER, config_id)
+        best_config, best_config_id = self.process_results(KFOLD_FOLDER, config_id)
 
         with open(os.path.join(KFOLD_FOLDER, self.WINNER_CONFIG_FILENAME), 'w') as fp:
-            json.dump(best_config, fp)
+            json.dump(dict(best_config=best_config, best_config_id=best_config_id), fp)
 
         return best_config
 

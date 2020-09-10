@@ -2,7 +2,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool
-from models.predictors.Predictor import GraphPredictor
+
+
+class GraphPredictor(torch.nn.Module):
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
+        super().__init__()
+        self.dim_node_features = dim_node_features
+        self.dim_edge_features = dim_edge_features
+        self.dim_target = dim_target
+        self.config = config
+
+    def forward(self, data):
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+        raise NotImplementedError('You need to implement this method!')
 
 
 class IdentityGraphPredictor(GraphPredictor):
@@ -40,20 +52,22 @@ class MLPGraphPredictor(nn.Module):
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
         x = global_add_pool(x, batch)
-        return self.out(F.relu(self.fc_global(x))), x
+        return self.out(F.relu(self.fc_global(x)))
 
 
 class CGMMGraphPredictor(nn.Module):
 
-    def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
+    def __init__(self, dim_features, dim_target, config):
         super().__init__()
+
+        dim_features = dim_features[1]
 
         hidden_units = config['hidden_units']
 
-        self.fc_global = torch.nn.Linear(dim_node_features, hidden_units)
+        self.fc_global = torch.nn.Linear(dim_features, hidden_units)
         self.out = torch.nn.Linear(hidden_units, dim_target)
 
     def forward(self, data):
         extra = data[1]
         x = torch.reshape(extra.g_outs.squeeze().float(), (extra.g_outs.shape[0], -1))
-        return self.out(F.relu(self.fc_global(x))), x
+        return self.out(F.relu(self.fc_global(x)))

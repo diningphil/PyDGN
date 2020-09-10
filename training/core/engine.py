@@ -5,7 +5,7 @@ from training.core.profiler import Profiler
 from training.core.event.state import State
 from training.core.event.dispatcher import EventDispatcher
 from training.core.callback.engine_callback import EngineCallback
-from utils.batch_utils import to_data_list, extend_lists, to_tensor_lists
+from training.core.utils import to_data_list, extend_lists, to_tensor_lists
 
 
 def log(msg, logger):
@@ -41,6 +41,8 @@ class TrainingEngine(EventDispatcher):
         :param device: the device on which to train.
         :param plotter: an object of a subclass of training.core.callback.Plotter
         :param exp_path: the path of the experiment folder
+        :param log_every: the frequency of logging epoch results
+        :param checkpoint: whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch.
         """
         super().__init__()
 
@@ -76,7 +78,7 @@ class TrainingEngine(EventDispatcher):
         for c in self.callbacks:
             self.register(c)
 
-    def _to_list(self, data_list, embeddings, batch, edge_index, y):
+    def _to_list(self, data_list, embeddings, batch, edge_index, y, linkpred=False):
 
         # Crucial: Detach the embeddings to free the computation graph!!
         if isinstance(embeddings, tuple):
@@ -91,7 +93,7 @@ class TrainingEngine(EventDispatcher):
         # (remember, the loader could have shuffled the data)
         if data_list is None:
             data_list = []
-        data_list.extend(to_data_list(embeddings, batch, y))
+        data_list.extend(to_data_list(embeddings, batch, y, single_graph_link_prediction=linkpred))
         return data_list
 
     def set_device(self):
@@ -135,14 +137,24 @@ class TrainingEngine(EventDispatcher):
 
             # This is useless if copies are not made
             self.state.update(batch_input=data)
-            self.state.update(batch_targets=targets.detach())
+            self.state.update(batch_targets=targets)
 
             num_graphs = _data.num_graphs
             self.state.update(batch_num_graphs=num_graphs)
 
-            # TODO WE MUST DO BETTER THAN THIS! WE ARE FORCING THE USER TO USE y
-            assert _data.y is not None, "You must provide a target value, even a dummy one, for the engine to infer whether this is a node or graph problem."
-            num_targets = _data.y.shape[0]
+            # TODO WE MUST DO BETTER THAN THIS! WE ARE FORCING THE USER TO USE y + link prediction patch
+            # TODO REPLACE THIS WITH A FUNCTION AND SUBCLASS TRAINING ENGINE
+            ##################
+            assert targets is not None, "You must provide a target value, even a dummy one, for the engine to infer whether this is a node or link or graph problem."
+            # Patch to work with single graph link prediction
+            if isinstance(targets, list):
+                # positive links + negative links provided separately
+                num_targets = targets[0][1].shape[1] + targets[0][2].shape[1]  # Just a single graph / single batch for link prediction
+                # print(f'Num targets is {_data.y[0][1].shape[1]} + { _data.y[0][2].shape[1]}')
+            else:
+                num_targets = targets.shape[0]
+            ##################
+
             self.state.update(batch_num_targets=num_targets)
 
             if self.training:
@@ -163,8 +175,19 @@ class TrainingEngine(EventDispatcher):
                 if len(output) > 1 and return_node_embeddings:
                     # Embeddings should be in position 2 of the output
                     embeddings = output[1]
-                    data_list = self._to_list(self.state.epoch_data_list, embeddings,
-                                                         batch_idx, edge_index, targets)
+
+                    ##################
+                    # TODO REPLACE THIS WITH A FUNCTION AND SUBCLASS TRAINING ENGINE
+                    # Patch to work with single graph link prediction
+                    if isinstance(targets, list):
+                        data_list = self._to_list(self.state.epoch_data_list, embeddings,
+                                                         batch_idx, edge_index, targets, linkpred=True)
+                    else:
+                        data_list = self._to_list(self.state.epoch_data_list, embeddings,
+                                                         batch_idx, edge_index, targets, linkpred=False)
+
+                    ##################
+
                     # I am extending the data list, not replacing! Hence the name "epoch" data list
                     self.state.update(epoch_data_list=data_list)
 
@@ -210,8 +233,6 @@ class TrainingEngine(EventDispatcher):
         assert self.state.epoch_loss is not None
         loss, score, data_list = self.state.epoch_loss, self.state.epoch_score, self.state.epoch_data_list
         return loss, score, data_list
-
-        return loss, score, embeddings
 
     def train(self, train_loader, validation_loader=None, test_loader=None, max_epochs=100, logger=None):
         """
@@ -260,16 +281,29 @@ class TrainingEngine(EventDispatcher):
                     if validation_loader is not None:
                         val_loss, val_score, _ = self.infer(validation_loader, TrainingEngine.VALIDATION, return_node_embeddings=False)
 
+                    # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
+                    if test_loader is not None:
+                        test_loss, test_score, _ = self.infer(test_loader, TrainingEngine.TEST, return_node_embeddings=False)
+
                 # Update state with epoch results
                 epoch_results = {
                     f'{TrainingEngine.TRAINING}_loss': train_loss,
                     f'{TrainingEngine.VALIDATION}_loss': val_loss,  # can be None
+                    f'{TrainingEngine.TEST}_loss': test_loss,  # can be None
                     'scores': {}
                 }
                 if self.score_fun:
                     epoch_results['scores'].update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_score.items()})
-                    epoch_results['scores'].update({f'{TrainingEngine.VALIDATION}_{k}': v for k, v in val_score.items()})
-
+                    if validation_loader is not None:
+                        epoch_results['scores'].update({f'{TrainingEngine.VALIDATION}_{k}': v for k, v in val_score.items()})
+                        val_msg_str = f', VL loss: {val_loss} VL score: {val_score}'
+                    else:
+                        val_msg_str = ''
+                    if test_score is not None:
+                        epoch_results['scores'].update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_score.items()})
+                        test_msg_str = f', TE loss: {test_loss} TE score: {test_score}'
+                    else:
+                        test_msg_str = ''
                 # Update state with the result of this epoch
                 self.state.update(epoch_results=epoch_results)
 
@@ -278,8 +312,7 @@ class TrainingEngine(EventDispatcher):
 
                 # Log performances
                 if epoch % self.log_every == 0 or epoch == 1:
-                    msg = f'Epoch: {epoch}, TR loss: {train_loss} TR score: {train_score},' \
-                        f' VL loss: {val_loss} VL score: {val_score} '
+                    msg = f'Epoch: {epoch}, TR loss: {train_loss} TR score: {train_score}' + val_msg_str + test_msg_str
                     log(msg, logger)
 
                 if self.state.stop_training:

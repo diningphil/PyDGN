@@ -41,6 +41,8 @@ class EarlyStopper(EventHandler):
 
         assert self.monitor in state.epoch_results['scores'], f'{self.monitor} not found in epoch_results'
 
+        metric_to_compare = state.epoch_results['scores'][self.monitor]
+
         if not hasattr(state, 'best_epoch_results'):
             state.update(best_epoch_results=state.epoch_results)
             state.best_epoch_results['best_epoch'] = state.epoch
@@ -53,12 +55,9 @@ class EarlyStopper(EventHandler):
                 atomic_save(state.best_epoch_results, Path(state.exp_path,
                            state.BEST_CHECKPOINT_FILENAME))
         else:
-            metric_to_compare = state.epoch_results['scores'][self.monitor]
             best_metric = state.best_epoch_results['scores'][self.monitor]
 
             if self.operator(metric_to_compare, best_metric):
-
-                # print(f'New best: {metric_to_compare}')
                 state.update(best_epoch_results=state.epoch_results)
                 state.best_epoch_results['best_epoch'] = state.epoch
                 state.best_epoch_results['scores'][self.monitor] = metric_to_compare
@@ -68,12 +67,11 @@ class EarlyStopper(EventHandler):
                 if self.checkpoint:
                     atomic_save(state.best_epoch_results, Path(state.exp_path,
                                state.BEST_CHECKPOINT_FILENAME))
-        if state.stop_training:
-            self.logger.warning(f"Early stopping: epoch {state.epoch} - best epoch {best_epoch} - patience {self.patience}")
 
-            # Regarless of improvement or not
-            stop_training = self.stop(state, metric_to_compare)
-            state.update(stop_training=stop_training)
+        # Regarless of improvement or not
+        stop_training = self.stop(state, metric_to_compare)
+        state.update(stop_training=stop_training)
+
 
     def stop(self, state, metric):
         """
@@ -98,7 +96,6 @@ class PatienceEarlyStopper(EarlyStopper):
         :param metric: the metric to consider
         :return: a boolean indicating whether to stop the training or not
         """
-
         best_epoch = state.best_epoch_results['best_epoch']
         stop_training = (state.epoch - best_epoch) >= self.patience
         return stop_training

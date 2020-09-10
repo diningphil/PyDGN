@@ -5,6 +5,8 @@ from torch.utils.data import Subset
 from datasets.datasets import ZipDataset
 from datasets.utils import load_dataset, load_splitter
 from datasets.sampler import RandomSampler
+from datasets.splitter import LinkPredictionSingleGraphSplitter, to_lower_triangular
+from torch_geometric.utils import to_undirected
 
 
 class DataProvider:
@@ -20,8 +22,8 @@ class DataProvider:
         :param dataset_name: the name of the dataset
         :param outer_folds: the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
         :param inner_folds: the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
-        :param num_workers: the number of workers to use in the DataLoader. A value > 0 triggers multiprocessing. Useful to prefetch data from disk to GPU. 
-        :param pin_memory: should be True when working on GPU. 
+        :param num_workers: the number of workers to use in the DataLoader. A value > 0 triggers multiprocessing. Useful to prefetch data from disk to GPU.
+        :param pin_memory: should be True when working on GPU.
         """
         self.data_root = data_root
         self.dataset_class = dataset_class
@@ -96,7 +98,7 @@ class DataProvider:
         """
         assert self.outer_k is not None and self.inner_k is not None
         splitter = self._get_splitter()
-        indices = splitter.inner_folds[self.outer_k][self.inner_k].test_idxs
+        indices = splitter.inner_folds[self.outer_k][self.inner_k].val_idxs
         return self._get_loader(indices, **kwargs)
 
     def get_outer_train(self, train_perc=0.9, **kwargs):
@@ -158,9 +160,100 @@ class DataProvider:
         return self._get_dataset().dim_target
 
 
+class LinkPredictionSingleGraphDataProvider(DataProvider):
+    """
+    An extension of the DataProvider class to deal with link prediction on a single graph
+    Designed to work with LinkPredictionSingleGraphSplitter
+    We assume the single-graph dataset can fit in memory
+    """
+    # WARNING: BE CAREFUL IF SHARED DATA IS IMPLEMENTED IN THE FUTURE: EXTENDING THE DATASET MAY NOT WORK ANYMORE
+
+    # Since we modify the dataset, we need different istances of the same graph
+    def _get_dataset(self):
+        return load_dataset(self.data_root, self.dataset_name, self.dataset_class)
+
+    def _get_splitter(self):
+        super()._get_splitter()  # loads splitter into self.splitter
+        assert isinstance(self.splitter, LinkPredictionSingleGraphSplitter), "This class only work with a LinkPredictionSingleGraphSplitter splitter."
+        return self.splitter
+
+    def _get_loader(self, indices, **kwargs):
+        dataset = self._get_dataset()  # Custom implementation, we need a copy of the dataset every time
+        assert len(dataset) == 1, f"Provider accepts a single-graph dataset only, but I see {len(dataset)} graphs"
+
+        # Use indices to change edge_index and provide an y
+        train, eval = indices
+        pos_train_edges, train_attr, neg_train_edges = train
+        pos_train_edges = torch.tensor(pos_train_edges, dtype=torch.long)
+        train_attr = torch.tensor(train_attr) if train_attr is not None else None
+        neg_train_edges = torch.tensor(neg_train_edges, dtype=torch.long)
+
+        pos_eval_edges, _, neg_eval_edges = eval
+        pos_eval_edges = torch.tensor(pos_eval_edges, dtype=torch.long)
+        neg_eval_edges = torch.tensor(neg_eval_edges, dtype=torch.long)
+
+        # The code below works because we are working with a single graph!
+        dataset.data.edge_index = pos_train_edges
+        dataset.data.edge_attr = train_attr
+        # Eval can be training/val/test
+        dataset.data.y = (dataset.data.y, pos_eval_edges, neg_eval_edges)
+
+        # We do not need to shuffle the nodes of our single sample (full batch training)
+        # This may change if we knew how to batch nodes inside a graph
+        kwargs.pop("shuffle")
+        # Single graph dataset, shuffle does not make sense (unless we know how to do mini-batch training with nodes)
+        dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
+
+        return dataloader
+
+    def get_inner_train(self, **kwargs):
+        assert self.outer_k is not None and self.inner_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.inner_folds[self.outer_k][self.inner_k].train_idxs
+        eval_indices = train_indices
+        indices = train_indices, eval_indices
+        return self._get_loader(indices, **kwargs)
+
+    def get_inner_val(self, **kwargs):
+        assert self.outer_k is not None and self.inner_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.inner_folds[self.outer_k][self.inner_k].train_idxs
+        eval_indices = splitter.inner_folds[self.outer_k][self.inner_k].val_idxs
+        indices = train_indices, eval_indices
+        return self._get_loader(indices, **kwargs)
+
+    def get_outer_train(self, train_perc=0.9, **kwargs):
+        assert self.outer_k is not None
+        splitter = self._get_splitter()
+
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+        eval_indices = train_indices
+        indices = train_indices, eval_indices
+        return self._get_loader(indices, **kwargs)
+
+    def get_outer_val(self, train_perc=0.9, **kwargs):
+        assert self.outer_k is not None
+        splitter = self._get_splitter()
+
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+        eval_indices = splitter.outer_folds[self.outer_k].val_idxs
+
+        indices = train_indices, eval_indices
+        return self._get_loader(indices, **kwargs)
+
+    def get_outer_test(self, **kwargs):
+        assert self.outer_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+        eval_indices = splitter.outer_folds[self.outer_k].test_idxs
+        indices = train_indices, eval_indices
+        return self._get_loader(indices, **kwargs)
+
+
 class IncrementalDataProvider(DataProvider):
     """
     An extension of the DataProvider class to deal with the intermediate outputs produced by incremental architectures
+    Used by CGMM to deal with node/graph classification/regression.
     """
 
     def _get_loader(self, indices, **kwargs):
@@ -190,5 +283,3 @@ class IncrementalDataProvider(DataProvider):
             dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
 
         return dataloader
-
-

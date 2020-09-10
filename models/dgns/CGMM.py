@@ -26,7 +26,7 @@ class CGMM:
         self.training = False
         self.compute_intermediate_outputs = False
 
-        # print(f'Initializing layer {self.depth}')
+        print(f'Initializing layer {self.depth}')
         self.K = dim_node_features
 
         self.node_type = config['node_type']
@@ -119,9 +119,8 @@ class CGMM:
                         test_loader=None,
                         logger=None, device=None):
         if is_last_layer:
-            dim_states = self.C * self.depth if not self.unibigram else (self.C + self.C * self.C2) * self.depth
-            # dim_features = self.dim_node_features + dim_states
-            dim_features = dim_states
+            dim_features = (
+            self.dim_node_features, self.C * self.depth if not self.unibigram else (self.C + self.C * self.C2) * self.depth)
 
             config = layer_config['arbitrary_function_config']
             device = config['device']
@@ -153,8 +152,7 @@ class CGMM:
             wrapper = s2c(config['wrapper'])(model=model, loss=loss,
                                              optimizer=optimizer, scorer=scorer, scheduler=scheduler,
                                              early_stopper=early_stopper, gradient_clipping=grad_clipper,
-                                             device=device, plotter=plotter, exp_path=experiment.exp_path,
-                                             log_every=config['log_every'], checkpoint=config['checkpoint'])
+                                             device=device, plotter=plotter)
 
             train_loss, train_score, _, \
             val_loss, val_score, _, \
@@ -168,7 +166,7 @@ class CGMM:
         else:
             return {}
 
-    def stopping_criterion(self, experiment, depth, max_layers, train_loss, train_score, val_loss, val_score,
+    def stopping_criterion(self, depth, max_layers, train_loss, train_score, val_loss, val_score,
                            dict_per_layer, layer_config, logger=None):
         return depth == max_layers
 
@@ -183,6 +181,7 @@ class CGMM:
         srcs, dsts = data.edge_index
 
         if self.A == 1:
+
             # for source, dest, in zip(srcs, dsts):
             #    statistics[dest, 0, :-1] += posteriors[source]
 
@@ -195,6 +194,7 @@ class CGMM:
             # assert torch.allclose(statistics, new_statistics)
 
         else:
+
             #arc_labels = data.edge_attr.long()
             #for source, dest, arc_label in zip(srcs, dsts, arc_labels):
             #    statistics[dest, arc_label, :-1] += posteriors[source]

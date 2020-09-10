@@ -12,90 +12,96 @@ from config.utils import s2c
 from datasets.splitter import Splitter
 from utils.utils import get_or_create_dir, check_argument
 
-DEFAULTS = {
-    "root": "DATA/",
-    "splits": "SPLITS/",
-    "inner_folds": 1,
-    "outer_folds": 10,
-    "seed": 42
-}
+# Adapted from https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/dropout.html
+def filter_adj(edge_index, edge_attr, mask):
+    row, col = edge_index
+    filtered_edge_index = row[mask], col[mask]
+    return filtered_edge_index, None if edge_attr is None else edge_attr[mask]
 
-def has_targets(dataset):
-    return all(d.y is not None for d in dataset)
+def get_graph_targets(dataset):
+    try:
+        targets = np.array([d.y.item() for d in dataset])
+        return True, targets
+    except Exception:
+        return False, None
 
-def get_targets(dataset):
-    return np.array([d.y.item() for d in dataset])
+def preprocess_data(options):
 
-def preprocess_data(options, splitter, delete_processed_data):
-    kwargs = DEFAULTS.copy()
-    kwargs.update(**options)
+    data_info = options.pop("dataset")
+    if "class_name" not in data_info:
+        raise ValueError("You must specify 'class_name' in your dataset.")
+    dataset_class = s2c(data_info.pop("class_name"))
+    dataset_args = data_info.pop("args")
+    data_root = data_info.pop("root")
 
-    if "class_name" not in kwargs:
-        raise ValueError("You must specify 'class_name' in your kwargs.")
+    ################################
 
-    data_root = Path(kwargs.pop("root"))
-    splits_root = Path(kwargs.pop("splits"))
-    outer_folds = kwargs.pop("outer_folds")
-    inner_folds = kwargs.pop("inner_folds")
-    seed = kwargs.pop("seed")
-    stratify = kwargs.pop("stratify", False)
-    other_kwargs = kwargs.pop('other_args', {})
+    # more experimental stuff here
 
-    # Enables re-generation of the 'processed' folder
-    if delete_processed_data:
-        processed_folder = Path(data_root, kwargs['name'], 'processed')
-        if os.path.exists(processed_folder):
-            print(f"Deleting old processed data in {processed_folder}")
-            shutil.rmtree(processed_folder)
-        else:
-            print(f"No old processed data to delete in {processed_folder}")
-
-    dataset_class = s2c(kwargs.pop("class_name"))
+    dataset_kwargs = data_info.pop('other_args', {})
 
     pre_transforms = None
-    pre_transforms_opt = kwargs.pop("pre_transform", None)
+    pre_transforms_opt = data_info.pop("pre_transform", None)
     if pre_transforms_opt is not None:
         pre_transforms = []
         for pre_transform in pre_transforms_opt:
             pre_transform_class = s2c(pre_transform["class_name"])
             args = pre_transform.pop("args", {})
             pre_transforms.append(pre_transform_class(**args))
-        kwargs.update(pre_transform=Compose(pre_transforms))
+        dataset_kwargs.update(pre_transform=Compose(pre_transforms))
 
     pre_filters = None
-    pre_filters_opt = kwargs.pop("pre_filter", None)
+    pre_filters_opt = data_info.pop("pre_filter", None)
     if pre_filters_opt is not None and check_argument(dataset_class, "pre_filter"):
         pre_filters = []
         for pre_filter in pre_filters_opt:
             pre_filter_class = s2c(pre_filter["class_name"])
             args = pre_filter.pop("args", {})
             pre_filters.append(pre_filter_class(**args))
-        kwargs.update(pre_filter=Compose(pre_filters))
+        dataset_kwargs.update(pre_filter=Compose(pre_filters))
 
     transforms = None
-    transforms_opt = kwargs.pop("transforms", None)
+    transforms_opt = data_info.pop("transforms", None)
     if transforms_opt is not None:
         transforms = []
         for transform in transforms_opt:
             transform_class = s2c(transform["class_name"])
             args = transform.pop("args", {})
             transforms.append(transform_class(**args))
-        kwargs.update(transform=Compose(transforms))
+        dataset_kwargs.update(transform=Compose(transforms))
 
-    kwargs.update(other_kwargs)
+    dataset_args.update(dataset_kwargs)
 
-    dataset = dataset_class(root=data_root, **kwargs)
+    ################################
 
-    # Store dataset arguments
+    dataset = dataset_class(**dataset_args)
+    assert hasattr(dataset, 'name'), "Dataset instance should have a name attribute!"
+
+    # Store dataset additional arguments in a separate file
     kwargs_path = Path(data_root, dataset.name, 'processed', 'dataset_kwargs.pt')
-    torch.save(kwargs, kwargs_path)
+    torch.save(dataset_args, kwargs_path)
 
-    splits_dir = get_or_create_dir(splits_root / dataset.name)
-    splits_path = splits_dir / f"{dataset.name}_outer{outer_folds}_inner{inner_folds}.yml"
+
+    # Process data splits
+
+    splits_info = options.pop("splitter")
+    splits_root = splits_info.pop("root")
+    if "class_name" not in splits_info:
+        raise ValueError("You must specify 'class_name' in your splitter.")
+    splitter_class = s2c(splits_info.pop("class_name"))
+    splitter_args = splits_info.pop("args")
+    splitter = splitter_class(**splitter_args)
+
+    splits_dir = get_or_create_dir(Path(splits_root) / dataset.name)
+    splits_path = splits_dir / f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits"
 
     if not splits_path.exists():
-        targets = get_targets(dataset) if has_targets(dataset) else None
-        splitter.split(range(len(dataset)), targets=targets)
+        # If there is a single target for each element of the dataset,
+        # we can try to stratify samples according to the target
+        # ow (node/link tasks) it is best if the specific splitter does the job for us
+        # todo: this code could be improved to handle different cases more elegantly
+        has_targets, targets = get_graph_targets(dataset)
+        splitter.split(dataset, targets=targets if has_targets else None)
         splitter.save(splits_path)
     else:
         print("Data splits are already present, I will not overwrite them.")
@@ -106,17 +112,20 @@ def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
 
     # Load arguments
     kwargs_path = Path(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
-    kwargs = torch.load(kwargs_path)
+    dataset_args = torch.load(kwargs_path)
 
     with warnings.catch_warnings():
         # suppress PyG warnings
         warnings.simplefilter("ignore")
-        dataset = dataset_class(data_root, **kwargs)
+        dataset = dataset_class(**dataset_args)
 
     return dataset
 
 
 def load_splitter(dataset_name, split_root, outer_folds, inner_folds):
     splits_dir = split_root / dataset_name
-    splits_path = splits_dir / f"{dataset_name}_outer{outer_folds}_inner{inner_folds}.yml"
-    return Splitter.load(splits_path)
+    splits_path = splits_dir / f"{dataset_name}_outer{outer_folds}_inner{inner_folds}.splits"
+    splitter = Splitter.load(splits_path)
+    assert splitter.n_inner_folds == inner_folds
+    assert splitter.n_outer_folds == outer_folds
+    return splitter
