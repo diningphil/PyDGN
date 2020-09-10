@@ -1,6 +1,30 @@
 
 # Changelog
 
+## [0.2.0] - 2020-09-10
+
+A series of improvements and bug fixes. We can now run link prediction experiments on a single graph. Data splits generated are incompatible with those of version 0.1.0.
+
+### Added
+
+- Link prediction data splitter (for single graph)
+- Link prediction data provider (for single graph)
+
+### Changed
+
+- Improvements on progress bar manager
+- Minor improvements on plotter
+
+### Fixed
+
+- Nothing relevant
+
+### Additional Notes
+
+The library now creates new processes using the `spawn` method. Spawning rather than forking prevents Pytorch from complaining (see https://github.com/pytorch/pytorch/wiki/Autograd-and-Fork and https://docs.python.org/3/library/multiprocessing.html#contexts-and-start-methods). Also, there is a warning on a leaked semaphore which we will ignore for now. Finally, `spawn` will be useful to implement CUDA multiprocessing https://pytorch.org/docs/stable/notes/multiprocessing.html#multiprocessing-cuda-note. However, the Pytorch DataLoader in a child process breaks if `num_workers > 0`. Waiting for Pytorch to address this issue.
+
+
+
 ## [0.1.0] - 2020-07-14
 
 We use PyDGN on a daily basis for our internal projects. In this first release there are some major additions to previous and unreleased version that greatly improve the user experience.
