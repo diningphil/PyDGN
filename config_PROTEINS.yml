@@ -1,0 +1,22 @@
+splitter:
+  root: SPLITS/
+  class_name: datasets.splitter.Splitter
+  args:
+    n_outer_folds: 3
+    n_inner_folds: 1
+    seed: 42
+    stratify: True  # works for graph classification tasks
+    shuffle: True
+    val_ratio: 0.1
+    test_ratio: 0.1
+dataset:
+  root: DATA/
+  class_name: datasets.datasets.TUDataset
+  args:
+    root: DATA/
+    name: PROTEINS
+  # useful for social datasets with no node features
+  transforms:
+      - class_name: datasets.transforms.ConstantIfEmpty
+        args:
+          value: 1

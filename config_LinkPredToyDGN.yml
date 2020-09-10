@@ -2,7 +2,7 @@ model: models.dgns.ToyDGN.ToyDGN
 experiment: supervised
 higher_results_are_better: True
 log_every: 1
-dataset-getter: datasets.provider.DataProvider
+dataset-getter: datasets.provider.LinkPredictionSingleGraphDataProvider
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device
@@ -31,17 +31,19 @@ grid:
     scheduler:
       - null
     loss:
-      - training.core.callback.loss.MulticlassClassificationLoss
+      # - training.core.callback.loss.MulticlassClassificationLoss
+      - training.core.callback.loss.ToyLinkPredictionLoss
     scorer:
       #- training.core.callback.score.MulticlassAccuracyScore
       -
         class_name: training.core.callback.score.MultiScore
         args:
            # used at model selection time. Should be the one on which to perform early stopping
-           main_scorer: training.core.callback.score.MulticlassAccuracyScore
-           my_metric2: training.core.callback.score.Toy1Score
+           #main_scorer: training.core.callback.score.MulticlassAccuracyScore
+           #my_metric2: training.core.callback.score.Toy1Score
+           main_scorer: training.core.callback.score.Toy1Score
     predictor:
-      - models.predictors.GraphPredictor.LinearGraphPredictor
+      - models.predictors.NodePredictor.LinearNodePredictor
     wrapper:
       - training.core.engine.TrainingEngine
     l2:
