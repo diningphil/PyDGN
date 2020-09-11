@@ -3,7 +3,6 @@ from config.utils import s2c
 from sklearn.metrics import r2_score, roc_auc_score, average_precision_score, accuracy_score
 
 from datasets.splitter import to_lower_triangular
-from training.core.callback.loss import L2GMMLinkPredictionLoss, JeffreyGMMLinkPredictionLoss, BhattacharyyaGMMLinkPredictionLoss, DotProductGMMLinkPredictionLoss
 from training.core.event.handler import EventHandler
 
 
