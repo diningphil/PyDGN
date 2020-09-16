@@ -11,6 +11,17 @@ This repository is built upon the [Pytorch Geometric Library](https://pytorch-ge
 
 [Bacciu Davide, Errica Federico, Micheli Alessio, Podda Marco: *A Gentle Introduction to Deep Learning for Graphs*](https://arxiv.org/abs/1912.12693), Neural Networks, 2020. DOI: `10.1016/j.neunet.2020.06.006`.
 
+    @article{bacciu_gentle_2020,
+        title={A Gentle Introduction to Deep Learning for Graphs},
+        author={Bacciu, Davide and Errica, Federico and Micheli, Alessio and Podda, Marco},
+        journal={Neural Networks},
+        doi = {10.1016/j.neunet.2020.06.006},
+        volume={129},
+        pages={203--221},
+        year={2020},
+        publisher={Elsevier}
+    }
+
 If you are interested in a rigorous evaluation of Deep Graph Networks, check this out:
 
 [Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
