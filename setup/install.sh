@@ -7,11 +7,11 @@ PYTORCH_GEOMETRIC_VERSION=1.6.0
 CUDA_VERSION=${1:-cpu}
 
 # create virtual environment and activate it
-conda create --name gnn-comparison python=3.7 -y
-conda activate gnn-comparison
+conda create --name pydgn python=3.7 -y
+conda activate pydgn
 
 # install requirements
-pip install -r requirements.txt
+pip install -r setup/requirements.txt
 
 # install pytorch
 if [[ "$CUDA_VERSION" == "cpu" ]]; then
