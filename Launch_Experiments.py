@@ -1,4 +1,5 @@
 import os
+os.environ["OMP_NUM_THREADS"] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
 import sys
 import torch
 import logging
@@ -13,12 +14,10 @@ if not sys.warnoptions:
     import warnings
     warnings.simplefilter("ignore")
 
-from config.base import Grid
 from datasets.splitter import Splitter
-from evaluation.model_selection.hold_out_selection import HoldOutSelection
-from evaluation.model_selection.k_fold_selection import KFoldSelection
-from evaluation.risk_assessment.hold_out_assessment import HoldOutAssessment
-from evaluation.risk_assessment.k_fold_assessment import KFoldAssessment
+from evaluation.grid import Grid
+from evaluation.k_fold_selection import KFoldSelection
+from evaluation.k_fold_assessment import KFoldAssessment
 from experiments.supervised_task import SupervisedTask
 from experiments.semi_supervised_task import SemiSupervisedTask
 from experiments.incremental_task import IncrementalTask
@@ -41,9 +40,10 @@ def evaluation(config_file,
     torch.set_num_threads(1)
 
     grid = Grid.from_file(config_file, data_root, dataset_class, dataset_name)
-    exp_path = os.path.join(result_folder, f'{grid.exp_name}_assessment')
-
     experiment = grid.experiment
+    use_cuda = 'cuda' in grid.device
+    exp_path = os.path.join(result_folder, f'{grid.exp_name}_{experiment}_experiment')
+
     if experiment == 'supervised':
         experiment_class = SupervisedTask
     elif experiment == 'semi-supervised':
@@ -58,21 +58,13 @@ def evaluation(config_file,
     inner_folds, outer_folds = splitter.n_inner_folds, splitter.n_outer_folds
     print(f'Data splits loaded, outer folds are {outer_folds} and inner folds are {inner_folds}')
 
-    if inner_folds > 1:
-        model_selector = KFoldSelection(inner_folds, max_processes=inner_processes,
+    model_selector = KFoldSelection(inner_folds, max_processes=inner_processes,
                                         higher_is_better=grid.higher_results_are_better)
-    else:
-        model_selector = HoldOutSelection(max_processes=inner_processes,
-                                          higher_is_better=grid.higher_results_are_better)
 
-    if outer_folds > 1:
-        risk_assesser = KFoldAssessment(outer_folds, model_selector, exp_path, splits_folder, grid,
+    risk_assesser = KFoldAssessment(outer_folds, model_selector, exp_path, splits_folder, grid,
                                         outer_processes=outer_processes, final_training_runs=final_training_runs)
-    else:
-        risk_assesser = HoldOutAssessment(model_selector, exp_path, splits_folder, grid,
-                                          final_training_runs=final_training_runs)
 
-    risk_assesser.risk_assessment(experiment_class, debug=debug)
+    risk_assesser.risk_assessment(experiment_class, debug=debug, use_cuda=use_cuda)
 
 
 def get_args():

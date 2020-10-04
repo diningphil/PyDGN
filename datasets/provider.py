@@ -62,13 +62,13 @@ class DataProvider:
             self.splitter = load_splitter(self.dataset_name, self.splits_root, self.outer_folds, self.inner_folds)
         return self.splitter
 
-    def _get_dataset(self):
+    def _get_dataset(self, **kwargs):
         if self.dataset is None:
             self.dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class)
         return self.dataset
 
     def _get_loader(self, indices, **kwargs):
-        dataset = self._get_dataset()
+        dataset = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
         shuffle = kwargs.pop("shuffle", False)
         if shuffle is True:
@@ -101,30 +101,46 @@ class DataProvider:
         indices = splitter.inner_folds[self.outer_k][self.inner_k].val_idxs
         return self._get_loader(indices, **kwargs)
 
-    def get_outer_train(self, train_perc=0.9, **kwargs):
+    def get_outer_train(self, train_perc=None, **kwargs):
         """
         Returns the training set for risk assessment associated with specific outer and inner folds
-        :param train_perc: the percentage of the outer training set that has to be used for training
+        :param train_perc: the percentage of the outer training set that has to be used for training. If None, it uses (1 - inner validation_ratio)
         :param kwargs: any extra information that has to be passed to the _get_loader function
         :return: a Dataloader
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
-        indices = splitter.outer_folds[self.outer_k].train_idxs
-        train_indices = indices[:round(train_perc * len(indices))]
+
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+
+        # Backward compatibility
+        if not hasattr(splitter.outer_folds[self.outer_k], 'val_idxs') or splitter.outer_folds[self.outer_k].val_idxs is None:
+            if train_perc is None:
+                # Use the same percentage of validation samples as in model select.
+                train_perc = 1 - splitter.val_ratio
+            train_indices = train_indices[:round(train_perc * len(train_indices))]
         return self._get_loader(train_indices, **kwargs)
 
-    def get_outer_val(self, train_perc=0.9, **kwargs):
+    def get_outer_val(self, train_perc=None, **kwargs):
         """
         Returns the validation set for risk assessment associated with specific outer and inner folds
-        :param train_perc: the percentage of the outer training set that has to be used for trainin
+        :param train_perc: the percentage of the outer training set that has to be used for training. If None, it uses (1 - inner validation_ratio)
         :param kwargs: any extra information that has to be passed to the _get_loader function
         :return: a Dataloader
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
-        indices = splitter.outer_folds[self.outer_k].train_idxs
-        val_indices = indices[round(train_perc * len(indices)):]
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+
+        # Backward compatibility
+        if not hasattr(splitter.outer_folds[self.outer_k], 'val_idxs') or splitter.outer_folds[self.outer_k].val_idxs is None:
+            if train_perc is None:
+                # Use the same percentage of validation samples as in model select.
+                train_perc = 1 - splitter.val_ratio
+            val_indices = train_indices[round(train_perc * len(train_indices)):]
+        else:
+            val_indices = splitter.outer_folds[self.outer_k].val_idxs
+
         return self._get_loader(val_indices, **kwargs)
 
     def get_outer_test(self, **kwargs):

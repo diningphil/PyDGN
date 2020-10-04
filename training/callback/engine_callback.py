@@ -1,16 +1,16 @@
 import os
 import copy
 from pathlib import Path
-from training.core.utils import atomic_save
-from training.core.event.handler import EventHandler
+from training.utils import atomic_save
+from training.event.handler import EventHandler
 
 
 class EngineCallback(EventHandler):
     __name__ = "engine_callback"
 
-    def __init__(self, checkpoint):
+    def __init__(self, store_last_checkpoint):
         super().__init__()
-        self.store_last_checkpoint = checkpoint
+        self.store_last_checkpoint = store_last_checkpoint
 
     # Allows to profile data loading
     def on_fetch_data(self, state):

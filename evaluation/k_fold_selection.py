@@ -1,13 +1,17 @@
 import os
-import time
 import json
+import time
 import pickle
 import operator
+import traceback
+from pathlib import Path
 from copy import deepcopy
+
+import torch
+import numpy as np
 import torch.multiprocessing as mp
 import concurrent.futures
 
-import numpy as np
 from log.Logger import Logger
 
 
@@ -66,7 +70,7 @@ class KFoldSelection:
 
         return best_config, best_i
 
-    def model_selection(self, outer_fold_id, dataset_getter, experiment_class, exp_path, model_configs, debug, other, snd_queue):
+    def model_selection(self, outer_fold_id, dataset_getter, experiment_class, exp_path, model_configs, use_cuda, debug, snd_queue):
         """
         Performs model selection by launching each configuration in parallel, unless debug is True. Each process
         trains the same configuration for each inner fold.
@@ -75,61 +79,69 @@ class KFoldSelection:
         :param experiment_class: Class of the experiment to be run, see experiments.Experiment and its subclasses
         :param exp_path: The folder in which to store all results
         :param model_configs: an object storing all possible model configurations, e.g. config.base.Grid
+        :param use_cuda: whether cuda is to be used in the experiments (no multiprocessing)
         :param debug: whether to run the procedure in debug mode (no multiprocessing)
-        :param other: this can be used to pass some additional information to the experiment in the form of a dict
         :param snd_queue: a queue to inform the main process about the progress
         :return: a dictionary holding the best configuration
         """
 
         exp_path = exp_path
-        KFOLD_FOLDER = os.path.join(exp_path, str(self.inner_folds) + '_FOLD_MS')
+        KFOLD_FOLDER = os.path.join(exp_path, 'MODEL_SELECTION')
 
-        if not os.path.exists(KFOLD_FOLDER):
-            os.makedirs(KFOLD_FOLDER)
+        if len(model_configs) > 1:
 
-        config_id = 0
-        # See https://pytorch.org/docs/stable/notes/multiprocessing.html#multiprocessing-cuda-note
-        mp_context = mp.get_context('spawn')
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self.max_processes, mp_context=mp_context) as pool:
-            for config in model_configs:
+            if not os.path.exists(KFOLD_FOLDER):
+                os.makedirs(KFOLD_FOLDER)
 
-                # I need to make a copy of this dictionary
-                # It seems it gets shared between processes!
-                cfg = deepcopy(config)
+            config_id = 0
+            # See https://pytorch.org/docs/stable/notes/multiprocessing.html#multiprocessing-cuda-note
+            mp_context = mp.get_context('spawn')
+            with concurrent.futures.ProcessPoolExecutor(max_workers=self.max_processes if not use_cuda else 1, mp_context=mp_context) as pool:
+                for config in model_configs:
 
-                # Create a separate folder for each experiment
-                exp_config_name = os.path.join(KFOLD_FOLDER, self._CONFIG_BASE + str(config_id + 1))
-                if not os.path.exists(exp_config_name):
-                    os.makedirs(exp_config_name)
+                    # I need to make a copy of this dictionary
+                    # It seems it gets shared between processes!
+                    cfg = deepcopy(config)
 
-                json_config = os.path.join(exp_config_name, self._CONFIG_FILENAME)
+                    # Create a separate folder for each experiment
+                    exp_config_name = os.path.join(KFOLD_FOLDER, self._CONFIG_BASE + str(config_id + 1))
+                    if not os.path.exists(exp_config_name):
+                        os.makedirs(exp_config_name)
 
-                if not os.path.exists(json_config):
-                    if not debug:
-                        f = pool.submit(self._model_selection_helper, outer_fold_id, dataset_getter, experiment_class, cfg,
-                                    config_id, exp_config_name, other, snd_queue)
-                    else:  # DEBUG
-                        self._model_selection_helper(outer_fold_id, dataset_getter, experiment_class, cfg,
-                                                     config_id, exp_config_name, other, snd_queue)
-                else:
-                    # Do not recompute experiments for these folds.
-                    # print(f"Config {json_config} already present! Skipping the experiment")
-                    # Inform the main process about experiment completion
-                    for k in range(self.inner_folds):
-                        for msg_type in ["START_CONFIG", "END_CONFIG"]:
-                            msg = dict(type=msg_type, outer_fold=outer_fold_id, config_id=config_id, inner_fold=k)
-                            snd_queue.put(msg)
+                    json_config = os.path.join(exp_config_name, self._CONFIG_FILENAME)
+                    if not os.path.exists(json_config):
+                        if not debug:
+                            f = pool.submit(self._model_selection_helper, outer_fold_id, dataset_getter, experiment_class, cfg,
+                                        config_id, exp_config_name, snd_queue)
+                        else:
+                            self._model_selection_helper(outer_fold_id, dataset_getter, experiment_class, cfg,
+                                                         config_id, exp_config_name, snd_queue)
+                    else:
+                        # Do not recompute experiments for these folds.
+                        # print(f"Config {json_config} already present! Skipping the experiment")
+                        # Inform the main process about experiment completion
+                        for k in range(self.inner_folds):
+                            for msg_type in ["START_CONFIG", "END_CONFIG"]:
+                                msg = dict(type=msg_type, outer_fold=outer_fold_id, config_id=config_id, inner_fold=k)
+                                snd_queue.put(msg)
 
-                config_id += 1
+                    config_id += 1
 
-        best_config, best_config_id = self.process_results(KFOLD_FOLDER, config_id)
+            best_config, best_config_id = self.process_results(KFOLD_FOLDER, config_id)
 
-        with open(os.path.join(KFOLD_FOLDER, self.WINNER_CONFIG_FILENAME), 'w') as fp:
-            json.dump(dict(best_config=best_config, best_config_id=best_config_id), fp)
+            with open(os.path.join(KFOLD_FOLDER, self.WINNER_CONFIG_FILENAME), 'w') as fp:
+                json.dump(dict(best_config=best_config, best_config_id=best_config_id), fp)
 
-        return best_config
+            return best_config
+        else:
+            # Performing model selection for a single configuration is useless
+            for k in range(self.inner_folds):
+                for msg_type in ["START_CONFIG", "END_CONFIG"]:
+                    msg = dict(type=msg_type, outer_fold=outer_fold_id, config_id=0, inner_fold=k)
+                    snd_queue.put(msg)
+            return {'config': deepcopy(model_configs[0])}
 
-    def _model_selection_helper(self, outer_fold_id, dataset_getter, experiment_class, config, config_id, exp_config_name, other, snd_queue):
+    def _model_selection_helper(self, outer_fold_id, dataset_getter, experiment_class, config, config_id, exp_config_name, snd_queue):
         """
         Helper method that runs model selection for a particular configuration. The configuration is repeated for each
         inner fold. Validation scores are averaged to compute the validation score of a single hyper-parameter
@@ -140,14 +152,8 @@ class KFoldSelection:
         :param config: Dictionary holding a specific hyper-parameter configuration
         :param config_id: Configuration ID
         :param exp_config_name: The folder in which to store all results for a specific configuration
-        :param other: this can be used to pass some additional information to the experiment in the form of a dict
         :param snd_queue: a queue to inform the main process about the progress
         """
-        # Set up a log file for this experiment (run in a separate process)
-        logger = Logger(str(os.path.join(exp_config_name, 'experiment.log')), mode='a')
-
-        logger.log('Configuration: \n' + str(config))
-
         config_filename = os.path.join(exp_config_name, self._CONFIG_FILENAME)
 
         # ------------- PREPARE DICTIONARY TO STORE RESULTS -------------- #
@@ -163,20 +169,28 @@ class KFoldSelection:
 
         for k in range(self.inner_folds):
 
-            dataset_getter.set_inner_k(k)
-
+            # Set up a log file for this experiment (run in a separate process)
             fold_exp_folder = os.path.join(exp_config_name, 'FOLD_' + str(k + 1))
-            # Create the experiment object which will be responsible for running a specific experiment
-            experiment = experiment_class(config, fold_exp_folder)
+            fold_results_torch_path = Path(fold_exp_folder, f'fold_{str(k + 1)}_results.torch')
 
             # Inform the main process about experiment completion
             msg = dict(type="START_CONFIG", outer_fold=outer_fold_id, config_id=config_id, inner_fold=k)
             snd_queue.put(msg)
 
-            training_score, validation_score = experiment.run_valid(dataset_getter, logger, other)
+            if not os.path.exists(fold_results_torch_path):
 
-            logger.log(str(k+1) + ' split, TR Score: ' + str(training_score) +
-                       ' VL Score: ' + str(validation_score))
+                logger = Logger(str(os.path.join(fold_exp_folder, 'experiment.log')), mode='a')
+                logger.log('Configuration: \n' + str(config))
+
+                # Create the experiment object which will be responsible for running a specific experiment
+                experiment = experiment_class(config, fold_exp_folder)
+
+                dataset_getter.set_inner_k(k)
+                training_score, validation_score = experiment.run_valid(dataset_getter, logger)
+
+                torch.save((training_score, validation_score), fold_results_torch_path)
+            else:
+                training_score, validation_score = torch.load(fold_results_torch_path)
 
             for key in training_score.keys():
                 k_fold_dict['folds'][k][f'TR_{key}'] = float(training_score[key])
@@ -197,13 +211,5 @@ class KFoldSelection:
             k_fold_dict[f'avg_VL_{key}'] = float(vl_scores.mean())
             k_fold_dict[f'std_VL_{key}'] = float(vl_scores.std())
 
-        logger.log('TR avg is ' + str(k_fold_dict['avg_TR_score']) + ' std is ' + str(k_fold_dict['std_TR_score']) +
-                   ' VL avg is ' + str(k_fold_dict['avg_VL_score']) + ' std is ' + str(k_fold_dict['std_VL_score']))
-
         with open(config_filename, 'w') as fp:
             json.dump(k_fold_dict, fp)
-
-        # Now we can remove the last checkpoints to save space
-        for k in range(self.inner_folds):
-            ckpt_filename = os.path.join(exp_config_name, 'FOLD_' + str(k + 1), 'last_checkpoint.pth')
-            os.remove(ckpt_filename)

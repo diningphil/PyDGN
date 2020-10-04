@@ -34,11 +34,11 @@ grid:
     self_arc:
       - False
     wrapper:
-      - training.core.engine.IncrementalTrainingEngine
+      - training.engine.IncrementalTrainingEngine
     loss:
-      - training.core.callback.loss.CGMMLoss
+      - training.callback.loss.CGMMLoss
     optimizer:
-      - training.core.callback.optimizer.CGMMOptimizer
+      - training.callback.optimizer.CGMMOptimizer
     arbitrary_function_config:  # Define the information for the arbitrary function
       checkpoint: True
       log_every: 1
@@ -53,26 +53,26 @@ grid:
         - 32
       optimizer:
         -
-          class_name: training.core.callback.optimizer.Optimizer
+          class_name: training.callback.optimizer.Optimizer
           args:
             optimizer_class_name: torch.optim.Adam
             lr:
               - 0.001
             weight_decay: 0.001
       loss:
-        #- training.core.callback.loss.MeanAverageErrorLoss
-      - training.core.callback.loss.MulticlassClassificationLoss
+        #- training.callback.loss.MeanAverageErrorLoss
+      - training.callback.loss.MulticlassClassificationLoss
       scorer:
-        #- training.core.callback.score.RSquareScore
-        - training.core.callback.score.MulticlassAccuracyScore
+        #- training.callback.score.RSquareScore
+        - training.callback.score.MulticlassAccuracyScore
       predictor:
         - models.predictors.GraphPredictor.CGMMGraphPredictor
       wrapper:
-        - training.core.engine.TrainingEngine
+        - training.engine.TrainingEngine
       early_stopper:
         -
           class_name:
-            - training.core.callback.early_stopping.PatienceEarlyStopper
+            - training.callback.early_stopping.PatienceEarlyStopper
           args:
             patience:
               - 2000
@@ -82,4 +82,4 @@ grid:
       shuffle:
         - True
       plotter:
-        - training.core.callback.plotter.Plotter
+        - training.callback.plotter.Plotter

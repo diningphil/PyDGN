@@ -1,6 +1,14 @@
-import random
-from config.base import Config
-from config.utils import s2c
+from pydoc import locate
+from evaluation.config import Config
+from training.callback.engine_callback import EngineCallback
+
+
+def s2c(class_name):
+    """ Converts a dotted path to the corresponding class """
+    result = locate(class_name)
+    if result is None:
+        raise ImportError(f"The (dotted) path '{class_name}' is unknown. Check your configuration.")
+    return result
 
 
 class Experiment:
@@ -85,7 +93,7 @@ class Experiment:
         return self._create_model(dim_node_features, dim_edge_features, dim_target,
                                   predictor_classname, self.model_config.layer_config)
 
-    def _create_wrapper(self, config, model, wrapper_classname, device, log_every, checkpoint):
+    def _create_wrapper(self, config, model, device, log_every):
         """
         Instantiates the training engine (see training.core.engine). It looks for pre-defined fields in the
         configuration file, i.e. 'loss', 'scorer', 'optimizer', 'scheduler', 'gradient_clipping', 'early_stopper' and
@@ -96,7 +104,6 @@ class Experiment:
         :param wrapper_classname: string containing the dotted path of the class associated with the training engine
         :param device:
         :param log_every:
-        :param checkpoint:
         :return: a training engine implementing (see training.core.engine.TrainingEngine for the base class
         doing most of the work)
         """
@@ -114,6 +121,9 @@ class Experiment:
         if sched_args is not None:
             sched_args['optimizer'] = optimizer.optimizer
         scheduler = sched_class(**sched_args) if sched_class is not None else None
+        # Remove the optimizer obj ow troubles when dumping the config file
+        if sched_args is not None:
+            sched_args.pop('optimizer', None)
 
         grad_clip_class, grad_clip_args = self._return_class_and_args(config, 'gradient_clipping')
         grad_clipper = grad_clip_class(**grad_clip_args) if grad_clip_class is not None else None
@@ -124,45 +134,42 @@ class Experiment:
         plot_class, plot_args = self._return_class_and_args(config, 'plotter')
         plotter = plot_class(exp_path=self.exp_path, **plot_args) if plot_class is not None else None
 
-        wrapper = s2c(wrapper_classname)(model=model, loss=loss,
+        store_last_checkpoint = config.get('checkpoint', False)
+        wrapper_class, wrapper_args = self._return_class_and_args(config, 'wrapper')
+        engine_callback = wrapper_args.get('engine_callback', EngineCallback)
+        wrapper = wrapper_class(engine_callback=engine_callback, model=model, loss=loss,
                                          optimizer=optimizer, scorer=scorer, scheduler=scheduler,
                                          early_stopper=early_stopper, gradient_clipping=grad_clipper,
                                          device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every,
-                                         checkpoint=checkpoint)
+                                         store_last_checkpoint=store_last_checkpoint)
         return wrapper
 
     def create_supervised_wrapper(self, model):
         """ Instantiates the training engine by using the 'supervised_config' key in the config file """
         device = self.model_config.device
-        wrapper_classname = self.model_config.supervised_config['wrapper']
         log_every = self.model_config.log_every
-        checkpoint = self.model_config.supervised_config.get('checkpoint', False)
-        return self._create_wrapper(self.model_config.supervised_config, model, wrapper_classname, device, log_every, checkpoint)
+        return self._create_wrapper(self.model_config.supervised_config, model, device, log_every)
 
     def create_unsupervised_wrapper(self, model):
         """ Instantiates the training engine by using the 'unsupervised_config' key in the config file """
         device = self.model_config.device
         log_every = self.model_config.log_every
-        wrapper_classname = self.model_config.unsupervised_config['wrapper']
-        checkpoint = self.model_config.unsupervised_config.get('checkpoint', False)
-        return self._create_wrapper(self.model_config.unsupervised_config, model, wrapper_classname, device, log_every, checkpoint)
+        return self._create_wrapper(self.model_config.unsupervised_config, model, device, log_every)
 
     def create_incremental_wrapper(self, model):
         """ Instantiates the training engine by using the 'layer_config' key in the config file """
         device = self.model_config.device
         log_every = self.model_config.log_every
-        wrapper_classname = self.model_config.layer_config['wrapper']
-        checkpoint = self.model_config.layer_config.get('checkpoint', False)
-        return self._create_wrapper(self.model_config.layer_config, model, wrapper_classname, device, log_every, checkpoint)
+        return self._create_wrapper(self.model_config.layer_config, model, device, log_every)
 
-    def run_valid(self, get_train_val, logger, other=None):
+    def run_valid(self, get_train_val, logger):
         """
         This function returns the training and validation scores
         :return: (training score, validation score)
         """
         raise NotImplementedError('You must implement this function!')
 
-    def run_test(self, get_train_val, get_test, logger, other=None):
+    def run_test(self, get_train_val, get_test, logger):
         """
         This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
         :return: (training score, test score)

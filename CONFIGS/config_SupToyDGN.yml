@@ -2,7 +2,7 @@ model: models.dgns.ToyDGN.ToyDGN
 experiment: supervised
 higher_results_are_better: True
 log_every: 1
-dataset-getter: datasets.provider.LinkPredictionSingleGraphDataProvider
+dataset-getter: datasets.provider.DataProvider
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device
@@ -22,7 +22,7 @@ grid:
       - mean
     optimizer:
       -
-        class_name: training.core.callback.optimizer.Optimizer
+        class_name: training.callback.optimizer.Optimizer
         args:
           optimizer_class_name: torch.optim.Adam
           lr: 0.01
@@ -31,21 +31,19 @@ grid:
     scheduler:
       - null
     loss:
-      # - training.core.callback.loss.MulticlassClassificationLoss
-      - training.core.callback.loss.ToyLinkPredictionLoss
+      - training.callback.loss.MulticlassClassificationLoss
     scorer:
-      #- training.core.callback.score.MulticlassAccuracyScore
+      #- training.callback.score.MulticlassAccuracyScore
       -
-        class_name: training.core.callback.score.MultiScore
+        class_name: training.callback.score.MultiScore
         args:
            # used at model selection time. Should be the one on which to perform early stopping
-           #main_scorer: training.core.callback.score.MulticlassAccuracyScore
-           #my_metric2: training.core.callback.score.Toy1Score
-           main_scorer: training.core.callback.score.Toy1Score
+           main_scorer: training.callback.score.MulticlassAccuracyScore
+           my_metric2: training.callback.score.Toy1Score
     predictor:
-      - models.predictors.NodePredictor.LinearNodePredictor
+      - models.predictors.GraphPredictor.LinearGraphPredictor
     wrapper:
-      - training.core.engine.TrainingEngine
+      - training.engine.TrainingEngine
     l2:
       - 0.
     gradient_clipping:
@@ -55,7 +53,7 @@ grid:
     early_stopper:
       -
         class_name:
-          - training.core.callback.early_stopping.PatienceEarlyStopper
+          - training.callback.early_stopping.PatienceEarlyStopper
         args:
           patience:
             - 5
@@ -64,6 +62,6 @@ grid:
           mode: max
           checkpoint: True
     plotter:
-      - training.core.callback.plotter.Plotter
+      - training.callback.plotter.Plotter
     shuffle:
       - True

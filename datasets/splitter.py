@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold, train_test_split
 from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
-from config.utils import s2c
+from experiments.experiment import s2c
 
 
 class Fold:
@@ -30,6 +30,20 @@ class OuterFold(Fold):
     """
     def todict(self):
         return {"train": self.train_idxs, "val": self.val_idxs, "test": self.test_idxs}
+
+
+class NoShuffleTrainTestSplit:
+
+    def __init__(self, test_ratio):
+        self.test_ratio = test_ratio
+
+    def split(self, idxs, y=None):
+        n_samples = len(idxs)
+        n_test = int(n_samples*self.test_ratio)
+        n_train = n_samples - n_test
+        train_idxs = np.arange(n_train)
+        test_idxs = np.arange(n_train, n_train + n_test)
+        return [(train_idxs, test_idxs)]
 
 
 class Splitter:
@@ -97,11 +111,14 @@ class Splitter:
         '''
     def _get_splitter(self, n_splits, stratified, test_ratio):
         if n_splits == 1:
-            # TODO we should be able to shuffle also here!
-            if stratified:
-                splitter = StratifiedShuffleSplit(n_splits, test_size=test_ratio, random_state=self.seed)
+            if not self.shuffle:
+                assert stratified == False, "Stratified not implemented when shuffle is False"
+                splitter = NoShuffleTrainTestSplit(test_ratio=test_ratio)
             else:
-                splitter = ShuffleSplit(n_splits, test_size=test_ratio, random_state=self.seed)
+                if stratified:
+                    splitter = StratifiedShuffleSplit(n_splits, test_size=test_ratio, random_state=self.seed)
+                else:
+                    splitter = ShuffleSplit(n_splits, test_size=test_ratio, random_state=self.seed)
         elif n_splits > 1:
             if stratified:
                 splitter = StratifiedKFold(n_splits, shuffle=self.shuffle, random_state=self.seed)
@@ -133,23 +150,39 @@ class Splitter:
                 test_ratio=self.test_ratio)  # This is the true test (outer test)
 
             for train_idxs, test_idxs in outer_splitter.split(outer_idxs, y=targets):
+
+                assert set(train_idxs) == set(outer_idxs[train_idxs])
+                assert set(test_idxs) == set(outer_idxs[test_idxs])
+
+                inner_fold_splits = []
+                inner_idxs = outer_idxs[train_idxs]  # equals train_idxs because outer_idxs was ordered
+                inner_targets = targets[train_idxs] if targets is not None else None
+
                 inner_splitter = self._get_splitter(
                     n_splits=self.n_inner_folds,
                     stratified=stratified,
                     test_ratio=self.val_ratio)  # The inner "test" is, instead, the validation set
-
-                inner_fold_splits = []
-                inner_idxs = outer_idxs[train_idxs]
-                inner_targets = targets[train_idxs] if targets is not None else None
 
                 for inner_train_idxs, inner_val_idxs in inner_splitter.split(inner_idxs, y=inner_targets):
                     inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(), val_idxs=inner_idxs[inner_val_idxs].tolist())
                     inner_fold_splits.append(inner_fold)
                 self.inner_folds.append(inner_fold_splits)
 
-                np.random.shuffle(train_idxs)
+                # Obtain outer val from outer train in an holdout fashion
+                outer_val_splitter = self._get_splitter(n_splits=1, stratified=stratified, test_ratio=self.val_ratio)  # Use val ratio to compute outer val
+                outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=inner_targets))[0]
+
+                # False if empty
+                assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
+                assert not bool(set(inner_idxs[inner_train_idxs]) & set(inner_idxs[inner_val_idxs]) & set(test_idxs))
+                assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+                assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+                assert not bool(set(inner_idxs[outer_train_idxs]) & set(inner_idxs[outer_val_idxs]) & set(test_idxs))
+
+                np.random.shuffle(outer_train_idxs)
+                np.random.shuffle(outer_val_idxs)
                 np.random.shuffle(test_idxs)
-                outer_fold = OuterFold(train_idxs=train_idxs.tolist(), test_idxs=test_idxs.tolist())
+                outer_fold = OuterFold(train_idxs=inner_idxs[outer_train_idxs].tolist(), val_idxs=inner_idxs[outer_val_idxs].tolist(), test_idxs=outer_idxs[test_idxs].tolist())
                 self.outer_folds.append(outer_fold)
 
             self.processed = True

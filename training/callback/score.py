@@ -1,9 +1,9 @@
 import torch
-from config.utils import s2c
+from experiments.experiment import s2c
 from sklearn.metrics import r2_score, roc_auc_score, average_precision_score, accuracy_score
 
 from datasets.splitter import to_lower_triangular
-from training.core.event.handler import EventHandler
+from training.event.handler import EventHandler
 
 
 class Score(EventHandler):

@@ -1,12 +1,9 @@
-import os
 import operator
-import numpy as np
 import copy
-import torch
 from pathlib import Path
 
-from training.core.utils import atomic_save
-from training.core.event.handler import EventHandler
+from training.utils import atomic_save
+from training.event.handler import EventHandler
 
 
 class EarlyStopper(EventHandler):

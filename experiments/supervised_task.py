@@ -6,7 +6,7 @@ class SupervisedTask(Experiment):
     def __init__(self, model_configuration, exp_path):
         super(SupervisedTask, self).__init__(model_configuration, exp_path)
 
-    def run_valid(self, dataset_getter, logger, other=None):
+    def run_valid(self, dataset_getter, logger):
         """
         This function returns the training and validation scores
         :return: (training score, validation score)
@@ -39,7 +39,7 @@ class SupervisedTask(Experiment):
                                                                     logger=logger)
         return train_score, val_score
 
-    def run_test(self, dataset_getter, logger, other=None):
+    def run_test(self, dataset_getter, logger):
         """
         This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
         :return: (training score, test score)

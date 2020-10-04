@@ -1,7 +1,5 @@
 import torch
 from torch_geometric.utils import degree
-from torch_geometric.transforms import *
-from torch_geometric.data import Data
 
 
 class ConstantIfEmpty:

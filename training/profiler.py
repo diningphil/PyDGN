@@ -1,7 +1,7 @@
 import time
 import bisect
 import datetime
-from training.core.event.handler import EventHandler
+from training.event.handler import EventHandler
 
 
 # Decorator class. Ideas taken from "Fluent Python" book

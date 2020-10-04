@@ -1,17 +1,15 @@
 import os
 from pathlib import Path
 import torch
-from training.core.profiler import Profiler
-from training.core.event.state import State
-from training.core.event.dispatcher import EventDispatcher
-from training.core.callback.engine_callback import EngineCallback
-from training.core.utils import to_data_list, extend_lists, to_tensor_lists
+from training.profiler import Profiler
+from training.event.state import State
+from training.event.dispatcher import EventDispatcher
+from training.utils import to_data_list, extend_lists, to_tensor_lists
 
 
 def log(msg, logger):
     if logger is not None:
         logger.log(msg)
-    #print(msg)
 
 
 class TrainingEngine(EventDispatcher):
@@ -27,10 +25,11 @@ class TrainingEngine(EventDispatcher):
     VALIDATION = 'validation'
     TEST = 'test'
 
-    def __init__(self, model, loss, optimizer, scorer=None,
-                 scheduler=None, early_stopper=None, gradient_clipping=None, device='cpu', plotter=None, exp_path=None, log_every=1, checkpoint=False):
+    def __init__(self, engine_callback, model, loss, optimizer, scorer=None,
+                 scheduler=None, early_stopper=None, gradient_clipping=None, device='cpu', plotter=None, exp_path=None, log_every=1, store_last_checkpoint=False):
         """
         Initializes the engine
+        :param model: the engine_callback subclass to be used
         :param model: the model to be trained
         :param loss: an object of a subclass of training.core.callback.Loss
         :param optimizer: an object of a subclass of training.core.callback.Optimizer
@@ -42,10 +41,11 @@ class TrainingEngine(EventDispatcher):
         :param plotter: an object of a subclass of training.core.callback.Plotter
         :param exp_path: the path of the experiment folder
         :param log_every: the frequency of logging epoch results
-        :param checkpoint: whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch.
+        :param store_last_checkpoint: whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch.
         """
         super().__init__()
 
+        self.engine_callback = engine_callback
         self.model = model
         self.loss_fun = loss
         self.optimizer = optimizer
@@ -57,7 +57,7 @@ class TrainingEngine(EventDispatcher):
         self.plotter = plotter
         self.exp_path = exp_path
         self.log_every = log_every
-        self.checkpoint = checkpoint
+        self.store_last_checkpoint = store_last_checkpoint
 
         self.state = State(self.model, self.optimizer)  # Initialize the state
         self.state.update(exp_path=self.exp_path)
@@ -73,10 +73,14 @@ class TrainingEngine(EventDispatcher):
                           self.early_stopper, self.scheduler, self.plotter] if c is not None]  # filter None callbacks
 
         # Add an Engine specific callback to profile different passages of _loop
-        self.callbacks.append(self.profiler(EngineCallback(checkpoint=self.checkpoint)))
+        self.callbacks.append(self.profiler(self.engine_callback(store_last_checkpoint=self.store_last_checkpoint)))
 
         for c in self.callbacks:
             self.register(c)
+
+        self.state = State(self.model, self.optimizer)  # Initialize the state
+        self.state.update(exp_path=self.exp_path)
+
 
     def _to_list(self, data_list, embeddings, batch, edge_index, y, linkpred=False):
 
@@ -135,8 +139,8 @@ class TrainingEngine(EventDispatcher):
                 _data = data
             batch_idx, edge_index, targets = _data.batch, _data.edge_index, _data.y
 
-            # This is useless if copies are not made
-            self.state.update(batch_input=data)
+            # Helpful when you need to access again the input batch, e.g for some continual learning strategy
+            self.state.update(batch_input=_data)
             self.state.update(batch_targets=targets)
 
             num_graphs = _data.num_graphs
@@ -232,15 +236,26 @@ class TrainingEngine(EventDispatcher):
 
         assert self.state.epoch_loss is not None
         loss, score, data_list = self.state.epoch_loss, self.state.epoch_score, self.state.epoch_data_list
+
+        # Add the main loss we want to return as a special key
+        main_loss_name = self.loss_fun.get_main_loss_name()
+        loss['main_loss'] = loss[main_loss_name]
+
+        # Add the main score we want to return as a special key
+        # Needed by the experimental evaluation framework
+        main_score_name = self.score_fun.get_main_score_name()
+        score['main_score'] = score[main_score_name]
+
         return loss, score, data_list
 
-    def train(self, train_loader, validation_loader=None, test_loader=None, max_epochs=100, logger=None):
+    def train(self, train_loader, validation_loader=None, test_loader=None, max_epochs=100, zero_epoch=False, logger=None):
         """
         Trains the model
         :param train_loader: the DataLoader associated with training data
         :param validation_loader: the DataLoader associated with validation data, if any
         :param test_loader:  the DataLoader associated with test data, if any
         :param max_epochs: maximum number of training epochs
+        :param zero_epoch: if True, starts again from epoch 0 and resets optimizer and scheduler states.
         :param logger: a log.Logger for logging purposes
         :return: a tuple (train_loss, train_score, train_embeddings, validation_loss, validation_score, validation_embeddings, test_loss, test_score, test_embeddings)
         """
@@ -250,60 +265,61 @@ class TrainingEngine(EventDispatcher):
             val_loss, val_score, val_embeddings_tuple = None, None, None
             test_loss, test_score, test_embeddings_tuple = None, None, None
 
-            self.state = State(self.model, self.optimizer)  # Initialize the state
-            self.state.update(exp_path=self.exp_path)
             self.set_device()
 
             # Restore training from last checkpoint if possible!
             ckpt_filename = Path(self.exp_path, self.state.LAST_CHECKPOINT_FILENAME)
             best_ckpt_filename = Path(self.exp_path, self.state.BEST_CHECKPOINT_FILENAME)
             if os.path.exists(ckpt_filename):
-                # print(f'{ckpt_filename} exists!')
-                self._restore_last(ckpt_filename, best_ckpt_filename)
+                self._restore_last(ckpt_filename, best_ckpt_filename, zero_epoch)
                 log(f'START AGAIN FROM EPOCH {self.state.initial_epoch}', logger)
 
             self._dispatch('on_fit_start', self.state)
 
             # Loop over the entire dataset dataset
-            for epoch in range(self.state.initial_epoch, max_epochs+1):
+            for epoch in range(self.state.initial_epoch, max_epochs):
                 self.state.update(epoch=epoch)
 
                 self._dispatch('on_epoch_start', self.state)
 
                 self.state.update(set=TrainingEngine.TRAINING)
-                t_l, _, _ = self._train(train_loader)
+                _, _, _ = self._train(train_loader)
 
                 # Compute training output (necessary because on_backward has been called)
                 train_loss, train_score, _ = self.infer(train_loader, TrainingEngine.TRAINING, return_node_embeddings=False)
 
-                if self.early_stopper:  # Early stopping can also be performed on training!
-                    # Compute validation output
-                    if validation_loader is not None:
-                        val_loss, val_score, _ = self.infer(validation_loader, TrainingEngine.VALIDATION, return_node_embeddings=False)
+                # Compute validation output
+                if validation_loader is not None:
+                    val_loss, val_score, _ = self.infer(validation_loader, TrainingEngine.VALIDATION, return_node_embeddings=False)
 
-                    # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
-                    if test_loader is not None:
-                        test_loss, test_score, _ = self.infer(test_loader, TrainingEngine.TEST, return_node_embeddings=False)
+                # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
+                if test_loader is not None:
+                    test_loss, test_score, _ = self.infer(test_loader, TrainingEngine.TEST, return_node_embeddings=False)
 
                 # Update state with epoch results
                 epoch_results = {
-                    f'{TrainingEngine.TRAINING}_loss': train_loss,
-                    f'{TrainingEngine.VALIDATION}_loss': val_loss,  # can be None
-                    f'{TrainingEngine.TEST}_loss': test_loss,  # can be None
+                    #f'{TrainingEngine.TRAINING}_loss': train_loss,
+                    #f'{TrainingEngine.VALIDATION}_loss': val_loss,  # can be None
+                    #f'{TrainingEngine.TEST}_loss': test_loss,  # can be None
+                    'losses': {},
                     'scores': {}
                 }
-                if self.score_fun:
-                    epoch_results['scores'].update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_score.items()})
-                    if validation_loader is not None:
-                        epoch_results['scores'].update({f'{TrainingEngine.VALIDATION}_{k}': v for k, v in val_score.items()})
-                        val_msg_str = f', VL loss: {val_loss} VL score: {val_score}'
-                    else:
-                        val_msg_str = ''
-                    if test_score is not None:
-                        epoch_results['scores'].update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_score.items()})
-                        test_msg_str = f', TE loss: {test_loss} TE score: {test_score}'
-                    else:
-                        test_msg_str = ''
+
+                epoch_results['losses'].update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_loss.items()})
+                epoch_results['scores'].update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_score.items()})
+                if validation_loader is not None:
+                    epoch_results['losses'].update({f'{TrainingEngine.VALIDATION}_{k}': v for k, v in val_loss.items()})
+                    epoch_results['scores'].update({f'{TrainingEngine.VALIDATION}_{k}': v for k, v in val_score.items()})
+                    val_msg_str = f', VL loss: {val_loss} VL score: {val_score}'
+                else:
+                    val_msg_str = ''
+                if test_score is not None:
+                    epoch_results['losses'].update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_loss.items()})
+                    epoch_results['scores'].update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_score.items()})
+                    test_msg_str = f', TE loss: {test_loss} TE score: {test_score}'
+                else:
+                    test_msg_str = ''
+
                 # Update state with the result of this epoch
                 self.state.update(epoch_results=epoch_results)
 
@@ -332,43 +348,28 @@ class TrainingEngine(EventDispatcher):
                 self.state.update(best_epoch_results={'best_epoch': epoch})
                 ber = self.state.best_epoch_results
 
-            if self.score_fun:
-                # Retrieve the main score we want to return
-                main_score_name = self.score_fun.get_main_score_name()
-
             # Compute training output
             train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TrainingEngine.TRAINING, return_node_embeddings=True)
-            ber[f'{TrainingEngine.TRAINING}_loss'] = train_loss
+            #ber[f'{TrainingEngine.TRAINING}_loss'] = train_loss
             ber[f'{TrainingEngine.TRAINING}_embeddings_tuple'] = train_embeddings_tuple
-            if self.score_fun:
-                ber.update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_score.items()})
-
-                # Needed by the experimental evaluation framework
-                train_score['main_score'] = train_score[main_score_name]
+            ber.update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_loss.items()})
+            ber.update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in train_score.items()})
 
             # Compute validation output
             if validation_loader is not None:
                 val_loss, val_score, val_embeddings_tuple = self.infer(validation_loader, TrainingEngine.VALIDATION, return_node_embeddings=True)
-                ber[f'{TrainingEngine.VALIDATION}_loss'] = val_loss
+                #ber[f'{TrainingEngine.VALIDATION}_loss'] = val_loss
                 ber[f'{TrainingEngine.VALIDATION}_embeddings_tuple'] = val_embeddings_tuple
-
-                if self.score_fun:
-                    ber.update({f'{TrainingEngine.VALIDATION}_{k}': v for k, v in val_score.items()})
-
-                    # Needed by the experimental evaluation framework
-                    val_score['main_score'] = val_score[main_score_name]
+                ber.update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in val_loss.items()})
+                ber.update({f'{TrainingEngine.TRAINING}_{k}': v for k, v in val_score.items()})
 
             # Compute test output
             if test_loader is not None:
                 test_loss, test_score, test_embeddings_tuple = self.infer(test_loader, TrainingEngine.TEST, return_node_embeddings=True)
-                ber[f'{TrainingEngine.TEST}_loss'] = test_loss
+                #ber[f'{TrainingEngine.TEST}_loss'] = test_loss
                 ber[f'{TrainingEngine.TEST}_embeddings_tuple'] = test_embeddings_tuple
-
-                if self.score_fun:
-                    ber.update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_score.items()})
-
-                    # Needed by the experimental evaluation framework
-                    test_score['main_score'] = test_score[main_score_name]
+                ber.update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_loss.items()})
+                ber.update({f'{TrainingEngine.TEST}_{k}': v for k, v in test_score.items()})
 
             self._dispatch('on_fit_end', self.state)
 
@@ -383,7 +384,6 @@ class TrainingEngine(EventDispatcher):
             log(report, logger)
             exit(0)
 
-
         # Log profile results
         report = self.profiler.report()
         log(report, logger)
@@ -392,22 +392,23 @@ class TrainingEngine(EventDispatcher):
                 val_loss, val_score, val_embeddings_tuple, \
                 test_loss, test_score, test_embeddings_tuple
 
-    def _restore_last(self, ckpt_filename, best_ckpt_filename):
+    def _restore_last(self, ckpt_filename, best_ckpt_filename, zero_epoch):
         ckpt_dict = torch.load(ckpt_filename)
 
-        self.state.update(initial_epoch=int(ckpt_dict['epoch'])+1)
+        self.state.update(initial_epoch=int(ckpt_dict['epoch'])+1 if not zero_epoch else 0)
 
         model_state = ckpt_dict['model_state']
         self.model.load_state_dict(model_state)
 
-        optimizer_state = ckpt_dict['optimizer_state']
-        self.state.update(optimizer_state=optimizer_state)
+        if not zero_epoch:
+            optimizer_state = ckpt_dict['optimizer_state']
+            self.state.update(optimizer_state=optimizer_state)
 
         if os.path.exists(best_ckpt_filename):
             best_ckpt_dict = torch.load(best_ckpt_filename)
             self.state.update(best_epoch_results=best_ckpt_dict)
 
-        if self.scheduler is not None:
+        if self.scheduler is not None and not zero_epoch:
             scheduler_state = ckpt_dict['scheduler_state']
             assert scheduler_state is not None
             self.state.update(scheduler_state=scheduler_state)

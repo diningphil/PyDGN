@@ -12,7 +12,7 @@ class SemiSupervisedTask(Experiment):
         super(SemiSupervisedTask, self).__init__(model_configuration, exp_path)
         self.root_exp_path = exp_path  # to distinguish unsup. and sup. exp paths
 
-    def run_valid(self, dataset_getter, logger, other=None):
+    def run_valid(self, dataset_getter, logger):
         """
         This function returns the training and validation scores
         :return: (training score, validation score)
@@ -87,7 +87,7 @@ class SemiSupervisedTask(Experiment):
 
         return train_score, val_score
 
-    def run_test(self, dataset_getter, logger, other=None):
+    def run_test(self, dataset_getter, logger):
         """
         This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
         :return: (training score, test score)

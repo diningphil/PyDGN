@@ -3,7 +3,6 @@ import sys
 import time
 import tqdm
 import datetime
-import threading
 
 
 def clear_screen():
@@ -74,12 +73,6 @@ class ProgressManager:
         self.show_footer()
 
         self.times = [{} for _ in range(len(self.pbars))]
-
-        def refresh_timer():
-            threading.Timer(60.0, refresh_timer).start()
-            self.refresh()
-
-        refresh_timer()
 
     def show_header(self):
         '''

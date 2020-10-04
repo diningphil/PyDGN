@@ -1,16 +1,31 @@
+import os
+import inspect
+import shutil
 import warnings
 from pathlib import Path
 import numpy as np
-import os
-import shutil
 
 import torch
 from torch_geometric.datasets import TUDataset
 from torch_geometric.transforms import Compose
 
-from config.utils import s2c
+from experiments.experiment import s2c
 from datasets.splitter import Splitter
-from utils.utils import get_or_create_dir, check_argument
+
+
+def get_or_create_dir(path):
+    """ Creates directories associated to the specified path if they are missing, and it returns the Path object """
+    path = Path(path)
+    if not path.exists():
+        os.makedirs(path)
+    return path
+
+
+def check_argument(cls, arg_name):
+    """ Checks whether arg_name is in the signature of a method or class """
+    sign = inspect.signature(cls)
+    return arg_name in sign.parameters.keys()
+
 
 # Adapted from https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/dropout.html
 def filter_adj(edge_index, edge_attr, mask):
@@ -18,12 +33,14 @@ def filter_adj(edge_index, edge_attr, mask):
     filtered_edge_index = row[mask], col[mask]
     return filtered_edge_index, None if edge_attr is None else edge_attr[mask]
 
+
 def get_graph_targets(dataset):
     try:
         targets = np.array([d.y.item() for d in dataset])
         return True, targets
     except Exception:
         return False, None
+
 
 def preprocess_data(options):
 

@@ -7,20 +7,9 @@
 This is a Python library to easily experiment with [Deep Graph Networks](https://arxiv.org/abs/1912.12693) (DGNs). It provides automatic management of data splitting, loading and the most common experimental settings. It also handles both model selection and risk assessment procedures, by trying many different configurations in parallel (CPU).
 This repository is built upon the [Pytorch Geometric Library](https://pytorch-geometric.readthedocs.io/en/latest/), which provides support for data management.
 
-**If you happen to use or modify this code, please remember to cite our tutorial paper**:
+If you happen to use or modify this code, please remember to cite our tutorial paper:
 
 [Bacciu Davide, Errica Federico, Micheli Alessio, Podda Marco: *A Gentle Introduction to Deep Learning for Graphs*](https://arxiv.org/abs/1912.12693), Neural Networks, 2020. DOI: `10.1016/j.neunet.2020.06.006`.
-
-    @article{bacciu_gentle_2020,
-        title={A Gentle Introduction to Deep Learning for Graphs},
-        author={Bacciu, Davide and Errica, Federico and Micheli, Alessio and Podda, Marco},
-        journal={Neural Networks},
-        doi = {10.1016/j.neunet.2020.06.006},
-        volume={129},
-        pages={203--221},
-        year={2020},
-        publisher={Elsevier}
-    }
 
 If you are interested in a rigorous evaluation of Deep Graph Networks, check this out:
 
@@ -32,14 +21,12 @@ If you are interested in a rigorous evaluation of Deep Graph Networks, check thi
 ## Installation:
 (We assume **git** and **Miniconda/Anaconda** are installed)
 
-#### PyTorch (CPU version) 
+First, make sure gcc 5.2.0 is installed: ``conda install -c anaconda libgcc=5.2.0``. Then, ``echo $LD_LIBRARY_PATH`` should always contain ``:/home/[your user name]/miniconda3/lib``. Then run from your terminal the following command:
 
-    source setup/install_cpu.sh
+    source install.sh [<your_cuda_version>]
 
-#### PyTorch (CUDA version 10.1) 
+Where `<your_cuda_version>` is an optional argument that can be either `cpu`, `cu92`, `cu101`, `cu102` for Pytorch 1.6.0. If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command using `bash` instead of `source`!
 
-    source setup/install_cuda.sh
-     
 Remember that [PyTorch MacOS Binaries dont support CUDA, install from source if CUDA is needed](https://pytorch.org/get-started/locally/)
 
 ## Usage:
@@ -49,14 +36,17 @@ Remember that [PyTorch MacOS Binaries dont support CUDA, install from source if 
 
 ### Launch an experiment in debug mode (see also Wiki)
     python Launch_Experiments.py --config-file [your config file] --data-splits [the splits file] --data-root [root folder of your data] --dataset-name [name of the dataset] --dataset-class [class that handles the dataset] --outer-processes [number of outer folds to process in parallel] --inner-processes [number of configurations to run in parallel for each outer fold] --final-training-runs [how many final runs when evaluating on test. Results are averaged] --result-folder [folder where to store results]
-    
-To debug your code it is useful to add `--debug` to the command above. Notice, however, that the CLI will not work as expected here, as code will be executed sequentially. After debugging, if you need sequential execution (e.g. because you run the experiments on single GPU) use `--inner-processes 1 --outer-processes 1` without the `--debug` option.  
+
+To debug your code it is useful to add `--debug` to the command above. Notice, however, that the CLI will not work as expected here, as code will be executed sequentially. After debugging, if you need sequential execution, you can use `--inner-processes 1 --outer-processes 1` without the `--debug` option.  
+
+**Important**: Multiprocessing on GPU is not enabled. When a `cuda` device is specified in the configuration file, execution will be *sequential*.
+
 
 ## Credits:
 This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda)/[Homepage](https://sites.google.com/view/marcopodda/home)), whom I thank for his relentless dedication.
 
 ## Contributing
-**This research software is provided as-is**. We are working on this library in our spare time. 
+**This research software is provided as-is**. We are working on this library in our spare time.
 
 If you find a bug, please open an issue to report it, and we will do our best to solve it. For generic/technical questions, please email us rather than opening an issue.
 

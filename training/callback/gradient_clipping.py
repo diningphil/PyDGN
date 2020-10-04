@@ -1,7 +1,7 @@
 import torch
 
-from config.utils import s2c
-from training.core.event.handler import EventHandler
+from experiments.experiment import s2c
+from training.event.handler import EventHandler
 
 
 class GradientClipping(EventHandler):

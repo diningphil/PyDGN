@@ -1,8 +1,8 @@
 import argparse
-from config.utils import s2c
+from experiments.experiment import s2c
 from datasets.splitter import Splitter
 from datasets.utils import preprocess_data
-from utils.serialization import load_yaml
+from evaluation.grid import load_yaml
 
 
 def get_args_dict():

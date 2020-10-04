@@ -1,6 +1,13 @@
 import json
+import yaml
 from copy import deepcopy
-from utils.serialization import load_yaml, save_yaml
+from pathlib import Path
+
+
+def load_yaml(path):
+    """ Loads a yaml file stored in path """
+    path = Path(path)
+    return yaml.load(open(path, "r"), Loader=yaml.SafeLoader)
 
 
 class Grid:
@@ -33,6 +40,13 @@ class Grid:
         self.pin_memory = self.configs_dict['pin_memory']
         self.model = self.configs_dict['model']
         self.dataset_getter = self.configs_dict['dataset-getter']
+
+        # For continual learning tasks
+        # - Reharsal
+        self.n_tasks = self.configs_dict.get('n_tasks', None)
+        self.n_rehearsal_patterns_per_task = self.configs_dict.get('n_rehearsal_patterns_per_task', None)
+
+        # This MUST be called at the END of the init method!
         self.hparams = self._gen_configs()
 
     def _gen_configs(self):
@@ -52,7 +66,9 @@ class Grid:
                         "pin_memory": self.pin_memory,
                         "experiment": self.experiment,
                         "higher_results_are_better": self.higher_results_are_better,
-                        "log_every": self.log_every})
+                        "log_every": self.log_every,
+                        "n_tasks": self.n_tasks,
+                        "n_rehearsal_patterns_per_task": self.n_rehearsal_patterns_per_task})
 
         return configs
 
@@ -136,9 +152,6 @@ class Grid:
     def __getitem__(self, index):
         return self.hparams[index]
 
-    def save(self, path):
-        save_yaml(self._grid, path)
-
     @property
     def exp_name(self):
         return f"{self.model.split('.')[-1]}_{self.dataset_name}"
@@ -146,37 +159,3 @@ class Grid:
     @property
     def num_configs(self):
         return len(self)
-
-
-class Config:
-    """ Simple class to manage the configuration dictionary """
-
-    def __init__(self, config_dict):
-        self.config_dict = config_dict
-
-    def __getattr__(self, attr):
-        return self.config_dict[attr]
-
-    def __getitem__(self, item):
-        return self.config_dict[item]
-
-    def __contains__(self, item):
-        return item in self.config_dict
-
-    def __len__(self):
-        return len(self.config_dict)
-
-    def __iter__(self):
-        return iter(self.config_dict)
-
-    def keys(self):
-        return self.config_dict.keys()
-
-    def items(self):
-        return self.config_dict.items()
-
-    def save(self, path):
-        save_yaml(self.config_dict, path)
-
-    def __str__(self):
-        return json.dumps(self.config_dict, sort_keys=True, indent=4)

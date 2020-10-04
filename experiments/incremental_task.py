@@ -143,7 +143,7 @@ class IncrementalTask(Experiment):
             graph_other_filepath = os.path.join(self.output_folder, mode, f'graph_other_output_{depth}.pt')
             torch.save([torch.unsqueeze(go_tensor, self._concat_axis) for go_tensor in go_tensor_list], graph_other_filepath)
 
-    def run_valid(self, dataset_getter, logger, other=None):
+    def run_valid(self, dataset_getter, logger):
         """
         This function returns the training and validation or test accuracy
         :return: (training accuracy, validation/test accuracy)
@@ -247,7 +247,7 @@ class IncrementalTask(Experiment):
 
         return dict_per_layer[-1]['train_score'], dict_per_layer[-1]['validation_score']
 
-    def run_test(self, dataset_getter, logger, other=None):
+    def run_test(self, dataset_getter, logger):
         """
         This function returns the training and test accuracy. DO NOT USE THE TEST FOR ANY REASON
         :return: (training accuracy, test accuracy)

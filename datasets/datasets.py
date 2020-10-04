@@ -15,8 +15,7 @@ from torch_geometric.data import InMemoryDataset, Data, download_url, extract_zi
 from torch_geometric.utils import from_networkx
 from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
 from torch_geometric.io import read_tu_data
-from dgl.data.utils import load_graphs
-
+from ogb.graphproppred import PygGraphPropPredDatasets
 
 
 class ZipDataset(torch.utils.data.Dataset):
@@ -45,6 +44,22 @@ class ZipDataset(torch.utils.data.Dataset):
         return len(self.datasets[0])
 
 
+class ConcatFromListDataset(InMemoryDataset):
+    """Create a dataset from a `torch_geometric.Data` list.
+    Args:
+        data_list (list): List of graphs.
+    """
+    def __init__(self, data_list):
+        super(ConcatFromListDataset, self).__init__("")
+        self.data, self.slices = self.collate(data_list)
+
+    def _download(self):
+        pass
+
+    def _process(self):
+        pass
+
+
 class DatasetInterface:
 
     name = None
@@ -56,6 +71,7 @@ class DatasetInterface:
     @property
     def dim_edge_features(self):
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
 
 class TUDatasetInterface(TUDataset, DatasetInterface):
 
@@ -80,7 +96,6 @@ class TUDatasetInterface(TUDataset, DatasetInterface):
     # Needs to be defined in each subclass of torch_geometric.data.Dataset
     def process(self):
         super().process()
-
 
 
 class KarateClubDatasetInterface(KarateClub, DatasetInterface):
