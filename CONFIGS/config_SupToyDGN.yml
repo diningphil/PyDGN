@@ -4,8 +4,8 @@ higher_results_are_better: True
 log_every: 1
 dataset-getter: datasets.provider.DataProvider
 device: cpu
-num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-pin_memory: False  # True only with --debug option and GPU device
+num_dataloader_workers: 0
+pin_memory: False
 grid:
   supervised_config:
     checkpoint: True
