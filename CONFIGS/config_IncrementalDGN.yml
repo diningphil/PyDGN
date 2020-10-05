@@ -3,8 +3,8 @@ experiment: incremental
 higher_results_are_better: True
 dataset-getter: datasets.provider.IncrementalDataProvider
 log_every: 1
-num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-pin_memory: False  # True only with --debug option and GPU device
+num_dataloader_workers: 0
+pin_memory: False
 device: cpu
 grid:
   layer_config:
