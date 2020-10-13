@@ -231,7 +231,7 @@ class Toy1Score(BinaryAccuracyScore):
         return torch.argmax(output, dim=1)
 
     def _score_fun(self, targets, *outputs, batch_loss_extra):
-        return torch.tensor(75)
+        return 100. * torch.ones(1)
 
 
 class MulticlassAccuracyScore(BinaryAccuracyScore):
