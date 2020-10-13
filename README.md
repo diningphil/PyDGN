@@ -56,5 +56,5 @@ PyDGN is GPL 3.0 licensed, as written in the LICENSE file.
 
 If you get errors like ``/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found``:
 * make sure gcc 5.2.0 is installed: ``conda install -c anaconda libgcc=5.2.0``
-* ``echo $LD_LIBRARY_PATH`` should contain ``:/home/[your user name]/miniconda3/lib``
+* ``echo $LD_LIBRARY_PATH`` should contain ``:/home/[your user name]/[your anaconda or miniconda folder name]/lib``
 * after checking the above points, you can reinstall everything with pip using the ``--no-cache-dir`` option
