@@ -1,22 +1,10 @@
 import json
-import yaml
 from copy import deepcopy
 from pathlib import Path
-
-
-def load_yaml(path):
-    """ Loads a yaml file stored in path """
-    path = Path(path)
-    return yaml.load(open(path, "r"), Loader=yaml.SafeLoader)
-
 
 class Grid:
     """ This class computes all possible hyper-parameters configurations based on the configuration file """
 
-    @classmethod
-    def from_file(cls, path, data_root, dataset_class, dataset_name):
-        configs_dict = load_yaml(path)
-        return cls(data_root, dataset_class, dataset_name, **configs_dict)
 
     def __init__(self, data_root, dataset_class, dataset_name, **configs_dict):
         """

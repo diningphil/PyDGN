@@ -1,4 +1,4 @@
-from experiments.experiment import Experiment
+from experiment.experiment import Experiment
 
 
 class SupervisedTask(Experiment):

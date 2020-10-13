@@ -4,7 +4,7 @@ import torch
 from training.profiler import Profiler
 from training.event.state import State
 from training.event.dispatcher import EventDispatcher
-from training.utils import to_data_list, extend_lists, to_tensor_lists
+from training.util import to_data_list, extend_lists, to_tensor_lists
 
 
 def log(msg, logger):
@@ -129,7 +129,6 @@ class TrainingEngine(EventDispatcher):
 
             # Move data to device
             data = self.state.batch_input
-
             if isinstance(data, list):
                 # used by incremental construction
                 data = [d.to(self.device) for d in data]
@@ -138,14 +137,13 @@ class TrainingEngine(EventDispatcher):
                 # standard case
                 data = data.to(self.device)
                 _data = data
-
             batch_idx, edge_index, targets = _data.batch, _data.edge_index, _data.y
-            num_graphs = _data.num_graphs
 
             # Helpful when you need to access again the input batch, e.g for some continual learning strategy
             self.state.update(batch_input=data)
             self.state.update(batch_targets=targets)
 
+            num_graphs = _data.num_graphs
             self.state.update(batch_num_graphs=num_graphs)
 
             # TODO WE MUST DO BETTER THAN THIS! WE ARE FORCING THE USER TO USE y + link prediction patch
@@ -156,6 +154,7 @@ class TrainingEngine(EventDispatcher):
             if isinstance(targets, list):
                 # positive links + negative links provided separately
                 num_targets = targets[0][1].shape[1] + targets[0][2].shape[1]  # Just a single graph / single batch for link prediction
+                # print(f'Num targets is {_data.y[0][1].shape[1]} + { _data.y[0][2].shape[1]}')
             else:
                 num_targets = targets.shape[0]
             ##################
@@ -397,6 +396,7 @@ class TrainingEngine(EventDispatcher):
         ckpt_dict = torch.load(ckpt_filename)
 
         self.state.update(initial_epoch=int(ckpt_dict['epoch'])+1 if not zero_epoch else 0)
+        self.state.update(stop_training=ckpt_dict['stop_training'])
 
         model_state = ckpt_dict['model_state']
         self.model.load_state_dict(model_state)
@@ -416,6 +416,8 @@ class TrainingEngine(EventDispatcher):
 
 
 class IncrementalTrainingEngine(TrainingEngine):
+    def __init__(self, model, loss, **kwargs):
+        super().__init__(model, loss, **kwargs)
 
     def infer(self, loader, set, return_node_embeddings=False):
         """
@@ -427,7 +429,7 @@ class IncrementalTrainingEngine(TrainingEngine):
         self.state.update(compute_intermediate_outputs=return_node_embeddings)
         return super().infer(loader, set, return_node_embeddings)
 
-    def _to_list(self, data_list, embeddings, batch, edge_index, y, linkpred=False):
+    def _to_list(self, data_list, embeddings, batch, edge_index, y):
 
         if isinstance(embeddings, tuple):
             embeddings = tuple([e.detach() if e is not None else None for e in embeddings])

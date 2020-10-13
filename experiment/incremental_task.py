@@ -1,7 +1,7 @@
 import os
 import torch
 import shutil
-from experiments.experiment import Experiment
+from experiment.experiment import Experiment
 from torch_geometric.data import Data
 from torch.utils.data.sampler import SequentialSampler
 import torch

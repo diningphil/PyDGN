@@ -1,7 +1,7 @@
 import torch
-from .GaussianEmission import GaussianEmission
-from .CategoricalEmission import CategoricalEmission
-from .BernoulliEmission import BernoulliEmission
+from .gaussian_emission import GaussianEmission
+from .categorical_emission import CategoricalEmission
+from .bernoulli_emission import BernoulliEmission
 
 
 class MixedEmission:

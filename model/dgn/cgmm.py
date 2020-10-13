@@ -1,14 +1,14 @@
 import torch
 from time import time
 from config.utils import s2c
-from models.utils.CategoricalEmission import CategoricalEmission
-from models.utils.GaussianEmission import GaussianEmission
-from models.utils.MixedEmission import MixedEmission
+from model.util.categorical_emission import CategoricalEmission
+from model.util.gaussian_emission import GaussianEmission
+from model.util.mixed_emission import MixedEmission
 from torch_scatter import scatter_add, scatter_max
 from torch_geometric.nn import global_mean_pool, global_add_pool
 
-from models.utils.MixtureModel import MixtureModel
-from models.utils.utils import _compute_bigram, _compute_unigram
+from model.util.mixture_model import MixtureModel
+from model.util.utils import _compute_bigram, _compute_unigram
 from training.core.engine import TrainingEngine
 
 

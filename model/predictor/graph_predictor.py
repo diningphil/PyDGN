@@ -54,7 +54,6 @@ class MLPGraphPredictor(nn.Module):
         x = global_add_pool(x, batch)
         return self.out(F.relu(self.fc_global(x)))
 
-
 class CGMMGraphPredictor(nn.Module):
 
     def __init__(self, dim_features, dim_target, config):

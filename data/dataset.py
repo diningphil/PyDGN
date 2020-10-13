@@ -15,7 +15,7 @@ from torch_geometric.data import InMemoryDataset, Data, download_url, extract_zi
 from torch_geometric.utils import from_networkx
 from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
 from torch_geometric.io import read_tu_data
-from ogb.graphproppred import PygGraphPropPredDatasets
+from ogb.graphproppred import PygGraphPropPredDataset
 
 
 class ZipDataset(torch.utils.data.Dataset):
@@ -189,5 +189,48 @@ class LinkPredictionPlanetoid(PlanetoidDatasetInterface):
         super().download()
 
     # Needs to be defined in each subclass of torch_geometric.data.Dataset
+    def process(self):
+        super().process()
+
+
+class OGBG(PygGraphPropPredDataset, DatasetInterface):
+    def __init__(self, root, name, transform=None,
+                 pre_transform=None, pre_filter=None, meta_dict=None):
+        super().__init__('-'.join(name.split('_')), root, transform, pre_transform, meta_dict)  #
+        self.name = name
+        self.data.y = self.data.y.squeeze()
+
+    @property
+    def dim_node_features(self):
+        return 1
+
+    @property
+    def dim_edge_features(self):
+        if self.data.edge_attr is not None:
+            return self.data.edge_attr.shape[1]
+        else:
+            return 0
+
+    @property
+    def dim_target(self):
+        return 37
+
+    @property
+    def processed_file_names(self):
+        return ['data.pt']
+
+    def download(self):
+        from ogb.utils.url import decide_download, download_url, extract_zip
+        url = self.meta_info['url']
+        if decide_download(url):
+            path = download_url(url, self.original_root)
+            extract_zip(path, self.original_root)
+            print(f'Removing {path}')
+            os.unlink(path)
+            print(f'Removing {self.root}')
+            shutil.rmtree(self.root)
+            print(f'Moving {osp.join(self.original_root, self.download_name)} to {self.root}')
+            shutil.move(osp.join(self.original_root, self.download_name), self.root)
+
     def process(self):
         super().process()

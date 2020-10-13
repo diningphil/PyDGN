@@ -2,7 +2,7 @@ import operator
 import copy
 from pathlib import Path
 
-from training.utils import atomic_save
+from training.util import atomic_save
 from training.event.handler import EventHandler
 
 

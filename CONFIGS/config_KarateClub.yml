@@ -1,6 +1,6 @@
 splitter:
   root: SPLITS/
-  class_name: datasets.splitter.LinkPredictionSingleGraphSplitter
+  class_name: data.splitter.LinkPredictionSingleGraphSplitter
   args:
     n_outer_folds: 1
     n_inner_folds: 1
@@ -14,7 +14,7 @@ splitter:
     run_checks: True  # in case you want to debug the first time. Computes full adj matrix, be careful.
 dataset:
   root: DATA/
-  class_name: datasets.datasets.LinkPredictionKarateClub
+  class_name: data.dataset.LinkPredictionKarateClub
   args:
     root: DATA/
     name: karateclub

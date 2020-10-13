@@ -2,10 +2,10 @@ import torch
 from torch_geometric.data import DataLoader
 from torch.utils.data import Subset
 
-from datasets.datasets import ZipDataset
-from datasets.utils import load_dataset, load_splitter
-from datasets.sampler import RandomSampler
-from datasets.splitter import LinkPredictionSingleGraphSplitter, to_lower_triangular
+from data.dataset import ZipDataset
+from data.util import load_dataset, load_splitter
+from data.sampler import RandomSampler
+from data.splitter import LinkPredictionSingleGraphSplitter, to_lower_triangular
 from torch_geometric.utils import to_undirected
 
 
@@ -185,7 +185,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
     # WARNING: BE CAREFUL IF SHARED DATA IS IMPLEMENTED IN THE FUTURE: EXTENDING THE DATASET MAY NOT WORK ANYMORE
 
     # Since we modify the dataset, we need different istances of the same graph
-    def _get_dataset(self):
+    def _get_dataset(self, **kwargs):
         return load_dataset(self.data_root, self.dataset_name, self.dataset_class)
 
     def _get_splitter(self):
@@ -218,7 +218,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         # This may change if we knew how to batch nodes inside a graph
         kwargs.pop("shuffle")
         # Single graph dataset, shuffle does not make sense (unless we know how to do mini-batch training with nodes)
-        dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
+        dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory)
 
         return dataloader
 
@@ -238,7 +238,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         indices = train_indices, eval_indices
         return self._get_loader(indices, **kwargs)
 
-    def get_outer_train(self, train_perc=0.9, **kwargs):
+    def get_outer_train(self, **kwargs):
         assert self.outer_k is not None
         splitter = self._get_splitter()
 
@@ -247,7 +247,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         indices = train_indices, eval_indices
         return self._get_loader(indices, **kwargs)
 
-    def get_outer_val(self, train_perc=0.9, **kwargs):
+    def get_outer_val(self, **kwargs):
         assert self.outer_k is not None
         splitter = self._get_splitter()
 
@@ -294,8 +294,8 @@ class IncrementalDataProvider(DataProvider):
         shuffle = kwargs.pop("shuffle", False)
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
+            dataloader = DataLoader(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory)
         else:
-            dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory, **kwargs)
+            dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory)
 
         return dataloader

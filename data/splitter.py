@@ -4,7 +4,7 @@ import warnings
 import numpy as np
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold, train_test_split
 from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
-from experiments.experiment import s2c
+from experiment.experiment import s2c
 
 
 class Fold:
@@ -61,7 +61,10 @@ class Splitter:
         splits = torch.load(path)
 
         splitter_classname = splits.get("splitter_class", "Splitter")
-        splitter_class = s2c('datasets.splitter.' + splitter_classname)
+        # v0.4.0, backward compatibility with 0.3.2
+        if 'dataset.' in splitter_classname:
+            splitter_classname.replace('datasets.', 'data.')
+        splitter_class = s2c('data.splitter.' + splitter_classname)
 
         splitter_args = splits.get("splitter_args")
         splitter = splitter_class(**splitter_args)
@@ -215,6 +218,40 @@ class Splitter:
             savedict["inner_folds"].append([i.todict() for i in inner_split])
         torch.save(savedict, path)
         print("Done.")
+
+
+class OGBGSplitter(Splitter):
+
+    def split(self, dataset, targets=None):
+        """
+        Computes the splits. The outer split does not include validation (can be extracted from the training set if needed)
+        :param dataset: the Dataset object
+        :param targets: targets used for stratification
+        :param test_ratio: percentage of validation/test set when using an internal/external hold-out split. Default value is 0.1.
+        :return:
+        """
+        assert self.n_outer_folds == 1 and self.n_inner_folds == 1, "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
+        original_splits = dataset.get_idx_split()
+
+        if not self.processed:
+
+            outer_train_indices = original_splits['train'].numpy().tolist()
+            outer_valid_indices = original_splits['valid'].numpy().tolist()
+            outer_test_indices = original_splits['test'].numpy().tolist()
+
+            np.random.shuffle(outer_train_indices)
+            np.random.shuffle(outer_valid_indices)
+            np.random.shuffle(outer_test_indices)
+
+            inner_fold_splits = []
+            inner_fold = InnerFold(train_idxs=outer_train_indices, val_idxs=outer_valid_indices)
+            inner_fold_splits.append(inner_fold)
+            self.inner_folds.append(inner_fold_splits)
+
+            outer_fold = OuterFold(train_idxs=outer_train_indices, val_idxs=outer_valid_indices, test_idxs=outer_test_indices)
+            self.outer_folds.append(outer_fold)
+
+            self.processed = True
 
 
 def to_lower_triangular(edge_index):

@@ -1,6 +1,45 @@
 
 # Changelog
 
+## [0.4.0] - 2020-10-13
+
+#### Ray support to distributed computation!
+
+### Added:
+
+- [Ray](https://github.com/ray-project/ray) transparently replaces multiprocessing.
+  It will help with future extensions to multi-GPU computing
+
+- Support for parallel executions on potentially different GPUs
+  (with Ray we can now allocate a predefined portion of a GPU for a task)
+
+- Dataset and Splitter for Open Graph Benchmark graph classification datasets
+
+### Changed:
+
+- Modified dataset/utils.py removing the need for Path objects
+
+- Refactored evaluation: risk assessment and model selection logic is now greatly simplified. Code is more robust and maintainable.
+
+- Print indented config
+
+- Moved s2c to evaluation/utils.py
+
+- Improved LaunchExperiment
+
+- Config files should now specify the complete path to a specific experiment class
+
+- Renamed files and folders to follow Python convention
+
+### Fixed:
+
+- bug fix when extending the list of final run jobs. We need to add to waiting variable the lastly scheduled jobs only.
+
+- bug fix in evaluator when using ray
+
+- Engine now saves (EngineCallback) and restores `stop_training` in checkpoint
+
+
 ## [0.3.2] - 2020-10-4
 
 ### Added

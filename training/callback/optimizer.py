@@ -1,5 +1,5 @@
 import copy
-from experiments.experiment import s2c
+from experiment.experiment import s2c
 from training.event.handler import EventHandler
 
 

@@ -1,8 +1,8 @@
-model: models.dgns.ToyDGN.ToyDGN
-experiment: supervised
+model: model.dgn.toy_dgn.ToyDGN
+experiment: experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
-dataset-getter: datasets.provider.LinkPredictionSingleGraphDataProvider
+dataset-getter: data.provider.LinkPredictionSingleGraphDataProvider
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device
@@ -43,7 +43,7 @@ grid:
            #my_metric2: training.callback.score.Toy1Score
            main_scorer: training.callback.score.Toy1Score
     predictor:
-      - models.predictors.NodePredictor.LinearNodePredictor
+      - model.predictor.node_predictor.LinearNodePredictor
     wrapper:
       - training.engine.TrainingEngine
     l2:

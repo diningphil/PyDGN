@@ -1,8 +1,6 @@
+import yaml
 import argparse
-from experiments.experiment import s2c
-from datasets.splitter import Splitter
-from datasets.utils import preprocess_data
-from evaluation.grid import load_yaml
+from data.util import preprocess_data
 
 
 def get_args_dict():
@@ -15,5 +13,5 @@ def get_args_dict():
 
 if __name__ == "__main__":
     args = get_args_dict()
-    options = load_yaml(args["config_file"])
+    options = yaml.load(open(args['config_file'], "r"), Loader=yaml.FullLoader)
     preprocess_data(options)

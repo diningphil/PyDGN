@@ -1,22 +1,21 @@
 import os
+import os.path as osp
 import inspect
 import shutil
 import warnings
-from pathlib import Path
 import numpy as np
 
 import torch
 from torch_geometric.datasets import TUDataset
 from torch_geometric.transforms import Compose
 
-from experiments.experiment import s2c
-from datasets.splitter import Splitter
+from experiment.experiment import s2c
+from data.splitter import Splitter
 
 
 def get_or_create_dir(path):
-    """ Creates directories associated to the specified path if they are missing, and it returns the Path object """
-    path = Path(path)
-    if not path.exists():
+    """ Creates directories associated to the specified path if they are missing, and it returns the path string """
+    if not os.path.exists(path):
         os.makedirs(path)
     return path
 
@@ -95,7 +94,7 @@ def preprocess_data(options):
     assert hasattr(dataset, 'name'), "Dataset instance should have a name attribute!"
 
     # Store dataset additional arguments in a separate file
-    kwargs_path = Path(data_root, dataset.name, 'processed', 'dataset_kwargs.pt')
+    kwargs_path = osp.join(data_root, dataset.name, 'processed', 'dataset_kwargs.pt')
     torch.save(dataset_args, kwargs_path)
 
 
@@ -109,10 +108,10 @@ def preprocess_data(options):
     splitter_args = splits_info.pop("args")
     splitter = splitter_class(**splitter_args)
 
-    splits_dir = get_or_create_dir(Path(splits_root) / dataset.name)
-    splits_path = splits_dir / f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits"
+    splits_dir = get_or_create_dir(osp.join(splits_root, dataset.name))
+    splits_path = osp.join(splits_dir, f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits")
 
-    if not splits_path.exists():
+    if not os.path.exists(splits_path):
         # If there is a single target for each element of the dataset,
         # we can try to stratify samples according to the target
         # ow (node/link tasks) it is best if the specific splitter does the job for us
@@ -125,10 +124,10 @@ def preprocess_data(options):
 
 
 def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
-    data_root = Path(data_root)
+    data_root = data_root
 
     # Load arguments
-    kwargs_path = Path(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
+    kwargs_path = osp.join(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
     dataset_args = torch.load(kwargs_path)
 
     with warnings.catch_warnings():
@@ -140,8 +139,8 @@ def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
 
 
 def load_splitter(dataset_name, split_root, outer_folds, inner_folds):
-    splits_dir = split_root / dataset_name
-    splits_path = splits_dir / f"{dataset_name}_outer{outer_folds}_inner{inner_folds}.splits"
+    splits_dir = osp.join(split_root, dataset_name)
+    splits_path = osp.join(splits_dir, f"{dataset_name}_outer{outer_folds}_inner{inner_folds}.splits")
     splitter = Splitter.load(splits_path)
     assert splitter.n_inner_folds == inner_folds
     assert splitter.n_outer_folds == outer_folds

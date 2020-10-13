@@ -5,6 +5,40 @@ import tqdm
 import datetime
 
 
+def set_gpus(num_gpus):
+    try:
+        import gpustat
+    except ImportError as e:
+        print("gpustat module is not installed. No GPU allocated.")
+
+    try:
+        selected = []
+
+        stats = gpustat.GPUStatCollection.new_query()
+
+        for i in range(num_gpus):
+
+            ids_mem = [res for res in map(lambda gpu: (int(gpu.entry['index']),
+                                          float(gpu.entry['memory.used']) /\
+                                          float(gpu.entry['memory.total'])),
+                                      stats) if str(res[0]) not in selected]
+
+            if len(ids_mem) == 0:
+                # No more gpus available
+                break
+
+            best = min(ids_mem, key=lambda x: x[1])
+            bestGPU, bestMem = best[0], best[1]
+            # print(f"{i}-th best is {bestGPU} with mem {bestMem}")
+            selected.append(str(bestGPU))
+
+        print("Setting GPUs to: {}".format(",".join(selected)))
+        os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+        os.environ['CUDA_VISIBLE_DEVICES'] = ",".join(selected)
+    except BaseException as e:
+        print("GPU not available: " + str(e))
+
+
 def clear_screen():
     try:
         os.system('clear')

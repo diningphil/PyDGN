@@ -1,6 +1,6 @@
 splitter:
   root: SPLITS/
-  class_name: datasets.splitter.Splitter
+  class_name: data.splitter.Splitter
   args:
     n_outer_folds: 3
     n_inner_folds: 1
@@ -11,12 +11,12 @@ splitter:
     test_ratio: 0.1
 dataset:
   root: DATA/
-  class_name: datasets.datasets.TUDataset
+  class_name: data.dataset.TUDataset
   args:
     root: DATA/
     name: PROTEINS
   # useful for social datasets with no node features
   transforms:
-      - class_name: datasets.transforms.ConstantIfEmpty
+      - class_name: data.transform.ConstantIfEmpty
         args:
           value: 1

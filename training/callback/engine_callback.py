@@ -1,7 +1,7 @@
 import os
 import copy
 from pathlib import Path
-from training.utils import atomic_save
+from training.util import atomic_save
 from training.event.handler import EventHandler
 
 
@@ -33,7 +33,8 @@ class EngineCallback(EventHandler):
                          'epoch': state.epoch,
                          'model_state': copy.deepcopy(state.model.state_dict()),
                          'optimizer_state': state.optimizer_state,
-                         'scheduler_state': state['scheduler_state']}
+                         'scheduler_state': state['scheduler_state'],
+                         'stop_training': state.stop_training }
             last_ckpt.update(state.epoch_results)
             atomic_save(last_ckpt,
                         Path(state.exp_path, state.LAST_CHECKPOINT_FILENAME))

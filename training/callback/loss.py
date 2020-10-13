@@ -1,6 +1,7 @@
 import time
 import operator
 from itertools import product
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -248,6 +249,18 @@ class MeanAverageErrorLoss(RegressionLoss):
     def __init__(self, reduction='mean'):
         super().__init__()
         self.loss = L1Loss(reduction=reduction)
+
+class Trento6d93_31_Loss(RegressionLoss):
+    __name__ = 'Trento6d93_31_Loss'
+
+    def __init__(self, reduction='mean'):
+        super().__init__()
+        self.loss = L1Loss(reduction=reduction)
+
+    def forward(self, targets, *outputs):
+        outputs = torch.relu(outputs[0])
+        loss = self.loss(torch.log(1+outputs), torch.log(1+targets))
+        return loss
 
 
 class CGMMLoss(Loss):

@@ -1,11 +1,11 @@
-model: models.dgns.ToyDGN.ToyDGN
-experiment: supervised
+model: model.dgn.toy_dgn.ToyDGN
+experiment: experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
-dataset-getter: datasets.provider.DataProvider
+dataset-getter: data.provider.DataProvider
 device: cpu
-num_dataloader_workers: 0
-pin_memory: False
+num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
+pin_memory: False  # True only with --debug option and GPU device
 grid:
   supervised_config:
     checkpoint: True
@@ -41,7 +41,7 @@ grid:
            main_scorer: training.callback.score.MulticlassAccuracyScore
            my_metric2: training.callback.score.Toy1Score
     predictor:
-      - models.predictors.GraphPredictor.LinearGraphPredictor
+      - model.predictor.graph_predictor.LinearGraphPredictor
     wrapper:
       - training.engine.TrainingEngine
     l2:

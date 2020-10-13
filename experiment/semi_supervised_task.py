@@ -3,7 +3,7 @@ from pathlib import Path
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch
 
-from experiments.experiment import Experiment
+from experiment.experiment import Experiment
 
 
 class SemiSupervisedTask(Experiment):

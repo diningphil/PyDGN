@@ -1,14 +1,6 @@
-from pydoc import locate
 from evaluation.config import Config
+from experiment.util import s2c
 from training.callback.engine_callback import EngineCallback
-
-
-def s2c(class_name):
-    """ Converts a dotted path to the corresponding class """
-    result = locate(class_name)
-    if result is None:
-        raise ImportError(f"The (dotted) path '{class_name}' is unknown. Check your configuration.")
-    return result
 
 
 class Experiment:
