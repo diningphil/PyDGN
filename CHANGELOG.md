@@ -1,6 +1,15 @@
 
 # Changelog
 
+## [0.4.1] - TBD
+
+### Fixed:
+
+- memory leak when not releasing output embeddings from gpu in `engine.py`
+
+- releasing score output from gpu in `score.py`
+
+
 ## [0.4.0] - 2020-10-13
 
 #### Ray support to distributed computation!

@@ -88,7 +88,7 @@ class Score(EventHandler):
         score = self(targets, *outputs, batch_loss_extra=getattr(state, 'batch_loss_extra', None))
         # Score is a dictionary with key-value pairs
         # we need to detach each score from the graph
-        score = {k: v.detach() for k, v in score.items()}
+        score = {k: v.detach().cpu() for k, v in score.items()}
         state.update(batch_score=score)
 
     def __call__(self, targets, *outputs, batch_loss_extra):
