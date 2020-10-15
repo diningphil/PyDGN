@@ -86,9 +86,9 @@ class TrainingEngine(EventDispatcher):
 
         # Crucial: Detach the embeddings to free the computation graph!!
         if isinstance(embeddings, tuple):
-            embeddings = tuple([e.detach() if e is not None else None for e in embeddings])
+            embeddings = tuple([e.detach().cpu() if e is not None else None for e in embeddings])
         elif isinstance(embeddings, torch.Tensor):
-            embeddings = embeddings.detach()
+            embeddings = embeddings.detach().cpu()
         else:
             raise NotImplementedError('Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor')
 
@@ -432,9 +432,9 @@ class IncrementalTrainingEngine(TrainingEngine):
     def _to_list(self, data_list, embeddings, batch, edge_index, y):
 
         if isinstance(embeddings, tuple):
-            embeddings = tuple([e.detach() if e is not None else None for e in embeddings])
+            embeddings = tuple([e.detach().cpu() if e is not None else None for e in embeddings])
         elif isinstance(embeddings, torch.Tensor):
-            embeddings = embeddings.detach()
+            embeddings = embeddings.detach().cpu()
         else:
             raise NotImplementedError('Embeddings not understood, should be Tensor or Tuple of Tensors')
 
