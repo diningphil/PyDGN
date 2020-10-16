@@ -9,6 +9,7 @@
 
 - releasing score output from gpu in `score.py`
 
+- minor fix in evaluator when passing the best config to the final runs
 
 ## [0.4.0] - 2020-10-13
 
