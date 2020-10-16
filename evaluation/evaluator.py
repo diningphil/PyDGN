@@ -325,7 +325,7 @@ class RiskAssesser:
                 def foo():
                     if not osp.exists(final_run_torch_path):
 
-                        experiment = self.experiment_class(best_config['config'],
+                        experiment = self.experiment_class(best_config,
                                                            final_run_exp_path)
                         res = experiment.run_test(dataset_getter, logger)
                         torch.save(res, final_run_torch_path)
@@ -339,7 +339,7 @@ class RiskAssesser:
                                                         run_id=i))
             else:
                 if not osp.exists(final_run_torch_path):
-                    experiment = self.experiment_class(best_config['config'],
+                    experiment = self.experiment_class(best_config,
                                                        final_run_exp_path)
                     training_score, test_score = experiment.run_test(dataset_getter, logger)
                     torch.save((training_score, test_score),
