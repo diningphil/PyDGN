@@ -279,7 +279,7 @@ class RiskAssesser:
         else:
             # Performing model selection for a single configuration is useless
             with open(osp.join(SELECTION_FOLDER, self._WINNER_CONFIG), 'w') as fp:
-                json.dump(dict(best_config_id=0, **(self.model_configs[0])), fp, sort_keys=False, indent=4)
+                json.dump(dict(best_config_id=0, config=self.model_configs[0]), fp, sort_keys=False, indent=4)
 
     def run_final_model(self, outer_k, debug):
         outer_folder = osp.join(self._ASSESSMENT_FOLDER,
