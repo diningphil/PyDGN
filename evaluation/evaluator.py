@@ -279,7 +279,7 @@ class RiskAssesser:
         else:
             # Performing model selection for a single configuration is useless
             with open(osp.join(SELECTION_FOLDER, self._WINNER_CONFIG), 'w') as fp:
-                json.dump(dict(best_config_id=0, **(self.model_configs[0])), fp, sort_keys=False, indent=4)
+                json.dump(dict(best_config_id=0, config=self.model_configs[0]), fp, sort_keys=False, indent=4)
 
     def run_final_model(self, outer_k, debug):
         outer_folder = osp.join(self._ASSESSMENT_FOLDER,
@@ -325,7 +325,7 @@ class RiskAssesser:
                 def foo():
                     if not osp.exists(final_run_torch_path):
 
-                        experiment = self.experiment_class(best_config,
+                        experiment = self.experiment_class(best_config['config'],
                                                            final_run_exp_path)
                         res = experiment.run_test(dataset_getter, logger)
                         torch.save(res, final_run_torch_path)
@@ -339,7 +339,7 @@ class RiskAssesser:
                                                         run_id=i))
             else:
                 if not osp.exists(final_run_torch_path):
-                    experiment = self.experiment_class(best_config,
+                    experiment = self.experiment_class(best_config['config'],
                                                        final_run_exp_path)
                     training_score, test_score = experiment.run_test(dataset_getter, logger)
                     torch.save((training_score, test_score),
