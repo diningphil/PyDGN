@@ -1,9 +1,9 @@
 # default pytorch version is 1.6.0
-PYTORCH_VERSION=1.6.0
+PYTORCH_VERSION=1.7.0
 PYTORCH_GEOMETRIC_VERSION=1.6.0
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
-# available options for for pytorch 1.6.0 are cpu, cu92, cu101, cu102
+# available options for for pytorch 1.7.0 are cpu, cu92, cu101, cu102, cu110
 CUDA_VERSION=${1:-cpu}
 
 # create virtual environment and activate it
@@ -22,13 +22,17 @@ elif [[ "$CUDA_VERSION" == 'cu101' ]]; then
   conda install pytorch==${PYTORCH_VERSION} cudatoolkit=10.1 -c pytorch -y
 elif [[ "$CUDA_VERSION" == 'cu102' ]]; then
   conda install pytorch==${PYTORCH_VERSION} cudatoolkit=10.2 -c pytorch -y
+elif [[ "$CUDA_VERSION" == 'cu110' ]]; then
+  conda install pytorch==${PYTORCH_VERSION} cudatoolkit=11.0 -c pytorch -y
 fi
 
+conda install jupyter
+
 # install torch-geometric dependencies
-pip install torch-scatter==latest+${CUDA_VERSION} -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}.html
-pip install torch-sparse==latest+${CUDA_VERSION} -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}.html
-pip install torch-cluster==latest+${CUDA_VERSION} -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}.html
-pip install torch-spline-conv==latest+${CUDA_VERSION} -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}.html
+pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
 pip install torch-geometric==${PYTORCH_GEOMETRIC_VERSION}
 
 echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command. Modify the .bashrc file to make permanent changes."
