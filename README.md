@@ -65,6 +65,8 @@ This is a joint project with **Marco Podda** ([Github](https://github.com/marcop
 
 Many thanks to **Antonio Carta** ([Github](https://github.com/AntonioCarta)/[Homepage](http://pages.di.unipi.it/carta)) for incorporating the Ray library (see v0.4.0) into PyDGN! This will be of tremendous help.
 
+Many thanks to **Danilo Numeroso** ([Github](https://github.com/danilonumeroso)) for implementing a very flexible random search! This is a very convenient alternative to grid search.
+
 ## Contributing
 **This research software is provided as-is**. We are working on this library in our spare time.
 
