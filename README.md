@@ -39,6 +39,27 @@ Remember that [PyTorch MacOS Binaries dont support CUDA, install from source if 
 
 To debug your code it is useful to add `--debug` to the command above. Notice, however, that the CLI will not work as expected here, as code will be executed sequentially. After debugging, if you need sequential execution, you can use `--max-cpus 1 --max-gpus 1 --gpus-per-task [0/1]` without the `--debug` option.  
 
+#### Grid Search 101
+Have a look at one of the config files.
+
+#### Random Search 101
+Specify a `num_samples` in the config file with the number of random trials, replace `grid`
+  with `random`, and specify a sampling method for each hyper-parameter. We provide different sampling methods:
+ - choice --> pick at random from a list of arguments
+ - uniform --> pick uniformly from min and max arguments
+ - normal --> sample from normal distribution with mean and std
+ - randint --> pick at random from min and max
+ - loguniform --> pick following the recprocal distribution from log_min, log_max, with a specified base
+
+There is one config file, namely `config_SupToyDGN_RandomSearch.yml`, which you can check to see an example.
+
+## Data Splits
+We provide the data splits taken from 
+
+[Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
+
+in the `DATA_SPLITS` folder.
+
 ## Credits:
 This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda)/[Homepage](https://sites.google.com/view/marcopodda/home)), whom I thank for his relentless dedication.
 

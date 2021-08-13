@@ -112,7 +112,7 @@ venv.bak/
 
 # PROJECT
 DATA/**
-SPLITS/**
+DATA_SPLITS/**
 **__pycache__/**
 Old_Baselines/**
 *RESULTS*/**

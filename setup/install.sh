@@ -1,4 +1,4 @@
-# default pytorch version is 1.6.0
+# default pytorch version
 PYTORCH_VERSION=1.7.0
 PYTORCH_GEOMETRIC_VERSION=1.6.0
 
@@ -35,4 +35,8 @@ pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${PYTORCH_V
 pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
 pip install torch-geometric==${PYTORCH_GEOMETRIC_VERSION}
 
-echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command. Modify the .bashrc file to make permanent changes."
+echo 'export DGLBACKEND=pytorch' >> ~/.bashrc
+
+echo "Done. Remember to "
+echo " 1) append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command"
+echo "Modify the .bashrc file to make permanent changes."

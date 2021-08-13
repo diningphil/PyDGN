@@ -1,6 +1,7 @@
 class EventDispatcher:
     """ Simple class implementing the publisher/subscribe pattern. Callbacks objects should implement the
     training.core.event.handler.EventHandler interface """
+
     def __init__(self):
         self._event_handlers = []
 

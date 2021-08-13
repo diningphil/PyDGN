@@ -1,9 +1,4 @@
 import torch
-import torch.nn.functional as F
-from torch.nn import BatchNorm1d
-from torch.nn import Sequential, Linear, ReLU
-from torch_geometric.nn import GINConv, global_add_pool, global_mean_pool
-from sklearn.metrics import roc_auc_score
 from torch_geometric.nn import GCNConv
 
 
@@ -26,13 +21,12 @@ class GCNLinkPrediction(torch.nn.Module):
             l = GCNConv(dim_input, hidden_units)
             self.layers.append(l)
 
-
     def forward(self, data):
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
         for i, layer in enumerate(self.layers):
             x = layer(x, edge_index)
-            if i < len(self.layers)-1:
+            if i < len(self.layers) - 1:
                 x = torch.relu(x)
 
         return x, x

@@ -2,18 +2,19 @@ model: model.dgn.toy_dgn.ToyDGN
 experiment: experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
-dataset-getter: data.provider.DataProvider
-device: cpu
-num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-pin_memory: False  # True only with --debug option and GPU device
+dataset_getter: data.provider.DataProvider
+device: cuda
+num_dataloader_workers: 3  # > 0 only with --debug option and GPU device
+pin_memory: True  # True only with --debug option and GPU device
+seed: 42
 grid:
   supervised_config:
     checkpoint: True
     batch_size:
       - 32
-      # - 64
+      - 64
     epochs:
-      - 10
+      - 3
     dim_embedding:
       - 4
     num_layers:
@@ -21,8 +22,7 @@ grid:
     aggregation:
       - mean
     optimizer:
-      -
-        class_name: training.callback.optimizer.Optimizer
+      - class_name: training.callback.optimizer.Optimizer
         args:
           optimizer_class_name: torch.optim.Adam
           lr: 0.01
@@ -34,12 +34,11 @@ grid:
       - training.callback.loss.MulticlassClassificationLoss
     scorer:
       #- training.callback.score.MulticlassAccuracyScore
-      -
-        class_name: training.callback.score.MultiScore
+      - class_name: training.callback.score.MultiScore
         args:
-           # used at model selection time. Should be the one on which to perform early stopping
-           main_scorer: training.callback.score.MulticlassAccuracyScore
-           my_metric2: training.callback.score.Toy1Score
+          # used at model selection time. Should be the one on which to perform early stopping
+          main_scorer: training.callback.score.MulticlassAccuracyScore
+          my_metric2: training.callback.score.Toy1Score
     predictor:
       - model.predictor.graph_predictor.LinearGraphPredictor
     wrapper:
@@ -51,8 +50,7 @@ grid:
     dropout:
       - 0.
     early_stopper:
-      -
-        class_name:
+      - class_name:
           - training.callback.early_stopping.PatienceEarlyStopper
         args:
           patience:

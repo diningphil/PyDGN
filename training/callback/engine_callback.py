@@ -1,8 +1,10 @@
-import os
 import copy
+import os
 from pathlib import Path
-from training.util import atomic_save
+
+from static import *
 from training.event.handler import EventHandler
+from training.util import atomic_save
 
 
 class EngineCallback(EventHandler):
@@ -22,7 +24,6 @@ class EngineCallback(EventHandler):
         outputs = state.model.forward(state.batch_input)
         state.update(batch_outputs=outputs)
 
-
     def on_epoch_end(self, state):
         # Save last checkpoint
         if self.store_last_checkpoint:
@@ -30,11 +31,10 @@ class EngineCallback(EventHandler):
                 os.makedirs(Path(state.exp_path))
 
             last_ckpt = {
-                         'epoch': state.epoch,
-                         'model_state': copy.deepcopy(state.model.state_dict()),
-                         'optimizer_state': state.optimizer_state,
-                         'scheduler_state': state['scheduler_state'],
-                         'stop_training': state.stop_training }
+                EPOCH: state.epoch,
+                MODEL_STATE: copy.deepcopy(state.model.state_dict()),
+                OPTIMIZER_STATE: getattr(state, OPTIMIZER_STATE, None),
+                SCHEDULER_STATE: getattr(state, SCHEDULER_STATE, None),
+                STOP_TRAINING: state.stop_training}
             last_ckpt.update(state.epoch_results)
-            atomic_save(last_ckpt,
-                        Path(state.exp_path, state.LAST_CHECKPOINT_FILENAME))
+            atomic_save(last_ckpt, Path(state.exp_path, LAST_CHECKPOINT_FILENAME))

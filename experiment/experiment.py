@@ -1,6 +1,10 @@
+import random
+
+import numpy as np
+import torch
+
 from evaluation.config import Config
 from experiment.util import s2c
-from training.callback.engine_callback import EngineCallback
 
 
 class Experiment:
@@ -8,9 +12,19 @@ class Experiment:
     Experiment provides useful utilities to support supervised, semi-supervised and incremental tasks on graphs
     """
 
-    def __init__(self, model_configuration, exp_path):
+    def __init__(self, model_configuration, exp_path, exp_seed):
         self.model_config = Config(model_configuration)
         self.exp_path = exp_path
+        self.exp_seed = exp_seed
+        # Set seed here to aid reproducibility
+        np.random.seed(self.exp_seed)
+        torch.manual_seed(self.exp_seed)
+        torch.cuda.manual_seed(self.exp_seed)
+        random.seed(self.exp_seed)
+
+        # torch.use_deterministic_algorithms(True) for future versions of Pytorch
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
     def _return_class_and_args(self, config, key):
         """
@@ -38,18 +52,22 @@ class Experiment:
         :param config: the configuration dictionary
         :return: a generic model, see the models.predictors sub-package.
         """
-        return s2c(self.model_config.model)(dim_node_features=dim_node_features,
-                                            dim_edge_features=dim_edge_features,
-                                            dim_target=dim_target,
-                                            predictor_class=s2c(predictor_classname)
-                                            if predictor_classname is not None else None,
-                                            config=config)
+
+        model = s2c(self.model_config.model)(dim_node_features=dim_node_features,
+                                             dim_edge_features=dim_edge_features,
+                                             dim_target=dim_target,
+                                             predictor_class=s2c(predictor_classname)
+                                             if predictor_classname is not None else None,
+                                             config=config)
+        model.to(self.model_config.device)  # model .to() may not return anything
+        return model
 
     def create_supervised_model(self, dim_node_features, dim_edge_features, dim_target):
         """ Instantiates a supervised model """
         predictor_classname = self.model_config.supervised_config['predictor'] \
             if 'predictor' in self.model_config.supervised_config else None
-        return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname, self.model_config.supervised_config)
+        return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
+                                  self.model_config.supervised_config)
 
     def create_supervised_predictor(self, dim_node_features, dim_edge_features, dim_target):
         """ Directly instantiates a supervised predictor for semi-supervised tasks """
@@ -62,7 +80,8 @@ class Experiment:
         """ Instantiates an unsupervised model """
         predictor_classname = self.model_config.unsupervised_config['predictor'] \
             if 'predictor' in self.model_config.supervised_config else None
-        return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname, self.model_config.unsupervised_config)
+        return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
+                                  self.model_config.unsupervised_config)
 
     def create_incremental_model(self, dim_node_features, dim_edge_features, dim_target,
                                  depth, prev_outputs_to_consider):
@@ -78,8 +97,7 @@ class Experiment:
         two previous layers.
         :return: an incremental model
         """
-        predictor_classname = self.model_config.layer_config['arbitrary_function_config']['predictor'] \
-            if 'predictor' in self.model_config.layer_config['arbitrary_function_config'] else None
+        predictor_classname = self.model_config.layer_config.get('predictor', None)
         self.model_config.layer_config['depth'] = depth
         self.model_config.layer_config['prev_outputs_to_consider'] = prev_outputs_to_consider
         return self._create_model(dim_node_features, dim_edge_features, dim_target,
@@ -128,12 +146,13 @@ class Experiment:
 
         store_last_checkpoint = config.get('checkpoint', False)
         wrapper_class, wrapper_args = self._return_class_and_args(config, 'wrapper')
-        engine_callback = wrapper_args.get('engine_callback', EngineCallback)
+        engine_callback = s2c(wrapper_args.get('engine_callback', 'training.callback.engine_callback.EngineCallback'))
+
         wrapper = wrapper_class(engine_callback=engine_callback, model=model, loss=loss,
-                                         optimizer=optimizer, scorer=scorer, scheduler=scheduler,
-                                         early_stopper=early_stopper, gradient_clipping=grad_clipper,
-                                         device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every,
-                                         store_last_checkpoint=store_last_checkpoint)
+                                optimizer=optimizer, scorer=scorer, scheduler=scheduler,
+                                early_stopper=early_stopper, gradient_clipping=grad_clipper,
+                                device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every,
+                                store_last_checkpoint=store_last_checkpoint)
         return wrapper
 
     def create_supervised_wrapper(self, model):

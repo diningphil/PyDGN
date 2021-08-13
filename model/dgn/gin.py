@@ -32,12 +32,12 @@ class GIN(torch.nn.Module):
 
             if layer == 0:
                 self.first_h = Sequential(Linear(dim_node_features, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU(),
-                                    Linear(out_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU())
+                                          Linear(out_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU())
                 self.linears.append(Linear(out_emb_dim, dim_target))
             else:
-                input_emb_dim = self.embeddings_dim[layer-1]
+                input_emb_dim = self.embeddings_dim[layer - 1]
                 self.nns.append(Sequential(Linear(input_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU(),
-                                      Linear(out_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU()))
+                                           Linear(out_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU()))
                 self.convs.append(GINConv(self.nns[-1], train_eps=train_eps))  # Eq. 4.2
 
                 self.linears.append(Linear(out_emb_dim, dim_target))
@@ -57,7 +57,7 @@ class GIN(torch.nn.Module):
                 out += F.dropout(self.pooling(self.linears[layer](x), batch), p=self.dropout)
             else:
                 # Layer l ("convolution" layer)
-                x = self.convs[layer-1](x, edge_index)
+                x = self.convs[layer - 1](x, edge_index)
                 out += F.dropout(self.linears[layer](self.pooling(x, batch)), p=self.dropout, training=self.training)
 
         return out
@@ -86,7 +86,7 @@ class GINDEBUG(torch.nn.Module):
         out_emb_dim = self.embeddings_dim
 
         self.nn = Sequential(Linear(dim_node_features, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU(),
-                              Linear(out_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU())
+                             Linear(out_emb_dim, out_emb_dim), BatchNorm1d(out_emb_dim), ReLU())
         self.convs.append(GINConv(self.nn, train_eps=train_eps))  # Eq. 4.2
         self.linears.append(Linear(out_emb_dim, dim_target))
 
@@ -95,7 +95,6 @@ class GINDEBUG(torch.nn.Module):
         self.linears = torch.nn.ModuleList(self.linears)  # has got one more for initial input
 
     def forward(self, x, edge_index, edge_attr):
-
         out = 0
 
         x = x[:, 0, :]

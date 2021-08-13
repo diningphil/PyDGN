@@ -1,9 +1,10 @@
-import operator
 import copy
+import operator
 from pathlib import Path
 
-from training.util import atomic_save
+from static import *
 from training.event.handler import EventHandler
+from training.util import atomic_save
 
 
 class EarlyStopper(EventHandler):
@@ -19,14 +20,14 @@ class EarlyStopper(EventHandler):
         self.best_metric = None
         self.checkpoint = checkpoint
 
-        if 'min' in mode:
+        if MIN in mode:
             self.operator = operator.le
-        elif 'max' in mode:
+        elif MAX in mode:
             self.operator = operator.ge
         else:
             raise NotImplementedError('Mode not understood by early stopper.')
 
-        assert 'test' not in monitor, "Do not apply early stopping to the test set!"
+        assert TEST not in monitor, "Do not apply early stopping to the test set!"
 
     def on_epoch_end(self, state):
         """
@@ -36,44 +37,46 @@ class EarlyStopper(EventHandler):
         :param state: the State object that is shared by the TrainingEngine during training
         """
 
-        assert self.monitor in state.epoch_results['scores'], f'{self.monitor} not found in epoch_results'
+        assert self.monitor in state.epoch_results[SCORES] or self.monitor in state.epoch_results[
+            LOSSES], f'{self.monitor} not found in epoch_results'
 
-        metric_to_compare = state.epoch_results['scores'][self.monitor]
-
-        if not hasattr(state, 'best_epoch_results'):
-            state.update(best_epoch_results=state.epoch_results)
-            state.best_epoch_results['best_epoch'] = state.epoch
-            state.best_epoch_results['scores'][self.monitor] = state.epoch_results['scores'][self.monitor]
-            state.best_epoch_results['model_state'] = copy.deepcopy(state.model.state_dict())
-            state.best_epoch_results['optimizer_state'] = state.optimizer_state  # computed by optimizer
-            state.best_epoch_results['scheduler_state'] = state['scheduler_state']  # computed by scheduler
-            stop_training = False
-            if self.checkpoint:
-                atomic_save(state.best_epoch_results, Path(state.exp_path,
-                           state.BEST_CHECKPOINT_FILENAME))
+        if self.monitor in state.epoch_results[SCORES]:
+            score_or_loss = SCORES
         else:
-            best_metric = state.best_epoch_results['scores'][self.monitor]
+            score_or_loss = LOSSES
+        metric_to_compare = state.epoch_results[score_or_loss][self.monitor]
+
+        if not hasattr(state, BEST_EPOCH_RESULTS):
+            state.update(best_epoch_results=state.epoch_results)
+            state.best_epoch_results[BEST_EPOCH] = state.epoch
+            state.best_epoch_results[score_or_loss][self.monitor] = state.epoch_results[score_or_loss][self.monitor]
+            state.best_epoch_results[MODEL_STATE] = copy.deepcopy(state.model.state_dict())
+            state.best_epoch_results[OPTIMIZER_STATE] = state[OPTIMIZER_STATE]  # computed by optimizer
+            state.best_epoch_results[SCHEDULER_STATE] = state[SCHEDULER_STATE]  # computed by scheduler
+            if self.checkpoint:
+                atomic_save(state.best_epoch_results, Path(state.exp_path, BEST_CHECKPOINT_FILENAME))
+        else:
+            best_metric = state.best_epoch_results[score_or_loss][self.monitor]
 
             if self.operator(metric_to_compare, best_metric):
                 state.update(best_epoch_results=state.epoch_results)
-                state.best_epoch_results['best_epoch'] = state.epoch
-                state.best_epoch_results['scores'][self.monitor] = metric_to_compare
-                state.best_epoch_results['model_state'] = copy.deepcopy(state.model.state_dict())
-                state.best_epoch_results['optimizer_state'] = state.optimizer_state  # computed by optimizer
-                state.best_epoch_results['scheduler_state'] = state['scheduler_state']  # computed by scheduler
+                state.best_epoch_results[BEST_EPOCH] = state.epoch
+                state.best_epoch_results[score_or_loss][self.monitor] = metric_to_compare
+                state.best_epoch_results[MODEL_STATE] = copy.deepcopy(state.model.state_dict())
+                state.best_epoch_results[OPTIMIZER_STATE] = state[OPTIMIZER_STATE]  # computed by optimizer
+                state.best_epoch_results[SCHEDULER_STATE] = state[SCHEDULER_STATE]  # computed by scheduler
                 if self.checkpoint:
-                    atomic_save(state.best_epoch_results, Path(state.exp_path,
-                               state.BEST_CHECKPOINT_FILENAME))
+                    atomic_save(state.best_epoch_results, Path(state.exp_path, BEST_CHECKPOINT_FILENAME))
 
         # Regarless of improvement or not
-        stop_training = self.stop(state, metric_to_compare)
+        stop_training = self.stop(state, score_or_loss, metric_to_compare)
         state.update(stop_training=stop_training)
 
-
-    def stop(self, state, metric):
+    def stop(self, state, score_or_loss, metric):
         """
         Returns true when the early stopping technique decides it is time to stop.
         :param state: the State object
+        :param score_or_loss: whether to check in scores or losses
         :param metric: the metric to consider
         :return:
         """
@@ -82,17 +85,12 @@ class EarlyStopper(EventHandler):
 
 class PatienceEarlyStopper(EarlyStopper):
     """ Early Stopper that implements patience """
+
     def __init__(self, monitor, mode, patience=30, checkpoint=False):
         super().__init__(monitor, mode, checkpoint)
         self.patience = patience
 
-    def stop(self, state, metric):
-        """
-        Returns true when the early stopping technique decides it is time to stop.
-        :param state: the State object
-        :param metric: the metric to consider
-        :return: a boolean indicating whether to stop the training or not
-        """
-        best_epoch = state.best_epoch_results['best_epoch']
+    def stop(self, state, score_or_loss, metric):
+        best_epoch = state.best_epoch_results[BEST_EPOCH]
         stop_training = (state.epoch - best_epoch) >= self.patience
         return stop_training

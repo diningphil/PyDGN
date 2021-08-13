@@ -1,52 +1,17 @@
 import os
+
 import torch
-from torch_geometric.data import Data
+
+from static import *
 
 
 def atomic_save(checkpoint, filepath):
     try:
-        tmp_path = str(filepath) + ".part"
+        tmp_path = str(filepath) + ATOMIC_SAVE_EXTENSION
         torch.save(checkpoint, tmp_path)
         os.replace(tmp_path, filepath)
     except Exception as e:
         os.remove(tmp_path)
-
-
-def to_data_list(x, batch, y, single_graph_link_prediction=False):
-    """
-    Converts a graphs outputs back to a list of Tensors elements. Useful for incremental architectures.
-    :param embeddings: a tuple of embeddings: (vertex_output, edge_output, graph_output, other_output). Each of
-    the elements should be a Tensor.
-    :param x: big Tensor holding information of different graphs
-    :param batch: the usual batch list provided by Pytorch Geometric. Used to split Tensors graph-wise.
-    :param y: target labels Tensor, used to determine whether the task is graph classification or not (to be changed)
-    :param single_graph_link_prediction: to be refactored
-    :return: a list of PyTorch Geometric Data objects
-    """
-    data_list = []
-
-    if not single_graph_link_prediction:
-        _, counts = torch.unique_consecutive(batch, return_counts=True)
-        cumulative = torch.cumsum(counts, dim=0)
-
-        is_graph_classification = y.shape[0] == len(cumulative)
-
-        y = y.unsqueeze(1) if y.dim() == 1 else y
-
-        data_list.append(Data(x=x[:cumulative[0]],
-                              y=y[0] if is_graph_classification else y[:,cumulative[0]]))
-        for i in range(1, len(cumulative)):
-
-            g = Data(x=x[cumulative[i-1]:cumulative[i]],
-                     y=y[i] if is_graph_classification else y[cumulative[i-1]:cumulative[i]])
-            data_list.append(g)
-    else:
-        # TODO refactor this with a different function in the engine
-        # Return node embeddings and their original class, if any (or dumb value which is required nonetheless)
-        y = y[0]
-        data_list.append(Data(x=x, y=y[0]))
-
-    return data_list
 
 
 def extend_lists(data_list, embeddings):
@@ -87,14 +52,13 @@ def extend_lists(data_list, embeddings):
     return data_list
 
 
-def to_tensor_lists(embeddings, batch, edge_index, y):
+def to_tensor_lists(embeddings, batch, edge_index):
     """
     Converts a graphs outputs back to a list of Tensors elements. Useful for incremental architectures.
     :param embeddings: a tuple of embeddings: (vertex_output, edge_output, graph_output, other_output). Each of
     the elements should be a Tensor.
     :param batch: the usual batch list provided by Pytorch Geometric. Used to split node Tensors graph-wise.
     :param edge_index: the usual edge_index tensor provided by Pytorch Geometric. Used to split edge Tensors graph-wise.
-    :param y: unused parameter with target labels Tensor, which might become useful later
     :return: a tuple where each elements holds a list of Tensors, one for each graph in the dataset.  The semantic
     of each element is the same of the parameter embeddings.
     """
@@ -126,9 +90,6 @@ def to_tensor_lists(embeddings, batch, edge_index, y):
         edge_batch = batch[edge_index[0]]
         _, edge_counts = torch.unique_consecutive(edge_batch, return_counts=True)
         edge_cumulative = torch.cumsum(edge_counts, dim=0)
-
-    # is_graph_classification = y.shape[0] == len(cumulative)
-    # y = y.unsqueeze(1) if y.dim() == 1 else y
 
     if v_out_list is not None:
         v_out_list.append(v_out[:node_cumulative[0]])

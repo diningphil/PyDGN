@@ -3,9 +3,6 @@ from experiment.experiment import Experiment
 
 class SupervisedTask(Experiment):
 
-    def __init__(self, model_configuration, exp_path):
-        super(SupervisedTask, self).__init__(model_configuration, exp_path)
-
     def run_valid(self, dataset_getter, logger):
         """
         This function returns the training and validation scores
@@ -32,11 +29,11 @@ class SupervisedTask(Experiment):
         train_loss, train_score, _, \
         val_loss, val_score, _, \
         test_loss, test_score, _ = supervised_training_wrapper.train(
-                                                                    train_loader=train_loader,
-                                                                    validation_loader=val_loader,
-                                                                    test_loader=None,
-                                                                    max_epochs=self.model_config.supervised_config['epochs'],
-                                                                    logger=logger)
+            train_loader=train_loader,
+            validation_loader=val_loader,
+            test_loader=None,
+            max_epochs=self.model_config.supervised_config['epochs'],
+            logger=logger)
         return train_score, val_score
 
     def run_test(self, dataset_getter, logger):
@@ -65,10 +62,10 @@ class SupervisedTask(Experiment):
         train_loss, train_score, _, \
         val_loss, val_score, _, \
         test_loss, test_score, _ = supervised_training_wrapper.train(
-                                                                    train_loader=train_loader,
-                                                                    validation_loader=val_loader,
-                                                                    test_loader=test_loader,
-                                                                    max_epochs=self.model_config.supervised_config['epochs'],
-                                                                    logger=logger)
+            train_loader=train_loader,
+            validation_loader=val_loader,
+            test_loader=test_loader,
+            max_epochs=self.model_config.supervised_config['epochs'],
+            logger=logger)
 
         return train_score, test_score

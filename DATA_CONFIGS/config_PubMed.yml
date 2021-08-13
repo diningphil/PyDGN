@@ -1,5 +1,5 @@
 splitter:
-  root: SPLITS/
+  root: DATA_SPLITS/
   class_name: data.splitter.LinkPredictionSingleGraphSplitter
   args:
     n_outer_folds: 10
@@ -17,6 +17,6 @@ dataset:
   class_name: data.dataset.LinkPredictionPlanetoid
   args:
     root: DATA/
-    name: cora
+    name: pubmed
   transforms:
-      - class_name: data.transform.NormalizeFeatures
+    - class_name: data.transform.NormalizeFeatures

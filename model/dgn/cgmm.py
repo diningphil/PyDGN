@@ -1,103 +1,145 @@
 import torch
-from time import time
-from config.utils import s2c
-from model.util.categorical_emission import CategoricalEmission
-from model.util.gaussian_emission import GaussianEmission
-from model.util.mixed_emission import MixedEmission
-from torch_scatter import scatter_add, scatter_max
 from torch_geometric.nn import global_mean_pool, global_add_pool
+from torch_scatter import scatter_add, scatter_max
 
-from model.util.mixture_model import MixtureModel
-from model.util.utils import _compute_bigram, _compute_unigram
-from training.core.engine import TrainingEngine
+from model.util.util import _compute_bigram, _compute_unigram
 
 
-class CGMM:
+class CGMM(torch.nn.Module):
 
-    def __init__(self, dim_node_features, dim_edge_features, dim_target, predictor_class, config):
+    def __init__(self, dim_node_features, dim_edge_features, dim_target,
+                 predictor_class, config):
+        super().__init__()
+        self.device = None
 
         self.dim_node_features = dim_node_features
-        # self.dim_edge_features = dim_edge_features not used
         self.dim_target = dim_target
         self.predictor_class = predictor_class
-        self.layer_config = config
+        self.is_first_layer = config['depth'] == 1
         self.depth = config['depth']
-        self.is_first_layer = self.depth == 1
         self.training = False
         self.compute_intermediate_outputs = False
 
-        print(f'Initializing layer {self.depth}')
         self.K = dim_node_features
-
-        self.node_type = config['node_type']
+        self.Y = dim_target
         self.L = len(config['prev_outputs_to_consider'])
         self.A = config['A']
         self.C = config['C']
         self.C2 = config['C'] + 1
-        self.add_self_arc = config['self_arc'] if 'self_arc' in config else False
-
-        self.max_epochs = config['max_epochs'] if 'max_epochs' in config else 10
-        self.node_type = config['node_type']
-        self.threshold = config['threshold'] if 'threshold' in config else 0.
+        self.CS = config.get('CS', None)
+        self.is_graph_classification = self.CS is not None
+        # self.add_self_arc = config['self_arc'] if 'self_arc' in config else False
         self.use_continuous_states = config['infer_with_posterior']
         self.unibigram = config['unibigram']
         self.aggregation = config['aggregation']
-        self.device = None
 
-        if self.node_type == 'discrete':
-            emission = CategoricalEmission(self.K, self.C)
-        elif self.node_type == 'continuous':
-            emission = GaussianEmission(self.K, self.C)
-        elif self.node_type == 'mixed':
-            emission = MixedEmission(self.K, self.C)
+        self.readout = predictor_class(dim_node_features, dim_edge_features,
+                                       dim_target, config)
 
         if self.is_first_layer:
-            self.layer = MixtureModel(self.C, emission)
+            self.transition = BaseTransition(self.C)
         else:
-            self.layer = CGMMLayer(self.C, self.A, self.C2, self.L, self.is_first_layer, emission)
+            self.transition = CGMMTransition(self.C, self.A,
+                                             self.C2, self.L)
+
+        self.init_accumulators()
+
+    def init_accumulators(self):
+        self.readout.init_accumulators()
+        self.transition.init_accumulators()
+
+        # Do not delete this!
+        if self.device:  # set by to() method
+            self.to(self.device)
 
     def to(self, device):
+        super().to(device)
         self.device = device
-        self.layer.to(device)
-
-        return self
 
     def train(self):
+        self.readout.train()
+        self.transition.train()
         self.training = True
 
     def eval(self):
+        self.readout.eval()
+        self.transition.eval()
         self.training = False
 
     def forward(self, data):
-        return self.e_step(data, self.training)
-
-    def e_step(self, data, training=False):
-
-        if self.is_first_layer:
-            # If training, E-step also accumulates statistics for the M-step!
-            likelihood, posterior_batch = self.layer.e_step(data.x, data.batch, training=training)
-        else:
+        extra = None
+        if not self.is_first_layer:
             data, extra = data[0], data[1]
+        return self.e_step(data, extra)
 
-            prev_stats = extra.vo_outs if extra is not None else None
-            if prev_stats is not None:
-                prev_stats.to(self.device)
+    def e_step(self, data, extra=None):
+        x, y, batch = data.x, data.y, data.batch
 
-            # E-step also accumulates statistics for the M-step!
-            likelihood, posterior_batch = self.layer.e_step(data.x, prev_stats, training=training)
-            likelihood, posterior_batch = likelihood.detach(), posterior_batch.detach()
+        prev_stats = None if self.is_first_layer else extra.vo_outs
+        if prev_stats is not None:
+            prev_stats.to(self.device)
 
+        # --------------------------- FORWARD PASS --------------------------- #
+
+        # t = time.time()
+
+        # --- TRANSITION contribution
+        if self.is_first_layer:
+            # p_Q_given_obs --> ?xC
+            p_Q_given_obs = self.transition.e_step(x)
+            transition_posterior = p_Q_given_obs
+            rightmost_term = p_Q_given_obs
+        else:
+            # p_Q_given_obs --> ?xC / transition_posterior --> ?xLxAxCxC2
+            p_Q_given_obs, transition_posterior, rightmost_term = self.transition.e_step(x, prev_stats)
+
+        # assert torch.allclose(p_Q_given_obs.sum(1), torch.tensor([1.]).to(self.device)), p_Q_given_obs.sum(1)
+
+        # print(f"Transition E-step time: {time.time()-t}"); t = time.time()
+
+        # --- READOUT contribution
+        # true_log_likelihood --> ?x1 / readout_posterior --> ?xCSxCN or ?xCN
+        true_log_likelihood, readout_posterior, emission_target = self.readout.e_step(p_Q_given_obs, x, y, batch)
+
+        # print(f"Readout E-step time: {time.time()-t}"); t = time.time()
+
+        # likely_labels --> ? x Y
+        likely_labels = self.readout.infer(p_Q_given_obs, x, batch)
+
+        # print(f"Readout inference time: {time.time()-t}"); t = time.time()
+
+        # -------------------------------------------------------------------- #
+
+        if not self.is_graph_classification:
+            complete_log_likelihood, eui = self._e_step_node(x, y, p_Q_given_obs,
+                                                             transition_posterior, rightmost_term,
+                                                             readout_posterior, emission_target,
+                                                             batch)
+        else:
+            complete_log_likelihood, eui = self._e_step_graph(x, y, p_Q_given_obs,
+                                                              transition_posterior, rightmost_term,
+                                                              readout_posterior, emission_target,
+                                                              batch)
+
+        # print(f"Posterior E-step time: {time.time()-t}"); t = time.time()
+
+        num_nodes = x.shape[0]
+
+        # CGMM uses the true posterior (over node attributes) as it is unsupervised!
+        # Different from IO version
         if self.compute_intermediate_outputs:
             # print("Computing intermediate outputs")
-            statistics_batch = self._compute_statistics(posterior_batch, data, self.device)
 
-            node_unigram = _compute_unigram(posterior_batch, self.use_continuous_states)
-            graph_unigram = self._get_aggregation_fun()(node_unigram, data.batch)
+            assert not self.training
+            statistics_batch = self._compute_statistics(eui, data, self.device)
+
+            node_unigram = _compute_unigram(eui, self.use_continuous_states)
+            graph_unigram = self._get_aggregation_fun()(node_unigram, batch)
 
             if self.unibigram:
-                node_bigram = _compute_bigram(posterior_batch.float(), data.edge_index, data.batch,
+                node_bigram = _compute_bigram(eui.float(), data.edge_index, batch,
                                               self.use_continuous_states)
-                graph_bigram = self._get_aggregation_fun()(node_unigram, data.batch)
+                graph_bigram = self._get_aggregation_fun()(node_bigram, batch)
 
                 node_embeddings_batch = torch.cat((node_unigram, node_bigram), dim=1)
                 graph_embeddings_batch = torch.cat((graph_unigram, graph_bigram), dim=1)
@@ -106,65 +148,164 @@ class CGMM:
                 graph_embeddings_batch = graph_unigram
 
             # to save time during debug
-            embeddings = (node_embeddings_batch, None, graph_embeddings_batch, statistics_batch, None, None)
+            embeddings = (None, None, graph_embeddings_batch, statistics_batch, None, None)
         else:
             embeddings = None
 
-        return likelihood, embeddings
+        return likely_labels, embeddings, complete_log_likelihood, \
+               true_log_likelihood, num_nodes
+
+    def _e_step_graph(self, x, y, p_Q_given_obs, transition_posterior,
+                      rightmost_term, readout_posterior, emission_target, batch):
+
+        # batch (i.e., replicate) graph readout posterior for all nodes
+        b_readout_posterior = readout_posterior[batch]  # ?nxCSxCN
+
+        if self.is_first_layer:
+            # ----------------------------- Posterior ---------------------------- #
+
+            # expand
+            exp_readout_posterior = b_readout_posterior.reshape((-1, self.CS,
+                                                                 self.C))
+            # expand
+            exp_transition_posterior = transition_posterior.unsqueeze(1)
+
+            # batch graph sizes + expand
+            b_graph_sizes = scatter_add(torch.ones_like(batch).to(self.device),
+                                        batch)[batch].reshape([-1, 1, 1])
+
+            unnorm_posterior_estimate = torch.div(torch.mul(exp_readout_posterior,
+                                                            exp_transition_posterior),
+                                                  b_graph_sizes)
+
+            Z = global_add_pool(unnorm_posterior_estimate.sum((1, 2), keepdim=True), batch)
+            Z[Z == 0.] = 1.
+
+            esui = unnorm_posterior_estimate / (Z[batch])  # --> ?n x CS x CN
+            eui = esui.sum(1)  # ?n x CN
+
+            if self.training:
+                # Update the accumulators (also useful for minibatch training)
+                self.readout._m_step(x, y, esui, batch)
+                self.transition._m_step(x, y, eui)
+
+            # -------------------------------------------------------------------- #
+
+            # ---------------------- Complete Log Likelihood --------------------- #
+
+            complete_log_likelihood_readout = self.readout.complete_log_likelihood(esui, emission_target, batch)
+            complete_log_likelihood_transition = self.transition.complete_log_likelihood(eui, p_Q_given_obs)
+            complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
+
+            # -------------------------------------------------------------------- #
+        else:
+            # ----------------------------- Posterior ---------------------------- #
+
+            # expand
+            exp_readout_posterior = b_readout_posterior.reshape((-1, self.CS,
+                                                                 1, 1,
+                                                                 self.C, 1))
+            # expand
+            exp_transition_posterior = transition_posterior.unsqueeze(1)
+            # batch graph sizes + expand
+            b_graph_sizes = scatter_add(torch.ones_like(batch).to(self.device),
+                                        batch)[batch].reshape([-1, 1, 1, 1, 1, 1])
+
+            unnorm_posterior_estimate = torch.div(torch.mul(exp_readout_posterior,
+                                                            exp_transition_posterior),
+                                                  b_graph_sizes)
+            Z = global_add_pool(unnorm_posterior_estimate.sum((1, 2, 3, 4, 5), keepdim=True), batch)
+            Z[Z == 0.] = 1.
+
+            esuilaj = unnorm_posterior_estimate / (Z[batch])  # --> ?n x CS x L x A x C x C2
+            euilaj = esuilaj.sum(1)  # Marginalize over CS --> transition M-step
+            euila = euilaj.sum(4)  # ?n x L x A x C
+            euil = euila.sum(2)  # ?n x L x C
+            esui = esuilaj.sum((2, 3, 5))  # Marginalize over L,A,C2 --> readout M-step
+            eui = euil.sum(1)  # ?n x C
+
+            if self.training:
+                # Update the accumulators (also useful for minibatch training)
+                self.readout._m_step(x, y, esui, batch)
+                self.transition._m_step(x, y, euilaj, euila, euil)
+
+            # -------------------------------------------------------------------- #
+
+            # ---------------------- Complete Log Likelihood --------------------- #
+
+            complete_log_likelihood_readout = self.readout.complete_log_likelihood(esui, emission_target, batch)
+            complete_log_likelihood_transition = self.transition.complete_log_likelihood(euilaj, euila, euil,
+                                                                                         rightmost_term)
+            complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
+
+            # -------------------------------------------------------------------- #
+
+        return complete_log_likelihood, eui
+
+    def _e_step_node(self, x, y, p_Q_given_obs, transition_posterior,
+                     rightmost_term, readout_posterior, emission_target, batch):
+
+        if self.is_first_layer:
+            # ----------------------------- Posterior ---------------------------- #
+
+            unnorm_posterior_estimate = readout_posterior * transition_posterior
+            Z = unnorm_posterior_estimate.sum(1, keepdim=True)
+            Z[Z == 0.] = 1.
+
+            eui = unnorm_posterior_estimate / Z  # --> ? x CN
+
+            if self.training:
+                # Update the accumulators (also useful for minibatch training)
+                self.readout._m_step(x, y, eui, batch)
+                self.transition._m_step(x, y, eui)
+
+            # -------------------------------------------------------------------- #
+
+            # ---------------------- Complete Log Likelihood --------------------- #
+
+            complete_log_likelihood_readout = self.readout.complete_log_likelihood(eui, emission_target, batch)
+            complete_log_likelihood_transition = self.transition.complete_log_likelihood(eui, p_Q_given_obs)
+            complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
+
+            # -------------------------------------------------------------------- #
+        else:
+            # ----------------------------- Posterior ---------------------------- #
+
+            # expand
+            exp_readout_posterior = readout_posterior.reshape((-1, 1, 1, self.C, 1))
+
+            unnorm_posterior_estimate = torch.mul(exp_readout_posterior,
+                                                  transition_posterior)
+            Z = unnorm_posterior_estimate.sum((1, 2, 3, 4), keepdim=True)
+            Z[Z == 0.] = 1.
+            euilaj = unnorm_posterior_estimate / Z  # --> ?n x L x A x C x C2
+            euila = euilaj.sum(4)  # ?n x L x A x C
+            euil = euila.sum(2)  # ?n x L x C
+            eui = euil.sum(1)  # ?n x C
+
+            if self.training:
+                # Update the accumulators (also useful for minibatch training)
+                self.readout._m_step(x, y, eui, batch)
+                self.transition._m_step(x, y, euilaj, euila, euil)
+
+            # -------------------------------------------------------------------- #
+
+            # ---------------------- Complete Log Likelihood --------------------- #
+
+            complete_log_likelihood_readout = self.readout.complete_log_likelihood(eui, emission_target, batch)
+            complete_log_likelihood_transition = self.transition.complete_log_likelihood(euilaj, euila, euil,
+                                                                                         rightmost_term)
+            complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
+            # -------------------------------------------------------------------- #
+
+        # assert torch.allclose(eui.sum(1), torch.tensor([1.]).to(self.device)), eui.sum(1)[eui.sum(1) != 1.]
+
+        return complete_log_likelihood, eui
 
     def m_step(self):
-        self.layer.m_step()
-
-    def arbitrary_logic(self, experiment, train_loader, layer_config, is_last_layer, validation_loader=None,
-                        test_loader=None,
-                        logger=None, device=None):
-        if is_last_layer:
-            dim_features = (
-            self.dim_node_features, self.C * self.depth if not self.unibigram else (self.C + self.C * self.C2) * self.depth)
-
-            config = layer_config['arbitrary_function_config']
-            device = config['device']
-
-            predictor_class = s2c(config['predictor'])
-            model = predictor_class(dim_features, 0, self.dim_target, config)
-
-            loss_class, loss_args = experiment._return_class_and_args(config, 'loss')
-            loss = loss_class(**loss_args) if loss_class is not None else None
-
-            scorer_class, scorer_args = experiment._return_class_and_args(config, 'scorer')
-            scorer = scorer_class(**scorer_args) if scorer_class is not None else None
-
-            optim_class, optim_args = experiment._return_class_and_args(config, 'optimizer')
-            optimizer = optim_class(model=model, **optim_args) if optim_class is not None else None
-
-            sched_class, sched_args = experiment._return_class_and_args(config, 'scheduler')
-            scheduler = sched_class(**sched_args) if sched_class is not None else None
-
-            grad_clip_class, grad_clip_args = experiment._return_class_and_args(config, 'gradient_clipping')
-            grad_clipper = grad_clip_class(**grad_clip_args) if grad_clip_class is not None else None
-
-            early_stop_class, early_stop_args = experiment._return_class_and_args(config, 'early_stopper')
-            early_stopper = early_stop_class(**early_stop_args) if early_stop_class is not None else None
-
-            plot_class, plot_args = experiment._return_class_and_args(config, 'plotter')
-            plotter = plot_class(exp_path=experiment.exp_path, **plot_args) if plot_class is not None else None
-
-            wrapper = s2c(config['wrapper'])(model=model, loss=loss,
-                                             optimizer=optimizer, scorer=scorer, scheduler=scheduler,
-                                             early_stopper=early_stopper, gradient_clipping=grad_clipper,
-                                             device=device, plotter=plotter)
-
-            train_loss, train_score, _, \
-            val_loss, val_score, _, \
-            test_loss, test_score, _ = wrapper.train(train_loader=train_loader,
-                                                     validation_loader=validation_loader,
-                                                     test_loader=test_loader,
-                                                     max_epochs=config['epochs'],
-                                                     logger=logger)
-
-            return {'train_score': train_score, 'validation_score': val_score, 'test_score': test_score}
-        else:
-            return {}
+        self.readout.m_step()
+        self.transition.m_step()
+        self.init_accumulators()
 
     def stopping_criterion(self, depth, max_layers, train_loss, train_score, val_loss, val_score,
                            dict_per_layer, layer_config, logger=None):
@@ -172,50 +313,38 @@ class CGMM:
 
     def _compute_statistics(self, posteriors, data, device):
 
-        # Compute statistics
-        if 'cuda' in device:
-            statistics = torch.full((posteriors.shape[0], self.A + 2, self.C2), 1e-8, dtype=torch.float32).cuda()
-        else:
-            statistics = torch.full((posteriors.shape[0], self.A + 2, self.C2), 1e-8, dtype=torch.float32)
-
+        statistics = torch.full((posteriors.shape[0], self.A + 1, posteriors.shape[1] + 1), 0., dtype=torch.float32).to(
+            device)
         srcs, dsts = data.edge_index
 
         if self.A == 1:
-
-            # for source, dest, in zip(srcs, dsts):
-            #    statistics[dest, 0, :-1] += posteriors[source]
-
             sparse_adj_matr = torch.sparse_coo_tensor(data.edge_index, \
-                                                      torch.ones(data.edge_index.shape[1], dtype=posteriors.dtype), \
+                                                      torch.ones(data.edge_index.shape[1], dtype=posteriors.dtype).to(
+                                                          device), \
                                                       torch.Size([posteriors.shape[0],
-                                                                  posteriors.shape[0]])).transpose(0, 1)
+                                                                  posteriors.shape[0]])).to(device).transpose(0, 1)
             statistics[:, 0, :-1] = torch.sparse.mm(sparse_adj_matr, posteriors)
-
-            # assert torch.allclose(statistics, new_statistics)
-
         else:
-
-            #arc_labels = data.edge_attr.long()
-            #for source, dest, arc_label in zip(srcs, dsts, arc_labels):
-            #    statistics[dest, arc_label, :-1] += posteriors[source]
-
             for arc_label in range(self.A):
                 sparse_label_adj_matr = torch.sparse_coo_tensor(data.edge_index, \
-                                                                (data.edge_attr == arc_label).long, \
+                                                                (data.edge_attr == arc_label).to(device).float(), \
                                                                 torch.Size([posteriors.shape[0],
-                                                                            posteriors.shape[0]])).transpose(0, 1)
-
+                                                                            posteriors.shape[0]])).to(device).transpose(
+                    0, 1)
                 statistics[:, arc_label, :-1] = torch.sparse.mm(sparse_label_adj_matr, posteriors)
 
+        # Deal with nodes with degree 0: add a single fake neighbor with uniform posterior
+        degrees = statistics[:, :, :-1].sum(dim=[1, 2]).floor()
+        statistics[degrees == 0., :, :] = 1. / self.C2
 
+        '''
         if self.add_self_arc:
             statistics[:, self.A, :-1] += posteriors
-
+        '''
         # use self.A+1 as special edge for bottom states (all in self.C2-1)
-        degrees = statistics[:, :, :-1].sum(dim=[1, 2]).floor()
-
-        max_arieties, _ = self._compute_max_ariety(degrees.int(), data.batch)
-        statistics[:, self.A + 1, self.C2 - 1] += 1 - (degrees / max_arieties[data.batch].float())
+        max_arieties, _ = self._compute_max_ariety(degrees.int().to(self.device), data.batch)
+        max_arieties[max_arieties == 0] = 1
+        statistics[:, self.A, self.C] += degrees / max_arieties[data.batch].float()
 
         return statistics
 
@@ -233,186 +362,154 @@ class CGMM:
         return aggregate
 
 
-class CGMMLayer:
-    def __init__(self, c, a, c2, l, is_first_layer, emission):
+class CGMMTransition(torch.nn.Module):
+    def __init__(self, c, a, c2, l):
         super().__init__()
+
         self.device = None
-        self.is_layer_0 = is_first_layer
 
         self.eps = 1e-8  # Laplace smoothing
         self.C = c
         self.orig_A = a
-        self.A = a + 2  # may consider a special case of the recurrent arc and the special case of bottom state
-
-        self.emission = emission
+        self.A = a + 1  # bottom state connected with a special arc
         self.C2 = c2
         self.L = l
 
-        if not self.is_layer_0:
-            self.layerS = torch.nn.init.uniform_(torch.empty(self.L, dtype=torch.float32))
-            self.arcS = torch.zeros((self.L, self.A), dtype=torch.float32)
-            self.transition = torch.empty([self.L, self.A, self.C, self.C2], dtype=torch.float32)
+        self.layerS = torch.nn.Parameter(torch.nn.init.uniform_(torch.empty(self.L, dtype=torch.float32)),
+                                         requires_grad=False)
+        self.arcS = torch.nn.Parameter(torch.zeros((self.L, self.A), dtype=torch.float32), requires_grad=False)
+        self.transition = torch.nn.Parameter(torch.empty([self.L, self.A, self.C, self.C2], dtype=torch.float32),
+                                             requires_grad=False)
 
-            self.layerS /= self.layerS.sum()
+        self.layerS /= self.layerS.sum()  # inplace
 
-            for layer in range(0, self.L):
-                self.arcS[layer, :] = torch.nn.init.uniform_(self.arcS[layer, :])
-                self.arcS[layer, :] /= self.arcS[layer, :].sum()
-                for arc in range(0, self.A):
-                    for j in range(0, self.C2):
-                        tr = torch.nn.init.uniform_(torch.empty(self.C))
-                        self.transition[layer, arc, :, j] = tr / tr.sum()
-
-            # print(self.arcS)
-            # print(self.transition)
-
-        self.init_accumulators()
-
-    def to(self, device):
-        self.device = device
-        self.emission.to(device)
-        self.layerS.to(device)
-        self.arcS.to(device)
-        self.transition.to(device)
-
-    def init_accumulators(self):
+        for layer in range(self.L):
+            self.arcS[layer, :] = torch.nn.init.uniform_(self.arcS[layer, :])
+            self.arcS[layer, :] /= self.arcS[layer, :].sum()
+            for arc in range(self.A):
+                for j in range(self.C2):
+                    tr = torch.nn.init.uniform_(torch.empty(self.C))
+                    self.transition[layer, arc, :, j] = tr / tr.sum()
 
         # These are variables where I accumulate intermediate minibatches' results
         # These are needed by the M-step update equations at the end of an epoch
-        self.emission.init_accumulators()
-        self.layerS_numerator = torch.full([self.L], self.eps, dtype=torch.float32)
-        self.arcS_numerator = torch.full([self.L, self.A], self.eps, dtype=torch.float32)
-        self.transition_numerator = torch.full([self.L, self.A, self.C, self.C2], self.eps, dtype=torch.float32)
-        self.arcS_denominator = torch.full([self.L, 1], self.eps * self.A, dtype=torch.float32)
-        self.transition_denominator = torch.full([self.L, self.A, 1, self.C2], self.eps * self.C,
-                                                     dtype=torch.float32)
-        self.layerS_denominator = self.eps * self.L
+        self.layerS_numerator = torch.nn.Parameter(torch.empty_like(self.layerS),
+                                                   requires_grad=False)
+        self.arcS_numerator = torch.nn.Parameter(torch.empty_like(self.arcS),
+                                                 requires_grad=False)
+        self.transition_numerator = torch.nn.Parameter(torch.empty_like(self.transition),
+                                                       requires_grad=False)
+        self.init_accumulators()
 
-        # Do not delete this!
-        if self.device:  # set by to() method
-            self.to(self.device)
+    def to(self, device):
+        super().to(device)
+        self.device = device
 
-    def _compute_posterior_estimate(self, emission_for_labels, stats):
+    def init_accumulators(self):
+        torch.nn.init.constant_(self.layerS_numerator, self.eps)
+        torch.nn.init.constant_(self.arcS_numerator, self.eps)
+        torch.nn.init.constant_(self.transition_numerator, self.eps)
 
-        # print(stats.shape)
+    def e_step(self, x_labels, stats=None, batch=None):
 
-        batch_size = emission_for_labels.size()[0]
+        # ---------------------------- Forward Pass -------------------------- #
+
+        stats = stats.float()
 
         # Compute the neighbourhood dimension for each vertex
-        neighbDim = torch.sum(stats[:, :, :, :], dim=3).float()  # --> ? x L x A
-
+        neighbDim = stats.sum(dim=3, keepdim=True).unsqueeze(4)  # --> ?n x L x A x 1
         # Replace zeros with ones to avoid divisions by zero
         # This does not alter learning: the numerator can still be zero
+        neighbDim[neighbDim == 0] = 1.
 
-        neighbDim = torch.where(neighbDim == 0., torch.tensor([1.]).to(self.device), neighbDim)
-        neighbDim[:, :, -1] = 1
+        transition = torch.unsqueeze(self.transition, 0)  # --> 1 x L x A x C x C2
 
-        broadcastable_transition = torch.unsqueeze(self.transition, 0)  # --> 1 x L x A x C x C2
-        broadcastable_stats = torch.unsqueeze(stats, 3).float()  # --> ? x L x A x 1 x C2
+        stats = stats.unsqueeze(3)  # --> ?n x L x A x 1 x C2
+        rightmost_term = (transition * stats) / neighbDim  # --> ?n x L x A x C x C2
+        layerS = torch.reshape(self.layerS, [1, self.L, 1])  # --> L x 1 x 1
+        arcS = torch.reshape(self.arcS, [1, self.L, self.A, 1])  # --> 1 x L x A x 1
 
-        tmp = torch.sum(torch.mul(broadcastable_transition, broadcastable_stats), dim=4)  # --> ? x L x A x C2
+        tmp = (arcS * rightmost_term.sum(4)).sum(dim=2)  # --> ?n x L x C
+        p_Q_given_obs = (layerS * tmp).sum(dim=1)  # --> ?n x C
 
-        broadcastable_layerS = torch.unsqueeze(self.layerS, 1)  # --> L x 1
+        # -------------------------------------------------------------------- #
 
-        tmp2 = torch.reshape(torch.mul(broadcastable_layerS, self.arcS), [1, self.L, self.A, 1])  # --> 1 x L x A x 1
+        # ----------------------------- Posterior ---------------------------- #
 
-        div_neighb = torch.reshape(neighbDim, [batch_size, self.L, self.A, 1]).float()  # --> ? x L x A x 1
+        layerS_expanded = torch.reshape(self.layerS, [1, self.L, 1, 1, 1])
+        arcS_expanded = torch.reshape(self.arcS, [1, self.L, self.A, 1, 1])
+        transition_posterior = layerS_expanded * arcS_expanded * rightmost_term
 
-        tmp_unnorm_posterior_estimate = torch.div(torch.mul(tmp, tmp2), div_neighb)  # --> ? x L x A x C2
+        # -------------------------------------------------------------------- #
 
-        tmp_emission = torch.reshape(emission_for_labels,
-                                     [batch_size, 1, 1, self.C])  # --> ? x 1 x 1 x C2
+        return p_Q_given_obs, transition_posterior, rightmost_term
 
-        unnorm_posterior_estimate = torch.mul(tmp_unnorm_posterior_estimate, tmp_emission)  # --> ? x L x A x C2
+    def complete_log_likelihood(self, euilaj, euila, euil, rightmost_term):
+        layerS = torch.reshape(self.layerS, [1, self.L, 1])
+        term_1 = (euil * (layerS.log())).sum((1, 2)).sum()
 
-        # Normalize
-        norm_constant = torch.reshape(torch.sum(unnorm_posterior_estimate, dim=[1, 2, 3]), [batch_size, 1, 1, 1])
-        norm_constant = torch.where(norm_constant == 0., torch.Tensor([1.]).float().to(self.device), norm_constant)
+        arcS = torch.reshape(self.arcS, [1, self.L, self.A, 1])
+        term_2 = (euila * (arcS.log())).sum((1, 2, 3)).sum()
 
-        posterior_estimate = torch.div(unnorm_posterior_estimate, norm_constant)  # --> ? x L x A x C2
+        rightmost_term[rightmost_term == 0.] = 1
+        term_3 = (euilaj * (rightmost_term.log())).sum((1, 2, 3, 4)).sum()
 
-        return posterior_estimate, broadcastable_stats, broadcastable_layerS, div_neighb
+        return term_1 + term_2 + term_3
 
-    def _e_step(self, labels, stats=None):
-        batch_size = labels.size()[0]
+    def _m_step(self, x_labels, y_labels, euilaj, euila, euil):
 
-        emission_of_labels = self.emission.get_distribution_of_labels(labels)
-
-        posterior_estimate, broadcastable_stats, broadcastable_layerS, div_neighb \
-            = self._compute_posterior_estimate(emission_of_labels, stats)
-
-        posterior_uli = torch.sum(posterior_estimate, dim=2)  # --> ? x L x C
-        posterior_ui = torch.sum(posterior_uli, dim=1)  # --> ? x C
-
-        # -------------------------------- Likelihood -------------------------------- #
-
-        # NOTE: these terms can become expensive in terms of memory consumption, mini-batch computation is required.
-
-        log_trans = torch.log(self.transition)
-
-        num = torch.div(
-            torch.mul(self.transition,
-                      torch.mul(torch.reshape(self.layerS, [self.L, 1, 1, 1]),
-                                torch.reshape(self.arcS, [self.L, self.A, 1, 1]))),
-            torch.unsqueeze(div_neighb, 4))
-
-        num = torch.mul(num, torch.reshape(emission_of_labels, [batch_size, 1, 1, self.C, 1]))
-        num = torch.mul(num, broadcastable_stats)
-
-        den = torch.sum(num, dim=[1, 2, 3, 4], keepdim=True)  # --> ? x 1 x 1 x 1 x 1
-        den = torch.where(torch.eq(den, 0.), torch.tensor([1.]).float().to(self.device), den)
-
-        eulaij = torch.div(num, den)  # --> ? x L x A x C x C2
-
-        # Compute the expected complete log likelihood
-
-        # TODO this should be rewritten as done in IOMixtureModel
-
-        likelihood1 = torch.mean(torch.mul(posterior_ui, torch.log(emission_of_labels)).sum(1))
-        likelihood2 = torch.mean(torch.mul(posterior_uli, torch.log(broadcastable_layerS)).sum((1,2)))
-        likelihood3 = torch.mean(torch.mul(posterior_estimate,
-                                          torch.reshape(torch.log(self.arcS), [1, self.L, self.A, 1])).sum((1,2,3)))
-
-        likelihood4 = torch.mean(torch.mul(torch.mul(eulaij, broadcastable_stats), log_trans).sum((1,2,3,4)))
-
-        likelihood = likelihood1 + likelihood2 + likelihood3 + likelihood4
-
-        return likelihood, posterior_estimate, posterior_uli, posterior_ui, eulaij, broadcastable_stats
-
-    def e_step(self, labels, stats=None, training=False):
-
-        likelihood, posterior_estimate, posterior_uli, posterior_ui, eulaij, broadcastable_stats \
-            = self._e_step(labels, stats)
-        if training:
-            self._m_step(labels, posterior_estimate, posterior_uli, posterior_ui, eulaij, broadcastable_stats)
-            return likelihood, eulaij
-        else:
-            return likelihood, posterior_ui
-
-    def _m_step(self, labels, posterior_estimate, posterior_uli, posterior_ui, eulaij, broadcastable_stats):
-
-        # These are equivalent to the categorical mixture model, it just changes how the posterior is computed
-        self.emission.update_accumulators(posterior_ui, labels)
-
-        tmp_arc_num = torch.sum(posterior_estimate, dim=[0, 3])  # --> L x A
-        self.arcS_numerator += tmp_arc_num
-        self.arcS_denominator += torch.unsqueeze(torch.sum(tmp_arc_num, dim=1), 1)  # --> L x 1
-
-        new_layer_num = torch.sum(posterior_uli, dim=[0, 2])  # --> [L]
-        self.layerS_numerator += new_layer_num
-        self.layerS_denominator += torch.sum(new_layer_num)  # --> [1]
-
-        new_trans_num = torch.sum(torch.mul(eulaij, broadcastable_stats), dim=0)
-        self.transition_numerator += new_trans_num
-        self.transition_denominator += torch.unsqueeze(torch.sum(new_trans_num, dim=2), 2)  # --> L x A x 1 x C2
+        self.layerS_numerator += euil.sum(dim=(0, 2))
+        self.arcS_numerator += euila.sum(dim=(0, 3))
+        self.transition_numerator += euilaj.sum(0)  # --> L x A x C x C2
 
     def m_step(self):
+        self.layerS.data = self.layerS_numerator / self.layerS_numerator.sum(dim=0, keepdim=True)
+        self.arcS.data = self.arcS_numerator / self.arcS_numerator.sum(dim=1, keepdim=True)
+        self.transition.data = self.transition_numerator / self.transition_numerator.sum(dim=2, keepdim=True)
+        self.init_accumulators()
 
-        self.emission.update_parameters()
-        self.layerS = self.layerS_numerator / self.layerS_denominator
-        self.arcS = self.arcS_numerator / self.arcS_denominator
 
-        self.transition = self.transition_numerator / self.transition_denominator
+class BaseTransition(torch.nn.Module):
+    def __init__(self, c):
+        super().__init__()
 
-        # I need to re-init accumulators, otherwise they will contain statistics of the previous epochs
+        self.device = None
+
+        self.eps = 1e-8  # Laplace smoothing
+        self.C = c
+
+        self.transition = torch.nn.Parameter(torch.empty([self.C], dtype=torch.float32), requires_grad=False)
+
+        tr = torch.nn.init.uniform_(torch.empty(self.C))
+        self.transition.data = tr / tr.sum()
+
+        self.transition_numerator = torch.nn.Parameter(torch.empty_like(self.transition), requires_grad=False)
+        self.init_accumulators()
+
+    def to(self, device):
+        super().to(device)
+        self.device = device
+
+    def init_accumulators(self):
+        torch.nn.init.constant_(self.transition_numerator, self.eps)
+
+    def e_step(self, x_labels, stats=None, batch=None):
+        # ---------------------------- Forward Pass -------------------------- #
+
+        p_Q_given_obs = self.transition.unsqueeze(0)  # --> 1 x C
+        return p_Q_given_obs
+
+    def infer(self, x_labels, stats=None, batch=None):
+        p_Q_given_obs, _ = self.e_step(x_labels, stats, batch)
+        return p_Q_given_obs
+
+    def complete_log_likelihood(self, eui, p_Q_given_obs):
+        complete_log_likelihood = (eui * (p_Q_given_obs.log())).sum(1).sum()
+        return complete_log_likelihood
+
+    def _m_step(self, x_labels, y_labels, eui):
+        self.transition_numerator += eui.sum(0)
+
+    def m_step(self):
+        self.transition.data = self.transition_numerator / self.transition_numerator.sum()
         self.init_accumulators()

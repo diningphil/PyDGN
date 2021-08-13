@@ -1,12 +1,12 @@
-import time
 import operator
-from itertools import product
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.distributions.normal import Normal
-from torch.nn.modules.loss import MSELoss, L1Loss, BCELoss
+from torch.nn.modules.loss import MSELoss, L1Loss
+
+from experiment.experiment import s2c
+from static import *
 from training.event.handler import EventHandler
 
 
@@ -21,7 +21,7 @@ class Loss(nn.Module, EventHandler):
     def __init__(self):
         super().__init__()
         self.batch_losses = None
-        self.num_targets = None
+        self.num_samples = None
 
     def get_main_loss_name(self):
         return self.__name__
@@ -32,7 +32,7 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses = []
-        self.num_targets = 0
+        self.num_samples = 0
 
     def on_training_batch_end(self, state):
         """
@@ -40,16 +40,16 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses.append(state.batch_loss[self.__name__].item() * state.batch_num_targets)
-        self.num_targets += state.batch_num_targets
+        self.num_samples += state.batch_num_targets
 
     def on_training_epoch_end(self, state):
         """
         Computes a loss value for the entire epoch
         :param state: the shared State object
         """
-        state.update(epoch_loss={self.__name__: torch.tensor(self.batch_losses).sum()/self.num_targets})
+        state.update(epoch_loss={self.__name__: torch.tensor(self.batch_losses).sum() / self.num_samples})
         self.batch_losses = None
-        self.num_targets = None
+        self.num_samples = None
 
     def on_eval_epoch_start(self, state):
         """
@@ -57,14 +57,14 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses = []
-        self.num_targets = 0
+        self.num_samples = 0
 
     def on_eval_epoch_end(self, state):
         """
         Computes a loss value for the entire epoch
         :param state: the shared State object
         """
-        state.update(epoch_loss={self.__name__: torch.tensor(self.batch_losses).sum()/self.num_targets})
+        state.update(epoch_loss={self.__name__: torch.tensor(self.batch_losses).sum() / self.num_samples})
         self.batch_losses = None
 
     def on_eval_batch_end(self, state):
@@ -73,7 +73,7 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses.append(state.batch_loss[self.__name__].item() * state.batch_num_targets)
-        self.num_targets += state.batch_num_targets
+        self.num_samples += state.batch_num_targets
 
     def on_compute_metrics(self, state):
         """
@@ -124,8 +124,8 @@ class AdditiveLoss(Loss):
 
     def _istantiate_loss(self, loss):
         if isinstance(loss, dict):
-            args = loss["args"]
-            return s2c(loss['class_name'])(*args)
+            args = loss[ARGS]
+            return s2c(loss[CLASS_NAME])(**args)
         else:
             return s2c(loss)()
 
@@ -138,13 +138,13 @@ class AdditiveLoss(Loss):
         self.num_targets = 0
 
     def on_training_batch_end(self, state):
-        for k,v in state.batch_loss.items():
+        for k, v in state.batch_loss.items():
             self.batch_losses[k].append(v.item() * state.batch_num_targets)
         self.num_targets += state.batch_num_targets
 
     def on_training_epoch_end(self, state):
-        state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum()/self.num_targets
-                                  for l in [self] + self.losses})
+        state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_targets
+                                 for l in [self] + self.losses})
         self.batch_losses = None
         self.num_targets = None
 
@@ -154,12 +154,12 @@ class AdditiveLoss(Loss):
 
     def on_eval_epoch_end(self, state):
         state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_targets
-                          for l in [self] + self.losses})
+                                 for l in [self] + self.losses})
         self.batch_losses = None
         self.num_targets = None
 
     def on_eval_batch_end(self, state):
-        for k,v in state.batch_loss.items():
+        for k, v in state.batch_loss.items():
             self.batch_losses[k].append(v.item() * state.batch_num_targets)
         self.num_targets += state.batch_num_targets
 
@@ -178,7 +178,7 @@ class AdditiveLoss(Loss):
                 # Allow loss to produce intermediate results that speed up
                 # Score computation. Loss callback MUST occur before the score one.
                 loss_output, loss_extra = single_loss
-                extra[single_loss.__name__] = loss_extra
+                extra[l.__name__] = loss_extra
                 state.update(batch_loss_extra=extra)
             else:
                 loss_output = single_loss
@@ -207,7 +207,6 @@ class ClassificationLoss(Loss):
 
 class RegressionLoss(Loss):
     __name__ = 'Regression Loss'
-
 
     def __init__(self):
         super().__init__()
@@ -250,18 +249,6 @@ class MeanAverageErrorLoss(RegressionLoss):
         super().__init__()
         self.loss = L1Loss(reduction=reduction)
 
-class Trento6d93_31_Loss(RegressionLoss):
-    __name__ = 'Trento6d93_31_Loss'
-
-    def __init__(self, reduction='mean'):
-        super().__init__()
-        self.loss = L1Loss(reduction=reduction)
-
-    def forward(self, targets, *outputs):
-        outputs = torch.relu(outputs[0])
-        loss = self.loss(torch.log(1+outputs), torch.log(1+targets))
-        return loss
-
 
 class CGMMLoss(Loss):
     __name__ = 'CGMM Loss'
@@ -270,34 +257,38 @@ class CGMMLoss(Loss):
         super().__init__()
         self.old_likelihood = -float('inf')
         self.new_likelihood = None
-        self.training = None
 
-    def on_training_epoch_start(self, state):
-        super().on_training_epoch_start(state)
-        self.training = True
+    def on_training_batch_end(self, state):
+        self.batch_losses.append(state.batch_loss[self.__name__].item())
+        if state.model.is_graph_classification:
+            self.num_samples += state.batch_num_targets
+        else:
+            # This works for unsupervised CGMM
+            self.num_samples += state.batch_num_nodes
 
     def on_training_epoch_end(self, state):
         super().on_training_epoch_end(state)
-        self.training = False
+
+        if (state.epoch_loss[self.__name__].item() - self.old_likelihood) < 0:
+            pass
+            # tate.stop_training = True
+        self.old_likelihood = state.epoch_loss[self.__name__].item()
+
+    def on_eval_batch_end(self, state):
+        self.batch_losses.append(state.batch_loss[self.__name__].item())
+        if state.model.is_graph_classification:
+            self.num_samples += state.batch_num_targets
+        else:
+            # This works for unsupervised CGMM
+            self.num_samples += state.batch_num_nodes
 
     # Simply ignore targets
-    def forward(self, targets, *outputs):  # IMPORTANT: This method assumes the batch size is the size of the dataset
-        likelihood = outputs[0]
-
-        if self.training:
-            self.new_likelihood = likelihood
-
+    def forward(self, targets, *outputs):
+        likelihood = outputs[2]
         return likelihood
 
     def on_backward(self, state):
         pass
-
-    def on_training_epoch_end(self, state):
-        super().on_training_epoch_end(state)
-
-        if (self.new_likelihood - self.old_likelihood) <= 0:
-            state.stop_training = True
-        self.old_likelihood = self.new_likelihood
 
 
 class LinkPredictionLoss(Loss):
@@ -312,11 +303,11 @@ class LinkPredictionLoss(Loss):
 
         loss_edge_index = torch.cat((pos_edges, neg_edges), dim=1)
         loss_target = torch.cat((torch.ones(pos_edges.shape[1]),
-                                  torch.zeros(neg_edges.shape[1])))
+                                 torch.zeros(neg_edges.shape[1])))
 
         # Taken from https://github.com/rusty1s/pytorch_geometric/blob/master/examples/link_pred.py
         x_j = torch.index_select(node_embs, 0, loss_edge_index[0])
         x_i = torch.index_select(node_embs, 0, loss_edge_index[1])
         link_logits = torch.einsum("ef,ef->e", x_i, x_j)
-        loss =  torch.nn.functional.binary_cross_entropy_with_logits(link_logits, loss_target)
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(link_logits, loss_target)
         return loss

@@ -1,6 +1,7 @@
-import time
 import bisect
 import datetime
+import time
+
 from training.event.handler import EventHandler
 
 
@@ -32,6 +33,7 @@ class Profiler:
                     self.callback_calls[class_name][callback_name] = 1
 
                 return result
+
             return clocked
 
         # Relies on closures
@@ -105,21 +107,21 @@ class Profiler:
 
     def report(self):
         total_time_experiment = 0.
-        profile_str = f'{"*"*25} Profiler {"*"*25} \n \n'
+        profile_str = f'{"*" * 25} Profiler {"*" * 25} \n \n'
         profile_str += f'Threshold: {self.threshold} \n \n'
 
-        for class_name,v in self.callback_elapsed.items():
+        for class_name, v in self.callback_elapsed.items():
 
             sorted_avg_elapsed = []
 
-            for callback_name,v1 in v.items():
+            for callback_name, v1 in v.items():
                 n = self.callback_calls[class_name][callback_name]
 
                 # Depending on when a KeyboardInterrupt is triggered
                 if n == 0:
                     continue
 
-                avg_elapsed = v1/n
+                avg_elapsed = v1 / n
 
                 if avg_elapsed > self.threshold:
                     bisect.insort(sorted_avg_elapsed, (avg_elapsed, v1, callback_name))
@@ -135,5 +137,5 @@ class Profiler:
             profile_str += '\n'
 
         profile_str += f'Total time of the experiment: {str(datetime.timedelta(seconds=total_time_experiment))} \n \n'
-        profile_str += f'{"*"*60}'
+        profile_str += f'{"*" * 60}'
         return profile_str

@@ -1,8 +1,11 @@
-import os
-import sys
-import time
-import tqdm
 import datetime
+import math
+import os
+import random
+
+import tqdm
+
+from static import *
 
 
 def set_gpus(num_gpus):
@@ -19,9 +22,9 @@ def set_gpus(num_gpus):
         for i in range(num_gpus):
 
             ids_mem = [res for res in map(lambda gpu: (int(gpu.entry['index']),
-                                          float(gpu.entry['memory.used']) /\
-                                          float(gpu.entry['memory.total'])),
-                                      stats) if str(res[0]) not in selected]
+                                                       float(gpu.entry['memory.used']) / \
+                                                       float(gpu.entry['memory.total'])),
+                                          stats) if str(res[0]) not in selected]
 
             if len(ids_mem) == 0:
                 # No more gpus available
@@ -50,7 +53,6 @@ def clear_screen():
 
 
 class ProgressManager:
-
     '''
     Possible vars of bar_format:
           l_bar, bar, r_bar,
@@ -63,25 +65,24 @@ class ProgressManager:
     '''
 
     def _init_selection_pbar(self, i, j):
-        position = i*self.inner_folds + j
+        position = i * self.inner_folds + j
         pbar = tqdm.tqdm(total=self.no_configs, ncols=self.ncols, ascii=True,
                          position=position, unit="config",
                          bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
-        pbar.set_description(f'Out_{i+1}/Inn_{j+1}')
+        pbar.set_description(f'Out_{i + 1}/Inn_{j + 1}')
         mean = str(datetime.timedelta(seconds=0))
         pbar.set_postfix_str(f'(1 cfg every {mean})')
         return pbar
 
     def _init_assessment_pbar(self, i):
-        position = self.outer_folds*self.inner_folds + i
+        position = self.outer_folds * self.inner_folds + i
         pbar = tqdm.tqdm(total=self.final_runs, ncols=self.ncols, ascii=True,
                          position=position, unit="config",
                          bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
-        pbar.set_description(f'Final run {i+1}')
+        pbar.set_description(f'Final run {i + 1}')
         mean = str(datetime.timedelta(seconds=0))
         pbar.set_postfix_str(f'(1 run every {mean})')
         return pbar
-
 
     def __init__(self, outer_folds, inner_folds, no_configs, final_runs, show=True):
         self.ncols = 100
@@ -114,7 +115,8 @@ class ProgressManager:
         \033[A --> move cursor up one line
         \033[<N>A --> move cursor up N lines
         '''
-        print(f'\033[F\033[A{"*"*((self.ncols-21)//2 + 1)} Experiment Progress {"*"*((self.ncols-21)//2)}\n')
+        print(
+            f'\033[F\033[A{"*" * ((self.ncols - 21) // 2 + 1)} Experiment Progress {"*" * ((self.ncols - 21) // 2)}\n')
 
     def show_footer(self):
         pass  # need to work how how to print after tqdm
@@ -130,7 +132,7 @@ class ProgressManager:
             if len(completion_times) > 0:
                 min_seconds = min(completion_times)
                 max_seconds = max(completion_times)
-                mean_seconds = sum(completion_times)/len(completion_times)
+                mean_seconds = sum(completion_times) / len(completion_times)
             else:
                 min_seconds = 0
                 max_seconds = 0
@@ -151,37 +153,26 @@ class ProgressManager:
         try:
             type = msg.get('type')
 
-            if type == 'START_CONFIG':
-                outer_fold = msg.get('outer_fold')
-                inner_fold = msg.get('inner_fold')
-                config_id = msg.get('config_id')
-                position = outer_fold*self.inner_folds + inner_fold
-                configs_times = self.times[position]
-                configs_times[config_id] = (time.time(), False)
-            elif type == 'END_CONFIG':
-                outer_fold = msg.get('outer_fold')
-                inner_fold = msg.get('inner_fold')
-                config_id = msg.get('config_id')
-                position = outer_fold*self.inner_folds + inner_fold
+            if type == END_CONFIG:
+                outer_fold = msg.get(OUTER_FOLD)
+                inner_fold = msg.get(INNER_FOLD)
+                config_id = msg.get(CONFIG_ID)
+                position = outer_fold * self.inner_folds + inner_fold
+                elapsed = msg.get(ELAPSED)
                 configs_times = self.times[position]
                 # Compute delta t for a specific config
-                configs_times[config_id] = (time.time() - configs_times[config_id][0], True)
+                configs_times[config_id] = (elapsed, True)  # (time.time() - configs_times[config_id][0], True)
                 # Update progress bar
                 self.pbars[position].update()
                 self.refresh()
-            elif type == 'START_FINAL_RUN':
-                outer_fold = msg.get('outer_fold')
-                run_id = msg.get('run_id')
-                position = self.outer_folds*self.inner_folds + outer_fold
-                configs_times = self.times[position]
-                configs_times[run_id] = (time.time(), False)
-            elif type == 'END_FINAL_RUN':
-                outer_fold = msg.get('outer_fold')
-                run_id = msg.get('run_id')
-                position = self.outer_folds*self.inner_folds + outer_fold
+            elif type == END_FINAL_RUN:
+                outer_fold = msg.get(OUTER_FOLD)
+                run_id = msg.get(RUN_ID)
+                position = self.outer_folds * self.inner_folds + outer_fold
+                elapsed = msg.get(ELAPSED)
                 configs_times = self.times[position]
                 # Compute delta t for a specific config
-                configs_times[run_id] = (time.time() - configs_times[run_id][0], True)
+                configs_times[run_id] = (elapsed, True)  # (time.time() - configs_times[run_id][0], True)
                 # Update progress bar
                 self.pbars[position].update()
                 self.refresh()
@@ -198,3 +189,19 @@ class ProgressManager:
     def __exit__(self, exc_type, exc_value, exc_traceback):
         for pbar in self.pbars:
             pbar.close()
+
+
+choice = lambda *args: random.choice(args)
+uniform = lambda *args: random.uniform(*args)
+normal = lambda *args: random.normalvariate(*args)
+randint = lambda *args: random.randint(*args)
+
+
+def loguniform(*args):
+    log_min, log_max, *base = args
+    base = base[0] if len(base) > 0 else 10
+
+    log_min = math.log(log_min) / math.log(base)
+    log_max = math.log(log_max) / math.log(base)
+
+    return base ** (random.uniform(log_min, log_max))

@@ -1,5 +1,5 @@
 import os
-from pathlib import Path
+
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch
 
@@ -8,8 +8,8 @@ from experiment.experiment import Experiment
 
 class SemiSupervisedTask(Experiment):
 
-    def __init__(self, model_configuration, exp_path):
-        super(SemiSupervisedTask, self).__init__(model_configuration, exp_path)
+    def __init__(self, model_configuration, exp_path, exp_seed):
+        super(SemiSupervisedTask, self).__init__(model_configuration, exp_path, exp_seed)
         self.root_exp_path = exp_path  # to distinguish unsup. and sup. exp paths
 
     def run_valid(self, dataset_getter, logger):
@@ -45,23 +45,21 @@ class SemiSupervisedTask(Experiment):
         _, _, train_data_list, \
         _, _, val_data_list, \
         _, _, _ = unsupervised_training_wrapper.train(train_loader=train_loader,
-                                                         validation_loader=val_loader,
-                                                         test_loader=None,
-                                                         max_epochs=unsupervised_config['epochs'],
-                                                         logger=logger)
+                                                      validation_loader=val_loader,
+                                                      test_loader=None,
+                                                      max_epochs=unsupervised_config['epochs'],
+                                                      logger=logger)
 
         # --------------------------------------- PART II: Supervised Training --------------------------------------- #
 
         # Get the embedding size from the first graph in the dataset
         embedding_size = train_data_list[0].x.shape[1]
 
-
-
         # Get information from the supervised configuration
         batch_size = supervised_config['batch_size']
         shuffle = supervised_config['shuffle'] \
             if 'shuffle' in supervised_config else True
-        collate_fn=lambda data_list: Batch.from_data_list(data_list)
+        collate_fn = lambda data_list: Batch.from_data_list(data_list)
 
         # Instantiate the Embedding Dataset for supervised learning
         train_loader = DataLoader(train_data_list, batch_size, shuffle, collate_fn=collate_fn)
@@ -80,10 +78,10 @@ class SemiSupervisedTask(Experiment):
         train_loss, train_score, _, \
         val_loss, val_score, _, \
         _, _, _ = supervised_training_wrapper.train(train_loader=train_loader,
-                                                       validation_loader=val_loader,
-                                                       test_loader=None,
-                                                       max_epochs=supervised_config['epochs'],
-                                                       logger=logger)
+                                                    validation_loader=val_loader,
+                                                    test_loader=None,
+                                                    max_epochs=supervised_config['epochs'],
+                                                    logger=logger)
 
         return train_score, val_score
 
@@ -120,11 +118,11 @@ class SemiSupervisedTask(Experiment):
 
         _, _, train_data_list, \
         _, _, val_data_list, \
-        _, _, test_data_list  = unsupervised_training_wrapper.train(train_loader=train_loader,
-                                                         validation_loader=val_loader,
-                                                         test_loader=test_loader,
-                                                         max_epochs=unsupervised_config['epochs'],
-                                                         logger=logger)
+        _, _, test_data_list = unsupervised_training_wrapper.train(train_loader=train_loader,
+                                                                   validation_loader=val_loader,
+                                                                   test_loader=test_loader,
+                                                                   max_epochs=unsupervised_config['epochs'],
+                                                                   logger=logger)
 
         # --------------------------------------- PART II: Supervised Training --------------------------------------- #
 
@@ -135,7 +133,7 @@ class SemiSupervisedTask(Experiment):
         batch_size = supervised_config['batch_size']
         shuffle = supervised_config['shuffle'] \
             if 'shuffle' in supervised_config else True
-        collate_fn=lambda data_list: Batch.from_data_list(data_list)
+        collate_fn = lambda data_list: Batch.from_data_list(data_list)
 
         # Instantiate the Embedding Dataset for supervised learning
         train_loader = DataLoader(train_data_list, batch_size, shuffle, collate_fn=collate_fn)
@@ -155,9 +153,9 @@ class SemiSupervisedTask(Experiment):
         train_loss, train_score, _, \
         _, _, _, \
         test_loss, test_score, _ = supervised_training_wrapper.train(train_loader=train_loader,
-                                                       validation_loader=val_loader,
-                                                       test_loader=test_loader,
-                                                       max_epochs=supervised_config['epochs'],
-                                                       logger=logger)
+                                                                     validation_loader=val_loader,
+                                                                     test_loader=test_loader,
+                                                                     max_epochs=supervised_config['epochs'],
+                                                                     logger=logger)
 
         return train_score, test_score

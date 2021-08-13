@@ -1,10 +1,10 @@
-import json
 from copy import deepcopy
-from pathlib import Path
+
+from static import *
+
 
 class Grid:
     """ This class computes all possible hyper-parameters configurations based on the configuration file """
-
 
     def __init__(self, data_root, dataset_class, dataset_name, **configs_dict):
         """
@@ -17,22 +17,23 @@ class Grid:
         :param configs_dict: the configuration dictionary
         """
         self.configs_dict = configs_dict
+        self.seed = self.configs_dict.get(SEED, None)
         self.data_root = data_root
         self.dataset_class = dataset_class
         self.dataset_name = dataset_name
-        self.experiment = self.configs_dict['experiment']
-        self.higher_results_are_better = self.configs_dict['higher_results_are_better']
-        self.log_every = self.configs_dict['log_every']
-        self.device = self.configs_dict['device']
-        self.num_dataloader_workers = self.configs_dict['num_dataloader_workers']
-        self.pin_memory = self.configs_dict['pin_memory']
-        self.model = self.configs_dict['model']
-        self.dataset_getter = self.configs_dict['dataset-getter']
+        self.experiment = self.configs_dict[EXPERIMENT]
+        self.higher_results_are_better = self.configs_dict[HIGHER_RESULTS_ARE_BETTER]
+        self.log_every = self.configs_dict[LOG_EVERY]
+        self.device = self.configs_dict[DEVICE]
+        self.num_dataloader_workers = self.configs_dict[NUM_DATALOADER_WORKERS]
+        self.pin_memory = self.configs_dict[PIN_MEMORY]
+        self.model = self.configs_dict[MODEL]
+        self.dataset_getter = self.configs_dict[DATASET_GETTER]
 
         # For continual learning tasks
-        # - Reharsal
-        self.n_tasks = self.configs_dict.get('n_tasks', None)
-        self.n_rehearsal_patterns_per_task = self.configs_dict.get('n_rehearsal_patterns_per_task', None)
+        # - Rehearsal
+        self.n_tasks = self.configs_dict.get(NUM_TASKS, None)
+        self.n_rehearsal_patterns_per_task = self.configs_dict.get(NUM_REHEARSAL_PATTERNS_PER_TASK, None)
 
         # This MUST be called at the END of the init method!
         self.hparams = self._gen_configs()
@@ -42,22 +43,21 @@ class Grid:
         Takes a dictionary of key:list pairs and computes all possible permutations.
         :return: A list of al possible configurations
         '''
-        configs = [cfg for cfg in self._gen_helper(self.configs_dict['grid'])]
+        configs = [cfg for cfg in self._gen_helper(self.configs_dict[GRID_SEARCH])]
         for cfg in configs:
-            cfg.update({"dataset": self.dataset_name,
-                        "dataset_getter": self.dataset_getter,
-                        "dataset_class": self.dataset_class,
-                        "data_root": self.data_root,
-                        "model": self.model,
-                        "device": self.device,
-                        "num_dataloader_workers": self.num_dataloader_workers,
-                        "pin_memory": self.pin_memory,
-                        "experiment": self.experiment,
-                        "higher_results_are_better": self.higher_results_are_better,
-                        "log_every": self.log_every,
-                        "n_tasks": self.n_tasks,
-                        "n_rehearsal_patterns_per_task": self.n_rehearsal_patterns_per_task})
-
+            cfg.update({DATASET: self.dataset_name,
+                        DATASET_GETTER: self.dataset_getter,
+                        DATASET_CLASS: self.dataset_class,
+                        DATA_ROOT: self.data_root,
+                        MODEL: self.model,
+                        DEVICE: self.device,
+                        NUM_DATALOADER_WORKERS: self.num_dataloader_workers,
+                        PIN_MEMORY: self.pin_memory,
+                        EXPERIMENT: self.experiment,
+                        HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
+                        LOG_EVERY: self.log_every,
+                        NUM_TASKS: self.n_tasks,
+                        NUM_REHEARSAL_PATTERNS_PER_TASK: self.n_rehearsal_patterns_per_task})
         return configs
 
     def _gen_helper(self, cfgs_dict):

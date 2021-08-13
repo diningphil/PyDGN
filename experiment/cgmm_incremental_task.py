@@ -1,21 +1,23 @@
 import os
-import torch
 import shutil
-from experiment.experiment import Experiment
-from torch_geometric.data import Data
-from torch.utils.data.sampler import SequentialSampler
+
 import torch
+from torch.utils.data.sampler import SequentialSampler
+from torch_geometric.data import Data
+
+from experiment.experiment import Experiment
+from experiment.util import s2c
 
 
-class IncrementalTask(Experiment):
+class CGMMTask(Experiment):
 
-    def __init__(self, model_configuration, exp_path):
-        super(IncrementalTask, self).__init__(model_configuration, exp_path)
+    def __init__(self, model_configuration, exp_path, exp_seed):
+        super(CGMMTask, self).__init__(model_configuration, exp_path, exp_seed)
         self.root_exp_path = exp_path  # to distinguish from layers' exp_path
         self.output_folder = os.path.join(exp_path, 'outputs')
         self._concat_axis = self.model_config.layer_config['concatenate_on_axis']
 
-    def _create_extra_dataset(self, prev_outputs_to_consider, mode, depth):
+    def _create_extra_dataset(self, prev_outputs_to_consider, mode, depth, only_g=False):
         # Load previous outputs if any according to prev. layers to consider (ALL TENSORS)
         v_outs, e_outs, g_outs, vo_outs, eo_outs, go_outs = self._load_outputs(mode, prev_outputs_to_consider)
 
@@ -29,14 +31,17 @@ class IncrementalTask(Experiment):
                         len(go_outs) if go_outs is not None else 0)
 
         for index in range(no_graphs):
-            v = v_outs[index] if v_outs is not None else None
-            e = e_outs[index] if e_outs is not None else None
             g = g_outs[index] if g_outs is not None else None
-            vo = vo_outs[index] if vo_outs is not None else None
-            eo = eo_outs[index] if eo_outs is not None else None
             go = go_outs[index] if go_outs is not None else None
-            data_list.append(Data(v_outs=v, e_outs=e, g_outs=g,
-                                  vo_outs=vo, eo_outs=eo, go_outs=go))
+            if not only_g:
+                v = v_outs[index] if v_outs is not None else None
+                e = e_outs[index] if e_outs is not None else None
+                vo = vo_outs[index] if vo_outs is not None else None
+                eo = eo_outs[index] if eo_outs is not None else None
+                data_list.append(Data(v_outs=v, e_outs=e, g_outs=g,
+                                      vo_outs=vo, eo_outs=eo, go_outs=go))
+            else:
+                data_list.append(Data(g_outs=g, go_outs=go))
 
         return data_list
 
@@ -87,15 +92,23 @@ class IncrementalTask(Experiment):
             'graph_other_outputs': None,
         }
 
-        # print(f"Loading outputs of layers {prev_outputs_to_consider}, will be concatenated in reverse order")
-
+        # The elements of prev_outputs_to_consider will be concatenated in
+        # reverse, i.e., if prev_outputs_to_consider = 1,2,3...L
+        # the contribution of layer L will appear in position 0 across
+        # self._concat_axis, then L-1 in position 1 and so on
+        # this is because a hyper-parameter l_prec=1 means "previous layer"
+        # and prev_outputs_to_consider will be = L,L-1,...1
+        # so we want to reorder layers from 1 to L
         for prev in prev_outputs_to_consider:
             for path, o_key in [(os.path.join(self.output_folder, mode, f'vertex_output_{prev}.pt'), 'vertex_outputs'),
                                 (os.path.join(self.output_folder, mode, f'edge_output_{prev}.pt'), 'edge_outputs'),
                                 (os.path.join(self.output_folder, mode, f'graph_output_{prev}.pt'), 'graph_outputs'),
-                                (os.path.join(self.output_folder, mode, f'vertex_other_output_{prev}.pt'), 'vertex_other_outputs'),
-                                (os.path.join(self.output_folder, mode, f'edge_other_output_{prev}.pt'), 'edge_other_outputs'),
-                                (os.path.join(self.output_folder, mode, f'graph_other_output_{prev}.pt'), 'graph_other_outputs'),]:
+                                (os.path.join(self.output_folder, mode, f'vertex_other_output_{prev}.pt'),
+                                 'vertex_other_outputs'),
+                                (os.path.join(self.output_folder, mode, f'edge_other_output_{prev}.pt'),
+                                 'edge_other_outputs'),
+                                (os.path.join(self.output_folder, mode, f'graph_other_output_{prev}.pt'),
+                                 'graph_other_outputs'), ]:
                 if os.path.exists(path):
                     out = torch.load(path)
                     outs = outs_dict[o_key]
@@ -114,9 +127,9 @@ class IncrementalTask(Experiment):
 
                     outs_dict[o_key] = outs
 
-        return outs_dict['vertex_outputs'], outs_dict['edge_outputs'],\
-            outs_dict['graph_outputs'], outs_dict['vertex_other_outputs'], \
-            outs_dict['edge_other_outputs'], outs_dict['graph_other_outputs']
+        return outs_dict['vertex_outputs'], outs_dict['edge_outputs'], \
+               outs_dict['graph_outputs'], outs_dict['vertex_other_outputs'], \
+               outs_dict['edge_other_outputs'], outs_dict['graph_other_outputs']
 
     def _store_outputs(self, mode, depth, v_tensor_list, e_tensor_list=None, g_tensor_list=None,
                        vo_tensor_list=None, eo_tensor_list=None, go_tensor_list=None):
@@ -135,13 +148,16 @@ class IncrementalTask(Experiment):
             torch.save([torch.unsqueeze(g_tensor, self._concat_axis) for g_tensor in g_tensor_list], graph_filepath)
         if vo_tensor_list is not None:
             vertex_other_filepath = os.path.join(self.output_folder, mode, f'vertex_other_output_{depth}.pt')
-            torch.save([torch.unsqueeze(vo_tensor, self._concat_axis) for vo_tensor in vo_tensor_list], vertex_other_filepath)
+            torch.save([torch.unsqueeze(vo_tensor, self._concat_axis) for vo_tensor in vo_tensor_list],
+                       vertex_other_filepath)
         if eo_tensor_list is not None:
             edge_other_filepath = os.path.join(self.output_folder, mode, f'edge_other_output_{depth}.pt')
-            torch.save([torch.unsqueeze(eo_tensor, self._concat_axis) for eo_tensor in eo_tensor_list], edge_other_filepath)
+            torch.save([torch.unsqueeze(eo_tensor, self._concat_axis) for eo_tensor in eo_tensor_list],
+                       edge_other_filepath)
         if go_tensor_list is not None:
             graph_other_filepath = os.path.join(self.output_folder, mode, f'graph_other_output_{depth}.pt')
-            torch.save([torch.unsqueeze(go_tensor, self._concat_axis) for go_tensor in go_tensor_list], graph_other_filepath)
+            torch.save([torch.unsqueeze(go_tensor, self._concat_axis) for go_tensor in go_tensor_list],
+                       graph_other_filepath)
 
     def run_valid(self, dataset_getter, logger):
         """
@@ -176,6 +192,7 @@ class IncrementalTask(Experiment):
             # Change exp path to allow Stop & Resume
             self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}')
 
+            # load output will concatenate in reverse order
             prev_outputs_to_consider = [(depth - int(x)) for x in l_prec if (depth - int(x)) > 0]
 
             train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
@@ -184,7 +201,8 @@ class IncrementalTask(Experiment):
             val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle, extra=val_out)
 
             # Instantiate the Model
-            new_layer = self.create_incremental_model(dim_node_features, dim_edge_features, dim_target, depth, prev_outputs_to_consider)
+            new_layer = self.create_incremental_model(dim_node_features, dim_edge_features, dim_target, depth,
+                                                      prev_outputs_to_consider)
 
             # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
             incremental_training_wrapper = self.create_incremental_wrapper(new_layer)
@@ -192,30 +210,32 @@ class IncrementalTask(Experiment):
             train_loss, train_score, train_out, \
             val_loss, val_score, val_out, \
             _, _, _ = incremental_training_wrapper.train(train_loader=train_loader,
-                                                            validation_loader=val_loader,
-                                                            test_loader=None,
-                                                            max_epochs=self.model_config.layer_config['epochs'],
-                                                            logger=logger)
+                                                         validation_loader=val_loader,
+                                                         test_loader=None,
+                                                         max_epochs=self.model_config.layer_config['epochs'],
+                                                         logger=logger)
 
             for loader, out, mode in [(train_loader, train_out, 'train'), (val_loader, val_out, 'validation')]:
                 v_out, e_out, g_out, vo_out, eo_out, go_out = out
 
                 # Reorder outputs, which are produced in shuffled order, to the original arrangement of the dataset.
-                v_out, e_out, g_out, vo_out, eo_out, go_out = self._reorder_shuffled_objects(v_out, e_out, g_out, vo_out, eo_out, go_out, loader)
+                v_out, e_out, g_out, vo_out, eo_out, go_out = self._reorder_shuffled_objects(v_out, e_out, g_out,
+                                                                                             vo_out, eo_out, go_out,
+                                                                                             loader)
 
                 # Store outputs
                 self._store_outputs(mode, depth, v_out, e_out, g_out, vo_out, eo_out, go_out)
 
             # Consider all previous layers now, i.e. gather all the embeddings
-            prev_outputs_to_consider = [l for l in range(1, depth+1)]
-            prev_outputs_to_consider.reverse()
+            prev_outputs_to_consider = [l for l in range(1, depth + 1)]
+            prev_outputs_to_consider.reverse()  # load output will concatenate in reverse order
 
             train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
             val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
             train_loader = dataset_getter.get_inner_train(batch_size=arbitrary_logic_batch_size,
-                                                            shuffle=arbitrary_logic_shuffle, extra=train_out)
+                                                          shuffle=arbitrary_logic_shuffle, extra=train_out)
             val_loader = dataset_getter.get_inner_val(batch_size=arbitrary_logic_batch_size,
-                                                        shuffle=arbitrary_logic_shuffle, extra=val_out)
+                                                      shuffle=arbitrary_logic_shuffle, extra=val_out)
 
             # Change exp path to allow Stop & Resume
             self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_stopping_criterion')
@@ -227,10 +247,39 @@ class IncrementalTask(Experiment):
             # Change exp path to allow Stop & Resume
             self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_arbitrary_config')
 
-            # Execute arbitrary logic e.g. to compute scores
-            d = new_layer.arbitrary_logic(self, train_loader, self.model_config.layer_config, is_last_layer=stop,
-                                            validation_loader=val_loader, test_loader=None,
-                                            logger=logger, device=self.model_config.device)
+            if stop:
+
+                if 'CA' in self.model_config.layer_config:
+                    # ECGMM
+                    dim_features = new_layer.dim_node_features, new_layer.C * new_layer.depth + new_layer.CA * new_layer.depth if not new_layer.unibigram else (
+                                                                                                                                                                       new_layer.C + new_layer.CA + new_layer.C * new_layer.C) * new_layer.depth
+                else:
+                    # CGMM
+                    dim_features = new_layer.dim_node_features, new_layer.C * new_layer.depth if not new_layer.unibigram else (
+                                                                                                                                      new_layer.C + new_layer.C * new_layer.C) * new_layer.depth
+
+                config = self.model_config.layer_config['arbitrary_function_config']
+                device = config['device']
+
+                predictor_class = s2c(config['predictor'])
+                model = predictor_class(dim_node_features=dim_features,
+                                        dim_edge_features=0,
+                                        dim_target=dim_target,
+                                        config=config)
+
+                predictor_wrapper = self._create_wrapper(config, model, device, log_every=self.model_config.log_every)
+
+                train_loss, train_score, _, \
+                val_loss, val_score, _, \
+                _, _, _ = predictor_wrapper.train(train_loader=train_loader,
+                                                  validation_loader=val_loader,
+                                                  test_loader=None,
+                                                  max_epochs=config['epochs'],
+                                                  logger=logger)
+
+                d = {'train_score': train_score, 'validation_score': val_score}
+            else:
+                d = {}
 
             # Append layer
             layers.append(new_layer)
@@ -284,6 +333,7 @@ class IncrementalTask(Experiment):
             train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
             val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
             test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test', depth=depth)
+
             train_loader = dataset_getter.get_outer_train(batch_size=batch_size, shuffle=shuffle, extra=train_out)
             val_loader = dataset_getter.get_outer_val(batch_size=batch_size, shuffle=shuffle, extra=val_out)
             test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle, extra=test_out)
@@ -298,10 +348,12 @@ class IncrementalTask(Experiment):
             train_loss, train_score, train_out, \
             val_loss, val_score, val_out, \
             test_loss, test_score, test_out = incremental_training_wrapper.train(train_loader=train_loader,
-                                                           validation_loader=val_loader,
-                                                           test_loader=test_loader,
-                                                           max_epochs=self.model_config.layer_config['epochs'],
-                                                           logger=logger)
+                                                                                 validation_loader=val_loader,
+                                                                                 test_loader=test_loader,
+                                                                                 max_epochs=
+                                                                                 self.model_config.layer_config[
+                                                                                     'epochs'],
+                                                                                 logger=logger)
 
             for loader, out, mode in [(train_loader, train_out, 'train'),
                                       (val_loader, val_out, 'validation'),
@@ -309,17 +361,21 @@ class IncrementalTask(Experiment):
                 v_out, e_out, g_out, vo_out, eo_out, go_out = out
 
                 # Reorder outputs, which are produced in shuffled order, to the original arrangement of the dataset.
-                v_out, e_out, g_out, vo_out, eo_out, go_out = self._reorder_shuffled_objects(v_out, e_out, g_out, vo_out, eo_out, go_out, loader)
+                v_out, e_out, g_out, vo_out, eo_out, go_out = self._reorder_shuffled_objects(v_out, e_out, g_out,
+                                                                                             vo_out, eo_out, go_out,
+                                                                                             loader)
 
                 # Store outputs
                 self._store_outputs(mode, depth, v_out, e_out, g_out, vo_out, eo_out, go_out)
 
             # Consider all previous layers now, i.e. gather all the embeddings
-            prev_outputs_to_consider = [l for l in range(1, depth+1)]
+            prev_outputs_to_consider = [l for l in range(1, depth + 1)]
 
-            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth)
-            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth)
-            test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test', depth=depth)
+            train_out = self._create_extra_dataset(prev_outputs_to_consider, mode='train', depth=depth,
+                                                   only_g_outs=True)
+            val_out = self._create_extra_dataset(prev_outputs_to_consider, mode='validation', depth=depth,
+                                                 only_g_outs=True)
+            test_out = self._create_extra_dataset(prev_outputs_to_consider, mode='test', depth=depth, only_g_outs=True)
             train_loader = dataset_getter.get_outer_train(batch_size=arbitrary_logic_batch_size,
                                                           shuffle=arbitrary_logic_shuffle, extra=train_out)
             val_loader = dataset_getter.get_outer_val(batch_size=arbitrary_logic_batch_size,
@@ -331,18 +387,46 @@ class IncrementalTask(Experiment):
             self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_stopping_criterion')
 
             # Stopping criterion based on training of the model
-            stop = new_layer.stopping_criterion(self, depth, max_layers, train_loss, train_score, val_loss, val_score,
+            stop = new_layer.stopping_criterion(depth, max_layers, train_loss, train_score, val_loss, val_score,
                                                 dict_per_layer, self.model_config.layer_config,
                                                 logger=logger)
 
             # Change exp path to allow Stop & Resume
             self.exp_path = os.path.join(self.root_exp_path, f'layer_{depth}_arbitrary_config')
 
-            # Execute arbitrary logic e.g. to compute scores
-            d = new_layer.arbitrary_logic(self, train_loader, self.model_config.layer_config,
-                                          is_last_layer=stop,
-                                          validation_loader=val_loader, test_loader=test_loader,
-                                          logger=logger, device=self.model_config.device)
+            if stop:
+
+                if 'CA' in self.model_config.layer_config:
+                    # ECGMM
+                    dim_features = new_layer.dim_node_features, new_layer.C * new_layer.depth + new_layer.CA * new_layer.depth if not new_layer.unibigram else (
+                                                                                                                                                                       new_layer.C + new_layer.CA + new_layer.C * new_layer.C) * new_layer.depth
+                else:
+                    # CGMM
+                    dim_features = new_layer.dim_node_features, new_layer.C * new_layer.depth if not new_layer.unibigram else (
+                                                                                                                                      new_layer.C + new_layer.C * new_layer.C) * new_layer.depth
+
+                config = self.model_config.layer_config['arbitrary_function_config']
+                device = config['device']
+
+                predictor_class = s2c(config['predictor'])
+                model = predictor_class(dim_node_features=dim_features,
+                                        dim_edge_features=0,
+                                        dim_target=dim_target,
+                                        config=config)
+
+                predictor_wrapper = self._create_wrapper(config, model, device, log_every=self.model_config.log_every)
+
+                train_loss, train_score, _, \
+                val_loss, val_score, _, \
+                test_loss, test_score, _ = predictor_wrapper.train(train_loader=train_loader,
+                                                                   validation_loader=val_loader,
+                                                                   test_loader=test_loader,
+                                                                   max_epochs=config['epochs'],
+                                                                   logger=logger)
+
+                d = {'train_score': train_score, 'validation_score': val_score, 'test_score': test_score}
+            else:
+                d = {}
 
             # Append layer
             layers.append(new_layer)

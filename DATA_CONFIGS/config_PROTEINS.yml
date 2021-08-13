@@ -1,8 +1,8 @@
 splitter:
-  root: SPLITS/
+  root: DATA_SPLITS/CHEMICAL
   class_name: data.splitter.Splitter
   args:
-    n_outer_folds: 3
+    n_outer_folds: 10
     n_inner_folds: 1
     seed: 42
     stratify: True  # works for graph classification tasks
@@ -17,6 +17,6 @@ dataset:
     name: PROTEINS
   # useful for social datasets with no node features
   transforms:
-      - class_name: data.transform.ConstantIfEmpty
-        args:
-          value: 1
+    - class_name: data.transform.ConstantIfEmpty
+      args:
+        value: 1

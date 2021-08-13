@@ -1,8 +1,70 @@
 import math
+
 import torch
 from torch_scatter import scatter
 
 pi = torch.FloatTensor([math.pi])
+
+
+class StirlingNumbers:
+
+    def __init__(self):
+        self.s_table = None
+
+    def stirling(self, n, k):
+
+        if self.s_table is None:
+            self.s_table = torch.zeros(n + 1, k + 1, dtype=torch.float64)
+            self.s_table[0, 0] = 1
+
+            for i in range(1, n + 1):
+                for j in range(1, min(k + 1, i + 1)):
+                    self.s_table[i, j] = (i - 1) * self.s_table[i - 1, j] + self.s_table[i - 1, j - 1]
+            return self.s_table[n, k]
+
+        elif n < self.s_table.shape[0] and k < self.s_table.shape[1]:
+            return self.s_table[n, k]
+
+        elif n >= self.s_table.shape[0] and k >= self.s_table.shape[1]:
+            old_n = self.s_table.shape[0]  # it was "n+1" when invoked with previous n
+            rows_to_add = n + 1 - old_n
+            old_k = self.s_table.shape[1]  # it was "k+1" when invoked with previous k
+            columns_to_add = k + 1 - old_k
+            new_table = torch.zeros(n + 1, k + 1, dtype=torch.float64)
+            new_table[:old_n, :old_k] += self.s_table
+            self.s_table = new_table
+
+            for i in range(1, n + 1):
+                for j in range(old_k, min(k + 1, i + 1)):
+                    self.s_table[i, j] = (i - 1) * self.s_table[i - 1, j] + self.s_table[i - 1, j - 1]
+
+            for i in range(old_n, n + 1):
+                for j in range(1, min(k + 1, i + 1)):
+                    self.s_table[i, j] = (i - 1) * self.s_table[i - 1, j] + self.s_table[i - 1, j - 1]
+
+            return self.s_table[n, k]
+
+        elif n < self.s_table.shape[0] and k >= self.s_table.shape[1]:
+            old_k = self.s_table.shape[1]  # it was "k+1" when invoked with previous k
+            columns_to_add = k + 1 - old_k
+            self.s_table = torch.cat((self.s_table,
+                                      torch.zeros(self.s_table.shape[0], columns_to_add, dtype=torch.float64)), dim=1)
+
+            for i in range(1, n + 1):
+                for j in range(old_k, min(k + 1, i + 1)):
+                    self.s_table[i, j] = (i - 1) * self.s_table[i - 1, j] + self.s_table[i - 1, j - 1]
+            return self.s_table[n, k]
+
+        elif n >= self.s_table.shape[0] and k < self.s_table.shape[1]:
+            old_n = self.s_table.shape[0]  # it was "n+1" when invoked with previous n
+            rows_to_add = n + 1 - old_n
+            self.s_table = torch.cat((self.s_table,
+                                      torch.zeros(rows_to_add, self.s_table.shape[1], dtype=torch.float64)), dim=0)
+
+            for i in range(old_n, n + 1):
+                for j in range(1, min(k + 1, i + 1)):
+                    self.s_table[i, j] = (i - 1) * self.s_table[i - 1, j] + self.s_table[i - 1, j - 1]
+            return self.s_table[n, k]
 
 
 def _compute_unigram(posteriors, use_continuous_states):
@@ -18,17 +80,18 @@ def _compute_unigram(posteriors, use_continuous_states):
 
 def _compute_bigram(posteriors, edge_index, batch, use_continuous_states):
     C = posteriors.shape[1]
+    device = posteriors.get_device()
+    device = 'cpu' if device == -1 else device
 
     if use_continuous_states:
         # Code provided by Daniele Atzeni to speed up the computation!
         nodes_in_batch = len(batch)
         sparse_adj_matrix = torch.sparse.FloatTensor(edge_index,
-                                                     torch.ones(edge_index.shape[1]),
+                                                     torch.ones(edge_index.shape[1]).to(device),
                                                      torch.Size([nodes_in_batch, nodes_in_batch]))
         tmp1 = torch.sparse.mm(sparse_adj_matrix, posteriors.float()).repeat(1, C)
-        tmp2 = posteriors.view(-1, 1).repeat(1, C).view(-1, C * C)
+        tmp2 = posteriors.reshape(-1, 1).repeat(1, C).reshape(-1, C * C)
         node_bigram_batch = torch.mul(tmp1, tmp2)
-
     else:
         # Covert into one hot
         posteriors_one_hot = _make_one_hot(posteriors.argmax(dim=1), C).float()
@@ -36,18 +99,20 @@ def _compute_bigram(posteriors, edge_index, batch, use_continuous_states):
         # Code provided by Daniele Atzeni to speed up the computation!
         nodes_in_batch = len(batch)
         sparse_adj_matrix = torch.sparse.FloatTensor(edge_index,
-                                                     torch.ones(edge_index.shape[1]),
+                                                     torch.ones(edge_index.shape[1]).to(device),
                                                      torch.Size([nodes_in_batch, nodes_in_batch]))
         tmp1 = torch.sparse.mm(sparse_adj_matrix, posteriors_one_hot).repeat(1, C)
-        tmp2 = posteriors_one_hot.view(-1, 1).repeat(1, C).view(-1, C * C)
+        tmp2 = posteriors_one_hot.reshape(-1, 1).repeat(1, C).reshape(-1, C * C)
         node_bigram_batch = torch.mul(tmp1, tmp2)
 
     return node_bigram_batch.double()
 
 
 def _make_one_hot(labels, C):
-    one_hot = torch.zeros(labels.size(0), C)
-    one_hot[torch.arange(labels.size(0)), labels] = 1
+    device = labels.get_device()
+    device = 'cpu' if device == -1 else device
+    one_hot = torch.zeros(labels.size(0), C).to(device)
+    one_hot[torch.arange(labels.size(0)).to(device), labels] = 1
     return one_hot
 
 
@@ -81,13 +146,13 @@ def multivariate_diagonal_pdf(data, mean, var):
     :param var:  vector of variance values, size F
     :return:
     '''
-    tmp =  torch.log(2 * pi)
+    tmp = torch.log(2 * pi)
     try:
         device = 'cuda:' + str(data.get_device())
         tmp = tmp.to(device)
     except Exception as e:
         pass
-        
+
     diff = (data.float() - mean)
     log_normaliser = -0.5 * (tmp + torch.log(var))
     log_num = - (diff * diff) / (2 * var)

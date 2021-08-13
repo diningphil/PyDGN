@@ -11,7 +11,6 @@ class GradientClipping(EventHandler):
     """
     __name__ = 'gradient clipper'
 
-
     def __init__(self, gradient_clipping_class_name, **kwargs):
         """
         Istantiates the gradient clipper object

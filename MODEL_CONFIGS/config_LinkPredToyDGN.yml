@@ -2,7 +2,7 @@ model: model.dgn.toy_dgn.ToyDGN
 experiment: experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
-dataset-getter: data.provider.LinkPredictionSingleGraphDataProvider
+dataset_getter: data.provider.LinkPredictionSingleGraphDataProvider
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device
@@ -21,8 +21,7 @@ grid:
     aggregation:
       - mean
     optimizer:
-      -
-        class_name: training.callback.optimizer.Optimizer
+      - class_name: training.callback.optimizer.Optimizer
         args:
           optimizer_class_name: torch.optim.Adam
           lr: 0.01
@@ -35,17 +34,16 @@ grid:
       - training.callback.loss.ToyLinkPredictionLoss
     scorer:
       #- training.callback.score.MulticlassAccuracyScore
-      -
-        class_name: training.callback.score.MultiScore
+      - class_name: training.callback.score.MultiScore
         args:
-           # used at model selection time. Should be the one on which to perform early stopping
-           #main_scorer: training.callback.score.MulticlassAccuracyScore
-           #my_metric2: training.callback.score.Toy1Score
-           main_scorer: training.callback.score.Toy1Score
+          # used at model selection time. Should be the one on which to perform early stopping
+          #main_scorer: training.callback.score.MulticlassAccuracyScore
+          #my_metric2: training.callback.score.Toy1Score
+          main_scorer: training.callback.score.Toy1Score
     predictor:
       - model.predictor.node_predictor.LinearNodePredictor
     wrapper:
-      - training.engine.TrainingEngine
+      - training.engine.LinkPredictionSingleGraphEngine
     l2:
       - 0.
     gradient_clipping:
@@ -53,8 +51,7 @@ grid:
     dropout:
       - 0.
     early_stopper:
-      -
-        class_name:
+      - class_name:
           - training.callback.early_stopping.PatienceEarlyStopper
         args:
           patience:

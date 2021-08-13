@@ -1,5 +1,5 @@
 splitter:
-  root: SPLITS/
+  root: DATA_SPLITS/
   class_name: data.splitter.LinkPredictionSingleGraphSplitter
   args:
     n_outer_folds: 1

@@ -1,21 +1,19 @@
-import torch
 import os
-import json
-import shutil
 import os.path as osp
-from pathlib import Path
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import networkx as nx
+import shutil
+import sys
 import torch
-from torch_geometric.data import Dataset
-from torch_geometric.data import InMemoryDataset, Data, download_url, extract_zip
-from torch_geometric.utils import from_networkx
+from torch_geometric.data import InMemoryDataset
 from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
-from torch_geometric.io import read_tu_data
+
+# Suppress that "Using backend" message caused by OBG and DGL
+stderr_tmp = sys.stderr
+null = open(os.devnull, 'w')
+sys.stderr = null
 from ogb.graphproppred import PygGraphPropPredDataset
+from dgl.data.utils import load_graphs
+
+sys.stderr = stderr_tmp
 
 
 class ZipDataset(torch.utils.data.Dataset):
@@ -23,6 +21,7 @@ class ZipDataset(torch.utils.data.Dataset):
     This Dataset takes n datasets and "zips" them. When asked for the i-th element, it returns the i-th element of
     all n datasets. The lenght of all datasets must be the same.
     """
+
     def __init__(self, *datasets):
         """
         Stores all datasets in an internal variable.
@@ -49,6 +48,7 @@ class ConcatFromListDataset(InMemoryDataset):
     Args:
         data_list (list): List of graphs.
     """
+
     def __init__(self, data_list):
         super(ConcatFromListDataset, self).__init__("")
         self.data, self.slices = self.collate(data_list)
@@ -61,7 +61,6 @@ class ConcatFromListDataset(InMemoryDataset):
 
 
 class DatasetInterface:
-
     name = None
 
     @property
@@ -75,7 +74,30 @@ class DatasetInterface:
 
 class TUDatasetInterface(TUDataset, DatasetInterface):
 
-    # Do not implement a dummy init function that calls super().__init__, ow it breaks
+    def __init__(self, root, name, transform=None, pre_transform=None, pre_filter=None, use_node_attr=False,
+                 use_edge_attr=False, cleaned=False):
+        super().__init__(root, name, transform, pre_transform, pre_filter, use_node_attr, use_edge_attr, cleaned)
+
+        if 'aspirin' in self.name:
+            # For regression problems
+            if len(self.data.y.shape) == 1:
+                self.data.y = self.data.y.unsqueeze(1)
+            self.data.y = self.data.y / 100000.
+
+        if 'alchemy_full' in self.name or 'QM9' in self.name:
+            # For regression problems
+            if len(self.data.y.shape) == 1:
+                self.data.y = self.data.y.unsqueeze(1)
+
+            # Normalize all target variables (just for stability purposes)
+            mean = self.data.y.mean(0).unsqueeze(0)
+            std = self.data.y.std(0).unsqueeze(0)
+            self.data.y = (self.data.y - mean) / std
+
+        if 'ZINC_full' in self.name:
+            # For regression problems
+            if len(self.data.y.shape) == 1:
+                self.data.y = self.data.y.unsqueeze(1)
 
     @property
     def dim_node_features(self):
@@ -87,6 +109,8 @@ class TUDatasetInterface(TUDataset, DatasetInterface):
 
     @property
     def dim_target(self):
+        if 'alchemy_full' in self.name:
+            return self.data.y.shape[1]
         return self.num_classes
 
     # Needs to be defined in each subclass of torch_geometric.data.Dataset
@@ -234,3 +258,5 @@ class OGBG(PygGraphPropPredDataset, DatasetInterface):
 
     def process(self):
         super().process()
+
+

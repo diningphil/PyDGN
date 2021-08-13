@@ -1,16 +1,14 @@
+import inspect
 import os
 import os.path as osp
-import inspect
-import shutil
 import warnings
-import numpy as np
 
+import numpy as np
 import torch
 from torch_geometric.datasets import TUDataset
 from torch_geometric.transforms import Compose
 
 from experiment.experiment import s2c
-from data.splitter import Splitter
 
 
 def get_or_create_dir(path):
@@ -42,7 +40,6 @@ def get_graph_targets(dataset):
 
 
 def preprocess_data(options):
-
     data_info = options.pop("dataset")
     if "class_name" not in data_info:
         raise ValueError("You must specify 'class_name' in your dataset.")
@@ -97,7 +94,6 @@ def preprocess_data(options):
     kwargs_path = osp.join(data_root, dataset.name, 'processed', 'dataset_kwargs.pt')
     torch.save(dataset_args, kwargs_path)
 
-
     # Process data splits
 
     splits_info = options.pop("splitter")
@@ -109,14 +105,12 @@ def preprocess_data(options):
     splitter = splitter_class(**splitter_args)
 
     splits_dir = get_or_create_dir(osp.join(splits_root, dataset.name))
-    splits_path = osp.join(splits_dir, f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits")
+    splits_path = osp.join(splits_dir,
+                           f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits")
 
     if not os.path.exists(splits_path):
-        # If there is a single target for each element of the dataset,
-        # we can try to stratify samples according to the target
-        # ow (node/link tasks) it is best if the specific splitter does the job for us
-        # todo: this code could be improved to handle different cases more elegantly
         has_targets, targets = get_graph_targets(dataset)
+        # The splitter is in charge of eventual stratifications
         splitter.split(dataset, targets=targets if has_targets else None)
         splitter.save(splits_path)
     else:
@@ -124,11 +118,12 @@ def preprocess_data(options):
 
 
 def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
-    data_root = data_root
-
     # Load arguments
     kwargs_path = osp.join(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
     dataset_args = torch.load(kwargs_path)
+
+    # Overwrite original data_root field, which may have changed
+    dataset_args['root'] = data_root
 
     with warnings.catch_warnings():
         # suppress PyG warnings
@@ -136,12 +131,3 @@ def load_dataset(data_root, dataset_name, dataset_class=TUDataset):
         dataset = dataset_class(**dataset_args)
 
     return dataset
-
-
-def load_splitter(dataset_name, split_root, outer_folds, inner_folds):
-    splits_dir = osp.join(split_root, dataset_name)
-    splits_path = osp.join(splits_dir, f"{dataset_name}_outer{outer_folds}_inner{inner_folds}.splits")
-    splitter = Splitter.load(splits_path)
-    assert splitter.n_inner_folds == inner_folds
-    assert splitter.n_outer_folds == outer_folds
-    return splitter
