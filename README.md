@@ -4,12 +4,12 @@
 
 ## Description
 ![](https://github.com/diningphil/PyDGN/blob/master/images/pydgn-logo.png)
-This is a Python library to easily experiment with [Deep Graph Networks](https://arxiv.org/abs/1912.12693) (DGNs). It provides automatic management of data splitting, loading and the most common experimental settings. It also handles both model selection and risk assessment procedures, by trying many different configurations in parallel (CPU).
+This is a Python library to easily experiment with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S0893608020302197) (DGNs). It provides automatic management of data splitting, loading and the most common experimental settings. It also handles both model selection and risk assessment procedures, by trying many different configurations in parallel (CPU).
 This repository is built upon the [Pytorch Geometric Library](https://pytorch-geometric.readthedocs.io/en/latest/), which provides support for data management.
 
 If you happen to use or modify this code, please remember to cite our tutorial paper:
 
-[Bacciu Davide, Errica Federico, Micheli Alessio, Podda Marco: *A Gentle Introduction to Deep Learning for Graphs*](https://arxiv.org/abs/1912.12693), Neural Networks, 2020. DOI: `10.1016/j.neunet.2020.06.006`.
+[Bacciu Davide, Errica Federico, Micheli Alessio, Podda Marco: *A Gentle Introduction to Deep Learning for Graphs*](https://www.sciencedirect.com/science/article/pii/S0893608020302197), Neural Networks, 2020. DOI: `10.1016/j.neunet.2020.06.006`.
 
 If you are interested in a rigorous evaluation of Deep Graph Networks, check this out:
 
