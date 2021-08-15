@@ -5,8 +5,8 @@ import torch
 from torch.utils.data.sampler import SequentialSampler
 from torch_geometric.data import Data
 
-from experiment.experiment import Experiment
-from experiment.util import s2c
+from pydgn.experiment.experiment import Experiment
+from pydgn.experiment.util import s2c
 
 
 class CGMMTask(Experiment):

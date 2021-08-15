@@ -1,7 +1,7 @@
-model: model.dgn.cgmm.CGMM
-experiment: experiment.cgmm_classifier_task.ClassifierCGMMTask
+model: pydgn.model.dgn.cgmm.CGMM
+experiment: pydgn.experiment.cgmm_classifier_task.ClassifierCGMMTask
 higher_results_are_better: True
-dataset_getter: data.provider.IncrementalDataProvider
+dataset_getter: pydgn.data.provider.IncrementalDataProvider
 log_every: 1
 num_dataloader_workers: 2  # > 0 only with --debug option and GPU device
 pin_memory: True  # True only with --debug option and GPU device
@@ -27,9 +27,9 @@ grid:
     C:
       - 20
     predictor:
-      - model.predictor.node_predictor.UnsupervisedProbabilisticNodeReadout
+      - pydgn.model.predictor.node_predictor.UnsupervisedProbabilisticNodeReadout
     emission:
-      - model.distribution.emission.IndependentMultivariateBernoulliEmission
+      - pydgn.model.distribution.emission.IndependentMultivariateBernoulliEmission
     unibigram:
       - True  # the experiment above will generate embeddings with both unigrams and unibigram representation
     aggregation:
@@ -41,19 +41,19 @@ grid:
     epochs:
       - 10
     wrapper:
-      - training.engine.IncrementalTrainingEngine
+      - pydgn.training.engine.IncrementalTrainingEngine
     loss:
-      - training.callback.loss.CGMMLoss
+      - pydgn.training.callback.loss.CGMMLoss
     optimizer:
-      - training.callback.optimizer.CGMMOptimizer
+      - pydgn.training.callback.optimizer.CGMMOptimizer
     scorer:
-      - class_name: training.callback.score.MultiScore
+      - class_name: pydgn.training.callback.score.MultiScore
         args:
           # used at model selection time. Should be the one on which to perform early stopping
-          main_scorer: training.callback.score.CGMMCompleteLikelihoodScore
-          true_likelihood: training.callback.score.CGMMTrueLikelihoodScore
+          main_scorer: pydgn.training.callback.score.CGMMCompleteLikelihoodScore
+          true_likelihood: pydgn.training.callback.score.CGMMTrueLikelihoodScore
     plotter:
-      - training.callback.plotter.Plotter
+      - pydgn.training.callback.plotter.Plotter
     arbitrary_function_config: # Define the information for the arbitrary function
         shuffle: True
         batch_size:
@@ -69,7 +69,7 @@ grid:
           - 128
           - 256
         optimizer:
-          - class_name: training.callback.optimizer.Optimizer
+          - class_name: pydgn.training.callback.optimizer.Optimizer
             args:
               optimizer_class_name: torch.optim.Adam
               lr:
@@ -78,18 +78,18 @@ grid:
                 - 0.
                 - 0.0005
         loss:
-          - training.callback.loss.MeanAverageErrorLoss
+          - pydgn.training.callback.loss.MeanAverageErrorLoss
         scorer:
-          - training.callback.score.RSquareScore
+          - pydgn.training.callback.score.RSquareScore
         predictor:
           - [your graph predictor]
         readout:
           - sum
         wrapper:
-          - training.engine.TrainingEngine
+          - pydgn.training.engine.TrainingEngine
         early_stopper:
           - class_name:
-              - training.callback.early_stopping.PatienceEarlyStopper
+              - pydgn.training.callback.early_stopping.PatienceEarlyStopper
             args:
               patience:
                 - 1000
@@ -97,4 +97,4 @@ grid:
               mode: max
               checkpoint: True
         plotter:
-          - training.callback.plotter.Plotter
+          - pydgn.training.callback.plotter.Plotter

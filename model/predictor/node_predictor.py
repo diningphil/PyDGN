@@ -1,8 +1,8 @@
 import torch
 import torch.nn as nn
 
-from experiment.util import s2c
-from model.predictor.probabilistic_readout import ProbabilisticReadout
+from pydgn.experiment.util import s2c
+from pydgn.model.predictor.probabilistic_readout import ProbabilisticReadout
 
 
 class ProbabilisticNodeReadout(ProbabilisticReadout):

@@ -3,9 +3,9 @@ import random
 import numpy as np
 import torch
 
-from evaluation.config import Config
-from experiment.util import s2c
-
+from pydgn.evaluation.config import Config
+from pydgn.experiment.util import s2c
+from pydgn.static import DEFAULT_ENGINE_CALLBACK
 
 class Experiment:
     """
@@ -146,7 +146,7 @@ class Experiment:
 
         store_last_checkpoint = config.get('checkpoint', False)
         wrapper_class, wrapper_args = self._return_class_and_args(config, 'wrapper')
-        engine_callback = s2c(wrapper_args.get('engine_callback', 'training.callback.engine_callback.EngineCallback'))
+        engine_callback = s2c(wrapper_args.get('engine_callback', DEFAULT_ENGINE_CALLBACK))
 
         wrapper = wrapper_class(engine_callback=engine_callback, model=model, loss=loss,
                                 optimizer=optimizer, scorer=scorer, scheduler=scheduler,
@@ -173,14 +173,14 @@ class Experiment:
         log_every = self.model_config.log_every
         return self._create_wrapper(self.model_config.layer_config, model, device, log_every)
 
-    def run_valid(self, get_train_val, logger):
+    def run_valid(self, dataset_getter, logger):
         """
         This function returns the training and validation scores
         :return: (training score, validation score)
         """
         raise NotImplementedError('You must implement this function!')
 
-    def run_test(self, get_train_val, get_test, logger):
+    def run_test(self, dataset_getter, logger):
         """
         This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
         :return: (training score, test score)

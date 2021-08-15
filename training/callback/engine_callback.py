@@ -2,9 +2,9 @@ import copy
 import os
 from pathlib import Path
 
-from static import *
-from training.event.handler import EventHandler
-from training.util import atomic_save
+from pydgn.static import *
+from pydgn.training.event.handler import EventHandler
+from pydgn.training.util import atomic_save
 
 
 class EngineCallback(EventHandler):

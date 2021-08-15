@@ -5,10 +5,10 @@ import torch
 from torch.utils.data import Subset
 from torch_geometric.data import Data, DataLoader
 
-from data.dataset import ZipDataset
-from data.sampler import RandomSampler
-from data.splitter import Splitter, LinkPredictionSingleGraphSplitter
-from data.util import load_dataset
+from pydgn.data.dataset import ZipDataset
+from pydgn.data.sampler import RandomSampler
+from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
+from pydgn.data.util import load_dataset
 
 
 def seed_worker(exp_seed, worker_id):

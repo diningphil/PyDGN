@@ -4,12 +4,12 @@ from pathlib import Path
 import torch
 from torch_geometric.data import Data
 
-from static import *
-from training.event.dispatcher import EventDispatcher
-from training.event.handler import EventHandler
-from training.event.state import State
-from training.profiler import Profiler
-from training.util import extend_lists, to_tensor_lists
+from pydgn.static import *
+from pydgn.training.event.dispatcher import EventDispatcher
+from pydgn.training.event.handler import EventHandler
+from pydgn.training.event.state import State
+from pydgn.training.profiler import Profiler
+from pydgn.training.util import extend_lists, to_tensor_lists
 
 
 def log(msg, logger):

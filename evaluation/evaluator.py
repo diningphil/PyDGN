@@ -11,10 +11,10 @@ import numpy as np
 import ray
 import torch
 
-from evaluation.util import ProgressManager
-from experiment.util import s2c
-from log.Logger import Logger
-from static import *
+from pydgn.evaluation.util import ProgressManager
+from pydgn.experiment.util import s2c
+from pydgn.log.Logger import Logger
+from pydgn.static import *
 
 # Ignore warnings
 if not sys.warnoptions:

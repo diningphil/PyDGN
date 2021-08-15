@@ -2,7 +2,7 @@ import torch
 from torch_geometric.nn import global_mean_pool, global_add_pool
 from torch_scatter import scatter_add, scatter_max
 
-from model.util.util import _compute_bigram, _compute_unigram
+from pydgn.model.util.util import _compute_bigram, _compute_unigram
 
 
 class CGMM(torch.nn.Module):

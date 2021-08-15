@@ -1,6 +1,6 @@
 splitter:
   root: DATA_SPLITS/
-  class_name: data.splitter.LinkPredictionSingleGraphSplitter
+  class_name: pydgn.data.splitter.LinkPredictionSingleGraphSplitter
   args:
     n_outer_folds: 10
     n_inner_folds: 1
@@ -14,9 +14,9 @@ splitter:
     run_checks: True  # in case you want to debug the first time. Computes full adj matrix, be careful.
 dataset:
   root: DATA/
-  class_name: data.dataset.LinkPredictionPlanetoid
+  class_name: pydgn.data.dataset.LinkPredictionPlanetoid
   args:
     root: DATA/
     name: pubmed
   transforms:
-    - class_name: data.transform.NormalizeFeatures
+    - class_name: pydgn.data.transform.NormalizeFeatures

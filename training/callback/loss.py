@@ -5,9 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules.loss import MSELoss, L1Loss
 
-from experiment.util import s2c
-from static import *
-from training.event.handler import EventHandler
+from pydgn.experiment.util import s2c
+from pydgn.static import *
+from pydgn.training.event.handler import EventHandler
 
 
 class Loss(nn.Module, EventHandler):

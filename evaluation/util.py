@@ -5,7 +5,7 @@ import random
 
 import tqdm
 
-from static import *
+from pydgn.static import *
 
 
 def set_gpus(num_gpus):

@@ -1,7 +1,7 @@
 import copy
 
-from experiment.util import s2c
-from training.event.handler import EventHandler
+from pydgn.experiment.util import s2c
+from pydgn.training.event.handler import EventHandler
 
 
 class Optimizer(EventHandler):

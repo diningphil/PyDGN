@@ -3,7 +3,7 @@ import os
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch
 
-from experiment.experiment import Experiment
+from pydgn.experiment.experiment import Experiment
 
 
 class SemiSupervisedTask(Experiment):

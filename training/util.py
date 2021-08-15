@@ -2,7 +2,7 @@ import os
 
 import torch
 
-from static import *
+from pydgn.static import *
 
 
 def atomic_save(checkpoint, filepath):

@@ -2,7 +2,7 @@ import bisect
 import datetime
 import time
 
-from training.event.handler import EventHandler
+from pydgn.training.event.handler import EventHandler
 
 
 # Decorator class. Ideas taken from "Fluent Python" book

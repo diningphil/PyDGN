@@ -1,7 +1,7 @@
-model: model.dgn.cgmm.CGMM
-experiment: experiment.cgmm_embedding_task.EmbeddingCGMMTask
+model: pydgn.model.dgn.cgmm.CGMM
+experiment: pydgn.experiment.cgmm_embedding_task.EmbeddingCGMMTask
 higher_results_are_better: True
-dataset_getter: data.provider.IncrementalDataProvider
+dataset_getter: pydgn.data.provider.IncrementalDataProvider
 log_every: 1
 num_dataloader_workers: 2  # > 0 only with --debug option and GPU device
 pin_memory: True  # True only with --debug option and GPU device
@@ -25,9 +25,9 @@ grid:
     C:
       - 20
     predictor:
-      - model.predictor.node_predictor.UnsupervisedProbabilisticNodeReadout
+      - pydgn.model.predictor.node_predictor.UnsupervisedProbabilisticNodeReadout
     emission:
-      - model.distribution.emission.IndependentMultivariateBernoulliEmission
+      - pydgn.model.distribution.emission.IndependentMultivariateBernoulliEmission
     unibigram:
       - True  # the experiment above will generate embeddings with both unigrams and unibigram representation
     aggregation:
@@ -39,16 +39,16 @@ grid:
     epochs:
       - 10
     wrapper:
-      - training.engine.IncrementalTrainingEngine
+      - pydgn.training.engine.IncrementalTrainingEngine
     loss:
-      - training.callback.loss.CGMMLoss
+      - pydgn.training.callback.loss.CGMMLoss
     optimizer:
-      - training.callback.optimizer.CGMMOptimizer
+      - pydgn.training.callback.optimizer.CGMMOptimizer
     scorer:
-      - class_name: training.callback.score.MultiScore
+      - class_name: pydgn.training.callback.score.MultiScore
         args:
           # used at model selection time. Should be the one on which to perform early stopping
-          main_scorer: training.callback.score.CGMMCompleteLikelihoodScore
-          true_likelihood: training.callback.score.CGMMTrueLikelihoodScore
+          main_scorer: pydgn.training.callback.score.CGMMCompleteLikelihoodScore
+          true_likelihood: pydgn.training.callback.score.CGMMTrueLikelihoodScore
     plotter:
-      - training.callback.plotter.Plotter
+      - pydgn.training.callback.plotter.Plotter

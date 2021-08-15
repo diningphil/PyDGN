@@ -1,7 +1,7 @@
 from copy import deepcopy
 
-from experiment.util import s2c
-from static import *
+from pydgn.experiment.util import s2c
+from pydgn.static import *
 
 
 class RandomSearch:

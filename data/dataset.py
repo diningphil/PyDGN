@@ -6,12 +6,11 @@ import torch
 from torch_geometric.data import InMemoryDataset
 from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
 
-# Suppress that "Using backend" message caused by OBG and DGL
+# Suppress that "Using backend" message caused by OBG
 stderr_tmp = sys.stderr
 null = open(os.devnull, 'w')
 sys.stderr = null
 from ogb.graphproppred import PygGraphPropPredDataset
-from dgl.data.utils import load_graphs
 
 sys.stderr = stderr_tmp
 

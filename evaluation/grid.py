@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from static import *
+from pydgn.static import *
 
 
 class Grid:

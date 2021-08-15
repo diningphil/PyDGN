@@ -5,7 +5,8 @@ import torch
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold, train_test_split
 from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
 
-from experiment.util import s2c
+from pydgn.experiment.util import s2c
+from pydgn.static import DATA_SPLITTER_BASE_PATH
 
 
 class Fold:
@@ -66,10 +67,7 @@ class Splitter:
         splits = torch.load(path)
 
         splitter_classname = splits.get("splitter_class", "Splitter")
-        # v0.4.0, backward compatibility with 0.3.2
-        if 'dataset.' in splitter_classname:
-            splitter_classname.replace('datasets.', 'data.')
-        splitter_class = s2c('data.splitter.' + splitter_classname)
+        splitter_class = s2c(DATA_SPLITTER_BASE_PATH + splitter_classname)
 
         splitter_args = splits.get("splitter_args")
         splitter = splitter_class(**splitter_args)

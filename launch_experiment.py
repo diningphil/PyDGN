@@ -1,6 +1,6 @@
 import os
 
-from static import *
+from pydgn.static import *
 
 os.environ[
     OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
@@ -17,9 +17,8 @@ import argparse
 
 import ray
 
-# Disable info logging from rdflib and dgl
+# Disable info logging from rdflib
 logging.getLogger("rdflib").setLevel(logging.WARNING)
-logging.getLogger("dgl").setLevel(logging.ERROR)
 
 # Ignore warnings
 if not sys.warnoptions:
@@ -27,11 +26,11 @@ if not sys.warnoptions:
 
     warnings.simplefilter("ignore")
 
-from data.splitter import Splitter
-from evaluation.grid import Grid
-from evaluation.random_search import RandomSearch
-from evaluation.util import set_gpus
-from experiment.util import s2c
+from pydgn.data.splitter import Splitter
+from pydgn.evaluation.grid import Grid
+from pydgn.evaluation.random_search import RandomSearch
+from pydgn.evaluation.util import set_gpus
+from pydgn.experiment.util import s2c
 
 
 def get_key(key, priority_dict, config_dict):
@@ -111,8 +110,8 @@ def evaluation(args):
     inner_folds, outer_folds = splitter.n_inner_folds, splitter.n_outer_folds
     print(f'Data splits loaded, outer folds are {outer_folds} and inner folds are {inner_folds}')
 
-    # Leave it here, reads env variables set before
-    from evaluation.evaluator import RiskAssesser
+    # WARNING: leave the import here, it reads env variables set before
+    from pydgn.evaluation.evaluator import RiskAssesser
     risk_assesser = RiskAssesser(outer_folds, inner_folds, experiment_class, exp_path, splits_folder,
                                  data_splits_filepath, search,
                                  final_training_runs=final_training_runs,

@@ -1,8 +1,8 @@
-model: model.dgn.toy_dgn.ToyDGN
-experiment: experiment.supervised_task.SupervisedTask
+model: pydgn.model.dgn.toy_dgn.ToyDGN
+experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
-dataset_getter: data.provider.DataProvider
+dataset_getter: pydgn.data.provider.DataProvider
 device: cuda
 num_dataloader_workers: 3  # > 0 only with --debug option and GPU device
 pin_memory: True  # True only with --debug option and GPU device
@@ -22,7 +22,7 @@ grid:
     aggregation:
       - mean
     optimizer:
-      - class_name: training.callback.optimizer.Optimizer
+      - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
           optimizer_class_name: torch.optim.Adam
           lr: 0.01
@@ -31,18 +31,18 @@ grid:
     scheduler:
       - null
     loss:
-      - training.callback.loss.MulticlassClassificationLoss
+      - pydgn.training.callback.loss.MulticlassClassificationLoss
     scorer:
-      #- training.callback.score.MulticlassAccuracyScore
-      - class_name: training.callback.score.MultiScore
+      #- pydgn.training.callback.score.MulticlassAccuracyScore
+      - class_name: pydgn.training.callback.score.MultiScore
         args:
           # used at model selection time. Should be the one on which to perform early stopping
-          main_scorer: training.callback.score.MulticlassAccuracyScore
-          my_metric2: training.callback.score.Toy1Score
+          main_scorer: pydgn.training.callback.score.MulticlassAccuracyScore
+          my_metric2: pydgn.training.callback.score.Toy1Score
     predictor:
-      - model.predictor.graph_predictor.LinearGraphPredictor
+      - pydgn.model.predictor.graph_predictor.LinearGraphPredictor
     wrapper:
-      - training.engine.TrainingEngine
+      - pydgn.training.engine.TrainingEngine
     l2:
       - 0.
     gradient_clipping:
@@ -51,7 +51,7 @@ grid:
       - 0.
     early_stopper:
       - class_name:
-          - training.callback.early_stopping.PatienceEarlyStopper
+          - pydgn.training.callback.early_stopping.PatienceEarlyStopper
         args:
           patience:
             - 5
@@ -60,6 +60,6 @@ grid:
           mode: max
           checkpoint: True
     plotter:
-      - training.callback.plotter.Plotter
+      - pydgn.training.callback.plotter.Plotter
     shuffle:
       - True

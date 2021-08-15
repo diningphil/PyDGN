@@ -1,8 +1,8 @@
-model: model.dgn.toy_dgn.ToyDGN
-experiment: experiment.semi_supervised_task.SemiSupervisedTask
+model: pydgn.model.dgn.toy_dgn.ToyDGN
+experiment: pydgn.experiment.semi_supervised_task.SemiSupervisedTask
 higher_results_are_better: True
 log_every: 1
-dataset_getter: data.provider.DataProvider
+dataset_getter: pydgn.data.provider.DataProvider
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device
@@ -20,9 +20,9 @@ grid:
     aggregation:
       - mean
     optimizer:
-      - class_name: training.callback.optimizer.Optimizer
+      - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
-          optimizer_class_name: torch.optim.Adam
+          optimizer_class_name: pydgn.torch.optim.Adam
           lr: 0.01
           weight_decay: 0.
     scheduler:
@@ -34,7 +34,7 @@ grid:
     predictor:
       - [ A predictor of your choice ]
     wrapper:
-      - training.engine.TrainingEngine
+      - pydgn.training.engine.TrainingEngine
     gradient_clipping:
       - null
     early_stopper:
@@ -54,26 +54,26 @@ grid:
     aggregation:
       - mean
     optimizer:
-      - class_name: training.callback.optimizer.Optimizer
+      - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
-          optimizer_class_name: torch.optim.Adam
+          optimizer_class_name: pydgn.torch.optim.Adam
           lr: 0.01
           weight_decay: 0.
     scheduler:
       - null
     loss:
-      - training.callback.loss.MulticlassClassificationLoss
+      - pydgn.training.callback.loss.MulticlassClassificationLoss
     scorer:
-      - training.callback.score.MulticlassAccuracyScore
+      - pydgn.training.callback.score.MulticlassAccuracyScore
     predictor:
-      - model.predictor.GraphPredictor.LinearGraphPredictor
+      - pydgn.model.predictor.GraphPredictor.LinearGraphPredictor
     wrapper:
-      - training.engine.TrainingEngine
+      - pydgn.training.engine.TrainingEngine
     gradient_clipping:
       - null
     early_stopper:
       - class_name:
-          - training.callback.early_stopping.PatienceEarlyStopper
+          - pydgn.training.callback.early_stopping.PatienceEarlyStopper
         args:
           patience:
             - 5
@@ -81,6 +81,6 @@ grid:
           mode: max
           checkpoint: True
     plotter:
-      - training.callback.plotter.Plotter
+      - pydgn.training.callback.plotter.Plotter
     shuffle:
       - True

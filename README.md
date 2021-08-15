@@ -23,9 +23,10 @@ If you are interested in a rigorous evaluation of Deep Graph Networks, check thi
 
 First, make sure gcc 5.2.0 is installed: ``conda install -c anaconda libgcc=5.2.0``. Then, ``echo $LD_LIBRARY_PATH`` should always contain ``:/home/[your user name]/miniconda3/lib``. Then run from your terminal the following command:
 
-    source install.sh [<your_cuda_version>]
+    source setup/install.sh [<your_cuda_version>]
+    pip install pydgn
 
-Where `<your_cuda_version>` is an optional argument that can be either `cpu`, `cu92`, `cu101`, `cu102` or `cu110` for Pytorch 1.7.0. If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command using `bash` instead of `source`!
+Where `<your_cuda_version>` is an optional argument that can be either `cpu`, `cu102` or `cu111` for Pytorch 1.9.0. If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command using `bash` instead of `source`!
 
 Remember that [PyTorch MacOS Binaries dont support CUDA, install from source if CUDA is needed](https://pytorch.org/get-started/locally/)
 
@@ -54,18 +55,18 @@ Specify a `num_samples` in the config file with the number of random trials, rep
 There is one config file, namely `config_SupToyDGN_RandomSearch.yml`, which you can check to see an example.
 
 ## Data Splits
-We provide the data splits taken from 
+We provide the data splits taken from
 
 [Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
 in the `DATA_SPLITS` folder.
 
 ## Credits:
-This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda)/[Homepage](https://sites.google.com/view/marcopodda/home)), whom I thank for his relentless dedication.
+This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda )/[Homepage](https://sites.google.com/view/marcopodda/home)), whom I thank for his relentless dedication.
 
-Many thanks to **Antonio Carta** ([Github](https://github.com/AntonioCarta)/[Homepage](http://pages.di.unipi.it/carta)) for incorporating the Ray library (see v0.4.0) into PyDGN! This will be of tremendous help.
+Many thanks to **Antonio Carta** ([Github](https://github.com/AntonioCarta )/[Homepage](http://pages.di.unipi.it/carta)) for incorporating the Ray library (see v0.4.0) into PyDGN! This will be of tremendous help.
 
-Many thanks to **Danilo Numeroso** ([Github](https://github.com/danilonumeroso)/[Homepage](https://pages.di.unipi.it/numeroso/)) for implementing a very flexible random search! This is a very convenient alternative to grid search.
+Many thanks to **Danilo Numeroso** ([Github](https://github.com/danilonumeroso )/[Homepage](https://pages.di.unipi.it/numeroso/)) for implementing a very flexible random search! This is a very convenient alternative to grid search.
 
 ## Contributing
 **This research software is provided as-is**. We are working on this library in our spare time.
@@ -76,6 +77,10 @@ If you find a bug, please open an issue to report it, and we will do our best to
 PyDGN is GPL 3.0 licensed, as written in the LICENSE file.
 
 ## Troubleshooting
+As of 15th of August 2021, there is an [issue](https://discuss.pytorch.org/t/warning-leaking-caffe2-thread-pool-after-fork-function-pthreadpool/127559/2) with Pytorch 1.9.0 which impacts the CLI.
+Please update to the nightly version (Pytorch 1.10) to solve the issue.
+
+--
 
 If you get errors like ``/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found``:
 * make sure gcc 5.2.0 is installed: ``conda install -c anaconda libgcc=5.2.0``

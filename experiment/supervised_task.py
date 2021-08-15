@@ -1,4 +1,4 @@
-from experiment.experiment import Experiment
+from pydgn.experiment.experiment import Experiment
 
 
 class SupervisedTask(Experiment):

@@ -28,6 +28,12 @@ BEST_CONFIG = 'best_config'
 OUTER_TRAIN = 'outer_train'
 OUTER_TEST = 'outer_test'
 
+# SPLITTER
+DATA_SPLITTER_BASE_PATH = 'pydgn.data.splitter.'
+
+# ENGINE
+DEFAULT_ENGINE_CALLBACK = 'pydgn.training.callback.engine_callback.EngineCallback'
+
 # STATE
 TRAINING = 'training'
 EVALUATION = 'evaluation'

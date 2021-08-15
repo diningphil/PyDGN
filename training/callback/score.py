@@ -1,9 +1,9 @@
 import torch
 from sklearn.metrics import r2_score, roc_auc_score, average_precision_score
 
-from experiment.util import s2c
-from static import *
-from training.event.handler import EventHandler
+from pydgn.experiment.util import s2c
+from pydgn.static import *
+from pydgn.training.event.handler import EventHandler
 
 
 class Score(EventHandler):

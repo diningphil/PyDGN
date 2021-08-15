@@ -1,6 +1,6 @@
 splitter:
   root: DATA_SPLITS/CHEMICAL
-  class_name: data.splitter.Splitter
+  class_name: pydgn.data.splitter.Splitter
   args:
     n_outer_folds: 10
     n_inner_folds: 1
@@ -11,12 +11,12 @@ splitter:
     test_ratio: 0.1
 dataset:
   root: DATA/
-  class_name: data.dataset.TUDataset
+  class_name: pydgn.data.dataset.TUDataset
   args:
     root: DATA/
     name: PROTEINS
   # useful for social datasets with no node features
   transforms:
-    - class_name: data.transform.ConstantIfEmpty
+    - class_name: pydgn.data.transform.ConstantIfEmpty
       args:
         value: 1

@@ -4,8 +4,8 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.data import DataLoader
 
-from experiment.cgmm_incremental_task import CGMMTask
-from experiment.util import s2c
+from pydgn.experiment.cgmm_incremental_task import CGMMTask
+from pydgn.experiment.util import s2c
 
 
 # This works with graph classification only

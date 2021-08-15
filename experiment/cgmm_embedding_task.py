@@ -3,7 +3,7 @@ import shutil
 
 import torch
 
-from experiment.cgmm_incremental_task import CGMMTask
+from pydgn.experiment.cgmm_incremental_task import CGMMTask
 
 
 # This works with graph classification only

@@ -3,8 +3,8 @@ from pathlib import Path
 
 from torch.utils.tensorboard import SummaryWriter
 
-from static import *
-from training.event.handler import EventHandler
+from pydgn.static import *
+from pydgn.training.event.handler import EventHandler
 
 
 class Plotter(EventHandler):
