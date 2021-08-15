@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from torch.nn import Sequential, Linear, Dropout, BatchNorm1d, ReLU
 from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 from model.predictor.probabilistic_readout import ProbabilisticReadout
 
 

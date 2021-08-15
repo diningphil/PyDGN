@@ -1,6 +1,6 @@
 import torch
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 from training.event.handler import EventHandler
 
 

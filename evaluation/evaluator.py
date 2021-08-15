@@ -12,7 +12,7 @@ import ray
 import torch
 
 from evaluation.util import ProgressManager
-from experiment.experiment import s2c
+from experiment.util import s2c
 from log.Logger import Logger
 from static import *
 

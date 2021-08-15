@@ -5,7 +5,7 @@ import torch
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold, train_test_split
 from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 
 
 class Fold:

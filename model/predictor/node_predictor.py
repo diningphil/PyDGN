@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 from model.predictor.probabilistic_readout import ProbabilisticReadout
 
 

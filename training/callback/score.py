@@ -1,7 +1,7 @@
 import torch
 from sklearn.metrics import r2_score, roc_auc_score, average_precision_score
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 from static import *
 from training.event.handler import EventHandler
 

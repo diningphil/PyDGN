@@ -1,6 +1,6 @@
 from copy import deepcopy
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 from static import *
 
 

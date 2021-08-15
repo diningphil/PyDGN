@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.modules.loss import MSELoss, L1Loss
 
-from experiment.experiment import s2c
+from experiment.util import s2c
 from static import *
 from training.event.handler import EventHandler
 
