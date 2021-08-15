@@ -78,7 +78,7 @@ PyDGN is GPL 3.0 licensed, as written in the LICENSE file.
 
 ## Troubleshooting
 As of 15th of August 2021, there is an [issue](https://discuss.pytorch.org/t/warning-leaking-caffe2-thread-pool-after-fork-function-pthreadpool/127559/2) with Pytorch 1.9.0 which impacts the CLI.
-Please update to the nightly version (Pytorch 1.10) to solve the issue.
+This is why the setup script installs Pytorch 1.8.1 in the `pydgn` conda environment until Pytorch 1.10 is released (known to solve the issue).
 
 --
 

@@ -1,5 +1,5 @@
 # default pytorch version
-PYTORCH_VERSION=1.9.0
+PYTORCH_VERSION=1.8.1
 PYTORCH_GEOMETRIC_VERSION=1.7.2
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
@@ -22,11 +22,14 @@ fi
 conda install jupyter -y
 
 # install torch-geometric dependencies
-pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-pip install torch-geometric==${PYTORCH_GEOMETRIC_VERSION}
+# install torch-geometric dependencies
+#pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+#pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+#pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+#pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
+#pip install torch-geometric==${PYTORCH_GEOMETRIC_VERSION}
+pip install rdflib==6.0.0  # needed by torch_geometric but not instal led by the command below
+conda install pytorch-geometric==${PYTORCH_GEOMETRIC_VERSION} -c rusty1s -c conda-forge
 
 echo "Done. Remember to "
 echo " 1) append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command"
