@@ -35,8 +35,17 @@ Remember that [PyTorch MacOS Binaries dont support CUDA, install from source if 
 ### Preprocess your dataset (see also Wiki)
     python build_dataset.py --config-file [your data config file]
 
+#### Exampla
+
+    python build_dataset.py --config-file DATA_CONFIGS/config_PROTEINS.yml 
+
 ### Launch an experiment in debug mode (see also Wiki)
     python launch_experiment.py --config-file [your exp. config file] --splits-folder [the splits MAIN folder] --data-splits [the splits file] --data-root [root folder of your data] --dataset-name [name of the dataset] --dataset-class [class that handles the dataset] --max-cpus [max cpu parallelism] --max-gpus [max gpu parallelism] --gpus-per-task [how many gpus to allocate for each job] --final-training-runs [how many final runs when evaluating on test. Results are averaged] --result-folder [folder where to store results]
+    
+#### Example (GPU required)
+
+    python launch_experiment.py --config-file MODEL_CONFIGS/config_SupToyDGN_RandomSearch.yml --splits-folder DATA_SPLITS/CHEMICAL/ --data-splits DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits --data-root DATA --dataset-name PROTEINS --dataset-class pydgn.data.dataset.TUDatasetInterface --max-cpus 1 --max-gpus 1 --final-training-runs 1 --result-folder RESULTS/DEBUG
+
 
 To debug your code it is useful to add `--debug` to the command above. Notice, however, that the CLI will not work as expected here, as code will be executed sequentially. After debugging, if you need sequential execution, you can use `--max-cpus 1 --max-gpus 1 --gpus-per-task [0/1]` without the `--debug` option.  
 
