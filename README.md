@@ -15,8 +15,6 @@ If you are interested in a rigorous evaluation of Deep Graph Networks, check thi
 
 [Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
-*New features*
-- Support to multiprocessing in GPU is now provided via Ray (see v0.4.0)!
 
 ## Installation:
 (We assume **git** and **Miniconda/Anaconda** are installed)
