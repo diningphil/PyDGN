@@ -46,7 +46,7 @@ class LinearGraphPredictor(GraphPredictor):
 class SimpleMLPGraphPredictor(GraphPredictor):
 
     def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
-        super(SimpleMLPGraphPredictor, self).__init__()
+        super(SimpleMLPGraphPredictor, self).__init__(dim_node_features, dim_edge_features, dim_target, config)
 
         hidden_units = config['hidden_units']
 
@@ -63,7 +63,7 @@ class SimpleMLPGraphPredictor(GraphPredictor):
 class CGMMGraphPredictor(GraphPredictor):
 
     def __init__(self, dim_node_features, dim_edge_features, dim_target, config):
-        super().__init__()
+        super().__init__(dim_node_features, dim_edge_features, dim_target, config)
 
         original_node_features = dim_node_features[0]
         embeddings_node_features = dim_node_features[1]
