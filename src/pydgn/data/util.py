@@ -74,7 +74,7 @@ def preprocess_data(options):
         dataset_kwargs.update(pre_filter=Compose(pre_filters))
 
     transforms = None
-    transforms_opt = data_info.pop("transforms", None)
+    transforms_opt = data_info.pop("transform", None)
     if transforms_opt is not None:
         transforms = []
         for transform in transforms_opt:
