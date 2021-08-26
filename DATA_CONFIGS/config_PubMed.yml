@@ -18,5 +18,5 @@ dataset:
   args:
     root: DATA/
     name: pubmed
-  transforms:
+  transform:
     - class_name: pydgn.data.transform.NormalizeFeatures

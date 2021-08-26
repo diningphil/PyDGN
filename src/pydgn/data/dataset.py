@@ -6,12 +6,12 @@ import torch
 from torch_geometric.data import InMemoryDataset
 from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
 
-# Suppress that "Using backend" message caused by OBG
+# Trying to suppress that "Outdated version" message caused by OBG
 stderr_tmp = sys.stderr
 null = open(os.devnull, 'w')
 sys.stderr = null
 from ogb.graphproppred import PygGraphPropPredDataset
-
+from ogb.utils.url import decide_download, download_url, extract_zip
 sys.stderr = stderr_tmp
 
 
@@ -243,7 +243,6 @@ class OGBG(PygGraphPropPredDataset, DatasetInterface):
         return ['data.pt']
 
     def download(self):
-        from ogb.utils.url import decide_download, download_url, extract_zip
         url = self.meta_info['url']
         if decide_download(url):
             path = download_url(url, self.original_root)

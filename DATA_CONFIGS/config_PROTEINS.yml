@@ -16,7 +16,7 @@ dataset:
     root: DATA/
     name: PROTEINS
   # useful for social datasets with no node features
-  transforms:
+  transform:
     - class_name: pydgn.data.transform.ConstantIfEmpty
       args:
         value: 1

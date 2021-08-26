@@ -1,6 +1,24 @@
 # Changelog
 
-## [0.5.0] - Support to CUDA 11 (see setup) + Pytorch 1.7.0, random search, and many fixes
+## [0.5.1] - Code for E-CGMM + Minor fixes
+
+# TODO (decreasing priority):
+
+- Add Multi-GPU training option for a single configuration
+- Add shared dataset functionality
+
+### Added
+
+- Code for E-CGMM ("Modeling Edge Features with Deep Bayesian Graph Networks", IJCNN 2021)
+- ConstantEdgeIfEmpty transform (used by e.g., E-CGMM)
+
+### Fixed
+
+- Changed name from `transforms` to `transform` for data preprocessing config files (backward compatible)
+- Minor fix when handling edge data with incremental models like E-CGMM
+- Fix in graph predictor: forgot to pass arguments to super when inheriting from `GraphPredictor`
+
+## [0.5.0] - Pytorch 1.8.1, random search, and many fixes
 
 # TODO (decreasing priority):
 

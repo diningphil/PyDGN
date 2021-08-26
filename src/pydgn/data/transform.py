@@ -15,11 +15,25 @@ class ConstantIfEmpty:
         if data.x is None:
             c = torch.full((data.num_nodes, 1), self.value, dtype=torch.float)
             data.x = c
+        return data
 
+    def __repr__(self):
+        return '{}(value={})'.format(self.__class__.__name__, self.value)
+
+
+class ConstantEdgeIfEmpty:
+    r"""Adds a constant value to each edge feature only if edge_attr is None.
+    Args:
+        value (int, optional): The value to add. (default: :obj:`1`)
+    """
+
+    def __init__(self, value=1):
+        self.value = value
+
+    def __call__(self, data):
         if data.edge_attr is None:
             c = torch.full((data.edge_index.shape[1], 1), self.value, dtype=torch.float)
             data.edge_attr = c
-
         return data
 
     def __repr__(self):
