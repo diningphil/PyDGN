@@ -86,7 +86,7 @@ def to_tensor_lists(embeddings, batch, edge_index):
     _, node_counts = torch.unique_consecutive(batch, return_counts=True)
     node_cumulative = torch.cumsum(node_counts, dim=0)
 
-    if e_out is not None:
+    if e_out is not None or eo_out is not None:
         edge_batch = batch[edge_index[0]]
         _, edge_counts = torch.unique_consecutive(edge_batch, return_counts=True)
         edge_cumulative = torch.cumsum(edge_counts, dim=0)
