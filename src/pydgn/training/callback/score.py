@@ -274,16 +274,6 @@ class MulticlassAccuracyScore(BinaryAccuracyScore):
         return 100. * (correct == targets).sum().float() / targets.size(0)
 
 
-class LikelihoodScore(Score):
-    __name__ = 'True Log Likelihood'
-
-    def __init__(self):
-        super().__init__()
-
-    def _score_fun(self, targets, *outputs, batch_loss_extra):
-        return outputs[3]
-
-
 class CGMMCompleteLikelihoodScore(Score):
     __name__ = 'Complete Log Likelihood'
 
