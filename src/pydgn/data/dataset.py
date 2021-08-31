@@ -77,27 +77,6 @@ class TUDatasetInterface(TUDataset, DatasetInterface):
                  use_edge_attr=False, cleaned=False):
         super().__init__(root, name, transform, pre_transform, pre_filter, use_node_attr, use_edge_attr, cleaned)
 
-        if 'aspirin' in self.name:
-            # For regression problems
-            if len(self.data.y.shape) == 1:
-                self.data.y = self.data.y.unsqueeze(1)
-            self.data.y = self.data.y / 100000.
-
-        if 'alchemy_full' in self.name or 'QM9' in self.name:
-            # For regression problems
-            if len(self.data.y.shape) == 1:
-                self.data.y = self.data.y.unsqueeze(1)
-
-            # Normalize all target variables (just for stability purposes)
-            mean = self.data.y.mean(0).unsqueeze(0)
-            std = self.data.y.std(0).unsqueeze(0)
-            self.data.y = (self.data.y - mean) / std
-
-        if 'ZINC_full' in self.name:
-            # For regression problems
-            if len(self.data.y.shape) == 1:
-                self.data.y = self.data.y.unsqueeze(1)
-
     @property
     def dim_node_features(self):
         return self.num_features
