@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.5.2] - In progress
+
+# TODO (decreasing priority):
+
+- Add Multi-GPU training option for a single configuration
+- Add shared dataset functionality
+
+### Fixed
+
+- Removed old code in `TUDatasetInterface`
+
 ## [0.5.1] - Code for E-CGMM + Minor fixes
 
 # TODO (decreasing priority):
