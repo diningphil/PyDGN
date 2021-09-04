@@ -90,8 +90,6 @@ def evaluation(args):
     set_gpus(max_gpus)
 
     if not use_cuda:
-        warning_str = "Users should not change default GPU argument values when using CPU devices, It is useless and probably a mistake"
-        assert max_gpus <= 1 and gpus_per_task <= 1, str
         max_gpus = 0
         gpus_per_task = 0
 

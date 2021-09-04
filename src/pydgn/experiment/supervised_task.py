@@ -1,3 +1,4 @@
+from pydgn.static import LOSS, SCORE
 from pydgn.experiment.experiment import Experiment
 
 
@@ -28,12 +29,15 @@ class SupervisedTask(Experiment):
 
         train_loss, train_score, _, \
         val_loss, val_score, _, \
-        test_loss, test_score, _ = supervised_training_wrapper.train(
+        _, _, _ = supervised_training_wrapper.train(
             train_loader=train_loader,
             validation_loader=val_loader,
             test_loader=None,
             max_epochs=self.model_config.supervised_config['epochs'],
             logger=logger)
+        # train_res = {LOSS: train_loss, SCORE: train_score}
+        # val_res = {LOSS: val_loss, SCORE: val_score}
+        # return train_res, val_res
         return train_score, val_score
 
     def run_test(self, dataset_getter, logger):
@@ -68,4 +72,9 @@ class SupervisedTask(Experiment):
             max_epochs=self.model_config.supervised_config['epochs'],
             logger=logger)
 
+        # train_res = {LOSS: train_loss, SCORE: train_score}
+        # val_res = {LOSS: val_loss, SCORE: val_score}
+        # test_res = {LOSS: test_loss, SCORE: test_score}
+        # return train_res, val_res, test_res
         return train_score, test_score
+

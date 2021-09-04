@@ -1,6 +1,7 @@
 import os
 
 import torch
+from pydgn.static import LOSS, SCORE
 from torch_geometric.data import Data
 from torch_geometric.data import DataLoader
 
@@ -75,7 +76,9 @@ class ClassifierCGMMTask(CGMMTask):
                                           max_epochs=config['epochs'],
                                           logger=logger)
 
-        return train_score, val_score
+        train_res = {LOSS: train_loss, SCORE: train_score}
+        val_res = {LOSS: val_loss, SCORE: val_score}
+        return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
         """
@@ -153,4 +156,8 @@ class ClassifierCGMMTask(CGMMTask):
                                                            max_epochs=config['epochs'],
                                                            logger=logger)
 
-        return train_score, test_score
+        train_res = {LOSS: train_loss, SCORE: train_score}
+        val_res = {LOSS: val_loss, SCORE: val_score}
+        test_res = {LOSS: test_loss, SCORE: test_score}
+        return train_res, val_res, test_res
+

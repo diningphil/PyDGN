@@ -3,6 +3,7 @@ import os
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch
 
+from pydgn.static import LOSS, SCORE
 from pydgn.experiment.experiment import Experiment
 
 
@@ -83,7 +84,9 @@ class SemiSupervisedTask(Experiment):
                                                     max_epochs=supervised_config['epochs'],
                                                     logger=logger)
 
-        return train_score, val_score
+        train_res = {LOSS: train_loss, SCORE: train_score}
+        val_res = {LOSS: val_loss, SCORE: val_score}
+        return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
         """
@@ -151,11 +154,15 @@ class SemiSupervisedTask(Experiment):
         supervised_training_wrapper = self.create_supervised_wrapper(model)
 
         train_loss, train_score, _, \
-        _, _, _, \
+        val_loss, val_score, _, \
         test_loss, test_score, _ = supervised_training_wrapper.train(train_loader=train_loader,
                                                                      validation_loader=val_loader,
                                                                      test_loader=test_loader,
                                                                      max_epochs=supervised_config['epochs'],
                                                                      logger=logger)
 
-        return train_score, test_score
+        train_res = {LOSS: train_loss, SCORE: train_score}
+        val_res = {LOSS: val_loss, SCORE: val_score}
+        test_res = {LOSS: test_loss, SCORE: test_score}
+        return train_res, val_res, test_res
+

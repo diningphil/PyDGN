@@ -22,7 +22,7 @@ grid:
     optimizer:
       - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
-          optimizer_class_name: pydgn.torch.optim.Adam
+          optimizer_class_name: torch.optim.Adam
           lr: 0.01
           weight_decay: 0.
     scheduler:
@@ -56,7 +56,7 @@ grid:
     optimizer:
       - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
-          optimizer_class_name: pydgn.torch.optim.Adam
+          optimizer_class_name: torch.optim.Adam
           lr: 0.01
           weight_decay: 0.
     scheduler:

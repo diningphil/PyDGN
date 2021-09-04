@@ -354,7 +354,7 @@ class TrainingEngine(EventDispatcher):
 
                 # Log performances
                 if epoch % self.log_every == 0 or epoch == 1:
-                    msg = f'Epoch: {epoch}, TR loss: {train_loss} TR score: {train_score}' + val_msg_str + test_msg_str
+                    msg = f'Epoch: {epoch+1}, TR loss: {train_loss} TR score: {train_score}' + val_msg_str + test_msg_str
                     log(msg, logger)
 
                 if self.state.stop_training:
