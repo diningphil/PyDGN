@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.0] - In progress
+## [0.6.0] - Evaluator's Refactoring
 
 # TODO (decreasing priority):
 
@@ -9,7 +9,12 @@
 
 ### Added
 
-- Refactored evaluator to store and display values for the loss used. Also, validation of final runs is kept.
+- Evaluator now stores and displays values for the loss used. Also, validation of final runs is kept.
+
+### Modified
+
+- Heavy refactoring of the evaluator
+
 
 ### Fixed
 

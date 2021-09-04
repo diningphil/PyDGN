@@ -35,6 +35,7 @@ class SupervisedTask(Experiment):
             test_loader=None,
             max_epochs=self.model_config.supervised_config['epochs'],
             logger=logger)
+
         train_res = {LOSS: train_loss, SCORE: train_score}
         val_res = {LOSS: val_loss, SCORE: val_score}
         return train_res, val_res

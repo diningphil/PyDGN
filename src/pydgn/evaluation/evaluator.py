@@ -440,10 +440,14 @@ class RiskAssesser:
                 training_score, validation_score = training_res[SCORE], validation_res[SCORE]
 
                 for key in training_loss.keys():
+                    if MAIN_LOSS in key:
+                        continue
                     k_fold_dict[FOLDS][k][f'{TRAINING}_{key}_{LOSS}'] = float(training_loss[key])
                     k_fold_dict[FOLDS][k][f'{VALIDATION}_{key}_{LOSS}'] = float(validation_loss[key])
 
                 for key in training_score.keys():
+                    if MAIN_SCORE in key:
+                        continue
                     k_fold_dict[FOLDS][k][f'{TRAINING}_{key}_{SCORE}'] = float(training_score[key])
                     k_fold_dict[FOLDS][k][f'{VALIDATION}_{key}_{SCORE}'] = float(validation_score[key])
 
@@ -451,6 +455,10 @@ class RiskAssesser:
                 k_fold_dict[FOLDS][k][VL_LOSS] = float(validation_loss[MAIN_LOSS])
                 k_fold_dict[FOLDS][k][TR_SCORE] = float(training_score[MAIN_SCORE])
                 k_fold_dict[FOLDS][k][VL_SCORE] = float(validation_score[MAIN_SCORE])
+                del training_loss[MAIN_LOSS]
+                del validation_loss[MAIN_LOSS]
+                del training_score[MAIN_SCORE]
+                del validation_score[MAIN_SCORE]
 
             # Backward compatibility wrt PyDGN <= 0.5.1
             else:
@@ -567,8 +575,7 @@ class RiskAssesser:
                 else:
                     training_res, validation_res, test_res, _ = res
                     training_loss, validation_loss, test_loss = training_res[LOSS], validation_res[LOSS], test_res[LOSS]
-                    training_score, validation_score, test_score = training_res[SCORE], validation_res[SCORE], test_res[
-                        SCORE]
+                    training_score, validation_score, test_score = training_res[SCORE], validation_res[SCORE], test_res[SCORE]
 
                     training_losses.append(training_loss)
                     validation_losses.append(validation_loss)
@@ -589,10 +596,12 @@ class RiskAssesser:
                     # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
                     for res_type, res in [(LOSS, losses), (SCORE, scores)]:
                         for set_score, set_dict, set_scores in res:
-                            for k in set_score.keys():
-                                set_dict[k + f'_{res_type}'] = np.mean([float(set_run[k])
+                            for key in set_score.keys():
+                                # TODO perche' questo scombussola il risultato? SEMBRA SUCCEDA IN process_outer_results
+                                suffix = f'_{res_type}' if (key != MAIN_LOSS and key != MAIN_SCORE) else ''
+                                set_dict[key + suffix] = np.mean([float(set_run[key])
                                                                         for set_run in set_scores])
-                                set_dict[k + f'_{res_type}_{STD}'] = np.std([float(set_run[k])
+                                set_dict[key + f'{suffix}_{STD}'] = np.std([float(set_run[key])
                                                                              for set_run in set_scores])
 
         with open(osp.join(outer_folder, self._OUTER_RESULTS_FILENAME), 'w') as fp:
@@ -626,6 +635,7 @@ class RiskAssesser:
 
                 # Backward compatibility wrt PyDGN <= 0.5.1
                 backward_compatibility = OUTER_VALIDATION not in outer_fold_results
+
                 if not backward_compatibility:
                     outer_vl_results.append(outer_fold_results[OUTER_VALIDATION])
 
