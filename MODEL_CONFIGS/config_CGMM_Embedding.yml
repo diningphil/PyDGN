@@ -9,7 +9,7 @@ device: cuda
 seed: 42
 grid:
   layer_config:
-    embeddings_folder: [path where to save embeddings]
+    embeddings_folder: [ path where to save embeddings ]
     checkpoint: True
     batch_size:
       - 256

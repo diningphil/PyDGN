@@ -1,5 +1,5 @@
-from pydgn.static import LOSS, SCORE
 from pydgn.experiment.experiment import Experiment
+from pydgn.static import LOSS, SCORE
 
 
 class SupervisedTask(Experiment):
@@ -35,10 +35,9 @@ class SupervisedTask(Experiment):
             test_loader=None,
             max_epochs=self.model_config.supervised_config['epochs'],
             logger=logger)
-        # train_res = {LOSS: train_loss, SCORE: train_score}
-        # val_res = {LOSS: val_loss, SCORE: val_score}
-        # return train_res, val_res
-        return train_score, val_score
+        train_res = {LOSS: train_loss, SCORE: train_score}
+        val_res = {LOSS: val_loss, SCORE: val_score}
+        return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
         """
@@ -72,9 +71,7 @@ class SupervisedTask(Experiment):
             max_epochs=self.model_config.supervised_config['epochs'],
             logger=logger)
 
-        # train_res = {LOSS: train_loss, SCORE: train_score}
-        # val_res = {LOSS: val_loss, SCORE: val_score}
-        # test_res = {LOSS: test_loss, SCORE: test_score}
-        # return train_res, val_res, test_res
-        return train_score, test_score
-
+        train_res = {LOSS: train_loss, SCORE: train_score}
+        val_res = {LOSS: val_loss, SCORE: val_score}
+        test_res = {LOSS: test_loss, SCORE: test_score}
+        return train_res, val_res, test_res

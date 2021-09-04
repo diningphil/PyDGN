@@ -9,7 +9,7 @@ device: cpu
 seed: 42
 grid:
   layer_config:
-    embeddings_folder: [path where to load embeddings from]
+    embeddings_folder: [ path where to load embeddings from ]
     checkpoint: True
     batch_size:
       - 256
@@ -55,46 +55,46 @@ grid:
     plotter:
       - pydgn.training.callback.plotter.Plotter
     arbitrary_function_config: # Define the information for the arbitrary function
-        shuffle: True
-        batch_size:
-          - 256
-        checkpoint: True
-        log_every: 1
-        num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-        pin_memory: False  # True only with --debug option and GPU device
-        device: cpu
-        epochs:
-          - 10000
-        hidden_units:
-          - 128
-          - 256
-        optimizer:
-          - class_name: pydgn.training.callback.optimizer.Optimizer
-            args:
-              optimizer_class_name: torch.optim.Adam
-              lr:
-                - 0.001
-              weight_decay:
-                - 0.
-                - 0.0005
-        loss:
-          - pydgn.training.callback.loss.MeanAverageErrorLoss
-        scorer:
-          - pydgn.training.callback.score.RSquareScore
-        predictor:
-          - [your graph predictor]
-        readout:
-          - sum
-        wrapper:
-          - pydgn.training.engine.TrainingEngine
-        early_stopper:
-          - class_name:
-              - pydgn.training.callback.early_stopping.PatienceEarlyStopper
-            args:
-              patience:
-                - 1000
-              monitor: validation_R2 Determination Coefficient # (train_,validation_)[name_of_the_scorer_or_loss_to_monitor]
-              mode: max
-              checkpoint: True
-        plotter:
-          - pydgn.training.callback.plotter.Plotter
+      shuffle: True
+      batch_size:
+        - 256
+      checkpoint: True
+      log_every: 1
+      num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
+      pin_memory: False  # True only with --debug option and GPU device
+      device: cpu
+      epochs:
+        - 10000
+      hidden_units:
+        - 128
+        - 256
+      optimizer:
+        - class_name: pydgn.training.callback.optimizer.Optimizer
+          args:
+            optimizer_class_name: torch.optim.Adam
+            lr:
+              - 0.001
+            weight_decay:
+              - 0.
+              - 0.0005
+      loss:
+        - pydgn.training.callback.loss.MeanAverageErrorLoss
+      scorer:
+        - pydgn.training.callback.score.RSquareScore
+      predictor:
+        - [ your graph predictor ]
+      readout:
+        - sum
+      wrapper:
+        - pydgn.training.engine.TrainingEngine
+      early_stopper:
+        - class_name:
+            - pydgn.training.callback.early_stopping.PatienceEarlyStopper
+          args:
+            patience:
+              - 1000
+            monitor: validation_R2 Determination Coefficient # (train_,validation_)[name_of_the_scorer_or_loss_to_monitor]
+            mode: max
+            checkpoint: True
+      plotter:
+        - pydgn.training.callback.plotter.Plotter

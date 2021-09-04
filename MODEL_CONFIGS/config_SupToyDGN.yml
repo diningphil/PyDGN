@@ -31,7 +31,10 @@ grid:
     scheduler:
       - null
     loss:
-      - pydgn.training.callback.loss.MulticlassClassificationLoss
+      class_name: pydgn.training.callback.loss.AdditiveLoss
+      args:
+        loss1: pydgn.training.callback.loss.MulticlassClassificationLoss
+        loss2: pydgn.training.callback.loss.MulticlassClassificationLoss
     scorer:
       #- pydgn.training.callback.score.MulticlassAccuracyScore
       - class_name: pydgn.training.callback.score.MultiScore

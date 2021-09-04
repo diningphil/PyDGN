@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
 
-from torch.utils.tensorboard import SummaryWriter
-
 from pydgn.static import *
 from pydgn.training.event.handler import EventHandler
+from torch.utils.tensorboard import SummaryWriter
 
 
 class Plotter(EventHandler):

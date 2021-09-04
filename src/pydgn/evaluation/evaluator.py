@@ -10,7 +10,6 @@ from copy import deepcopy
 import numpy as np
 import ray
 import torch
-
 from pydgn.evaluation.util import ProgressManager
 from pydgn.experiment.util import s2c
 from pydgn.log.Logger import Logger
@@ -467,27 +466,16 @@ class RiskAssesser:
 
         # PyDGN > 0.5.1
         if not backward_compatibility:
-            for key in list(training_loss.keys()) + [LOSS]:
-                suffix = f'_{LOSS}' if key != LOSS else ''
-                tr_losses = np.array([k_fold_dict[FOLDS][i][f'{TRAINING}_{key}{suffix}']
-                                      for i in range(self.inner_folds)])
-                vl_losses = np.array([k_fold_dict[FOLDS][i][f'{VALIDATION}_{key}{suffix}']
-                                      for i in range(self.inner_folds)])
-                k_fold_dict[f'{AVG}_{TRAINING}_{key}{suffix}'] = float(tr_losses.mean())
-                k_fold_dict[f'{STD}_{TRAINING}_{key}{suffix}'] = float(tr_losses.std())
-                k_fold_dict[f'{AVG}_{VALIDATION}_{key}{suffix}'] = float(vl_losses.mean())
-                k_fold_dict[f'{STD}_{VALIDATION}_{key}{suffix}'] = float(vl_losses.std())
 
-            for key in list(training_score.keys()) + [SCORE]:
-                suffix = f'_{SCORE}' if key != SCORE else ''
-                tr_scores = np.array([k_fold_dict[FOLDS][i][f'{TRAINING}_{key}{suffix}']
-                                      for i in range(self.inner_folds)])
-                vl_scores = np.array([k_fold_dict[FOLDS][i][f'{VALIDATION}_{key}{suffix}']
-                                      for i in range(self.inner_folds)])
-                k_fold_dict[f'{AVG}_{TRAINING}_{key}{suffix}'] = float(tr_scores.mean())
-                k_fold_dict[f'{STD}_{TRAINING}_{key}{suffix}'] = float(tr_scores.std())
-                k_fold_dict[f'{AVG}_{VALIDATION}_{key}{suffix}'] = float(vl_scores.mean())
-                k_fold_dict[f'{STD}_{VALIDATION}_{key}{suffix}'] = float(vl_scores.std())
+            for key_dict, set_type, res_type in [(training_loss, TRAINING, LOSS), (validation_loss, VALIDATION, LOSS),
+                                                 (training_score, TRAINING, SCORE),
+                                                 (validation_score, VALIDATION, SCORE)]:
+                for key in list(key_dict.keys()) + [res_type]:
+                    suffix = f'_{res_type}' if key != res_type else ''
+                    set_losses = np.array([k_fold_dict[FOLDS][i][f'{set_type}_{key}{suffix}']
+                                           for i in range(self.inner_folds)])
+                    k_fold_dict[f'{AVG}_{set_type}_{key}{suffix}'] = float(set_losses.mean())
+                    k_fold_dict[f'{STD}_{set_type}_{key}{suffix}'] = float(set_losses.std())
 
         # Backward compatibility wrt PyDGN <= 0.5.1
         else:
@@ -558,6 +546,7 @@ class RiskAssesser:
                     test_scores.append(test_score)
 
                     tr_res = {}
+                    # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
                     for k in training_score.keys():
                         tr_res[k] = np.mean([float(tr_run[k])
                                              for tr_run in training_scores])
@@ -567,6 +556,7 @@ class RiskAssesser:
                     vl_res = None
 
                     te_res = {}
+                    # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
                     for k in test_score.keys():
                         te_res[k] = np.mean([float(te_run[k])
                                              for te_run in test_scores])
@@ -577,7 +567,8 @@ class RiskAssesser:
                 else:
                     training_res, validation_res, test_res, _ = res
                     training_loss, validation_loss, test_loss = training_res[LOSS], validation_res[LOSS], test_res[LOSS]
-                    training_score, validation_score, test_score = training_res[SCORE], validation_res[SCORE], test_res[SCORE]
+                    training_score, validation_score, test_score = training_res[SCORE], validation_res[SCORE], test_res[
+                        SCORE]
 
                     training_losses.append(training_loss)
                     validation_losses.append(validation_loss)
@@ -587,41 +578,22 @@ class RiskAssesser:
                     validation_scores.append(validation_score)
                     test_scores.append(test_score)
 
-                    tr_res = {}
-                    for k in training_score.keys():
-                        tr_res[k + f'_{SCORE}'] = np.mean([float(tr_run[k])
-                                             for tr_run in training_scores])
-                        tr_res[k + f'_{SCORE}_{STD}'] = np.std([float(tr_run[k])
-                                                        for tr_run in training_scores])
-                    for k in training_loss.keys():
-                        tr_res[k + f'_{LOSS}'] = np.mean([float(tr_run[k])
-                                             for tr_run in training_losses])
-                        tr_res[k + f'_{LOSS}_{STD}'] = np.std([float(tr_run[k])
-                                                        for tr_run in training_losses])
+                    tr_res, vl_res, te_res = {}, {}, {}
 
-                    vl_res = {}
-                    for k in validation_score.keys():
-                        vl_res[k + f'_{SCORE}'] = np.mean([float(vl_run[k])
-                                             for vl_run in validation_scores])
-                        vl_res[k + f'_{SCORE}_{STD}'] = np.std([float(vl_run[k])
-                                                        for vl_run in validation_scores])
-                    for k in validation_loss.keys():
-                        vl_res[k + f'_{LOSS}'] = np.mean([float(vl_run[k])
-                                             for vl_run in validation_losses])
-                        vl_res[k + f'_{LOSS}_{STD}'] = np.std([float(vl_run[k])
-                                                        for vl_run in validation_losses])
-
-                    te_res = {}
-                    for k in test_score.keys():
-                        te_res[k + f'_{SCORE}'] = np.mean([float(te_run[k])
-                                             for te_run in test_scores])
-                        te_res[k + f'_{SCORE}_{STD}'] = np.std([float(te_run[k])
-                                                        for te_run in test_scores])
-                    for k in test_loss.keys():
-                        te_res[k + f'_{LOSS}'] = np.mean([float(te_run[k])
-                                             for te_run in test_losses])
-                        te_res[k + f'_{LOSS}_{STD}'] = np.std([float(te_run[k])
-                                                        for te_run in test_losses])
+                    scores = [(training_score, tr_res, training_scores),
+                              (validation_score, vl_res, validation_scores),
+                              (test_score, te_res, test_scores)]
+                    losses = [(training_loss, tr_res, training_losses),
+                              (validation_loss, vl_res, validation_losses),
+                              (test_loss, te_res, test_losses)]
+                    # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
+                    for res_type, res in [(LOSS, losses), (SCORE, scores)]:
+                        for set_score, set_dict, set_scores in res:
+                            for k in set_score.keys():
+                                set_dict[k + f'_{res_type}'] = np.mean([float(set_run[k])
+                                                                        for set_run in set_scores])
+                                set_dict[k + f'_{res_type}_{STD}'] = np.std([float(set_run[k])
+                                                                             for set_run in set_scores])
 
         with open(osp.join(outer_folder, self._OUTER_RESULTS_FILENAME), 'w') as fp:
 
@@ -664,14 +636,18 @@ class RiskAssesser:
                     if k[-3:] == STD:
                         continue
                     tr_results = np.array([res[k] for res in outer_tr_results])
+
                     if not backward_compatibility:
                         vl_results = np.array([res[k] for res in outer_vl_results])
+
                     ts_results = np.array([res[k] for res in outer_ts_results])
                     assessment_results[f'{AVG}_{TRAINING}_{k}'] = tr_results.mean()
                     assessment_results[f'{STD}_{TRAINING}_{k}'] = tr_results.std()
+
                     if not backward_compatibility:
                         assessment_results[f'{AVG}_{VALIDATION}_{k}'] = vl_results.mean()
                         assessment_results[f'{STD}_{VALIDATION}_{k}'] = vl_results.std()
+
                     assessment_results[f'{AVG}_{TEST}_{k}'] = ts_results.mean()
                     assessment_results[f'{STD}_{TEST}_{k}'] = ts_results.std()
 

@@ -2,12 +2,11 @@ import os
 import shutil
 
 import torch
+from pydgn.experiment.experiment import Experiment
+from pydgn.experiment.util import s2c
 from pydgn.static import LOSS, SCORE
 from torch.utils.data.sampler import SequentialSampler
 from torch_geometric.data import Data
-
-from pydgn.experiment.experiment import Experiment
-from pydgn.experiment.util import s2c
 
 
 class CGMMTask(Experiment):

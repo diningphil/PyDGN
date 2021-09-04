@@ -4,7 +4,6 @@ import os
 import random
 
 import tqdm
-
 from pydgn.static import *
 
 

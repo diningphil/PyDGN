@@ -1,12 +1,11 @@
 import os
 
 import torch
+from pydgn.experiment.cgmm_incremental_task import CGMMTask
+from pydgn.experiment.util import s2c
 from pydgn.static import LOSS, SCORE
 from torch_geometric.data import Data
 from torch_geometric.data import DataLoader
-
-from pydgn.experiment.cgmm_incremental_task import CGMMTask
-from pydgn.experiment.util import s2c
 
 
 # This works with graph classification only
@@ -160,4 +159,3 @@ class ClassifierCGMMTask(CGMMTask):
         val_res = {LOSS: val_loss, SCORE: val_score}
         test_res = {LOSS: test_loss, SCORE: test_score}
         return train_res, val_res, test_res
-

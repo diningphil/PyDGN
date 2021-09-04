@@ -2,10 +2,10 @@ import random
 
 import numpy as np
 import torch
-
 from pydgn.evaluation.config import Config
 from pydgn.experiment.util import s2c
 from pydgn.static import DEFAULT_ENGINE_CALLBACK
+
 
 class Experiment:
     """

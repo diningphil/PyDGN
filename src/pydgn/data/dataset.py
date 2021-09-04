@@ -2,6 +2,7 @@ import os
 import os.path as osp
 import shutil
 import sys
+
 import torch
 from torch_geometric.data import InMemoryDataset
 from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
@@ -12,6 +13,7 @@ null = open(os.devnull, 'w')
 sys.stderr = null
 from ogb.graphproppred import PygGraphPropPredDataset
 from ogb.utils.url import decide_download, download_url, extract_zip
+
 sys.stderr = stderr_tmp
 
 
@@ -235,5 +237,3 @@ class OGBG(PygGraphPropPredDataset, DatasetInterface):
 
     def process(self):
         super().process()
-
-

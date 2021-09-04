@@ -1,15 +1,20 @@
 # Changelog
 
-## [0.5.2] - In progress
+## [0.6.0] - In progress
 
 # TODO (decreasing priority):
 
-- Add Multi-GPU training option for a single configuration
-- Add shared dataset functionality
+- Provide a documentation
+- Add shared dataset functionality to save main memory when parallelizing
+
+### Added
+
+- Refactored evaluator to store and display values for the loss used. Also, validation of final runs is kept.
 
 ### Fixed
 
 - Removed old code in `TUDatasetInterface`
+- Epochs' log starts from 1 :D
 
 ## [0.5.1] - Code for E-CGMM + Minor fixes
 
@@ -65,7 +70,7 @@
 ### Changed
 
 - Minor improvements in result files
-  
+
 - Debug mode now prints output to the console
 
 - Refactored engine for Link Prediction, by subclassing the TrainingEngine class

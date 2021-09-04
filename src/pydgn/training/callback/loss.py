@@ -3,11 +3,10 @@ import operator
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn.modules.loss import MSELoss, L1Loss
-
 from pydgn.experiment.util import s2c
 from pydgn.static import *
 from pydgn.training.event.handler import EventHandler
+from torch.nn.modules.loss import MSELoss, L1Loss
 
 
 class Loss(nn.Module, EventHandler):

@@ -2,7 +2,6 @@ import os
 import shutil
 
 import torch
-
 from pydgn.experiment.cgmm_incremental_task import CGMMTask
 
 
