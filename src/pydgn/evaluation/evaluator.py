@@ -597,7 +597,6 @@ class RiskAssesser:
                     for res_type, res in [(LOSS, losses), (SCORE, scores)]:
                         for set_score, set_dict, set_scores in res:
                             for key in set_score.keys():
-                                # TODO perche' questo scombussola il risultato? SEMBRA SUCCEDA IN process_outer_results
                                 suffix = f'_{res_type}' if (key != MAIN_LOSS and key != MAIN_SCORE) else ''
                                 set_dict[key + suffix] = np.mean([float(set_run[key])
                                                                         for set_run in set_scores])
