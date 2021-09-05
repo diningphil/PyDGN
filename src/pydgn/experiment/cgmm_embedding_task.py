@@ -6,6 +6,9 @@ from pydgn.experiment.cgmm_incremental_task import CGMMTask
 
 
 # This works with graph classification only
+from pydgn.static import LOSS, SCORE
+
+
 class EmbeddingCGMMTask(CGMMTask):
 
     def run_valid(self, dataset_getter, logger):
