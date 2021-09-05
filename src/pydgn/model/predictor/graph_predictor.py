@@ -1,11 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.nn import Sequential, Linear, Dropout, BatchNorm1d, ReLU
-from torch_geometric.nn import global_add_pool, global_mean_pool, global_max_pool
-
-from pydgn.experiment.util import s2c
-from pydgn.model.predictor.probabilistic_readout import ProbabilisticReadout
+from torch_geometric.nn import global_add_pool
 
 
 class GraphPredictor(torch.nn.Module):

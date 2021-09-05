@@ -2,11 +2,11 @@ import os
 import shutil
 
 import torch
-from torch.utils.data.sampler import SequentialSampler
-from torch_geometric.data import Data
-
 from pydgn.experiment.experiment import Experiment
 from pydgn.experiment.util import s2c
+from pydgn.static import LOSS, SCORE
+from torch.utils.data.sampler import SequentialSampler
+from torch_geometric.data import Data
 
 
 class CGMMTask(Experiment):
@@ -277,7 +277,8 @@ class CGMMTask(Experiment):
                                                   max_epochs=config['epochs'],
                                                   logger=logger)
 
-                d = {'train_score': train_score, 'validation_score': val_score}
+                d = {'train_loss': train_loss, 'train_score': train_score,
+                     'validation_loss': val_loss, 'validation_score': val_score}
             else:
                 d = {}
 
@@ -294,7 +295,9 @@ class CGMMTask(Experiment):
         for mode in ['train', 'validation']:
             shutil.rmtree(os.path.join(self.output_folder, mode), ignore_errors=True)
 
-        return dict_per_layer[-1]['train_score'], dict_per_layer[-1]['validation_score']
+        train_res = {LOSS: dict_per_layer[-1]['train_loss'], SCORE: dict_per_layer[-1]['train_score']}
+        val_res = {LOSS: dict_per_layer[-1]['validation_loss'], SCORE: dict_per_layer[-1]['validation_score']}
+        return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
         """
@@ -442,4 +445,7 @@ class CGMMTask(Experiment):
             shutil.rmtree(os.path.join(self.output_folder, mode), ignore_errors=True)
 
         # Use last training and test scores
-        return dict_per_layer[-1]['train_score'], dict_per_layer[-1]['test_score']
+        train_res = {LOSS: dict_per_layer[-1]['train_loss'], SCORE: dict_per_layer[-1]['train_score']}
+        val_res = {LOSS: dict_per_layer[-1]['validation_loss'], SCORE: dict_per_layer[-1]['validation_score']}
+        test_res = {LOSS: dict_per_layer[-1]['test_loss'], SCORE: dict_per_layer[-1]['test_score']}
+        return train_res, val_res, test_res

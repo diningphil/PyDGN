@@ -2,11 +2,10 @@ import random
 
 import numpy as np
 import torch
-from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold, train_test_split
-from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
-
 from pydgn.experiment.util import s2c
 from pydgn.static import DATA_SPLITTER_BASE_PATH
+from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold
+from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
 
 
 class Fold:

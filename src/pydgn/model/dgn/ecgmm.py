@@ -1,12 +1,11 @@
-import torch
-import torch_geometric
-from torch_scatter import scatter_add, scatter_max
-from torch_geometric.nn import global_mean_pool, global_add_pool
-
-from pydgn.experiment.util import s2c
-from pydgn.model.util.util import _compute_bigram, _compute_unigram, _make_one_hot
-from pydgn.model.dgn.cgmm import CGMMTransition, BaseTransition
 from copy import deepcopy
+
+import torch
+from pydgn.experiment.util import s2c
+from pydgn.model.dgn.cgmm import CGMMTransition, BaseTransition
+from pydgn.model.util.util import _compute_bigram, _compute_unigram, _make_one_hot
+from torch_geometric.nn import global_mean_pool, global_add_pool
+from torch_scatter import scatter_add, scatter_max
 
 
 class ECGMM(torch.nn.Module):
@@ -32,7 +31,7 @@ class ECGMM(torch.nn.Module):
         self.C2 = config['C'] + 1
         self.CS = config.get('CS', None)
         self.is_graph_classification = self.CS is not None
-        #self.add_self_arc = config['self_arc'] if 'self_arc' in config else False
+        # self.add_self_arc = config['self_arc'] if 'self_arc' in config else False
         self.use_continuous_states = config['infer_with_posterior']
         self.unibigram = config['unibigram']
         self.aggregation = config['aggregation']
@@ -46,23 +45,23 @@ class ECGMM(torch.nn.Module):
 
         cfg_cpy['emission'] = self.node_emission_class
         self.node_readout = self.node_predictor_class(dim_node_features, 0,
-                                       dim_target, cfg_cpy)
+                                                      dim_target, cfg_cpy)
 
         cfg_cpy['emission'] = self.edge_emission_class
         cfg_cpy['C'] = self.CA
         self.edge_readout = self.edge_predictor_class(dim_edge_features, 0,
-                                       dim_target, cfg_cpy)
+                                                      dim_target, cfg_cpy)
 
         if self.is_first_layer:
             self.node_transition = BaseTransition(self.C)
             self.edge_transition = BaseTransition(self.CA)
         else:
             self.node_transition = CGMMTransition(self.C, self.CA,
-                                               self.C2, self.L)
+                                                  self.C2, self.L)
 
             # TODO refactor: passing 1 but acts as 2 (no real bottom state)
             self.edge_transition = CGMMTransition(self.CA, 1,
-                                               self.C, self.L)
+                                                  self.C, self.L)
 
     def init_accumulators(self):
         self.node_readout.init_accumulators()
@@ -112,61 +111,65 @@ class ECGMM(torch.nn.Module):
 
         # --------------------------- FORWARD PASS --------------------------- #
 
-        #t = time.time()
+        # t = time.time()
 
         # --- TRANSITION contribution
         if self.is_first_layer:
             # p_Q_given_obs --> ?xC
-            node_p_Q_given_obs  = self.node_transition.e_step(x)
+            node_p_Q_given_obs = self.node_transition.e_step(x)
             node_transition_posterior = node_p_Q_given_obs
             node_rightmost_term = node_p_Q_given_obs
 
-            edge_p_Q_given_obs  = self.edge_transition.e_step(edge_attr)
+            edge_p_Q_given_obs = self.edge_transition.e_step(edge_attr)
             edge_transition_posterior = edge_p_Q_given_obs
             edge_rightmost_term = edge_p_Q_given_obs
 
         else:
             # p_Q_given_obs --> ?xC / transition_posterior --> ?xLxAxCxC2
-            node_p_Q_given_obs, node_transition_posterior, node_rightmost_term = self.node_transition.e_step(x, prev_node_stats)
-            edge_p_Q_given_obs, edge_transition_posterior, edge_rightmost_term = self.edge_transition.e_step(edge_attr, prev_edge_stats)
+            node_p_Q_given_obs, node_transition_posterior, node_rightmost_term = self.node_transition.e_step(x,
+                                                                                                             prev_node_stats)
+            edge_p_Q_given_obs, edge_transition_posterior, edge_rightmost_term = self.edge_transition.e_step(edge_attr,
+                                                                                                             prev_edge_stats)
 
         assert torch.allclose(node_p_Q_given_obs.sum(1), torch.tensor([1.]).to(self.device)), node_p_Q_given_obs
         assert torch.allclose(edge_p_Q_given_obs.sum(1), torch.tensor([1.]).to(self.device)), edge_p_Q_given_obs
 
-        #print(f"Transition E-step time: {time.time()-t}"); t = time.time()
+        # print(f"Transition E-step time: {time.time()-t}"); t = time.time()
 
         # --- READOUT contribution
         # true_log_likelihood --> ?x1 / readout_posterior --> ?xCSxCN or ?xCN
-        node_true_log_likelihood, node_readout_posterior, node_emission_target = self.node_readout.e_step(node_p_Q_given_obs, x, y, batch)
-        edge_true_log_likelihood, edge_readout_posterior, edge_emission_target = self.edge_readout.e_step(edge_p_Q_given_obs, edge_attr, y, edge_batch)
+        node_true_log_likelihood, node_readout_posterior, node_emission_target = self.node_readout.e_step(
+            node_p_Q_given_obs, x, y, batch)
+        edge_true_log_likelihood, edge_readout_posterior, edge_emission_target = self.edge_readout.e_step(
+            edge_p_Q_given_obs, edge_attr, y, edge_batch)
         true_log_likelihood = node_true_log_likelihood + edge_true_log_likelihood
 
-        #print(f"Readout E-step time: {time.time()-t}"); t = time.time()
+        # print(f"Readout E-step time: {time.time()-t}"); t = time.time()
 
         # likely_labels --> ? x Y
         node_likely_labels = self.node_readout.infer(node_p_Q_given_obs, x, batch)
         edge_likely_labels = self.edge_readout.infer(edge_p_Q_given_obs, edge_attr, edge_batch)
 
-        #print(f"Readout inference time: {time.time()-t}"); t = time.time()
+        # print(f"Readout inference time: {time.time()-t}"); t = time.time()
 
         # -------------------------------------------------------------------- #
 
         if not self.is_graph_classification:
             node_complete_log_likelihood, node_eui = self._e_step_node(x, y, node_p_Q_given_obs,
-                                        node_transition_posterior, node_rightmost_term,
-                                        node_readout_posterior, node_emission_target,
-                                        batch, process_nodes=True)
+                                                                       node_transition_posterior, node_rightmost_term,
+                                                                       node_readout_posterior, node_emission_target,
+                                                                       batch, process_nodes=True)
 
             edge_complete_log_likelihood, edge_eui = self._e_step_node(edge_attr, y, edge_p_Q_given_obs,
-                                        edge_transition_posterior, edge_rightmost_term,
-                                        edge_readout_posterior, edge_emission_target,
-                                        edge_batch, process_nodes=False)
+                                                                       edge_transition_posterior, edge_rightmost_term,
+                                                                       edge_readout_posterior, edge_emission_target,
+                                                                       edge_batch, process_nodes=False)
 
             complete_log_likelihood = node_complete_log_likelihood + edge_complete_log_likelihood
         else:
-            assert False # TODO
+            assert False  # TODO
 
-        #print(f"Posterior E-step time: {time.time()-t}"); t = time.time()
+        # print(f"Posterior E-step time: {time.time()-t}"); t = time.time()
 
         num_nodes = x.shape[0]
         num_edges = edge_index.shape[1]
@@ -211,18 +214,17 @@ class ECGMM(torch.nn.Module):
                true_log_likelihood, num_nodes
 
     def _e_step_graph(self, x, y, p_Q_given_obs, transition_posterior,
-                    rightmost_term, readout_posterior, emission_target, batch):
+                      rightmost_term, readout_posterior, emission_target, batch):
 
         # batch (i.e., replicate) graph readout posterior for all nodes
         b_readout_posterior = readout_posterior[batch]  # ?nxCSxCN
-
 
         if self.is_first_layer:
             # ----------------------------- Posterior ---------------------------- #
 
             # expand
             exp_readout_posterior = b_readout_posterior.reshape((-1, self.CS,
-                                                                     self.C))
+                                                                 self.C))
             # expand
             exp_transition_posterior = transition_posterior.unsqueeze(1)
 
@@ -234,10 +236,10 @@ class ECGMM(torch.nn.Module):
                                                             exp_transition_posterior),
                                                   b_graph_sizes)
 
-            Z = global_add_pool(unnorm_posterior_estimate.sum((1,2), keepdim=True), batch)
-            Z[Z==0.] = 1.
+            Z = global_add_pool(unnorm_posterior_estimate.sum((1, 2), keepdim=True), batch)
+            Z[Z == 0.] = 1.
 
-            esui = unnorm_posterior_estimate/(Z[batch])  # --> ?n x CS x CN
+            esui = unnorm_posterior_estimate / (Z[batch])  # --> ?n x CS x CN
             eui = esui.sum(1)  # ?n x CN
 
             if self.training:
@@ -258,8 +260,8 @@ class ECGMM(torch.nn.Module):
             # ----------------------------- Posterior ---------------------------- #
 
             # expand
-            exp_readout_posterior = b_readout_posterior.reshape((-1,self.CS,
-                                                                 1,1,
+            exp_readout_posterior = b_readout_posterior.reshape((-1, self.CS,
+                                                                 1, 1,
                                                                  self.C, 1))
             # expand
             exp_transition_posterior = transition_posterior.unsqueeze(1)
@@ -270,14 +272,14 @@ class ECGMM(torch.nn.Module):
             unnorm_posterior_estimate = torch.div(torch.mul(exp_readout_posterior,
                                                             exp_transition_posterior),
                                                   b_graph_sizes)
-            Z = global_add_pool(unnorm_posterior_estimate.sum((1,2,3,4,5), keepdim=True), batch)
-            Z[Z==0.] = 1.
+            Z = global_add_pool(unnorm_posterior_estimate.sum((1, 2, 3, 4, 5), keepdim=True), batch)
+            Z[Z == 0.] = 1.
 
-            esuilaj = unnorm_posterior_estimate/(Z[batch])  # --> ?n x CS x L x A x C x C2
+            esuilaj = unnorm_posterior_estimate / (Z[batch])  # --> ?n x CS x L x A x C x C2
             euilaj = esuilaj.sum(1)  # Marginalize over CS --> transition M-step
             euila = euilaj.sum(4)  # ?n x L x A x C
             euil = euila.sum(2)  # ?n x L x C
-            esui = esuilaj.sum((2,3,5)) # Marginalize over L,A,C2 --> readout M-step
+            esui = esuilaj.sum((2, 3, 5))  # Marginalize over L,A,C2 --> readout M-step
             eui = euil.sum(1)  # ?n x C
 
             if self.training:
@@ -290,7 +292,8 @@ class ECGMM(torch.nn.Module):
             # ---------------------- Complete Log Likelihood --------------------- #
 
             complete_log_likelihood_readout = self.readout.complete_log_likelihood(esui, emission_target, batch)
-            complete_log_likelihood_transition = self.transition.complete_log_likelihood(euilaj, euila, euil, rightmost_term)
+            complete_log_likelihood_transition = self.transition.complete_log_likelihood(euilaj, euila, euil,
+                                                                                         rightmost_term)
             complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
 
             # -------------------------------------------------------------------- #
@@ -298,16 +301,16 @@ class ECGMM(torch.nn.Module):
         return complete_log_likelihood, eui
 
     def _e_step_node(self, x, y, p_Q_given_obs, transition_posterior,
-                rightmost_term, readout_posterior, emission_target, batch, process_nodes):
+                     rightmost_term, readout_posterior, emission_target, batch, process_nodes):
 
         if self.is_first_layer:
             # ----------------------------- Posterior ---------------------------- #
 
-            unnorm_posterior_estimate = readout_posterior*transition_posterior
+            unnorm_posterior_estimate = readout_posterior * transition_posterior
             Z = unnorm_posterior_estimate.sum(1, keepdim=True)
-            Z[Z==0.] = 1.
+            Z[Z == 0.] = 1.
 
-            eui = unnorm_posterior_estimate/Z  # --> ? x CN
+            eui = unnorm_posterior_estimate / Z  # --> ? x CN
 
             if self.training:
                 if process_nodes:
@@ -336,15 +339,15 @@ class ECGMM(torch.nn.Module):
 
             # expand
             if process_nodes:
-                exp_readout_posterior = readout_posterior.reshape((-1,1,1,self.C,1))
+                exp_readout_posterior = readout_posterior.reshape((-1, 1, 1, self.C, 1))
             else:
-                exp_readout_posterior = readout_posterior.reshape((-1,1,1,self.CA,1))
+                exp_readout_posterior = readout_posterior.reshape((-1, 1, 1, self.CA, 1))
 
             unnorm_posterior_estimate = torch.mul(exp_readout_posterior,
                                                   transition_posterior)
-            Z = unnorm_posterior_estimate.sum((1,2,3,4), keepdim=True)
-            Z[Z==0.] = 1.
-            euilaj = unnorm_posterior_estimate/Z  # --> ?n x L x A x C x C2
+            Z = unnorm_posterior_estimate.sum((1, 2, 3, 4), keepdim=True)
+            Z[Z == 0.] = 1.
+            euilaj = unnorm_posterior_estimate / Z  # --> ?n x L x A x C x C2
             euila = euilaj.sum(4)  # ?n x L x A x C
             euil = euila.sum(2)  # ?n x L x C
             eui = euil.sum(1)  # ?n x C
@@ -364,11 +367,13 @@ class ECGMM(torch.nn.Module):
             # ---------------------- Complete Log Likelihood --------------------- #
             if process_nodes:
                 complete_log_likelihood_readout = self.node_readout.complete_log_likelihood(eui, emission_target, batch)
-                complete_log_likelihood_transition = self.node_transition.complete_log_likelihood(euilaj, euila, euil, rightmost_term)
+                complete_log_likelihood_transition = self.node_transition.complete_log_likelihood(euilaj, euila, euil,
+                                                                                                  rightmost_term)
                 complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
             else:
                 complete_log_likelihood_readout = self.edge_readout.complete_log_likelihood(eui, emission_target, batch)
-                complete_log_likelihood_transition = self.edge_transition.complete_log_likelihood(euilaj, euila, euil, rightmost_term)
+                complete_log_likelihood_transition = self.edge_transition.complete_log_likelihood(euilaj, euila, euil,
+                                                                                                  rightmost_term)
                 complete_log_likelihood = complete_log_likelihood_readout + complete_log_likelihood_transition
 
             # -------------------------------------------------------------------- #
@@ -392,25 +397,27 @@ class ECGMM(torch.nn.Module):
         if not self.use_continuous_states:
             node_posteriors = _make_one_hot(node_posteriors.argmax(dim=1), self.C).float()
             # TODO
-            #edge_posteriors = _make_one_hot(edge_posteriors.argmax(dim=1), self.CA).float()
+            # edge_posteriors = _make_one_hot(edge_posteriors.argmax(dim=1), self.CA).float()
 
-        statistics = torch.full((node_posteriors.shape[0], self.CA + 1, node_posteriors.shape[1]+1), 0., dtype=torch.float32).to(device)
+        statistics = torch.full((node_posteriors.shape[0], self.CA + 1, node_posteriors.shape[1] + 1), 0.,
+                                dtype=torch.float32).to(device)
         srcs, dsts = data.edge_index
 
         for arc_label in range(self.CA):
             sparse_label_adj_matr = torch.sparse_coo_tensor(data.edge_index, \
                                                             (edge_posteriors[:, arc_label]).to(device), \
                                                             torch.Size([node_posteriors.shape[0],
-                                                                        node_posteriors.shape[0]])).to(device).transpose(0, 1)
+                                                                        node_posteriors.shape[0]])).to(
+                device).transpose(0, 1)
             statistics[:, arc_label, :-1] = torch.sparse.mm(sparse_label_adj_matr, node_posteriors)
 
         # Deal with nodes with degree 0: add a single fake neighbor with uniform posterior
         degrees = statistics[:, :, :-1].sum(dim=[1, 2]).floor()
-        statistics[degrees==0., :, :] = 1./self.C2
+        statistics[degrees == 0., :, :] = 1. / self.C2
 
         ## use self.A+1 as special edge for bottom states (all in self.C2-1)
         max_arieties, _ = self._compute_max_ariety(degrees.int().to(self.device), data.batch)
-        max_arieties[max_arieties==0] = 1
+        max_arieties[max_arieties == 0] = 1
         statistics[:, -1, -1] += degrees / max_arieties[data.batch].float()
 
         return statistics

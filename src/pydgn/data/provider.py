@@ -2,13 +2,12 @@ import random
 
 import numpy as np
 import torch
-from torch.utils.data import Subset
-from torch_geometric.data import Data, DataLoader
-
 from pydgn.data.dataset import ZipDataset
 from pydgn.data.sampler import RandomSampler
 from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
 from pydgn.data.util import load_dataset
+from torch.utils.data import Subset
+from torch_geometric.data import Data, DataLoader
 
 
 def seed_worker(exp_seed, worker_id):

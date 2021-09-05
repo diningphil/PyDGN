@@ -2,11 +2,13 @@ import os
 import shutil
 
 import torch
-
 from pydgn.experiment.cgmm_incremental_task import CGMMTask
 
 
 # This works with graph classification only
+from pydgn.static import LOSS, SCORE
+
+
 class EmbeddingCGMMTask(CGMMTask):
 
     def run_valid(self, dataset_getter, logger):
@@ -133,7 +135,12 @@ class EmbeddingCGMMTask(CGMMTask):
         for mode in ['train', 'validation', 'test']:
             shutil.rmtree(os.path.join(self.output_folder, mode), ignore_errors=True)
 
-        return {'main_score': torch.zeros(1)}, {'main_score': torch.zeros(1)}
+        tr_res = {LOSS: {'main_loss': torch.zeros(1)}, SCORE: {'main_score': torch.zeros(1)}}
+        vl_res = {LOSS: {'main_loss': torch.zeros(1)}, SCORE: {'main_score': torch.zeros(1)}}
+        return tr_res, vl_res
 
     def run_test(self, dataset_getter, logger):
-        return {'main_score': torch.zeros(1)}, {'main_score': torch.zeros(1)}
+        tr_res = {LOSS: {'main_loss': torch.zeros(1)}, SCORE: {'main_score': torch.zeros(1)}}
+        vl_res = {LOSS: {'main_loss': torch.zeros(1)}, SCORE: {'main_score': torch.zeros(1)}}
+        te_res = {LOSS: {'main_loss': torch.zeros(1)}, SCORE: {'main_score': torch.zeros(1)}}
+        return tr_res, vl_res, te_res

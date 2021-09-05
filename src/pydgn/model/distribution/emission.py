@@ -4,8 +4,6 @@ import scipy
 import scipy.cluster
 import scipy.cluster.vq
 import torch
-
-
 # Interface for all emission distributions
 from torch.nn import ModuleList
 
@@ -327,7 +325,7 @@ class IndependentMultivariateBernoulliEmission(EmissionDistribution):
         emission_of_labels = None
         # Assume independence
         for i, b in enumerate(self.indep_bernoulli):
-            est_post_dist = b.e_step(x_labels, y_labels[:,i].unsqueeze(1))
+            est_post_dist = b.e_step(x_labels, y_labels[:, i].unsqueeze(1))
             if emission_of_labels is None:
                 emission_of_labels = est_post_dist
             else:
@@ -360,7 +358,7 @@ class IndependentMultivariateBernoulliEmission(EmissionDistribution):
         """
         # Assume independence
         for i, b in enumerate(self.indep_bernoulli):
-            b._m_step(x_labels, y_labels[:,i].unsqueeze(1), posterior_estimate)
+            b._m_step(x_labels, y_labels[:, i].unsqueeze(1), posterior_estimate)
 
     def m_step(self):
         # Assume independence

@@ -3,9 +3,9 @@ experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
 dataset_getter: pydgn.data.provider.DataProvider
-device: pydgn.cuda
-num_dataloader_workers: 3
-pin_memory: True
+device: cpu
+num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
+pin_memory: False  # True only with --debug option and GPU device
 num_samples: 3
 seed: 42
 random:
@@ -17,7 +17,7 @@ random:
         - 32
         - 64
         - 128
-    epochs: 10
+    epochs: 5
     dim_embedding: 4
     num_layers:
       sample_method: pydgn.evaluation.util.randint
@@ -30,7 +30,7 @@ random:
       args:
         - class_name: pydgn.training.callback.optimizer.Optimizer
           args:
-            optimizer_class_name: pydgn.torch.optim.Adam
+            optimizer_class_name: torch.optim.Adam
             lr:
               sample_method: pydgn.evaluation.util.normal
               args:
@@ -39,7 +39,7 @@ random:
             weight_decay: 0.
         - class_name: pydgn.training.callback.optimizer.Optimizer
           args:
-            optimizer_class_name: pydgn.torch.optim.Adamax
+            optimizer_class_name: torch.optim.Adamax
             lr:
               sample_method: pydgn.evaluation.util.loguniform
               args:
@@ -62,7 +62,7 @@ random:
     early_stopper:
       class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
       args:
-        patience: 5
+        patience: 3
         # Should be the name of the main_scorer in MultiScore
         monitor: validation_Multiclass Accuracy # (train_,validation_)[name_of_the_scorer_or_loss_to_monitor]
         mode: max

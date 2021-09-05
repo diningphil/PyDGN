@@ -1,7 +1,6 @@
 import argparse
 
 import yaml
-
 from pydgn.data.util import preprocess_data
 from pydgn.static import *
 

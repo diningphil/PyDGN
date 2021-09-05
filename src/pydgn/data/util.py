@@ -5,10 +5,9 @@ import warnings
 
 import numpy as np
 import torch
+from pydgn.experiment.util import s2c
 from torch_geometric.datasets import TUDataset
 from torch_geometric.transforms import Compose
-
-from pydgn.experiment.util import s2c
 
 
 def get_or_create_dir(path):
