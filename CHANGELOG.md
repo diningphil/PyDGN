@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.6.1] - Stop and Resume from different devices
+
+# TODO (decreasing priority):
+
+- Provide a documentation
+- Add shared dataset functionality to save main memory when parallelizing
+
+### Fixed
+
+- When using checkpoints, we can now switch devices without getting a deserialization error
+
 ## [0.6.0] - Evaluator's Refactoring
 
 # TODO (decreasing priority):

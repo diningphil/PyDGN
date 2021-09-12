@@ -60,10 +60,6 @@ class TrainingEngine(EventDispatcher):
         self.exp_path = exp_path
         self.log_every = log_every
         self.store_last_checkpoint = store_last_checkpoint
-
-        self.state = State(self.model, self.optimizer)  # Initialize the state
-        self.state.update(exp_path=self.exp_path)
-
         self.training = False
 
         self.profiler = Profiler(threshold=1e-5)
@@ -81,7 +77,7 @@ class TrainingEngine(EventDispatcher):
         for c in self.callbacks:
             self.register(c)
 
-        self.state = State(self.model, self.optimizer)  # Initialize the state
+        self.state = State(self.model, self.optimizer, self.device)  # Initialize the state
         self.state.update(exp_path=self.exp_path)
 
     def _to_data_list(self, x, batch, y):
@@ -293,8 +289,11 @@ class TrainingEngine(EventDispatcher):
             # Restore training from last checkpoint if possible!
             ckpt_filename = Path(self.exp_path, LAST_CHECKPOINT_FILENAME)
             best_ckpt_filename = Path(self.exp_path, BEST_CHECKPOINT_FILENAME)
-            if os.path.exists(ckpt_filename):
-                self._restore_last(ckpt_filename, best_ckpt_filename, zero_epoch)
+            is_early_stopper_ckpt = self.early_stopper.checkpoint if self.early_stopper is not None else False
+            # If one changes the options in the config file, the existence of a checkpoint is not enough to
+            # decide whether to resume training or not!
+            if os.path.exists(ckpt_filename) and (self.store_last_checkpoint or is_early_stopper_ckpt):
+                self._restore_checkpoint_and_best_results(ckpt_filename, best_ckpt_filename, zero_epoch)
                 log(f'START AGAIN FROM EPOCH {self.state.initial_epoch}', logger)
 
             self._dispatch(EventHandler.ON_FIT_START, self.state)
@@ -422,13 +421,21 @@ class TrainingEngine(EventDispatcher):
                val_loss, val_score, val_embeddings_tuple, \
                test_loss, test_score, test_embeddings_tuple
 
-    def _restore_last(self, ckpt_filename, best_ckpt_filename, zero_epoch):
-        ckpt_dict = torch.load(ckpt_filename)
+    def _restore_checkpoint_and_best_results(self, ckpt_filename, best_ckpt_filename, zero_epoch):
+        # When changing exp config from cuda to cpu, cuda will not be available to pytorch (due to Ray management
+        # of resources). Hence, we need to specify explicitly the map location as cpu.
+        # The other way around (cpu to cuda) poses no problem since GPUs are visible.
+        ckpt_dict = torch.load(ckpt_filename, map_location='cpu' if self.device =='cpu' else None)
 
         self.state.update(initial_epoch=int(ckpt_dict[EPOCH]) + 1 if not zero_epoch else 0)
         self.state.update(stop_training=ckpt_dict[STOP_TRAINING])
 
         model_state = ckpt_dict[MODEL_STATE]
+
+        # Needed only when moving from cpu to cuda (due to changes in config file). Move all parameters to cuda.
+        for param in model_state.keys():
+            model_state[param] = model_state[param].to(self.device)
+
         self.model.load_state_dict(model_state)
 
         if not zero_epoch:
@@ -436,7 +443,7 @@ class TrainingEngine(EventDispatcher):
             self.state.update(optimizer_state=optimizer_state)
 
         if os.path.exists(best_ckpt_filename):
-            best_ckpt_dict = torch.load(best_ckpt_filename)
+            best_ckpt_dict = torch.load(best_ckpt_filename, map_location='cpu' if self.device =='cpu' else None)
             self.state.update(best_epoch_results=best_ckpt_dict)
 
         if self.scheduler is not None and not zero_epoch:

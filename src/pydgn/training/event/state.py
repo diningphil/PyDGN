@@ -2,12 +2,13 @@ class State:
     """ Any object of this class contains training information that is handled and modified by the training engine
         (see training.core.engine) as well as by the EventHandler callbacks (see training.core.callbacks). """
 
-    def __init__(self, model, optimizer, **values):
+    def __init__(self, model, optimizer, device, **values):
         self.update(**values)
 
         self.initial_epoch = 0
         self.epoch = self.initial_epoch
         self.model = model
+        self.device = device
         self.optimizer = optimizer
         self.stop_training = False
 
