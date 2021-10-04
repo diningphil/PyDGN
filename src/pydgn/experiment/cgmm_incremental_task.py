@@ -427,7 +427,9 @@ class CGMMTask(Experiment):
                                                                    max_epochs=config['epochs'],
                                                                    logger=logger)
 
-                d = {'train_score': train_score, 'validation_score': val_score, 'test_score': test_score}
+                d = {'train_loss': train_loss, 'train_score': train_score, 
+                     'validation_loss': val_loss, 'validation_score': val_score,
+                     'test_loss': test_loss, 'test_score': test_score}
             else:
                 d = {}
 
