@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.2] - Minor fixes
+# TODO (decreasing priority):
+
+- Provide a documentation
+- Add shared dataset functionality to save main memory when parallelizing
+
+### Fixed
+
+- Minor in `cgmm_incremental` experiment
+
 ## [0.6.1] - Stop and Resume from different devices
 
 # TODO (decreasing priority):
