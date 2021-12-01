@@ -6,7 +6,7 @@ class SingleGraphSequenceSplitter(Splitter):
     Class for dynamic graphs that generates the splits at dataset creation time.
     """
 
-    def __init__(self, train_timesteps, valid_timesteps, test_timesteps, seed=None):
+    def __init__(self, train_timesteps, valid_timesteps, test_timesteps, seed=None, **kwargs):
         """
         Initializes the splitter
         :param train_timesteps: num of training timesteps to use
@@ -26,7 +26,7 @@ class SingleGraphSequenceSplitter(Splitter):
         self.test_timesteps = test_timesteps
 
         self.processed = False
-
+        self.seed = seed
 
     def split(self, dataset, targets=None):
         """
@@ -41,18 +41,18 @@ class SingleGraphSequenceSplitter(Splitter):
 
         inner_fold_splits = []
 
-        valid_range = (train_timesteps, train_timesteps+valid_timesteps)
-        test_range = (valid_range[0], valid_range[1]+test_timesteps)
+        valid_range = (self.train_timesteps, self.train_timesteps+self.valid_timesteps)
+        test_range = (valid_range[1], valid_range[1]+self.test_timesteps)
 
         if not self.processed:
 
-            inner_fold = InnerFold(train_idxs=list(range(train_timesteps)),
+            inner_fold = InnerFold(train_idxs=list(range(self.train_timesteps)),
                                    val_idxs=list(range(valid_range[0], valid_range[1])))
             inner_fold_splits.append(inner_fold)
             self.inner_folds.append(inner_fold_splits)
 
-            outer_fold = OuterFold(train_idxs=list(range(train_timesteps)),
-                                   val_idxs=list(range(valid_range[0], valid_range[1]),
+            outer_fold = OuterFold(train_idxs=list(range(self.train_timesteps)),
+                                   val_idxs=list(range(valid_range[0], valid_range[1])),
                                    test_idxs=list(range(test_range[0], test_range[1])))
 
             self.outer_folds.append(outer_fold)

@@ -9,6 +9,7 @@ from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
 
 from torch_geometric_temporal.dataset import ChickenpoxDatasetLoader
 
+from pydgn.data.dataset import DatasetInterface
 
 class DynamicDatasetInterface(DatasetInterface):
     name = None
@@ -45,4 +46,4 @@ class ChickenpoxDatasetInterface(ChickenpoxDatasetLoader, DynamicDatasetInterfac
         return len(self.dataset.features)
 
     def __getitem__(self, time_index):
-        return self.dataset[time_index]
+        return self.dataset.__get_item__(time_index)

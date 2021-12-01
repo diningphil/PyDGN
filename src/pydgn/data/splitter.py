@@ -66,7 +66,11 @@ class Splitter:
         splits = torch.load(path)
 
         splitter_classname = splits.get("splitter_class", "Splitter")
-        splitter_class = s2c(DATA_SPLITTER_BASE_PATH + splitter_classname)
+        try:
+            splitter_class = s2c(splitter_classname)
+        except:
+            # Backward compatibility with previous versions (< 0.6.2)
+            splitter_class = s2c(DATA_SPLITTER_BASE_PATH + splitter_classname)
 
         splitter_args = splits.get("splitter_args")
         splitter = splitter_class(**splitter_args)
@@ -221,9 +225,17 @@ class Splitter:
         :param path: filepath where to save the object
         """
         print("Saving splits on disk...")
+
+        # save split class name
+        module = self.__class__.__module__
+        splitter_class = self.__class__.__qualname__
+        if module is not None and module != "__builtin__":
+            splitter_class = module + "." + splitter_class
+
         savedict = {"seed": self.seed,
-                    "splitter_class": self.__class__.__name__,
+                    "splitter_class": splitter_class,
                     "splitter_args": self._splitter_args()
+
                     }
 
         savedict["outer_folds"] = [o.todict() for o in self.outer_folds]
