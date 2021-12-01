@@ -118,7 +118,7 @@ class TrainingEngine(EventDispatcher):
             embeddings = embeddings.detach().cpu()
         else:
             raise NotImplementedError('Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor')
-
+z
         # Convert embeddings back to a list of torch_geometric Data objects
         # Needs also y information to (possibly) use them as a tensor dataset
         # CRUCIAL: remember, the loader could have shuffled the data, so we
