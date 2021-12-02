@@ -9,6 +9,7 @@ class Score(EventHandler):
     """
     Score is the main event handler for score metrics. Other scores can easily subclass by implementing the __call__
     method, though sometimes more complex implementations are required.
+    IMPORTANT: this assumes that scores are typically normalized wrt the number of samples in the mini-batch
     """
     __name__ = 'score'
 
@@ -239,6 +240,18 @@ class MeanAverageErrorScore(Score):
     def __init__(self):
         super().__init__()
         self.loss = torch.nn.L1Loss()
+
+    def _score_fun(self, targets, *outputs, batch_loss_extra):
+        pred = outputs[0]
+        return self.loss(pred, targets)
+
+
+class MeanSquareErrorScore(Score):
+    __name__ = 'MSE Score'
+
+    def __init__(self):
+        super().__init__()
+        self.loss = torch.nn.MSELoss()
 
     def _score_fun(self, targets, *outputs, batch_loss_extra):
         pred = outputs[0]

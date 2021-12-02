@@ -15,4 +15,4 @@ dataset:
   args:
     root: DATA/
     name: chickenpox
-    lags: 1
+    lags: 4

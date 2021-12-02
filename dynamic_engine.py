@@ -6,6 +6,7 @@ from pydgn.static import *
 from pydgn.training.event.dispatcher import EventDispatcher
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State
+from pydgn.training.engine import TrainingEngine
 from pydgn.training.profiler import Profiler
 from pydgn.training.util import extend_lists, to_tensor_lists
 from torch_geometric.data import Data
@@ -79,19 +80,19 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
     def _loop(self, loader, return_node_embeddings=False):
 
         # Reset epoch state (DO NOT REMOVE)
+        self.state.update(epoch_data_list=None)
         self.state.update(epoch_loss=None)
         self.state.update(epoch_score=None)
         self.state.update(loader_iterable=iter(loader))
-
         # Initialize the model state at time step 0
         t = 0
-        state.update(time_step=t)
-        model_state = []
+        self.state.update(time_step=t)
         all_y = []
+        prev_hidden_states = []
 
         # This is specific to the single graph sequence scenario
         num_timesteps_per_batch = len(loader)
-        state.update(num_timesteps_per_batch=num_timesteps_per_batch)
+        self.state.update(num_timesteps_per_batch=num_timesteps_per_batch)
 
         # Loop over data
         for id_batch in range(len(loader)):
@@ -111,11 +112,14 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
             # Used to accumulate all losses in the batch (sequence of graphs)
             cumulative_batch_loss = {}
+            cumulative_batch_score = {}
+            cumulative_batch_num_targets = 0
 
             for snapshot in data:
 
                 _snapshot = snapshot
                 snapshot = snapshot.to(self.device)
+
                 edge_index, targets = _snapshot.edge_index, _snapshot.y
 
                 # Helpful when you need to access again the input batch, e.g for some continual learning strategy
@@ -123,7 +127,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 self.state.update(batch_targets=targets)
                 self.state.update(time_step=t)
 
-                num_nodes = _data.x.shape[0]
+                num_nodes = _snapshot.x.shape[0]
                 self.state.update(batch_num_nodes=num_nodes)
 
                 # Can we do better? we force the user to use y
@@ -131,6 +135,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 num_targets = self._num_targets(targets)
 
                 self.state.update(batch_num_targets=num_targets)
+                cumulative_batch_num_targets += num_targets
 
                 self._dispatch(EventHandler.ON_FORWARD, self.state)
 
@@ -140,81 +145,54 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 # make sure we have embeddings to store as model state
                 assert isinstance(output, tuple) and len(output) > 1
 
-                model_state.append(output[1])
                 all_y.append(targets)
-                self.state.update(model_state=model_state)
+
+                # Update previous hidden states
+                self.state.update(last_hidden_state=output[1])
+                prev_hidden_states.append(output[1].detach().cpu())
 
                 self._dispatch(EventHandler.ON_COMPUTE_METRICS, self.state)
 
-                for k in state.batch_loss.keys():
+                for k in self.state.batch_loss.keys():
                     if k not in cumulative_batch_loss:
-                        cumulative_batch_loss[k] = state.batch_loss[k]
+                        cumulative_batch_loss[k] = self.state.batch_loss[k]
                     else:
-                        cumulative_batch_loss[k] += state.batch_loss[k]
+                        cumulative_batch_loss[k] += self.state.batch_loss[k]
+
+                for k in self.state.batch_score.keys():
+                    if k not in cumulative_batch_score:
+                        cumulative_batch_score[k] = self.state.batch_score[k]
+                    else:
+                        cumulative_batch_score[k] += self.state.batch_score[k]
 
                 # Increment global time counter
                 t = t+1
-                state.update(time_step=t)
+                self.state.update(time_step=t)
 
-            # Substitute the last time step loss with the cumulative one
+            # Substitute the last time step loss/score with the cumulative one
             # before calling on_backward
-            state.update(batch_loss=cumulative_batch_loss)
+            self.state.update(batch_loss=cumulative_batch_loss)
+            self.state.update(batch_score=cumulative_batch_score)
+            self.state.update(batch_num_targets=cumulative_batch_num_targets)
 
             if self.training:
                 self._dispatch(EventHandler.ON_BACKWARD, self.state)
+
+                # After backward detach the last hidden state
+                last_hidden_state = self.state.last_hidden_state.detach()
+                self.state.update(last_hidden_state=last_hidden_state)
+
                 self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
             else:
                 self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
 
+
+
         if return_node_embeddings:
             # Model state will hold a list of tensors, one per time step
-            data_list = [Data(x=emb_t.cpu().detach(), y=all_y[i]) for i,emb_t in enumerate(model_state)]
+            data_list = [Data(x=emb_t, y=all_y[i]) for i,emb_t in enumerate(prev_hidden_states)]
             self.state.update(epoch_data_list=data_list)
 
-    def _train(self, loader):
-        self.set_training_mode()
-
-        self._dispatch(EventHandler.ON_TRAINING_EPOCH_START, self.state)
-
-        self._loop(loader, return_node_embeddings=False)
-
-        self._dispatch(EventHandler.ON_TRAINING_EPOCH_END, self.state)
-
-        assert self.state.epoch_loss is not None
-        loss, score = self.state.epoch_loss, self.state.epoch_score
-        return loss, score, None
-
-    def infer(self, loader, set, return_node_embeddings=False):
-        """
-        Performs an inference step
-        :param loader: the DataLoader
-        :set: the type of dataset being used, can be TRAINING, VALIDATION or TEST
-        :param return_node_embeddings: whether the model should compute node embeddings or not
-        :return: a tuple (loss, score, embeddings)
-        """
-        self.set_eval_mode()
-        self.state.update(set=set)
-
-        self._dispatch(EventHandler.ON_EVAL_EPOCH_START, self.state)
-
-        with torch.no_grad():
-            self._loop(loader, return_node_embeddings=return_node_embeddings)  # state has been updated
-
-        self._dispatch(EventHandler.ON_EVAL_EPOCH_END, self.state)
-
-        assert self.state.epoch_loss is not None
-        loss, score, data_list = self.state.epoch_loss, self.state.epoch_score, self.state.epoch_data_list
-
-        # Add the main loss we want to return as a special key
-        main_loss_name = self.loss_fun.get_main_loss_name()
-        loss[MAIN_LOSS] = loss[main_loss_name]
-
-        # Add the main score we want to return as a special key
-        # Needed by the experimental evaluation framework
-        main_score_name = self.score_fun.get_main_score_name()
-        score[MAIN_SCORE] = score[main_score_name]
-
-        return loss, score, data_list
 
     def train(self, train_loader, validation_loader=None, test_loader=None, max_epochs=100, zero_epoch=False,
               logger=None):
@@ -254,6 +232,9 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             # Loop over the entire dataset dataset
             for epoch in range(self.state.initial_epoch, max_epochs):
                 self.state.update(epoch=epoch)
+
+                # Initialize the state of the model
+                self.state.update(last_hidden_state=None)
 
                 self._dispatch(EventHandler.ON_EPOCH_START, self.state)
 
@@ -321,6 +302,9 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             else:
                 self.state.update(best_epoch_results={BEST_EPOCH: epoch})
                 ber = self.state.best_epoch_results
+
+            # Initialize the state of the model again before the final evaluation
+            self.state.update(last_hidden_state=None)
 
             # Compute training output
             train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING,

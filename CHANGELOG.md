@@ -1,8 +1,14 @@
 # Changelog
 
-## [0.6.2] - Minor fixes
+## [0.6.2] - Implementation of temporal experiments + Minor fixes
+
 # TODO (decreasing priority):
 
+- TODO losses and scores should consider the case of reduction=mean (default) and sum.
+- TODO fix MSE loss and score not working the same
+- TODO refactor with an additional callback to initialize the model state outside train()
+- Handle case in which we need to predict a value every K time steps
+- Handle case in which we need to use a window of T time steps as input
 - Provide a documentation
 - Add shared dataset functionality to save main memory when parallelizing
 

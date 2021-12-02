@@ -13,6 +13,7 @@ class Loss(nn.Module, EventHandler):
     """
     Loss is the main event handler for loss metrics. Other losses can easily subclass by implementing the forward
     method, though sometimes more complex implementations are required.
+    IMPORTANT: this assumes that losses are typically normalized wrt the number of samples in the mini-batch
     """
     __name__ = "loss"
     op = operator.lt  # less than to determine improvement
