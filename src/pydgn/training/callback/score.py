@@ -9,16 +9,25 @@ class Score(EventHandler):
     """
     Score is the main event handler for score metrics. Other scores can easily subclass by implementing the __call__
     method, though sometimes more complex implementations are required.
-    IMPORTANT: this assumes that scores are typically normalized wrt the number of samples in the mini-batch
     """
-    __name__ = 'score'
+    __name__ = 'Score'
 
-    def __init__(self):
+    def _handle_reduction(self, state):
+        if self.reduction == 'mean':
+            # Used to recover the "sum" version of the loss
+            return state.batch_num_targets
+        elif self.reduction == 'sum':
+            return 1
+        else:
+            raise NotImplementedError('The only reductions allowed are sum and mean')
+
+    def __init__(self, reduction='mean'):
         super().__init__()
         assert hasattr(self, '__name__')
         self.batch_scores = None
         self.num_samples = None
         self.current_set = None
+        self.reduction = reduction
 
     def get_main_score_name(self):
         """
@@ -43,7 +52,7 @@ class Score(EventHandler):
         Updates the array of batch score
         :param state: the shared State object
         """
-        self.batch_scores.append(state.batch_score[self.__name__].item() * state.batch_num_targets)
+        self.batch_scores.append(state.batch_score[self.__name__].item() * self._handle_reduction(state))
         self.num_samples += state.batch_num_targets
 
     def on_training_epoch_end(self, state):
@@ -77,7 +86,7 @@ class Score(EventHandler):
         Updates the array of batch score
         :param state: the shared State object
         """
-        self.batch_scores.append(state.batch_score[self.__name__].item() * state.batch_num_targets)
+        self.batch_scores.append(state.batch_score[self.__name__].item() * self._handle_reduction(state))
         self.num_samples += state.batch_num_targets
 
     def on_compute_metrics(self, state):
@@ -105,7 +114,7 @@ class Score(EventHandler):
 
 
 class MultiScore(Score):
-    __name__ = 'score'
+    __name__ = 'Multi Score'
 
     def _istantiate_scorer(self, scorer):
         if isinstance(scorer, dict):
@@ -175,8 +184,8 @@ class MultiScore(Score):
 class RSquareScore(Score):
     __name__ = 'R2 Determination Coefficient'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
         self.y = None
         self.pred = None
 
@@ -217,8 +226,8 @@ class RSquareScore(Score):
 class BinaryAccuracyScore(Score):
     __name__ = 'Binary Accuracy'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
 
     def _get_correct(self, output):
         return output > 0.5
@@ -237,9 +246,9 @@ class BinaryAccuracyScore(Score):
 class MeanAverageErrorScore(Score):
     __name__ = 'MAE Score'
 
-    def __init__(self):
-        super().__init__()
-        self.loss = torch.nn.L1Loss()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
+        self.loss = torch.nn.L1Loss(reduction=reduction)
 
     def _score_fun(self, targets, *outputs, batch_loss_extra):
         pred = outputs[0]
@@ -249,9 +258,9 @@ class MeanAverageErrorScore(Score):
 class MeanSquareErrorScore(Score):
     __name__ = 'MSE Score'
 
-    def __init__(self):
-        super().__init__()
-        self.loss = torch.nn.MSELoss()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
+        self.loss = torch.nn.MSELoss(reduction=reduction)
 
     def _score_fun(self, targets, *outputs, batch_loss_extra):
         pred = outputs[0]
@@ -261,8 +270,8 @@ class MeanSquareErrorScore(Score):
 class Toy1Score(BinaryAccuracyScore):
     __name__ = 'toy 1 accuracy'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
 
     def _get_correct(self, output):
         return torch.argmax(output, dim=1)
@@ -274,8 +283,8 @@ class Toy1Score(BinaryAccuracyScore):
 class MulticlassAccuracyScore(BinaryAccuracyScore):
     __name__ = 'Multiclass Accuracy'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
 
     def _get_correct(self, output):
         return torch.argmax(output, dim=1)
@@ -289,8 +298,8 @@ class MulticlassAccuracyScore(BinaryAccuracyScore):
 class CGMMCompleteLikelihoodScore(Score):
     __name__ = 'Complete Log Likelihood'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
 
     def on_training_batch_end(self, state):
         self.batch_scores.append(state.batch_score[self.__name__].item())
@@ -320,8 +329,8 @@ class CGMMCompleteLikelihoodScore(Score):
 class CGMMTrueLikelihoodScore(Score):
     __name__ = 'True Log Likelihood'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
 
     def on_training_batch_end(self, state):
         self.batch_scores.append(state.batch_score[self.__name__].item())

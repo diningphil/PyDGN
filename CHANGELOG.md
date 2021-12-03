@@ -4,9 +4,8 @@
 
 # TODO (decreasing priority):
 
-- TODO losses and scores should consider the case of reduction=mean (default) and sum.
-- TODO fix MSE loss and score not working the same
-- TODO refactor with an additional callback to initialize the model state outside train()
+- test loss and additiveloss and score
+- refactor with an additional callback to initialize the model state outside train()
 - Handle case in which we need to predict a value every K time steps
 - Handle case in which we need to use a window of T time steps as input
 - Provide a documentation
@@ -15,6 +14,7 @@
 ### Fixed
 
 - Minor in `cgmm_incremental` experiment
+- loss/score now considers the case of reduction=mean (default) and sum when computing the epoch's loss/score
 
 ## [0.6.1] - Stop and Resume from different devices
 

@@ -22,10 +22,11 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
     def __init__(self, engine_callback, model, loss, optimizer, scorer=None,
                  scheduler=None, early_stopper=None, gradient_clipping=None,
                  device='cpu', plotter=None, exp_path=None,
-                 log_every=1, store_last_checkpoint=False):
+                 log_every=1, store_last_checkpoint=False, reset_eval_state=False):
         super().__init__(engine_callback, model, loss, optimizer, scorer,
                      scheduler, early_stopper, gradient_clipping, device,
                      plotter, exp_path, log_every, store_last_checkpoint)
+        self.reset_eval_state = reset_eval_state
 
     # def _to_data_list(self, x, y):
     #     """
@@ -110,11 +111,6 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             else:
                 self._dispatch(EventHandler.ON_EVAL_BATCH_START, self.state)
 
-            # Used to accumulate all losses in the batch (sequence of graphs)
-            cumulative_batch_loss = {}
-            cumulative_batch_score = {}
-            cumulative_batch_num_targets = 0
-
             for snapshot in data:
 
                 _snapshot = snapshot
@@ -135,7 +131,6 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 num_targets = self._num_targets(targets)
 
                 self.state.update(batch_num_targets=num_targets)
-                cumulative_batch_num_targets += num_targets
 
                 self._dispatch(EventHandler.ON_FORWARD, self.state)
 
@@ -149,31 +144,16 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
                 # Update previous hidden states
                 self.state.update(last_hidden_state=output[1])
-                prev_hidden_states.append(output[1].detach().cpu())
+
+                # Save main memory if node embeddings are not needed
+                if return_node_embeddings:
+                    prev_hidden_states.append(output[1].detach().cpu())
 
                 self._dispatch(EventHandler.ON_COMPUTE_METRICS, self.state)
-
-                for k in self.state.batch_loss.keys():
-                    if k not in cumulative_batch_loss:
-                        cumulative_batch_loss[k] = self.state.batch_loss[k]
-                    else:
-                        cumulative_batch_loss[k] += self.state.batch_loss[k]
-
-                for k in self.state.batch_score.keys():
-                    if k not in cumulative_batch_score:
-                        cumulative_batch_score[k] = self.state.batch_score[k]
-                    else:
-                        cumulative_batch_score[k] += self.state.batch_score[k]
 
                 # Increment global time counter
                 t = t+1
                 self.state.update(time_step=t)
-
-            # Substitute the last time step loss/score with the cumulative one
-            # before calling on_backward
-            self.state.update(batch_loss=cumulative_batch_loss)
-            self.state.update(batch_score=cumulative_batch_score)
-            self.state.update(batch_num_targets=cumulative_batch_num_targets)
 
             if self.training:
                 self._dispatch(EventHandler.ON_BACKWARD, self.state)
@@ -185,8 +165,6 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
             else:
                 self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
-
-
 
         if return_node_embeddings:
             # Model state will hold a list of tensors, one per time step
@@ -244,9 +222,21 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 # Compute training output (necessary because on_backward has been called)
                 train_loss, train_score, _ = self.infer(train_loader, TRAINING, return_node_embeddings=False)
 
+                # Used when we want to reset the state after performing previous
+                # inference. Default should be false since we are dealing with
+                # a single temporal graph sequence
+                if self.reset_eval_state:
+                    self.state.update(last_hidden_state=None)
+
                 # Compute validation output
                 if validation_loader is not None:
                     val_loss, val_score, _ = self.infer(validation_loader, VALIDATION, return_node_embeddings=False)
+
+                # Used when we want to reset the state after performing previous
+                # inference. Default should be false since we are dealing with
+                # a single temporal graph sequence
+                if self.reset_eval_state:
+                    self.state.update(last_hidden_state=None)
 
                 # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
                 if test_loader is not None:

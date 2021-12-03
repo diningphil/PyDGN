@@ -6,13 +6,13 @@ splitter:
     # n_outer_folds: 1
     # n_inner_folds: 1
     seed: -1
-    train_timesteps: 10
-    valid_timesteps: 10
-    test_timesteps: 10
+    train_timesteps: 100
+    valid_timesteps: 100
+    test_timesteps: 100
 dataset:
   root: DATA/
   class_name: dynamic_dataset.ChickenpoxDatasetInterface
   args:
     root: DATA/
     name: chickenpox
-    lags: 4
+    lags: 1

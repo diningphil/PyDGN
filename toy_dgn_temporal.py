@@ -22,13 +22,14 @@ class ToyDynamicDGN(nn.Module):
 
         super().__init__()
 
-        dim_embedding = 32
+        self.dim_embedding = 32
         filter_size = 1
 
-        self.model = DCRNN(dim_node_features, dim_embedding, filter_size)
+        self.model = DCRNN(dim_node_features, self.dim_embedding, filter_size)
+        self.linear = nn.Linear(self.dim_embedding, self.dim_embedding)
 
         # self.predictor is a LinearNodePredictor
-        self.predictor = predictor_class(dim_node_features=dim_embedding,
+        self.predictor = predictor_class(dim_node_features=self.dim_embedding,
                                          dim_edge_features=dim_edge_features,
                                          dim_target=dim_target, config=config)
 
@@ -36,9 +37,9 @@ class ToyDynamicDGN(nn.Module):
         # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
         # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
         x, edge_index = snapshot.x, snapshot.edge_index
-        h_old = 0. if prev_state is None else prev_state
+        h_old = torch.zeros(x.shape[0], self.dim_embedding) if prev_state is None else prev_state
 
-        h = self.model(x, edge_index) + h_old
+        h = self.model(x, edge_index) + self.linear(h_old)
         h = torch.relu(h)
 
         # Node predictors assume the embedding is in field "x"
