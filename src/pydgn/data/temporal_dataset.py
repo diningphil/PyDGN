@@ -1,17 +1,9 @@
-import os
-import os.path as osp
-import shutil
-import sys
-
-import torch
-from torch_geometric.data import InMemoryDataset
-from torch_geometric.datasets import TUDataset, Planetoid, KarateClub
-
 from torch_geometric_temporal.dataset import ChickenpoxDatasetLoader
 
 from pydgn.data.dataset import DatasetInterface
 
-class DynamicDatasetInterface(DatasetInterface):
+
+class TemporalDatasetInterface(DatasetInterface):
     name = None
 
     def __len__(self):
@@ -21,7 +13,7 @@ class DynamicDatasetInterface(DatasetInterface):
         raise NotImplementedError("You should subclass DynamicDatasetInterface and implement this method")
 
 
-class ChickenpoxDatasetInterface(ChickenpoxDatasetLoader, DynamicDatasetInterface):
+class ChickenpoxDatasetInterface(ChickenpoxDatasetLoader, TemporalDatasetInterface):
     def __init__(self, root, name, lags=4):
         self.root = root
         self.name = name

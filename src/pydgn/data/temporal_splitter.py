@@ -1,4 +1,4 @@
-from pydgn.data.splitter import *
+from pydgn.data.splitter import Splitter, InnerFold, OuterFold
 
 
 class SingleGraphSequenceSplitter(Splitter):

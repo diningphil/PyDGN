@@ -24,6 +24,10 @@ If you are interested in a rigorous evaluation of Deep Graph Networks, check thi
 Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning
 Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
+## What's New
+With PyDGN 0.7.0, we have released the first support for temporal experiments! In particular, we can now tackle node prediction in single graph sequence tasks!
+We rely on [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/modules/root.html) for the definition of data and models.
+
 ## Installation:
 
 (We assume **git** and **Miniconda/Anaconda** are installed)
@@ -93,15 +97,18 @@ in the `DATA_SPLITS` folder.
 
 ## Credits:
 
-This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda )
+This is a joint project with **Marco Podda** ([Github](https://github.com/marcopodda)
 /[Homepage](https://sites.google.com/view/marcopodda/home)), whom I thank for his relentless dedication.
 
-Many thanks to **Antonio Carta** ([Github](https://github.com/AntonioCarta )/[Homepage](http://pages.di.unipi.it/carta))
+Many thanks to **Antonio Carta** ([Github](https://github.com/AntonioCarta) /[Homepage](http://pages.di.unipi.it/carta))
 for incorporating the Ray library (see v0.4.0) into PyDGN! This will be of tremendous help.
 
-Many thanks to **Danilo Numeroso** ([Github](https://github.com/danilonumeroso )
+Many thanks to **Danilo Numeroso** ([Github](https://github.com/danilonumeroso)
 /[Homepage](https://pages.di.unipi.it/numeroso/)) for implementing a very flexible random search! This is a very
 convenient alternative to grid search.
+
+Many thanks to **Alessio Gravina** ([Github](https://github.com/gravins)
+/[Homepage](http://pages.di.unipi.it/gravina/)) for his invaluable help and expertise regarding the implementation of PyDGN temporal. We still have a lot of work to do!
 
 ## Contributing
 

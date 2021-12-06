@@ -1,6 +1,3 @@
-import torch
-from pydgn.data.splitter import Splitter
-from pydgn.data.util import load_dataset
 from torch.utils.data import Subset, DataLoader
 from pydgn.data.provider import seed_worker, DataProvider
 
@@ -22,7 +19,6 @@ class SingleGraphSequenceDataProvider(DataProvider):
     @classmethod
     def collate_fn(cls, samples_list):
         return samples_list
-
 
     def _get_loader(self, indices, **kwargs):
         dataset = self._get_dataset(**kwargs)

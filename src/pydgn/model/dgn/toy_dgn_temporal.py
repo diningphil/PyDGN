@@ -1,13 +1,11 @@
 import torch
-from torch import embedding_renorm_, nn
-from torch_geometric.nn import SAGEConv
-from torch_geometric.nn import global_add_pool, global_mean_pool
+from torch import nn
 from torch_geometric_temporal.nn.recurrent import DCRNN
 
 
-class ToyDynamicDGN(nn.Module):
+class ToyDGNTemporal(nn.Module):
     """
-    Simple Dynamic Deep Graph Network that can be used to test the library
+    Simple Temporal Deep Graph Network that can be used to test the library
     """
 
     def __init__(self, dim_node_features, dim_edge_features, dim_target, predictor_class, config):

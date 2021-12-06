@@ -1,15 +1,19 @@
 # Changelog
 
-## [0.6.2] - Implementation of temporal experiments + Minor fixes
+## [0.7.0] - PyDGN temporal (with [Alessio Gravina](http://pages.di.unipi.it/gravina/) based on [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/modules/root.html)) + minor fixes
 
 # TODO (decreasing priority):
 
-- test loss and additiveloss and score
-- refactor with an additional callback to initialize the model state outside train()
-- Handle case in which we need to predict a value every K time steps
-- Handle case in which we need to use a window of T time steps as input
 - Provide a documentation
 - Add shared dataset functionality to save main memory when parallelizing
+- Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
+- Temporal: Handle case in which we need to predict a value every K time steps
+- Temporal: Handle case in which we need to use a window of T time steps as input
+
+### Added
+
+- PyDGN Temporal: Support for `single graph sequence` tasks, the most common use case at the moment
+  (tested for supervised experiments only)
 
 ### Fixed
 

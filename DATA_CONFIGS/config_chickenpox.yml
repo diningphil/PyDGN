@@ -1,6 +1,7 @@
+# WARNING: This is just a debug configuration file
 splitter:
   root: DATA_SPLITS/
-  class_name: dynamic_splitter.SingleGraphSequenceSplitter
+  class_name: pydgn.data.temporal_splitter.SingleGraphSequenceSplitter
   args:
     # These are assumed to be 1 for a Single Graph Sequence
     # n_outer_folds: 1
@@ -11,7 +12,7 @@ splitter:
     test_timesteps: 100
 dataset:
   root: DATA/
-  class_name: dynamic_dataset.ChickenpoxDatasetInterface
+  class_name: pydgn.data.temporal_dataset.ChickenpoxDatasetInterface
   args:
     root: DATA/
     name: chickenpox

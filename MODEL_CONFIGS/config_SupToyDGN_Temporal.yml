@@ -1,8 +1,8 @@
-model: toy_dgn_temporal.ToyDynamicDGN
+model: pydgn.model.dgn.toy_dgn_temporal.ToyDGNTemporal
 experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: False
 log_every: 1
-dataset_getter: dynamic_provider.SingleGraphSequenceDataProvider
+dataset_getter: pydgn.data.temporal_provider.SingleGraphSequenceDataProvider
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device
@@ -23,19 +23,19 @@ grid:
     scheduler:
       - null
     loss:
-      - temporal_loss.MeanSquareErrorLoss
+      - pydgn.training.callback.temporal_loss.MeanSquareErrorLoss
       # class_name: pydgn.training.callback.loss.AdditiveLoss
       # args:
       #   loss1: temporal_loss.MeanSquareErrorLoss
       #   loss2: temporal_loss.MeanAverageErrorLoss
     scorer:
-      - temporal_score.MeanSquareErrorScore
+      - pydgn.training.callback.temporal_score.MeanSquareErrorScore
     predictor:
       - pydgn.model.predictor.node_predictor.LinearNodePredictor
     wrapper:
-      - class_name: dynamic_engine.SingleGraphSequenceTrainingEngine
+      - class_name: pydgn.training.temporal_engine.SingleGraphSequenceTrainingEngine
         args:
-          engine_callback: dynamic_engine_callback.DynamicEngineCallback
+          engine_callback: pydgn.training.callback.temporal_engine_callback.TemporalEngineCallback
     gradient_clipping:
       - null
     early_stopper:
