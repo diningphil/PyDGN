@@ -9,7 +9,6 @@ class SupervisedTask(Experiment):
         This function returns the training and validation scores
         :return: (training score, validation score)
         """
-
         batch_size = self.model_config.supervised_config['batch_size']
         shuffle = self.model_config.supervised_config['shuffle'] \
             if 'shuffle' in self.model_config.supervised_config else True
@@ -35,7 +34,7 @@ class SupervisedTask(Experiment):
             test_loader=None,
             max_epochs=self.model_config.supervised_config['epochs'],
             logger=logger)
-        
+
         train_res = {LOSS: train_loss, SCORE: train_score}
         val_res = {LOSS: val_loss, SCORE: val_score}
         return train_res, val_res

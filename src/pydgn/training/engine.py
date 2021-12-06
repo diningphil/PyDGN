@@ -129,6 +129,8 @@ class TrainingEngine(EventDispatcher):
         return data_list
 
     def _num_targets(self, targets):
+        if targets is None:
+            return 0
         assert isinstance(targets, torch.Tensor), "Expecting a tensor as target"
         num_targets = targets.shape[0]
         return num_targets

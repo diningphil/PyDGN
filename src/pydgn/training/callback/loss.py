@@ -14,13 +14,24 @@ class Loss(nn.Module, EventHandler):
     Loss is the main event handler for loss metrics. Other losses can easily subclass by implementing the forward
     method, though sometimes more complex implementations are required.
     """
-    __name__ = "loss"
+    __name__ = "Loss"
     op = operator.lt  # less than to determine improvement
 
-    def __init__(self):
+    def _handle_reduction(self, state):
+        if self.reduction == 'mean':
+            # Used to recover the "sum" version of the loss
+            return state.batch_num_targets
+        elif self.reduction == 'sum':
+            return 1
+        else:
+            raise NotImplementedError('The only reductions allowed are sum and mean')
+
+    def __init__(self, reduction='mean'):
         super().__init__()
+        assert hasattr(self, '__name__')
         self.batch_losses = None
         self.num_samples = None
+        self.reduction = reduction
 
     def get_main_loss_name(self):
         return self.__name__
@@ -38,7 +49,8 @@ class Loss(nn.Module, EventHandler):
         Updates the array of batch losses
         :param state: the shared State object
         """
-        self.batch_losses.append(state.batch_loss[self.__name__].item() * state.batch_num_targets)
+
+        self.batch_losses.append(state.batch_loss[self.__name__].item() * self._handle_reduction(state))
         self.num_samples += state.batch_num_targets
 
     def on_training_epoch_end(self, state):
@@ -71,7 +83,7 @@ class Loss(nn.Module, EventHandler):
         Updates the array of batch losses
         :param state: the shared State object
         """
-        self.batch_losses.append(state.batch_loss[self.__name__].item() * state.batch_num_targets)
+        self.batch_losses.append(state.batch_loss[self.__name__].item() * self._handle_reduction(state))
         self.num_samples += state.batch_num_targets
 
     def on_compute_metrics(self, state):
@@ -115,7 +127,8 @@ class Loss(nn.Module, EventHandler):
 
 class AdditiveLoss(Loss):
     """
-    MultiLoss combines an arbitrary number of Loss objects to perform backprop without having to istantiate a new class.
+    AdditiveLoss combines an arbitrary number of Loss objects to perform
+    backprop without having to istantiate a new class.
     The final loss is formally defined as the sum of the individual losses.
     """
     __name__ = "Additive Loss"
@@ -134,33 +147,33 @@ class AdditiveLoss(Loss):
 
     def on_training_epoch_start(self, state):
         self.batch_losses = {l.__name__: [] for l in [self] + self.losses}
-        self.num_targets = 0
+        self.num_samples = 0
 
     def on_training_batch_end(self, state):
         for k, v in state.batch_loss.items():
-            self.batch_losses[k].append(v.item() * state.batch_num_targets)
-        self.num_targets += state.batch_num_targets
+            self.batch_losses[k].append(v.item() * self._handle_reduction(state))
+        self.num_samples += state.batch_num_targets
 
     def on_training_epoch_end(self, state):
-        state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_targets
+        state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_samples
                                  for l in [self] + self.losses})
         self.batch_losses = None
-        self.num_targets = None
+        self.num_samples = None
 
     def on_eval_epoch_start(self, state):
         self.batch_losses = {l.__name__: [] for l in [self] + self.losses}
-        self.num_targets = 0
+        self.num_samples = 0
 
     def on_eval_epoch_end(self, state):
-        state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_targets
+        state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_samples
                                  for l in [self] + self.losses})
         self.batch_losses = None
-        self.num_targets = None
+        self.num_samples = None
 
     def on_eval_batch_end(self, state):
         for k, v in state.batch_loss.items():
-            self.batch_losses[k].append(v.item() * state.batch_num_targets)
-        self.num_targets += state.batch_num_targets
+            self.batch_losses[k].append(v.item() * self._handle_reduction(state))
+        self.num_samples += state.batch_num_targets
 
     def on_compute_metrics(self, state):
         """
@@ -191,15 +204,12 @@ class AdditiveLoss(Loss):
 class ClassificationLoss(Loss):
     __name__ = 'Classification Loss'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
         self.loss = None
 
     def forward(self, targets, *outputs):
         outputs = outputs[0]
-
-        # print(outputs.shape, targets.shape)
-
         loss = self.loss(outputs, targets)
         return loss
 
@@ -207,8 +217,8 @@ class ClassificationLoss(Loss):
 class RegressionLoss(Loss):
     __name__ = 'Regression Loss'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
         self.loss = None
 
     def forward(self, targets, *outputs):
@@ -221,7 +231,7 @@ class BinaryClassificationLoss(ClassificationLoss):
     __name__ = 'Binary Classification Loss'
 
     def __init__(self, reduction='mean'):
-        super().__init__()
+        super().__init__(reduction=reduction)
         self.loss = nn.BCEWithLogitsLoss(reduction=reduction)
 
 
@@ -229,7 +239,7 @@ class MulticlassClassificationLoss(ClassificationLoss):
     __name__ = 'Multiclass Classification Loss'
 
     def __init__(self, reduction='mean'):
-        super().__init__()
+        super().__init__(reduction=reduction)
         self.loss = nn.CrossEntropyLoss(reduction=reduction)
 
 
@@ -237,7 +247,7 @@ class MeanSquareErrorLoss(RegressionLoss):
     __name__ = 'MSE'
 
     def __init__(self, reduction='mean'):
-        super().__init__()
+        super().__init__(reduction=reduction)
         self.loss = MSELoss(reduction=reduction)
 
 
@@ -245,15 +255,15 @@ class MeanAverageErrorLoss(RegressionLoss):
     __name__ = 'MAE'
 
     def __init__(self, reduction='mean'):
-        super().__init__()
+        super().__init__(reduction=reduction)
         self.loss = L1Loss(reduction=reduction)
 
 
 class CGMMLoss(Loss):
     __name__ = 'CGMM Loss'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
         self.old_likelihood = -float('inf')
         self.new_likelihood = None
 
@@ -293,8 +303,8 @@ class CGMMLoss(Loss):
 class LinkPredictionLoss(Loss):
     __name__ = 'Link Prediction Loss'
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, reduction='mean'):
+        super().__init__(reduction=reduction)
 
     def forward(self, targets, *outputs):
         node_embs = outputs[1]

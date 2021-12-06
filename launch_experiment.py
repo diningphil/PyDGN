@@ -26,6 +26,9 @@ if not sys.warnoptions:
 
     warnings.simplefilter("ignore")
 
+import warnings
+warnings.simplefilter("error", UserWarning) 
+
 from pydgn.data.splitter import Splitter
 from pydgn.evaluation.grid import Grid
 from pydgn.evaluation.random_search import RandomSearch

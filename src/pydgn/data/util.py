@@ -94,7 +94,10 @@ def preprocess_data(options):
     assert hasattr(dataset, 'name'), "Dataset instance should have a name attribute!"
 
     # Store dataset additional arguments in a separate file
-    kwargs_path = osp.join(data_root, dataset.name, 'processed', 'dataset_kwargs.pt')
+    kwargs_folder = osp.join(data_root, dataset.name, 'processed')
+    kwargs_path = osp.join(kwargs_folder, 'dataset_kwargs.pt')
+
+    get_or_create_dir(kwargs_folder)
     torch.save(dataset_args, kwargs_path)
 
     # Process data splits

@@ -12,6 +12,9 @@ class State:
         self.optimizer = optimizer
         self.stop_training = False
 
+        # For dynamic graph learning engines
+        self.time_step = 0
+
     def __getitem__(self, name):
         return getattr(self, name, None)
 
