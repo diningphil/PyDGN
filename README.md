@@ -10,7 +10,7 @@ with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S08
 automatic management of data splitting, loading and the most common experimental settings. It also handles both model
 selection and risk assessment procedures, by trying many different configurations in parallel (CPU or GPU). This
 repository is built upon the [Pytorch Geometric Library](https://pytorch-geometric.readthedocs.io/en/latest/) and [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/modules/root.html), which
-provides support for data management.
+provide support for data management.
 
 If you happen to use or modify this code, please remember to cite our tutorial paper:
 
