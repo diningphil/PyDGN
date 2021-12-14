@@ -7,8 +7,9 @@ class EventDispatcher:
 
     def _dispatch(self, event_name, state):
         for event_handler in self._event_handlers:
-            callback = getattr(event_handler, event_name)
-            callback(state)
+            callback = getattr(event_handler, event_name, None)
+            if callback is not None:
+                callback(state)
 
     def register(self, event_handler):
         self._event_handlers.append(event_handler)

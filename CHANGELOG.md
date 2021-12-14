@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.7.1] 
+
+## TODO
+- Provide a documentation
+- Add shared dataset functionality to save main memory when parallelizing
+- Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
+- Temporal: Handle case in which we need to predict a value every K time steps
+- Temporal: Handle case in which we need to use a window of T time steps as input
+
+## Fixed
+
+- Fixed a bug in EventHandler. If one extends EventHandler with new events, which are triggered by a training engine, make sure that callbacks that implement the EventHandler interface do not break when the new events are triggered.
+
 ## [0.7.0] - PyDGN temporal (with [Alessio Gravina](http://pages.di.unipi.it/gravina/) based on [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/modules/root.html)) + minor fixes
 
 # TODO (decreasing priority):
