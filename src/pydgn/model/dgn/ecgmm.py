@@ -21,7 +21,7 @@ class ECGMM(torch.nn.Module):
         self.is_first_layer = config['depth'] == 1
         self.depth = config['depth']
         self.training = False
-        self.compute_intermediate_outputs = False
+        self.return_node_embeddings = False
 
         self.K = dim_node_features
         self.Y = dim_target
@@ -176,7 +176,7 @@ class ECGMM(torch.nn.Module):
 
         # ECGMM uses the true posterior (over node attributes) as it is unsupervised!
         # Different from IO version
-        if self.compute_intermediate_outputs:
+        if self.return_node_embeddings:
             # print("Computing intermediate outputs")
 
             assert not self.training

@@ -78,22 +78,20 @@ class CGMMOptimizer(EventHandler):
 
     def on_eval_epoch_start(self, state):
         """
-        Use the "compute_intermediate_outputs" field of the state to decide whether to compute statistics or not during
+        Use the "return_node_embeddings" field of the state to decide whether to compute statistics or not during
         this evaluation epoch
         :param state: the shared State object
         """
-        cgmm = state.model
-        cgmm.compute_intermediate_outputs = state.compute_intermediate_outputs
+        state.model.return_node_embeddings = state.return_node_embeddings
 
     # Not necessary, but it may help to debug
     def on_eval_epoch_end(self, state):
         """
-        Reset the "compute_intermediate_outputs" field to False
+        Reset the "return_node_embeddings" field to False
         :param state:
         :return:
         """
-        cgmm = state.model
-        cgmm.compute_intermediate_outputs = False
+        state.model.return_node_embeddings = False
 
     def on_training_epoch_end(self, state):
         """

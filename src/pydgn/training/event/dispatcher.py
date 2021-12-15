@@ -7,7 +7,13 @@ class EventDispatcher:
 
     def _dispatch(self, event_name, state):
         for event_handler in self._event_handlers:
-            callback = getattr(event_handler, event_name, None)
+            try:
+                callback = getattr(event_handler, event_name)
+            except AttributeError:
+                # This happens when the callback does not implement a particular method
+                # e.g., when using a particular engine with new events and event handlers
+                callback = None
+
             if callback is not None:
                 callback(state)
 

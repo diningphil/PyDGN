@@ -23,57 +23,8 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                      plotter, exp_path, log_every, store_last_checkpoint)
         self.reset_eval_state = reset_eval_state
 
-    # def _to_data_list(self, x, y):
-    #     """
-    #     Converts a graphs outputs back to a list of Tensors elements. Useful for incremental architectures.
-    #     :param embeddings: a tuple of embeddings: (vertex_output, edge_output, graph_output, other_output). Each of
-    #     the elements should be a Tensor.
-    #     :param x: big Tensor holding information of different graphs
-    #     :param y: target labels Tensor, used to determine whether the task is graph classification or not (to be changed)
-    #     :return: a list of PyTorch Geometric Data objects
-    #     """
-    #     data_list = []
-    #
-    #     _, counts = torch.unique_consecutive(batch, return_counts=True)
-    #     cumulative = torch.cumsum(counts, dim=0)
-    #
-    #     is_graph_prediction = y.shape[0] == len(cumulative)
-    #
-    #     y = y.unsqueeze(1) if y.dim() == 1 else y
-    #
-    #     data_list.append(Data(x=x[:cumulative[0]],
-    #                           y=y[0].unsqueeze(0) if is_graph_prediction else y[:, cumulative[0]]))
-    #     for i in range(1, len(cumulative)):
-    #         g = Data(x=x[cumulative[i - 1]:cumulative[i]],
-    #                  y=y[i].unsqueeze(0) if is_graph_prediction else y[cumulative[i - 1]:cumulative[i]])
-    #         data_list.append(g)
-    #
-    #     return data_list
-    #
-    # def _to_list(self, data_list, embeddings, edge_index, y):
-    #     assert isinstance(y, torch.Tensor), "Expecting a tensor as target"
-    #
-    #     # Crucial: Detach the embeddings to free the computation graph!!
-    #     if isinstance(embeddings, tuple):
-    #         embeddings = tuple([e.detach().cpu() if e is not None else None for e in embeddings])
-    #     elif isinstance(embeddings, torch.Tensor):
-    #         embeddings = embeddings.detach().cpu()
-    #     else:
-    #         raise NotImplementedError('Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor')
-    #
-    #     # TODO gestire anche il caso lista di tensori (uno o piu' per istante di tempo)
-    #
-    #     # Convert embeddings back to a list of torch_geometric Data objects
-    #     # Needs also y information to (possibly) use them as a tensor dataset
-    #     # CRUCIAL: remember, the loader could have shuffled the data, so we
-    #     # need to carry y around as well
-    #     if data_list is None:
-    #         data_list = []
-    #     data_list.extend(self._to_data_list(embeddings, y))
-    #     return data_list
-
     # loop over all data (i.e. computes an epoch)
-    def _loop(self, loader, return_node_embeddings=False):
+    def _loop(self, loader):
 
         # Reset epoch state (DO NOT REMOVE)
         self.state.update(epoch_data_list=None)
@@ -141,7 +92,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 self.state.update(last_hidden_state=output[1])
 
                 # Save main memory if node embeddings are not needed
-                if return_node_embeddings:
+                if self.state.return_node_embeddings:
                     prev_hidden_states.append(output[1].detach().cpu())
 
                 self._dispatch(EventHandler.ON_COMPUTE_METRICS, self.state)
@@ -161,11 +112,10 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             else:
                 self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
 
-        if return_node_embeddings:
+        if self.state.return_node_embeddings:
             # Model state will hold a list of tensors, one per time step
             data_list = [Data(x=emb_t, y=all_y[i]) for i,emb_t in enumerate(prev_hidden_states)]
             self.state.update(epoch_data_list=data_list)
-
 
     def train(self, train_loader, validation_loader=None, test_loader=None, max_epochs=100, zero_epoch=False,
               logger=None):
@@ -213,6 +163,8 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
                 self.state.update(set=TRAINING)
                 _, _, _ = self._train(train_loader)
+
+                self.state.update(return_node_embeddings=False)
 
                 # Compute training output (necessary because on_backward has been called)
                 train_loss, train_score, _ = self.infer(train_loader, TRAINING, return_node_embeddings=False)
@@ -291,6 +243,8 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             # Initialize the state of the model again before the final evaluation
             self.state.update(last_hidden_state=None)
 
+            self.state.update(return_node_embeddings=True)
+
             # Compute training output
             train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING,
                                                                          return_node_embeddings=True)
@@ -318,6 +272,8 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 ber.update({f'{TEST}_{k}': v for k, v in test_score.items()})
 
             self._dispatch(EventHandler.ON_FIT_END, self.state)
+
+            self.state.update(return_node_embeddings=False)
 
             log(f'Chosen is TR loss: {train_loss} TR score: {train_score}, VL loss: {val_loss} VL score: {val_score} '
                 f'TE loss: {test_loss} TE score: {test_score}', logger)

@@ -22,7 +22,7 @@ class Profiler:
                 callback_name = func.__name__
                 t0 = time.time()
                 # print(f'Callback {cls.__class__.__name__}: calling {func.__name__} with args {args} and kwargs {kwargs}')
-                result = func(cls, *args, **kwargs)
+                result = func(*args, **kwargs)
                 elapsed = time.time() - t0
 
                 if callback_name in self.callback_elapsed[class_name]:
@@ -36,72 +36,19 @@ class Profiler:
 
             return clocked
 
+        # Taken from: https://stackoverflow.com/questions/3155436/getattr-for-static-class-variables-in-python
+        # We need to do this to invoke __getattr__ on a class
+        # https://stackoverflow.com/questions/100003/what-are-metaclasses-in-python
+        # TLDR We want the class ClockedCallback (which is an object itself) to have a method __getattr__
+        # if we specify __getattr__ inside ClockedCallback, rather than in its metaclass, the class ClockedCallback will
+        # not use the overridden __getattr__
+        class getattribute(type):
+            def __getattr__(self, name):
+                return clock(getattr(cls, name))
+
         # Relies on closures
-        class ClockedCallback(EventHandler):
-
-            @clock
-            def on_fetch_data(self, state):
-                return cls.on_fetch_data(state)
-
-            @clock
-            def on_fit_start(self, state):
-                return cls.on_fit_start(state)
-
-            @clock
-            def on_fit_end(self, state):
-                return cls.on_fit_end(state)
-
-            @clock
-            def on_epoch_start(self, state):
-                return cls.on_epoch_start(state)
-
-            @clock
-            def on_epoch_end(self, state):
-                return cls.on_epoch_end(state)
-
-            @clock
-            def on_training_epoch_start(self, state):
-                return cls.on_training_epoch_start(state)
-
-            @clock
-            def on_training_epoch_end(self, state):
-                return cls.on_training_epoch_end(state)
-
-            @clock
-            def on_eval_epoch_start(self, state):
-                return cls.on_eval_epoch_start(state)
-
-            @clock
-            def on_eval_epoch_end(self, state):
-                return cls.on_eval_epoch_end(state)
-
-            @clock
-            def on_training_batch_start(self, state):
-                return cls.on_training_batch_start(state)
-
-            @clock
-            def on_training_batch_end(self, state):
-                return cls.on_training_batch_end(state)
-
-            @clock
-            def on_eval_batch_start(self, state):
-                return cls.on_eval_batch_start(state)
-
-            @clock
-            def on_eval_batch_end(self, state):
-                return cls.on_eval_batch_end(state)
-
-            @clock
-            def on_backward(self, state):
-                return cls.on_backward(state)
-
-            @clock
-            def on_forward(self, state):
-                return cls.on_forward(state)
-
-            @clock
-            def on_compute_metrics(self, state):
-                return cls.on_compute_metrics(state)
+        class ClockedCallback(metaclass=getattribute):
+            pass
 
         return ClockedCallback
 

@@ -148,7 +148,7 @@ class TrainingEngine(EventDispatcher):
         self.training = False
 
     # loop over all data (i.e. computes an epoch)
-    def _loop(self, loader, return_node_embeddings=False):
+    def _loop(self, loader):
 
         # Reset epoch state (DO NOT REMOVE)
         self.state.update(epoch_data_list=None)
@@ -205,7 +205,7 @@ class TrainingEngine(EventDispatcher):
             if not isinstance(output, tuple):
                 output = (output,)
             else:
-                if len(output) > 1 and return_node_embeddings:
+                if len(output) > 1 and self.state.return_node_embeddings:
                     # Embeddings should be in position 2 of the output
                     embeddings = output[1]
 
@@ -228,7 +228,7 @@ class TrainingEngine(EventDispatcher):
 
         self._dispatch(EventHandler.ON_TRAINING_EPOCH_START, self.state)
 
-        self._loop(loader, return_node_embeddings=False)
+        self._loop(loader)
 
         self._dispatch(EventHandler.ON_TRAINING_EPOCH_END, self.state)
 
@@ -236,12 +236,11 @@ class TrainingEngine(EventDispatcher):
         loss, score = self.state.epoch_loss, self.state.epoch_score
         return loss, score, None
 
-    def infer(self, loader, set, return_node_embeddings=False):
+    def infer(self, loader, set):
         """
         Performs an inference step
         :param loader: the DataLoader
         :set: the type of dataset being used, can be TRAINING, VALIDATION or TEST
-        :param return_node_embeddings: whether the model should compute node embeddings or not
         :return: a tuple (loss, score, embeddings)
         """
         self.set_eval_mode()
@@ -250,7 +249,7 @@ class TrainingEngine(EventDispatcher):
         self._dispatch(EventHandler.ON_EVAL_EPOCH_START, self.state)
 
         with torch.no_grad():
-            self._loop(loader, return_node_embeddings=return_node_embeddings)  # state has been updated
+            self._loop(loader)  # state has been updated
 
         self._dispatch(EventHandler.ON_EVAL_EPOCH_END, self.state)
 
@@ -306,22 +305,24 @@ class TrainingEngine(EventDispatcher):
             # Loop over the entire dataset dataset
             for epoch in range(self.state.initial_epoch, max_epochs):
                 self.state.update(epoch=epoch)
+                self.state.update(return_node_embeddings=False)
 
                 self._dispatch(EventHandler.ON_EPOCH_START, self.state)
 
                 self.state.update(set=TRAINING)
                 _, _, _ = self._train(train_loader)
 
+
                 # Compute training output (necessary because on_backward has been called)
-                train_loss, train_score, _ = self.infer(train_loader, TRAINING, return_node_embeddings=False)
+                train_loss, train_score, _ = self.infer(train_loader, TRAINING)
 
                 # Compute validation output
                 if validation_loader is not None:
-                    val_loss, val_score, _ = self.infer(validation_loader, VALIDATION, return_node_embeddings=False)
+                    val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
 
                 # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
                 if test_loader is not None:
-                    test_loss, test_score, _ = self.infer(test_loader, TEST, return_node_embeddings=False)
+                    test_loss, test_score, _ = self.infer(test_loader, TEST)
 
                 # Update state with epoch results
                 epoch_results = {
@@ -374,9 +375,10 @@ class TrainingEngine(EventDispatcher):
                 self.state.update(best_epoch_results={BEST_EPOCH: epoch})
                 ber = self.state.best_epoch_results
 
+            self.state.update(return_node_embeddings=True)
+
             # Compute training output
-            train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING,
-                                                                         return_node_embeddings=True)
+            train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING)
             # ber[f'{TRAINING}_loss'] = train_loss
             ber[f'{TRAINING}{EMB_TUPLE_SUBSTR}'] = train_embeddings_tuple
             ber.update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
@@ -384,8 +386,7 @@ class TrainingEngine(EventDispatcher):
 
             # Compute validation output
             if validation_loader is not None:
-                val_loss, val_score, val_embeddings_tuple = self.infer(validation_loader, VALIDATION,
-                                                                       return_node_embeddings=True)
+                val_loss, val_score, val_embeddings_tuple = self.infer(validation_loader, VALIDATION)
                 # ber[f'{VALIDATION}_loss'] = val_loss
                 ber[f'{VALIDATION}{EMB_TUPLE_SUBSTR}'] = val_embeddings_tuple
                 ber.update({f'{TRAINING}_{k}': v for k, v in val_loss.items()})
@@ -393,14 +394,15 @@ class TrainingEngine(EventDispatcher):
 
             # Compute test output
             if test_loader is not None:
-                test_loss, test_score, test_embeddings_tuple = self.infer(test_loader, TEST,
-                                                                          return_node_embeddings=True)
+                test_loss, test_score, test_embeddings_tuple = self.infer(test_loader, TEST)
                 # ber[f'{TEST}_loss'] = test_loss
                 ber[f'{TEST}{EMB_TUPLE_SUBSTR}'] = test_embeddings_tuple
                 ber.update({f'{TEST}_{k}': v for k, v in test_loss.items()})
                 ber.update({f'{TEST}_{k}': v for k, v in test_score.items()})
 
             self._dispatch(EventHandler.ON_FIT_END, self.state)
+
+            self.state.update(return_node_embeddings=False)
 
             log(f'Chosen is TR loss: {train_loss} TR score: {train_score}, VL loss: {val_loss} VL score: {val_score} '
                 f'TE loss: {test_loss} TE score: {test_score}', logger)
@@ -493,16 +495,6 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
 class IncrementalTrainingEngine(TrainingEngine):
     def __init__(self, engine_callback, model, loss, **kwargs):
         super().__init__(engine_callback, model, loss, **kwargs)
-
-    def infer(self, loader, set, return_node_embeddings=False):
-        """
-        Extends the infer method of Training Engine to update the State variable "compute_intermediate_outputs".
-        :param loader:
-        :param return_node_embeddings:
-        :return:
-        """
-        self.state.update(compute_intermediate_outputs=return_node_embeddings)
-        return super().infer(loader, set, return_node_embeddings)
 
     def _to_list(self, data_list, embeddings, batch, edge_index, y):
 
