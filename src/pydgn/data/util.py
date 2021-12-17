@@ -30,14 +30,6 @@ def filter_adj(edge_index, edge_attr, mask):
     return filtered_edge_index, None if edge_attr is None else edge_attr[mask]
 
 
-def get_graph_targets(dataset):
-    try:
-        targets = np.array([d.y.item() for d in dataset])
-        return True, targets
-    except Exception:
-        return False, None
-
-
 def preprocess_data(options):
     data_info = options.pop("dataset")
     if "class_name" not in data_info:
@@ -115,7 +107,7 @@ def preprocess_data(options):
                            f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits")
 
     if not os.path.exists(splits_path):
-        has_targets, targets = get_graph_targets(dataset)
+        has_targets, targets = splitter.get_graph_targets(dataset)
         # The splitter is in charge of eventual stratifications
         splitter.split(dataset, targets=targets if has_targets else None)
         splitter.save(splits_path)

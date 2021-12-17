@@ -73,6 +73,9 @@ class TemporalLoss(Loss):
         :param state: the shared State object
         """
         outputs, targets = state.batch_outputs, state.batch_targets
+        if outputs[0] is None:
+            return
+
         loss = self.forward(targets, *outputs)
 
         # In the temporal scenario, on_compute_metrics is called at each
@@ -117,6 +120,9 @@ class TemporalAdditiveLoss(AdditiveLoss):
         :param state: the shared State object
         """
         outputs, targets = state.batch_outputs, state.batch_targets
+        if outputs[0] is None:
+            return
+
         loss = {}
         loss_sum = state.batch_loss.get(self.__name__, 0.)
         for l in self.losses:
@@ -131,7 +137,6 @@ class TemporalAdditiveLoss(AdditiveLoss):
 
         loss[self.__name__] = loss_sum
         state.update(batch_loss=loss)
-
 
 
 class ClassificationLoss(TemporalLoss):

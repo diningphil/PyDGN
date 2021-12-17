@@ -34,7 +34,10 @@ class ToyDGNTemporal(nn.Module):
     def forward(self, snapshot, prev_state=None):
         # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
         # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
-        x, edge_index = snapshot.x, snapshot.edge_index
+        x, edge_index, mask = snapshot.x, snapshot.edge_index, snapshot.mask
+
+        print(mask, mask.shape)
+
         h_old = torch.zeros(x.shape[0], self.dim_embedding) if prev_state is None else prev_state
 
         h = self.model(x, edge_index) + self.linear(h_old)

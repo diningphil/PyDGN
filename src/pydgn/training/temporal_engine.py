@@ -12,7 +12,12 @@ def log(msg, logger):
         logger.log(msg)
 
 
-class SingleGraphSequenceTrainingEngine(TrainingEngine):
+class GraphSequenceTrainingEngine(TrainingEngine):
+    """
+    Assumes that the model can return None predictions (i.e., output[0] below)
+    whenever no values should be predicted according to the mask field in the
+    Data object representing a snapshot
+    """
 
     def __init__(self, engine_callback, model, loss, optimizer, scorer=None,
                  scheduler=None, early_stopper=None, gradient_clipping=None,
@@ -155,6 +160,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             # Loop over the entire dataset dataset
             for epoch in range(self.state.initial_epoch, max_epochs):
                 self.state.update(epoch=epoch)
+                self.state.update(return_node_embeddings=False)
 
                 # Initialize the state of the model
                 self.state.update(last_hidden_state=None)
@@ -164,10 +170,8 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
                 self.state.update(set=TRAINING)
                 _, _, _ = self._train(train_loader)
 
-                self.state.update(return_node_embeddings=False)
-
                 # Compute training output (necessary because on_backward has been called)
-                train_loss, train_score, _ = self.infer(train_loader, TRAINING, return_node_embeddings=False)
+                train_loss, train_score, _ = self.infer(train_loader, TRAINING)
 
                 # Used when we want to reset the state after performing previous
                 # inference. Default should be false since we are dealing with
@@ -177,7 +181,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
                 # Compute validation output
                 if validation_loader is not None:
-                    val_loss, val_score, _ = self.infer(validation_loader, VALIDATION, return_node_embeddings=False)
+                    val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
 
                 # Used when we want to reset the state after performing previous
                 # inference. Default should be false since we are dealing with
@@ -187,7 +191,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
                 # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
                 if test_loader is not None:
-                    test_loss, test_score, _ = self.infer(test_loader, TEST, return_node_embeddings=False)
+                    test_loss, test_score, _ = self.infer(test_loader, TEST)
 
                 # Update state with epoch results
                 epoch_results = {
@@ -246,8 +250,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
             self.state.update(return_node_embeddings=True)
 
             # Compute training output
-            train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING,
-                                                                         return_node_embeddings=True)
+            train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING)
             # ber[f'{TRAINING}_loss'] = train_loss
             ber[f'{TRAINING}{EMB_TUPLE_SUBSTR}'] = train_embeddings_tuple
             ber.update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
@@ -255,8 +258,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
             # Compute validation output
             if validation_loader is not None:
-                val_loss, val_score, val_embeddings_tuple = self.infer(validation_loader, VALIDATION,
-                                                                       return_node_embeddings=True)
+                val_loss, val_score, val_embeddings_tuple = self.infer(validation_loader, VALIDATION)
                 # ber[f'{VALIDATION}_loss'] = val_loss
                 ber[f'{VALIDATION}{EMB_TUPLE_SUBSTR}'] = val_embeddings_tuple
                 ber.update({f'{TRAINING}_{k}': v for k, v in val_loss.items()})
@@ -264,8 +266,7 @@ class SingleGraphSequenceTrainingEngine(TrainingEngine):
 
             # Compute test output
             if test_loader is not None:
-                test_loss, test_score, test_embeddings_tuple = self.infer(test_loader, TEST,
-                                                                          return_node_embeddings=True)
+                test_loss, test_score, test_embeddings_tuple = self.infer(test_loader, TEST)
                 # ber[f'{TEST}_loss'] = test_loss
                 ber[f'{TEST}{EMB_TUPLE_SUBSTR}'] = test_embeddings_tuple
                 ber.update({f'{TEST}_{k}': v for k, v in test_loss.items()})

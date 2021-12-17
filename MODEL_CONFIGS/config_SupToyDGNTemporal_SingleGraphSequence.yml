@@ -33,7 +33,7 @@ grid:
     predictor:
       - pydgn.model.predictor.node_predictor.LinearNodePredictor
     wrapper:
-      - class_name: pydgn.training.temporal_engine.SingleGraphSequenceTrainingEngine
+      - class_name: pydgn.training.temporal_engine.GraphSequenceTrainingEngine
         args:
           engine_callback: pydgn.training.callback.temporal_engine_callback.TemporalEngineCallback
     gradient_clipping:

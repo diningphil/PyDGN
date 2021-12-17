@@ -67,6 +67,9 @@ class TemporalScore(Score):
         """
         self.current_set = state.set
         outputs, targets = state.batch_outputs, state.batch_targets
+        if outputs[0] is None:
+            return
+
         score = self(targets, *outputs)
 
         # Score is a dictionary with key-value pairs
@@ -84,7 +87,7 @@ class TemporalScore(Score):
         score = self._score_fun(targets, *outputs)
         return {self.__name__: score}
 
-#
+
 # class MultiScore(TemporalScore):
 #     __name__ = 'Temporal Multi Score'
 #

@@ -56,6 +56,13 @@ class Splitter:
     Class that generates the splits at dataset creation time.
     """
 
+    def get_graph_targets(self, dataset):
+        try:
+            targets = np.array([d.y.item() for d in dataset])
+            return True, targets
+        except Exception:
+            return False, None
+
     @classmethod
     def load(cls, path):
         """
@@ -155,6 +162,7 @@ class Splitter:
         :return:
         """
         idxs = range(len(dataset))
+        print(len(dataset))
 
         if not self.processed:
 

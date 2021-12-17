@@ -1,5 +1,18 @@
+import numpy as np
 from pydgn.data.splitter import Splitter, InnerFold, OuterFold
 
+
+class TemporalSplitter(Splitter):
+    """
+    Class that generates the splits at dataset creation time.
+    """
+
+    def get_graph_targets(self, dataset):
+        try:
+            targets = np.array([d.targets[-1].item() for d in dataset])
+            return True, targets
+        except Exception:
+            return False, None
 
 class SingleGraphSequenceSplitter(Splitter):
     """
