@@ -14,7 +14,7 @@
 - Minor refactoring of the engines to avoid redundant flow of information
 
 ### Fixed
-
+- Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the predictor
 - Fixed a bug in EventHandler. If one extends EventHandler with new events, which are triggered by a training engine, make sure that callbacks that implement the EventHandler interface do not break when the new events are triggered.
 - Refactored Profiler to abstract from the EventHandler. This created problems when a callback implmenented an interface that extends EventHandler. If the callback does not implement a particular method, nothing happens and the dispatcher moves on.
 
