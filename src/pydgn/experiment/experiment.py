@@ -79,7 +79,7 @@ class Experiment:
     def create_unsupervised_model(self, dim_node_features, dim_edge_features, dim_target):
         """ Instantiates an unsupervised model """
         predictor_classname = self.model_config.unsupervised_config['predictor'] \
-            if 'predictor' in self.model_config.supervised_config else None
+            if 'predictor' in self.model_config.unsupervised_config else None
         return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
                                   self.model_config.unsupervised_config)
 
