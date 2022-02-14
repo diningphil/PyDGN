@@ -185,8 +185,8 @@ class MultiScore(Score):
 class RSquareScore(Score):
     __name__ = 'R2 Determination Coefficient'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.y = None
         self.pred = None
 
@@ -227,8 +227,8 @@ class RSquareScore(Score):
 class BinaryAccuracyScore(Score):
     __name__ = 'Binary Accuracy'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
 
     def _get_correct(self, output):
         return output > 0.5
@@ -247,8 +247,8 @@ class BinaryAccuracyScore(Score):
 class MeanAverageErrorScore(Score):
     __name__ = 'MAE Score'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = torch.nn.L1Loss(reduction=reduction)
 
     def _score_fun(self, targets, *outputs, batch_loss_extra):
@@ -259,8 +259,8 @@ class MeanAverageErrorScore(Score):
 class MeanSquareErrorScore(Score):
     __name__ = 'MSE Score'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = torch.nn.MSELoss(reduction=reduction)
 
     def _score_fun(self, targets, *outputs, batch_loss_extra):
@@ -271,8 +271,8 @@ class MeanSquareErrorScore(Score):
 class Toy1Score(BinaryAccuracyScore):
     __name__ = 'toy 1 accuracy'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
 
     def _get_correct(self, output):
         return torch.argmax(output, dim=1)
@@ -284,8 +284,8 @@ class Toy1Score(BinaryAccuracyScore):
 class MulticlassAccuracyScore(BinaryAccuracyScore):
     __name__ = 'Multiclass Accuracy'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
 
     def _get_correct(self, output):
         return torch.argmax(output, dim=1)
@@ -299,8 +299,8 @@ class MulticlassAccuracyScore(BinaryAccuracyScore):
 class CGMMCompleteLikelihoodScore(Score):
     __name__ = 'Complete Log Likelihood'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
 
     def on_training_batch_end(self, state):
         self.batch_scores.append(state.batch_score[self.__name__].item())
@@ -330,8 +330,8 @@ class CGMMCompleteLikelihoodScore(Score):
 class CGMMTrueLikelihoodScore(Score):
     __name__ = 'True Log Likelihood'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
 
     def on_training_batch_end(self, state):
         self.batch_scores.append(state.batch_score[self.__name__].item())

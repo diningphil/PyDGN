@@ -207,8 +207,8 @@ class AdditiveLoss(Loss):
 class ClassificationLoss(Loss):
     __name__ = 'Classification Loss'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = None
 
     def forward(self, targets, *outputs):
@@ -220,8 +220,8 @@ class ClassificationLoss(Loss):
 class RegressionLoss(Loss):
     __name__ = 'Regression Loss'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = None
 
     def forward(self, targets, *outputs):
@@ -233,40 +233,40 @@ class RegressionLoss(Loss):
 class BinaryClassificationLoss(ClassificationLoss):
     __name__ = 'Binary Classification Loss'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = nn.BCEWithLogitsLoss(reduction=reduction)
 
 
 class MulticlassClassificationLoss(ClassificationLoss):
     __name__ = 'Multiclass Classification Loss'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = nn.CrossEntropyLoss(reduction=reduction)
 
 
 class MeanSquareErrorLoss(RegressionLoss):
     __name__ = 'MSE'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = MSELoss(reduction=reduction)
 
 
 class MeanAverageErrorLoss(RegressionLoss):
     __name__ = 'MAE'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.loss = L1Loss(reduction=reduction)
 
 
 class CGMMLoss(Loss):
     __name__ = 'CGMM Loss'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.old_likelihood = -float('inf')
         self.new_likelihood = None
 
@@ -306,8 +306,8 @@ class CGMMLoss(Loss):
 class LinkPredictionLoss(Loss):
     __name__ = 'Link Prediction Loss'
 
-    def __init__(self, reduction='mean'):
-        super().__init__(reduction=reduction)
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
+        super().__init__(reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
 
     def forward(self, targets, *outputs):
         node_embs = outputs[1]
