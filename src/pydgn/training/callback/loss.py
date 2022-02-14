@@ -20,18 +20,20 @@ class Loss(nn.Module, EventHandler):
     def _handle_reduction(self, state):
         if self.reduction == 'mean':
             # Used to recover the "sum" version of the loss
-            return state.batch_num_targets
+            return state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+
         elif self.reduction == 'sum':
             return 1
         else:
             raise NotImplementedError('The only reductions allowed are sum and mean')
 
-    def __init__(self, reduction='mean'):
+    def __init__(self, reduction='mean', use_nodes_batch_size=False):
         super().__init__()
         assert hasattr(self, '__name__')
         self.batch_losses = None
         self.num_samples = None
         self.reduction = reduction
+        self.use_nodes_batch_size = use_nodes_batch_size
 
     def get_main_loss_name(self):
         return self.__name__
@@ -51,7 +53,7 @@ class Loss(nn.Module, EventHandler):
         """
 
         self.batch_losses.append(state.batch_loss[self.__name__].item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets
+        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
 
     def on_training_epoch_end(self, state):
         """
@@ -84,7 +86,7 @@ class Loss(nn.Module, EventHandler):
         :param state: the shared State object
         """
         self.batch_losses.append(state.batch_loss[self.__name__].item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets
+        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
 
     def on_compute_metrics(self, state):
         """
@@ -141,9 +143,10 @@ class AdditiveLoss(Loss):
         else:
             return s2c(loss)()
 
-    def __init__(self, **losses):
+    def __init__(self, use_nodes_batch_size='False', **losses):
         super().__init__()
         self.losses = [self._istantiate_loss(loss) for loss in losses.values()]
+        self.use_nodes_batch_size = use_nodes_batch_size
 
     def on_training_epoch_start(self, state):
         self.batch_losses = {l.__name__: [] for l in [self] + self.losses}
@@ -152,7 +155,7 @@ class AdditiveLoss(Loss):
     def on_training_batch_end(self, state):
         for k, v in state.batch_loss.items():
             self.batch_losses[k].append(v.item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets
+        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
 
     def on_training_epoch_end(self, state):
         state.update(epoch_loss={l.__name__: torch.tensor(self.batch_losses[l.__name__]).sum() / self.num_samples
@@ -173,7 +176,7 @@ class AdditiveLoss(Loss):
     def on_eval_batch_end(self, state):
         for k, v in state.batch_loss.items():
             self.batch_losses[k].append(v.item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets
+        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
 
     def on_compute_metrics(self, state):
         """
