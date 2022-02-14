@@ -11,6 +11,7 @@
 
 ### Fixed
 - Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the predictor
+- Feature request: loss, score, and additiveloss now take a parameter `use_nodes_batch_size` to force computation w.r.t. input nodes rather than target dimension (the default)
 
 ## [0.7.1] 
 
