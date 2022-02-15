@@ -5,7 +5,7 @@ from pydgn.experiment.cgmm_incremental_task import CGMMTask
 from pydgn.experiment.util import s2c
 from pydgn.static import LOSS, SCORE
 from torch_geometric.data import Data
-from torch_geometric.data import DataLoader
+from torch_geometric.loader import DataLoader
 
 
 # This works with graph classification only

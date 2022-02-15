@@ -32,13 +32,12 @@ We rely on [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readt
 
 (We assume **git** and **Miniconda/Anaconda** are installed)
 
-First, make sure gcc 5.2.0 is installed: ``conda install -c anaconda libgcc=5.2.0``. Then, ``echo $LD_LIBRARY_PATH``
-should always contain ``:/home/[your user name]/miniconda3/lib``. Then run from your terminal the following command:
+Be sure that the variable ``$LD_LIBRARY_PATH`` contains ``:/home/[your user name]/miniconda3/lib``. Then run from your terminal the following command:
 
     source setup/install.sh [<your_cuda_version>]
     pip install pydgn
 
-Where `<your_cuda_version>` is an optional argument that can be either `cpu`, `cu102` or `cu111` for Pytorch >= 1.8.0.
+Where `<your_cuda_version>` is an optional argument that can be either `cpu`, `cu102` or `cu113` for Pytorch >= 1.10.0
 If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment
 named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command
 using `bash` instead of `source`!
@@ -120,18 +119,3 @@ questions, please email us rather than opening an issue.
 ## License:
 
 PyDGN is GPL 3.0 licensed, as written in the LICENSE file.
-
-## Troubleshooting
-
-As of 15th of August 2021, there is
-an [issue](https://discuss.pytorch.org/t/warning-leaking-caffe2-thread-pool-after-fork-function-pthreadpool/127559/2)
-with Pytorch 1.9.0 which impacts the CLI. This is why the setup script installs Pytorch 1.8.1 in the `pydgn` conda
-environment until Pytorch 1.10 is released (known to solve the issue).
-
---
-
-If you get errors like ``/lib64/libstdc++.so.6: version `GLIBCXX_3.4.21' not found``:
-
-* make sure gcc 5.2.0 is installed: ``conda install -c anaconda libgcc=5.2.0``
-* ``echo $LD_LIBRARY_PATH`` should contain ``:/home/[your user name]/[your anaconda or miniconda folder name]/lib``
-* after checking the above points, you can reinstall everything with pip using the ``--no-cache-dir`` option

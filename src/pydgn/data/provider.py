@@ -7,7 +7,8 @@ from pydgn.data.sampler import RandomSampler
 from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
 from pydgn.data.util import load_dataset
 from torch.utils.data import Subset
-from torch_geometric.data import Data, DataLoader
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 
 def seed_worker(exp_seed, worker_id):

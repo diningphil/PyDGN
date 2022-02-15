@@ -1,13 +1,12 @@
 # default pytorch version
-PYTORCH_VERSION=1.8.1
-PYTORCH_GEOMETRIC_VERSION=1.7.2
+PYTORCH_VERSION=1.10.2
+PYTORCH_GEOMETRIC_VERSION=2.0.3
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
-# available options for for pytorch 1.7.2 are cpu, cu102, cu111
 CUDA_VERSION=${1:-cpu}
 
 # create virtual environment and activate it
-conda create --name pydgn python=3.7 -y
+conda create --name pydgn python=3.8 -y
 conda activate pydgn
 
 # install pytorch
@@ -15,21 +14,13 @@ if [[ "$CUDA_VERSION" == "cpu" ]]; then
   conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cpuonly -c pytorch -y
 elif [[ "$CUDA_VERSION" == 'cu102' ]]; then
   conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=10.2 -c pytorch -y
-elif [[ "$CUDA_VERSION" == 'cu111' ]]; then
-  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=11.1 -c pytorch -c nvidia -y
+elif [[ "$CUDA_VERSION" == 'cu113' ]]; then
+  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=11.3 -c pytorch -c nvidia -y
 fi
 
 conda install jupyter -y
 
-# install torch-geometric dependencies
-# install torch-geometric dependencies
-#pip install torch-scatter -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-#pip install torch-sparse -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-#pip install torch-cluster -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-#pip install torch-spline-conv -f https://pytorch-geometric.com/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
-#pip install torch-geometric==${PYTORCH_GEOMETRIC_VERSION}
-pip install rdflib==6.0.0  # needed by torch_geometric but not instal led by the command below
-conda install pytorch-geometric==${PYTORCH_GEOMETRIC_VERSION} -c rusty1s -c conda-forge
+conda install pyg==${PYTORCH_GEOMETRIC_VERSION} -c pyg -c conda-forge -c rusty1s -c conda-forge
 
 echo "Done. Remember to "
 echo " 1) append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command"

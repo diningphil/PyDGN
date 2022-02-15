@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.7.2] 
+## [0.7.3] 
 
 # TODO (decreasing priority):
 - Provide a documentation
@@ -8,19 +8,19 @@
 - Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
 - Temporal: Handle case in which we need to predict a value every K time steps
 - Temporal: Handle case in which we need to use a window of T time steps as input
+
+### Changed
+
+- The setup installation files now work with Pytorch 1.10 and Pytorch Geometric 2.0.3, and the library assumes Python >= 3.8
+
+## [0.7.2] 
+
 
 ### Fixed
 - Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the predictor
 - Feature request: loss, score, and additiveloss now take a parameter `use_nodes_batch_size` to force computation w.r.t. input nodes rather than target dimension (the default)
 
 ## [0.7.1] 
-
-# TODO (decreasing priority):
-- Provide a documentation
-- Add shared dataset functionality to save main memory when parallelizing
-- Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
-- Temporal: Handle case in which we need to predict a value every K time steps
-- Temporal: Handle case in which we need to use a window of T time steps as input
 
 ### Added
 
@@ -31,14 +31,6 @@
 - Refactored Profiler to abstract from the EventHandler. This created problems when a callback implmenented an interface that extends EventHandler. If the callback does not implement a particular method, nothing happens and the dispatcher moves on.
 
 ## [0.7.0] - PyDGN temporal (with [Alessio Gravina](http://pages.di.unipi.it/gravina/) based on [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/modules/root.html)) + minor fixes
-
-# TODO (decreasing priority):
-
-- Provide a documentation
-- Add shared dataset functionality to save main memory when parallelizing
-- Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
-- Temporal: Handle case in which we need to predict a value every K time steps
-- Temporal: Handle case in which we need to use a window of T time steps as input
 
 ### Added
 
@@ -52,21 +44,11 @@
 
 ## [0.6.1] - Stop and Resume from different devices
 
-# TODO (decreasing priority):
-
-- Provide a documentation
-- Add shared dataset functionality to save main memory when parallelizing
-
 ### Fixed
 
 - When using checkpoints, we can now switch devices without getting a deserialization error
 
 ## [0.6.0] - Evaluator's Refactoring
-
-# TODO (decreasing priority):
-
-- Provide a documentation
-- Add shared dataset functionality to save main memory when parallelizing
 
 ### Added
 
@@ -84,11 +66,6 @@
 
 ## [0.5.1] - Code for E-CGMM + Minor fixes
 
-# TODO (decreasing priority):
-
-- Add Multi-GPU training option for a single configuration
-- Add shared dataset functionality
-
 ### Added
 
 - Code for E-CGMM ("Modeling Edge Features with Deep Bayesian Graph Networks", IJCNN 2021)
@@ -101,11 +78,6 @@
 - Fix in graph predictor: forgot to pass arguments to super when inheriting from `GraphPredictor`
 
 ## [0.5.0] - Pytorch 1.8.1, random search, and many fixes
-
-# TODO (decreasing priority):
-
-- Add Multi-GPU training option for a single configuration
-- Add shared dataset functionality
 
 ### Added
 
@@ -283,11 +255,6 @@
 
 - Error when validation was provided but early stopper was not. removed if that prevented validation and test scores
   from being computed
-
-### TODOs
-
-- Add [Ray](https://github.com/ray-project/ray) support, replacing multiprocessing. Subject to usage of Pipes as in
-  multiprocessing.
 
 ## [0.2.0] - 2020-09-10
 
