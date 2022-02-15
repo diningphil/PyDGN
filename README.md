@@ -1,3 +1,5 @@
+[![Upload Python Package](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml/badge.svg?branch=master)](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml)
+
 # PyDGN
 
 ## [Wiki](https://github.com/diningphil/PyDGN/wiki)
