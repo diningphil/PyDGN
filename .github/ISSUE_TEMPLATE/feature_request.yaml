@@ -1,0 +1,22 @@
+name: "👻 Feature Request"
+description: "Help us improve PyDGN!"
+labels: feature
+
+body:
+  - type: textarea
+    attributes:
+      label: Feature description
+      description: >
+        Please provide a description of what you would like to see implemented and state why this could be useful.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Ideas on how to do it
+      description: >
+        If you already a vague or concrete idea on how to implement this feature, please let us know! 
+  - type: textarea
+    attributes:
+      label: Additional info
+      description: >
+        Use this space to add any info that could help us to better understand the problem and the feature itself.
