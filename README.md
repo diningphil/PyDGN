@@ -1,5 +1,5 @@
 [![Documentation Status](https://readthedocs.org/projects/pydgn/badge/?version=latest)](https://pydgn.readthedocs.io/en/latest/?badge=latest)
-[![Upload Python Package](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml/badge.svg?branch=master)](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml)
+
 
 # PyDGN
 
