@@ -143,14 +143,6 @@ class DataProvider:
         splitter = self._get_splitter()
 
         train_indices = splitter.outer_folds[self.outer_k].train_idxs
-
-        # Backward compatibility
-        if not hasattr(splitter.outer_folds[self.outer_k], 'val_idxs') or splitter.outer_folds[
-            self.outer_k].val_idxs is None:
-            if train_perc is None:
-                # Use the same percentage of validation samples as in model select.
-                train_perc = 1 - splitter.val_ratio
-            train_indices = train_indices[:round(train_perc * len(train_indices))]
         return self._get_loader(train_indices, **kwargs)
 
     def get_outer_val(self, train_perc=None, **kwargs):
@@ -163,17 +155,7 @@ class DataProvider:
         assert self.outer_k is not None
         splitter = self._get_splitter()
         train_indices = splitter.outer_folds[self.outer_k].train_idxs
-
-        # Backward compatibility
-        if not hasattr(splitter.outer_folds[self.outer_k], 'val_idxs') or splitter.outer_folds[
-            self.outer_k].val_idxs is None:
-            if train_perc is None:
-                # Use the same percentage of validation samples as in model select.
-                train_perc = 1 - splitter.val_ratio
-            val_indices = train_indices[round(train_perc * len(train_indices)):]
-        else:
-            val_indices = splitter.outer_folds[self.outer_k].val_idxs
-
+        val_indices = splitter.outer_folds[self.outer_k].val_idxs
         return self._get_loader(val_indices, **kwargs)
 
     def get_outer_test(self, **kwargs):

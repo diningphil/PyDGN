@@ -7,7 +7,8 @@ splitter:
     seed: 42
     stratify: False
     shuffle: True
-    val_ratio: 0.05
+    inner_val_ratio: 0.05
+    outer_val_ratio: 0.05
     test_ratio: 0.1
     undirected: True  # we need to know if the graph is undirected or not to create proper random splits
     avoid_opposite_negative_edges: True  # Useful for losses/scores that consider the direction. Has an effect when the graph is directed.

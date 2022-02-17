@@ -46,13 +46,8 @@ def run_test(experiment_class, dataset_getter, best_config, outer_k, i,
         res = experiment.run_test(dataset_getter, logger)
         elapsed = time.time() - start
 
-        # Backward compatibility wrt PyDGN <= 0.5.1
-        if len(res) == 2:
-            train_res, test_res = res
-            torch.save((train_res, test_res, elapsed), final_run_torch_path)
-        else:
-            train_res, val_res, test_res = res
-            torch.save((train_res, val_res, test_res, elapsed), final_run_torch_path)
+        train_res, val_res, test_res = res
+        torch.save((train_res, val_res, test_res, elapsed), final_run_torch_path)
     else:
         res = torch.load(final_run_torch_path)
         elapsed = res[-1]
@@ -388,13 +383,8 @@ class RiskAssesser:
                     res = experiment.run_test(dataset_getter, logger)
                     elapsed = time.time() - start
 
-                    # Backward compatibility wrt PyDGN <= 0.5.1
-                    if len(res) == 2:
-                        training_res, test_res = res
-                        torch.save((training_res, test_res, elapsed), final_run_torch_path)
-                    else:
-                        training_res, val_res, test_res = res
-                        torch.save((training_res, val_res, test_res, elapsed), final_run_torch_path)
+                    training_res, val_res, test_res = res
+                    torch.save((training_res, val_res, test_res, elapsed), final_run_torch_path)
                 # else:
                 #     res = torch.load(final_run_torch_path)
                 #     elapsed = res[-1]
@@ -408,8 +398,6 @@ class RiskAssesser:
             FOLDS: [{} for _ in range(self.inner_folds)],
         }
 
-        backward_compatibility = False
-
         for k in range(self.inner_folds):
             # Set up a log file for this experiment (run in a separate process)
             fold_exp_folder = osp.join(config_folder, self._INNER_FOLD_BASE + str(k + 1))
@@ -417,66 +405,38 @@ class RiskAssesser:
 
             training_res, validation_res, _ = torch.load(fold_results_torch_path)
 
-            # PyDGN > 0.5.1
-            if LOSS in training_res and SCORE in training_res:
-                training_loss, validation_loss = training_res[LOSS], validation_res[LOSS]
-                training_score, validation_score = training_res[SCORE], validation_res[SCORE]
+            training_loss, validation_loss = training_res[LOSS], validation_res[LOSS]
+            training_score, validation_score = training_res[SCORE], validation_res[SCORE]
 
-                for res_type, mode, res, main_res_type in [(LOSS, TRAINING, training_loss, MAIN_LOSS),
-                                                     (LOSS, VALIDATION, validation_loss, MAIN_LOSS),
-                                                     (SCORE, TRAINING, training_score, MAIN_SCORE),
-                                                     (SCORE, VALIDATION, validation_score, MAIN_SCORE)]:
-                    for key in res.keys():
-                        if main_res_type in key:
-                            continue
-                        k_fold_dict[FOLDS][k][f'{mode}_{key}_{res_type}'] = float(res[key])
+            for res_type, mode, res, main_res_type in [(LOSS, TRAINING, training_loss, MAIN_LOSS),
+                                                 (LOSS, VALIDATION, validation_loss, MAIN_LOSS),
+                                                 (SCORE, TRAINING, training_score, MAIN_SCORE),
+                                                 (SCORE, VALIDATION, validation_score, MAIN_SCORE)]:
+                for key in res.keys():
+                    if main_res_type in key:
+                        continue
+                    k_fold_dict[FOLDS][k][f'{mode}_{key}_{res_type}'] = float(res[key])
 
-                # Rename main loss key for aesthetic
-                k_fold_dict[FOLDS][k][TR_LOSS] = float(training_loss[MAIN_LOSS])
-                k_fold_dict[FOLDS][k][VL_LOSS] = float(validation_loss[MAIN_LOSS])
-                k_fold_dict[FOLDS][k][TR_SCORE] = float(training_score[MAIN_SCORE])
-                k_fold_dict[FOLDS][k][VL_SCORE] = float(validation_score[MAIN_SCORE])
-                del training_loss[MAIN_LOSS]
-                del validation_loss[MAIN_LOSS]
-                del training_score[MAIN_SCORE]
-                del validation_score[MAIN_SCORE]
+            # Rename main loss key for aesthetic
+            k_fold_dict[FOLDS][k][TR_LOSS] = float(training_loss[MAIN_LOSS])
+            k_fold_dict[FOLDS][k][VL_LOSS] = float(validation_loss[MAIN_LOSS])
+            k_fold_dict[FOLDS][k][TR_SCORE] = float(training_score[MAIN_SCORE])
+            k_fold_dict[FOLDS][k][VL_SCORE] = float(validation_score[MAIN_SCORE])
+            del training_loss[MAIN_LOSS]
+            del validation_loss[MAIN_LOSS]
+            del training_score[MAIN_SCORE]
+            del validation_score[MAIN_SCORE]
 
-            # Backward compatibility wrt PyDGN <= 0.5.1
-            else:
-                backward_compatibility = True
-                training_score, validation_score = training_res, validation_res
 
-                for key in training_score.keys():
-                    k_fold_dict[FOLDS][k][f'{TRAINING}_{key}'] = float(training_score[key])
-                    k_fold_dict[FOLDS][k][f'{VALIDATION}_{key}'] = float(validation_score[key])
-
-                k_fold_dict[FOLDS][k][TR_SCORE] = float(training_score[MAIN_SCORE])
-                k_fold_dict[FOLDS][k][VL_SCORE] = float(validation_score[MAIN_SCORE])
-
-        # PyDGN > 0.5.1
-        if not backward_compatibility:
-
-            for key_dict, set_type, res_type in [(training_loss, TRAINING, LOSS), (validation_loss, VALIDATION, LOSS),
-                                                 (training_score, TRAINING, SCORE),
-                                                 (validation_score, VALIDATION, SCORE)]:
-                for key in list(key_dict.keys()) + [res_type]:
-                    suffix = f'_{res_type}' if key != res_type else ''
-                    set_res = np.array([k_fold_dict[FOLDS][i][f'{set_type}_{key}{suffix}']
-                                        for i in range(self.inner_folds)])
-                    k_fold_dict[f'{AVG}_{set_type}_{key}{suffix}'] = float(set_res.mean())
-                    k_fold_dict[f'{STD}_{set_type}_{key}{suffix}'] = float(set_res.std())
-
-        # Backward compatibility wrt PyDGN <= 0.5.1
-        else:
-            for key in list(training_score.keys()) + [SCORE]:
-                tr_scores = np.array([k_fold_dict[FOLDS][i][f'{TRAINING}_{key}']
-                                      for i in range(self.inner_folds)])
-                vl_scores = np.array([k_fold_dict[FOLDS][i][f'{VALIDATION}_{key}']
-                                      for i in range(self.inner_folds)])
-                k_fold_dict[f'{AVG}_{TRAINING}_{key}'] = float(tr_scores.mean())
-                k_fold_dict[f'{STD}_{TRAINING}_{key}'] = float(tr_scores.std())
-                k_fold_dict[f'{AVG}_{VALIDATION}_{key}'] = float(vl_scores.mean())
-                k_fold_dict[f'{STD}_{VALIDATION}_{key}'] = float(vl_scores.std())
+        for key_dict, set_type, res_type in [(training_loss, TRAINING, LOSS), (validation_loss, VALIDATION, LOSS),
+                                             (training_score, TRAINING, SCORE),
+                                             (validation_score, VALIDATION, SCORE)]:
+            for key in list(key_dict.keys()) + [res_type]:
+                suffix = f'_{res_type}' if key != res_type else ''
+                set_res = np.array([k_fold_dict[FOLDS][i][f'{set_type}_{key}{suffix}']
+                                    for i in range(self.inner_folds)])
+                k_fold_dict[f'{AVG}_{set_type}_{key}{suffix}'] = float(set_res.mean())
+                k_fold_dict[f'{STD}_{set_type}_{key}{suffix}'] = float(set_res.std())
 
         with open(config_filename, 'w') as fp:
             json.dump(k_fold_dict, fp, sort_keys=False, indent=4)
@@ -523,67 +483,40 @@ class RiskAssesser:
                 final_run_torch_path = osp.join(final_run_exp_path, f'run_{i + 1}_results.torch')
                 res = torch.load(final_run_torch_path)
 
-                # Backward compatibility wrt PyDGN <= 0.5.1
-                if len(res) == 3:
-                    training_score, test_score, _ = res
+                tr_res, vl_res, te_res = {}, {}, {}
 
-                    training_scores.append(training_score)
-                    test_scores.append(test_score)
+                training_res, validation_res, test_res, _ = res
+                training_loss, validation_loss, test_loss = training_res[LOSS], validation_res[LOSS], test_res[LOSS]
+                training_score, validation_score, test_score = training_res[SCORE], validation_res[SCORE], test_res[SCORE]
 
-                    tr_res = {}
-                    # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
-                    for k in training_score.keys():
-                        tr_res[k] = np.mean([float(tr_run[k]) for tr_run in training_scores])
-                        tr_res[k + f'_{STD}'] = np.std([float(tr_run[k]) for tr_run in training_scores])
+                training_losses.append(training_loss)
+                validation_losses.append(validation_loss)
+                test_losses.append(test_loss)
+                training_scores.append(training_score)
+                validation_scores.append(validation_score)
+                test_scores.append(test_score)
 
-                    vl_res = None
+            # 1.0.0: unindented these 2 blocks as results are concatenated in the lists
+            # so the first self.final_training_runs loops were useless (not a huge deal though)
+            scores = [(training_score, tr_res, training_scores),
+                      (validation_score, vl_res, validation_scores),
+                      (test_score, te_res, test_scores)]
+            losses = [(training_loss, tr_res, training_losses),
+                      (validation_loss, vl_res, validation_losses),
+                      (test_loss, te_res, test_losses)]
 
-                    te_res = {}
-                    # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
-                    for k in test_score.keys():
-                        te_res[k] = np.mean([float(te_run[k]) for te_run in test_scores])
-                        te_res[k + f'_{STD}'] = np.std([float(te_run[k]) for te_run in test_scores])
-
-                # PyDGN > 0.5.1
-                else:
-                    tr_res, vl_res, te_res = {}, {}, {}
-
-                    training_res, validation_res, test_res, _ = res
-                    training_loss, validation_loss, test_loss = training_res[LOSS], validation_res[LOSS], test_res[LOSS]
-                    training_score, validation_score, test_score = training_res[SCORE], validation_res[SCORE], test_res[SCORE]
-
-                    training_losses.append(training_loss)
-                    validation_losses.append(validation_loss)
-                    test_losses.append(test_loss)
-                    training_scores.append(training_score)
-                    validation_scores.append(validation_score)
-                    test_scores.append(test_score)
-
-                    scores = [(training_score, tr_res, training_scores),
-                              (validation_score, vl_res, validation_scores),
-                              (test_score, te_res, test_scores)]
-                    losses = [(training_loss, tr_res, training_losses),
-                              (validation_loss, vl_res, validation_losses),
-                              (test_loss, te_res, test_losses)]
-                    # These updates could stay out of the loop, but keeping them here to simplify backward compatibility
-                    for res_type, res in [(LOSS, losses), (SCORE, scores)]:
-                        for set_score, set_dict, set_scores in res:
-                            for key in set_score.keys():
-                                suffix = f'_{res_type}' if (key != MAIN_LOSS and key != MAIN_SCORE) else ''
-                                set_dict[key + suffix] = np.mean([float(set_run[key]) for set_run in set_scores])
-                                set_dict[key + f'{suffix}_{STD}'] = np.std([float(set_run[key])
-                                                                            for set_run in set_scores])
+            for res_type, res in [(LOSS, losses), (SCORE, scores)]:
+                for set_score, set_dict, set_scores in res:
+                    for key in set_score.keys():
+                        suffix = f'_{res_type}' if (key != MAIN_LOSS and key != MAIN_SCORE) else ''
+                        set_dict[key + suffix] = np.mean([float(set_run[key]) for set_run in set_scores])
+                        set_dict[key + f'{suffix}_{STD}'] = np.std([float(set_run[key])
+                                                                    for set_run in set_scores])
 
         with open(osp.join(outer_folder, self._OUTER_RESULTS_FILENAME), 'w') as fp:
 
-            # Backward compatibility wrt PyDGN <= 0.5.1
-            if vl_res is None:
-                json.dump({BEST_CONFIG: best_config, OUTER_TRAIN: tr_res, OUTER_TEST: te_res},
-                          fp, sort_keys=False, indent=4)
-            # PyDGN > 0.5.1
-            else:
-                json.dump({BEST_CONFIG: best_config, OUTER_TRAIN: tr_res, OUTER_VALIDATION: vl_res, OUTER_TEST: te_res},
-                          fp, sort_keys=False, indent=4)
+            json.dump({BEST_CONFIG: best_config, OUTER_TRAIN: tr_res, OUTER_VALIDATION: vl_res, OUTER_TEST: te_res},
+                      fp, sort_keys=False, indent=4)
 
     def process_outer_results(self):
         """ Aggregates Outer Folds results and compute Training and Test mean/std """
@@ -602,12 +535,8 @@ class RiskAssesser:
                 outer_fold_results = json.load(fp)
                 outer_tr_results.append(outer_fold_results[OUTER_TRAIN])
 
-                # Backward compatibility wrt PyDGN <= 0.5.1
-                backward_compatibility = OUTER_VALIDATION not in outer_fold_results
 
-                if not backward_compatibility:
-                    outer_vl_results.append(outer_fold_results[OUTER_VALIDATION])
-
+                outer_vl_results.append(outer_fold_results[OUTER_VALIDATION])
                 outer_ts_results.append(outer_fold_results[OUTER_TEST])
 
                 for k in outer_fold_results[OUTER_TRAIN].keys():  # train keys are the same as valid and test keys
@@ -615,13 +544,9 @@ class RiskAssesser:
                     if k[-3:] == STD:
                         continue
 
-                    if not backward_compatibility:
-                        outer_results = [(outer_tr_results, TRAINING),
-                                         (outer_vl_results, VALIDATION),
-                                         (outer_ts_results, TEST)]
-                    else:
-                        outer_results = [(outer_tr_results, TRAINING),
-                                         (outer_ts_results, TEST)]
+                    outer_results = [(outer_tr_results, TRAINING),
+                                     (outer_vl_results, VALIDATION),
+                                     (outer_ts_results, TEST)]
 
                     for results, set in outer_results:
                         set_results = np.array([res[k] for res in results])
