@@ -8,7 +8,6 @@ from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
 from pydgn.data.util import load_dataset
 from torch.utils.data import Subset
 from torch_geometric.data import Data
-from torch_geometric.loader import DataLoader
 
 
 def seed_worker(exp_seed, worker_id):
@@ -21,7 +20,10 @@ class DataProvider:
     This class is responsible for building the dataset at runtime.
     """
 
-    def __init__(self, data_root, splits_root, splits_filepath, dataset_class, dataset_name, outer_folds, inner_folds,
+    def __init__(self, data_root, splits_root, splits_filepath,
+                 dataset_class, dataset_name,
+                 data_loader_class,
+                 outer_folds, inner_folds,
                  num_workers, pin_memory):
         """
         Initializes the object with all the relevant information
@@ -29,6 +31,7 @@ class DataProvider:
         :param splits_root: the path of the splits folder in which data splits are stored
         :param splits_filepath: the filepath of the splits. with additional metadata
         :param dataset_class: the class of the dataset
+        :param data_loader_class: the class of the data loader
         :param dataset_name: the name of the dataset
         :param outer_folds: the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
         :param inner_folds: the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
@@ -40,6 +43,8 @@ class DataProvider:
         self.data_root = data_root
         self.dataset_class = dataset_class
         self.dataset_name = dataset_name
+
+        self.data_loader_class = data_loader_class
 
         self.outer_folds = outer_folds
         self.inner_folds = inner_folds
@@ -98,15 +103,15 @@ class DataProvider:
 
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler,
-                                    num_workers=self.num_workers,
-                                    pin_memory=self.pin_memory,
-                                    **kwargs)
+            dataloader = self.data_loader_class(dataset, sampler=sampler,
+                                                num_workers=self.num_workers,
+                                                pin_memory=self.pin_memory,
+                                                **kwargs)
         else:
-            dataloader = DataLoader(dataset, shuffle=False,
-                                    num_workers=self.num_workers,
-                                    pin_memory=self.pin_memory,
-                                    **kwargs)
+            dataloader = self.data_loader_class(dataset, shuffle=False,
+                                                num_workers=self.num_workers,
+                                                pin_memory=self.pin_memory,
+                                                **kwargs)
 
         return dataloader
 
@@ -235,7 +240,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         # We may want to shuffle the edges of our single graph and take edge batches
         # NOTE: EVAL edges can be TRAINING/VAL/TEST. It is on "eval" edges
         # that we compute the loss (and eventually do training)
-        # TODO changing names may be good
+        # changing names may be good
         shuffle = kwargs.pop("shuffle")
         if shuffle is True:
             pos_edge_indices = torch.randperm(pos_eval_edges.shape[1])
@@ -284,10 +289,10 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
 
         # Single graph dataset, shuffle does not make sense (unless we know how to do mini-batch training with nodes)
-        dataloader = DataLoader(batched_edge_dataset, batch_size=1,
-                                shuffle=False, num_workers=self.num_workers,
-                                pin_memory=self.pin_memory,
-                                **kwargs)
+        dataloader = self.data_loader_class(batched_edge_dataset, batch_size=1,
+                                            shuffle=False, num_workers=self.num_workers,
+                                            pin_memory=self.pin_memory,
+                                            **kwargs)
 
         return dataloader
 
@@ -367,15 +372,15 @@ class IncrementalDataProvider(DataProvider):
         shuffle = kwargs.pop("shuffle", False)
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler,
-                                    num_workers=self.num_workers,
-                                    pin_memory=self.pin_memory,
-                                    **kwargs)
+            dataloader = self.data_loader_class(dataset, sampler=sampler,
+                                                num_workers=self.num_workers,
+                                                pin_memory=self.pin_memory,
+                                                **kwargs)
         else:
-            dataloader = DataLoader(dataset, shuffle=False,
-                                    num_workers=self.num_workers,
-                                    pin_memory=self.pin_memory,
-                                    **kwargs)
+            dataloader = self.data_loader_class(dataset, shuffle=False,
+                                                num_workers=self.num_workers,
+                                                pin_memory=self.pin_memory,
+                                                **kwargs)
 
         return dataloader
 
@@ -389,10 +394,10 @@ class ContinualDataProvider(DataProvider):
         kwargs.pop('task_id', None)
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory,
-                                    **kwargs)
+            dataloader = self.data_loader_class(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory,
+                                                **kwargs)
         else:
-            dataloader = DataLoader(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory,
-                                    **kwargs)
+            dataloader = self.data_loader_class(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory,
+                                                **kwargs)
 
         return dataloader

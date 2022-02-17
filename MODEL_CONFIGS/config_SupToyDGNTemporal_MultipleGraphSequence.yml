@@ -3,6 +3,7 @@ experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: False
 log_every: 1
 dataset_getter: pydgn.data.temporal_provider.MultipleGraphSequenceDataProvider
+data_loader: torch.utils.data.DataLoader
 device: cpu
 num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
 pin_memory: False  # True only with --debug option and GPU device

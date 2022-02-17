@@ -2,6 +2,7 @@ model: ecgmm.ECGMM
 experiment: pydgn.experiment.cgmm_classifier_task.ClassifierCGMMTask
 higher_results_are_better: True
 dataset_getter: pydgn.data.provider.IncrementalDataProvider
+data_loader: torch_geometric.loader.DataLoader
 log_every: 1
 num_dataloader_workers: 0  # > 0 only with GPU device
 pin_memory: False  # True only with GPU device

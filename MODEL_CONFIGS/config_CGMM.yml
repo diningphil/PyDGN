@@ -2,6 +2,7 @@ model: pydgn.model.dgn.cgmm.CGMM
 experiment: pydgn.experiment.cgmm_incremental_task.CGMMTask
 higher_results_are_better: True
 dataset_getter: pydgn.data.provider.IncrementalDataProvider
+data_loader: torch_geometric.loader.DataLoader
 log_every: 1
 num_dataloader_workers: 2  # > 0 only with --debug option and GPU device
 pin_memory: True  # True only with --debug option and GPU device
