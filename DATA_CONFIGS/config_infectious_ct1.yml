@@ -8,7 +8,8 @@ splitter:
     seed: 42
     stratify: True  # works for graph classification tasks
     shuffle: True
-    val_ratio: 0.1
+    inner_val_ratio: 0.1
+    outer_val_ratio: 0.1
     test_ratio: 0.1
 dataset:
   root: DATA/

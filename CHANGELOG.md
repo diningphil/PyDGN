@@ -1,13 +1,26 @@
 # Changelog
 
-## [0.7.3] 
+## [1.0.0] PyDGN with Documentation and Tests 
 
-# TODO (decreasing priority):
+
+## [0.9.0] PyDGN with Documentation
+
+### TODO (decreasing priority):
 - Provide a documentation
 - Add shared dataset functionality to save main memory when parallelizing
 - Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
 - Temporal: Handle case in which we need to predict a value every K time steps
 - Temporal: Handle case in which we need to use a window of T time steps as input
+
+### Added
+
+- Possibility of specifying inner and outer validation ratio
+
+### Changed (IMPORTANT!)
+
+- Removed any backward compatibilities with very old versions (<=0.6.2)
+
+## [0.7.3]
 
 ### Changed
 

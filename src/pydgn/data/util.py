@@ -66,10 +66,6 @@ def preprocess_data(options):
 
     transforms_opt = data_info.pop("transform", None)
 
-    # Backward compatibility with 0.5.0
-    if transforms_opt is None:
-        transforms_opt = data_info.pop("transforms", None)
-
     if transforms_opt is not None:
         transforms = []
         for transform in transforms_opt:
