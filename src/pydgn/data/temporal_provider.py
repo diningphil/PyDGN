@@ -1,6 +1,5 @@
 from pydgn.data.sampler import RandomSampler
-from torch.utils.data import Subset, DataLoader
-from torch_geometric.data import Data
+from torch.utils.data import Subset
 from torch_geometric.data.batch import Batch
 
 from pydgn.data.provider import seed_worker, DataProvider
@@ -23,10 +22,10 @@ class SingleGraphSequenceDataProvider(DataProvider):
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
 
         # Using Pytorch default DataLoader instead of PyG, to return list of graphs
-        dataloader = DataLoader(dataset, num_workers=self.num_workers,
-                                pin_memory=self.pin_memory,
-                                collate_fn=SingleGraphSequenceDataProvider.collate_fn,
-                                **kwargs)
+        dataloader = self.data_loader_class(dataset, num_workers=self.num_workers,
+                                            pin_memory=self.pin_memory,
+                                            collate_fn=SingleGraphSequenceDataProvider.collate_fn,
+                                            **kwargs)
         return dataloader
 
 
@@ -74,13 +73,13 @@ class MultipleGraphSequenceDataProvider(DataProvider):
 
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = DataLoader(dataset, sampler=sampler,
+            dataloader = self.data_loader_class(dataset, sampler=sampler,
                                     num_workers=self.num_workers,
                                     pin_memory=self.pin_memory,
                                     collate_fn=MultipleGraphSequenceDataProvider.collate_fn,
                                     **kwargs)
         else:
-            dataloader = DataLoader(dataset, shuffle=False,
+            dataloader = self.data_loader_class(dataset, shuffle=False,
                                     num_workers=self.num_workers,
                                     pin_memory=self.pin_memory,
                                     collate_fn=MultipleGraphSequenceDataProvider.collate_fn,
