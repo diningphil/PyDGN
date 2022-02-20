@@ -18,7 +18,7 @@ class Scheduler(EventHandler):
         Load scheduler from state if any
         :param state: the shared State object
         """
-        if self.scheduler and SCHEDULER_STATE in state:
+        if self.scheduler and state.scheduler_state is not None:
             self.scheduler.load_state_dict(state.scheduler_state)
 
     def on_epoch_end(self, state):

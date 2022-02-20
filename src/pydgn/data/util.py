@@ -3,7 +3,6 @@ import os
 import os.path as osp
 import warnings
 
-import numpy as np
 import torch
 from pydgn.experiment.util import s2c
 from torch_geometric.datasets import TUDataset

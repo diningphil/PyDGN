@@ -1,16 +1,28 @@
+import torch
+
+
 class State:
-    """ Any object of this class contains training information that is handled and modified by the training engine
-        (see training.core.engine) as well as by the EventHandler callbacks (see training.core.callbacks). """
+    """
+    Any object of this class contains training information that is handled and modified by a :class:`TrainingEngine`
+    as well as by the `EventHandler` objects implementing callbacks
 
-    def __init__(self, model, optimizer, device, **values):
-        self.update(**values)
-
+    Args:
+        model (torch.nn.Module): the model
+        optimizer (training.callback.optimizer.Optimizer): the optimizer
+        device (str): the device on which to run computations
+    """
+    def __init__(self, model, optimizer, device):
         self.initial_epoch = 0
         self.epoch = self.initial_epoch
         self.model = model
         self.device = device
         self.optimizer = optimizer
+        self.optimizer_state = None
+        self.scheduler = None
+        self.scheduler_state = None
         self.stop_training = False
+        self.return_node_embeddings = False
+        self.set = None
 
         # For dynamic graph learning engines
         self.time_step = 0
@@ -21,6 +33,12 @@ class State:
     def __contains__(self, name):
         return name in self.__dict__
 
-    def update(self, **values):
+    def update(self, **values: dict):
+        """
+        The method sets new attributes or updates existing ones using the key,value pairs in ``values``
+
+        Args:
+            values: a dictionary of key,value pairs to store in the global state
+        """
         for name, value in values.items():
             setattr(self, name, value)

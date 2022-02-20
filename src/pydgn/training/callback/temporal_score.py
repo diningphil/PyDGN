@@ -1,7 +1,4 @@
 import torch
-from pydgn.experiment.util import s2c
-from pydgn.static import *
-from pydgn.training.event.handler import EventHandler
 from pydgn.training.callback.score import Score
 from sklearn.metrics import r2_score
 

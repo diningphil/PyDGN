@@ -2,7 +2,7 @@ import os
 import torch
 import numpy as np
 import pandas as pd
-from torch_geometric.data import download_url, extract_zip, Data
+from torch_geometric.data import download_url, extract_zip
 from torch_geometric_temporal import DynamicGraphTemporalSignal
 from torch_geometric_temporal.dataset import ChickenpoxDatasetLoader
 

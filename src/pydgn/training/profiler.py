@@ -2,23 +2,51 @@ import bisect
 import datetime
 import time
 
+
 from pydgn.training.event.handler import EventHandler
 
 
 # Decorator class. Ideas taken from "Fluent Python" book
 class Profiler:
-    def __init__(self, threshold):
+    r"""
+    A decorator class that is applied to a :class:`~pydgn.training.event.handler.EventHandler` object implementing a
+    set of callback functions. For each callback, the Profiler stores the average and total running time across epochs.
+    When the experiment terminates (either correctly or abruptly) the Profiler can produce a report to be stored in the
+    experiment's log file.
+
+    The Profiler is used as a singleton, and it produces wrappers that update its own state.
+
+    Args:
+        threshold (float): used to filter out callback functions that consume a negligible amount of time from the report
+
+    Usage:
+        Istantiate a profiler, and then register an event_handler with the syntax profiler(event_handler), which returns
+        another object implementing the :class:`~pydgn.training.event.handler.EventHandler` interface
+    """
+    def __init__(self, threshold: float):
+        # we filter out computation that takes a negligible amount of time from the report (< threshold)
         self.threshold = threshold
         self.callback_elapsed = {}
         self.callback_calls = {}
 
-    def __call__(self, cls):
-        self.callback_elapsed[cls.__class__.__name__] = {}
-        self.callback_calls[cls.__class__.__name__] = {}
+    def __call__(self, event_handler: EventHandler) -> object:
+        r"""
+        Wraps a :class:`~pydgn.training.event.handler.EventHandler` object, so that whenever one of its callbacks is
+        triggered the Profiler can compute and store statistics about the time required to execute it.
+
+        Args:
+            event_handler (:class:`~pydgn.training.event.handler.EventHandler`): the object implementing a subset of
+                          the callbacks defined in the :class:`~pydgn.training.event.handler.EventHandler` interface
+
+        Returns:
+            an object that transparently updates the profiler's state whenever a callback is triggered
+        """
+        self.callback_elapsed[event_handler.__class__.__name__] = {}
+        self.callback_calls[event_handler.__class__.__name__] = {}
 
         def clock(func):
             def clocked(*args, **kwargs):
-                class_name = cls.__class__.__name__
+                class_name = event_handler.__class__.__name__
                 callback_name = func.__name__
                 t0 = time.time()
                 # print(f'Callback {cls.__class__.__name__}: calling {func.__name__} with args {args} and kwargs {kwargs}')
@@ -44,7 +72,7 @@ class Profiler:
         # not use the overridden __getattr__
         class getattribute(type):
             def __getattr__(self, name):
-                return clock(getattr(cls, name))
+                return clock(getattr(event_handler, name)) #  needed to implement callback calls with generic names
 
         # Relies on closures
         class ClockedCallback(metaclass=getattribute):
@@ -52,7 +80,13 @@ class Profiler:
 
         return ClockedCallback
 
-    def report(self):
+    def report(self) -> str:
+        r"""
+        Builds a report string containing the statistics of the experiment accumulated so far.
+
+        Returns:
+            a string containing the report
+        """
         total_time_experiment = 0.
         profile_str = f'{"*" * 25} Profiler {"*" * 25} \n \n'
         profile_str += f'Threshold: {self.threshold} \n \n'

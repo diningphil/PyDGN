@@ -1,11 +1,6 @@
 import operator
 
-import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from pydgn.experiment.util import s2c
-from pydgn.static import *
-from pydgn.training.event.handler import EventHandler
 from pydgn.training.callback.loss import Loss, AdditiveLoss
 from torch.nn.modules.loss import MSELoss, L1Loss
 

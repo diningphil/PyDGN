@@ -1,7 +1,5 @@
 import os
 
-from pydgn.static import *
-
 os.environ[
     OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
 import sys
@@ -29,11 +27,11 @@ if not sys.warnoptions:
 import warnings
 warnings.simplefilter("error", UserWarning) 
 
-from pydgn.data.splitter import Splitter
-from pydgn.evaluation.grid import Grid
-from pydgn.evaluation.random_search import RandomSearch
-from pydgn.evaluation.util import set_gpus
-from pydgn.experiment.util import s2c
+from src.pydgn.data import Splitter
+from src.pydgn.evaluation import Grid
+from src.pydgn.evaluation import RandomSearch
+from src.pydgn.evaluation import set_gpus
+from src.pydgn import s2c
 
 
 def get_key(key, priority_dict, config_dict):
@@ -112,7 +110,7 @@ def evaluation(args):
     print(f'Data splits loaded, outer folds are {outer_folds} and inner folds are {inner_folds}')
 
     # WARNING: leave the import here, it reads env variables set before
-    from pydgn.evaluation.evaluator import RiskAssesser
+    from src.pydgn.evaluation.evaluator import RiskAssesser
     risk_assesser = RiskAssesser(outer_folds, inner_folds, experiment_class, exp_path, splits_folder,
                                  data_splits_filepath, search,
                                  final_training_runs=final_training_runs,

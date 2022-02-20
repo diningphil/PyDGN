@@ -1,8 +1,7 @@
 import argparse
 
 import yaml
-from pydgn.data.util import preprocess_data
-from pydgn.static import *
+from src.pydgn.data import preprocess_data
 
 
 def get_args_dict():

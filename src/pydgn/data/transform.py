@@ -41,15 +41,16 @@ class ConstantEdgeIfEmpty:
 
 
 class Degree:
-    r"""Adds the node degree to the node features.
-    Args:
-        in_degree (bool, optional): If set to :obj:`True`, will compute the
-            in-degree of nodes instead of the out-degree. Equal if undirected
-            (default: :obj:`False`)
-        cat (bool, optional): Concat node degrees to node features instead
-            of replacing them. (default: :obj:`True`)
     """
+    Adds the node degree to the node features.
 
+    :param in_degree: If set to :obj:`True`, will compute the in-degree of nodes instead of the out-degree.
+    Not relevant if the graph is undirected (default: :obj:`False`).
+    :type in_degree: [Optional] bool
+    :param cat: Concat node degrees to node features instead
+            of replacing them. (default: :obj:`True`)
+    :type cat: [Optional] bool
+    """
     def __init__(self, in_degree=False, cat=True):
         self.in_degree = in_degree
         self.cat = cat

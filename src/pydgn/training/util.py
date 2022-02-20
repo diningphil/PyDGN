@@ -1,67 +1,76 @@
 import os
+from typing import Tuple, Optional, List
 
 import torch
+import torch_geometric.data.batch
 from pydgn.static import *
 
 
-def atomic_save(checkpoint, filepath):
+def atomic_save(data: dict, filepath: str):
+    r"""
+    Atomically stores a dictionary that can be serialized by :func:`torch.save`,
+    exploiting the atomic :func:`os.replace`.
+
+    Args:
+        data (dict): the dictionary to be stored
+        filepath (str): the absolute filepath where to store the dictionary
+    """
     try:
         tmp_path = str(filepath) + ATOMIC_SAVE_EXTENSION
-        torch.save(checkpoint, tmp_path)
+        torch.save(data, tmp_path)
         os.replace(tmp_path, filepath)
     except Exception as e:
         os.remove(tmp_path)
+        raise e
 
 
-def extend_lists(data_list, embeddings):
-    """
-    Takes a tuple of lists of Tensors (one for each graph) and extends it with another tuple of the same time.
-    Used to concatenate results of mini-batches in incremental architectures.
-    :param data_list: tuple where each element holds a list of Tensors, one for each graph. The first element of the
-    tuple contains a list of Tensors, each containing vertex outputs for a specific graph. Similarly, the second
-    deals with edges, the third with graphs, the fourth with arbitrary vertex information and the last one
-    with arbitrary edge information.
-    :param embeddings: object of the same form of data list that has to be "concatenated" to data_list
-    :return: the extended data_list tuple
+def extend_lists(data_list: Optional[Tuple[Optional[List[torch.Tensor]]]],
+                 new_data_list: Tuple[Optional[List[torch.Tensor]]]) -> Tuple[Optional[List[torch.Tensor]]]:
+    r"""
+    Extends the semantic of Python :func:`extend()` over lists to tuples
+    Used e.g., to concatenate results of mini-batches in incremental architectures such as :obj:`CGMM`
+
+    Args:
+        data_list: tuple of lists, or ``None`` if there is no list to extend.
+        new_data_list: object of the same form of :obj:`data_list` that has to be concatenated
+
+    Returns:
+        the tuple of extended lists
     """
     if data_list is None:
-        data_list = embeddings
-        return data_list
+        return new_data_list
 
-    v_out_list, e_out_list, g_out_list, vo_out_list, eo_out_list, go_out_list = embeddings
+    assert len(data_list) == len(new_data_list)
 
-    if v_out_list is not None:
-        data_list[0].extend(v_out_list)
-
-    if e_out_list is not None:
-        data_list[1].extend(e_out_list)
-
-    if g_out_list is not None:
-        data_list[2].extend(g_out_list)
-
-    if vo_out_list is not None:
-        data_list[3].extend(vo_out_list)
-
-    if eo_out_list is not None:
-        data_list[4].extend(eo_out_list)
-
-    if go_out_list is not None:
-        data_list[5].extend(go_out_list)
+    for i in range(len(data_list)):
+        if new_data_list[i] is not None:
+            data_list[i].extend(new_data_list[i])
 
     return data_list
 
 
-def to_tensor_lists(embeddings, batch, edge_index):
-    """
-    Converts a graphs outputs back to a list of Tensors elements. Useful for incremental architectures.
-    :param embeddings: a tuple of embeddings: (vertex_output, edge_output, graph_output, other_output). Each of
-    the elements should be a Tensor.
-    :param batch: the usual batch list provided by Pytorch Geometric. Used to split node Tensors graph-wise.
-    :param edge_index: the usual edge_index tensor provided by Pytorch Geometric. Used to split edge Tensors graph-wise.
-    :return: a tuple where each elements holds a list of Tensors, one for each graph in the dataset.  The semantic
-    of each element is the same of the parameter embeddings.
+def to_tensor_lists(embeddings: Tuple[Optional[torch.Tensor]],
+                    batch: torch_geometric.data.batch.Batch,
+                    edge_index: torch.Tensor) -> Tuple[Optional[List[torch.Tensor]]]:
+    r"""
+    Reverts batched outputs back to a list of Tensors elements.
+    Can be useful to build incremental architectures such as :obj:`CGMM` that store intermediate results
+    before training the next layer.
+
+    Args:
+        embeddings (tuple): a tuple of embeddings :obj:`(vertex_output, edge_output, graph_output, vertex_extra_output, edge_extra_output, graph_extra_output)`.
+                            Each embedding can be a :class:`torch.Tensor` or ``None``.
+        batch (:class:`torch_geometric.data.batch.Batch`): Batch information used to split the tensors.
+
+        edge_index (:class:`torch.Tensor`): a :obj:`2 x num_edges` tensor as defined in Pytorch Geometric.
+                                            Used to split edge Tensors graph-wise.
+
+    Returns:
+        a tuple with the same semantics as the argument ``embeddings``, but this time each element holds a list of
+        Tensors, one for each graph in the dataset.
     """
     # Crucial: Detach the embeddings to free the computation graph!!
+    # TODO this code can surely be made more compact, but leave it as is until future refactoring or removal from PyDGN.
     v_out, e_out, g_out, vo_out, eo_out, go_out = embeddings
 
     v_out = v_out.detach() if v_out is not None else None

@@ -1,11 +1,22 @@
+from pydgn.training.event.state import State
+
+
 class EventDispatcher:
-    """ Simple class implementing the publisher/subscribe pattern. Callbacks objects should implement the
-    training.core.event.handler.EventHandler interface """
+    """
+    Class implementing the publisher/subscribe pattern. It is used to register subscribers that implement the
+    :class:`~training.event.handler.EventHandler` interface """
 
     def __init__(self):
         self._event_handlers = []
 
-    def _dispatch(self, event_name, state):
+    def _dispatch(self, event_name: str, state: State):
+        """
+        Triggers the callback ``event_name`` for all subscribers (**note: order matters!**)
+
+        Args:
+            event_name (str): the name of the callback to trigger
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         for event_handler in self._event_handlers:
             try:
                 callback = getattr(event_handler, event_name)
@@ -18,15 +29,19 @@ class EventDispatcher:
                 callback(state)
 
     def register(self, event_handler):
+        """
+        Registers a subscriber
+
+        Args:
+            event_handler: an object implementing the :class:`~training.event.handler.EventHandler` interface
+        """
         self._event_handlers.append(event_handler)
 
     def unregister(self, event_handler):
+        """
+        De-registers a subscriber
+
+        Args:
+            event_handler: an object implementing the :class:`~training.event.handler.EventHandler` interface
+        """
         self._event_handlers.remove(event_handler)
-
-    def register_all(self):
-        for event_handler in self._event_handlers:
-            self.register(event_handler)
-
-    def unregister_all(self):
-        for event_handler in self._event_handlers:
-            self.unregister(event_handler)

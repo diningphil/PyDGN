@@ -29,7 +29,7 @@ class Optimizer(EventHandler):
         Load scheduler from state if any
         :param state: the shared State object
         """
-        if 'optimizer_state' in state:
+        if state.optimizer_state is not None:
             self.optimizer.load_state_dict(state.optimizer_state)
 
     def on_training_epoch_start(self, state):

@@ -22,6 +22,7 @@ class RandomSampler(sampler.RandomSampler):
         def get_permutation(self):
             return self.sampler.permutation
         ...
+
     """
 
     def __init__(self, data_source, num_samples=None, replacement=False):
