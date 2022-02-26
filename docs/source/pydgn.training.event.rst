@@ -1,4 +1,4 @@
-pydgn.training.event
+pydgn.training.event package
 ============================
 
 Submodules

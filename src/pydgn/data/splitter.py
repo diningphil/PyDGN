@@ -1,6 +1,7 @@
 import random
 
 import numpy as np
+import pydgn.data.dataset
 import torch
 from pydgn.experiment.util import s2c
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold
@@ -8,10 +9,14 @@ from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj
 
 
 class Fold:
-    """
-    Simple class that stores training and validation/test indices
-    """
+    r"""
+    Simple class that stores training, validation, and test indices.
 
+    Args:
+        train_idxs (Union[list, tuple]): training indices
+        val_idxs (Union[list, tuple]): validation indices. Default is ``None``
+        test_idxs (Union[list, tuple]): test indices. Default is ``None``
+    """
     def __init__(self, train_idxs, val_idxs=None, test_idxs=None):
         self.train_idxs = train_idxs
         self.val_idxs = val_idxs
@@ -19,28 +24,46 @@ class Fold:
 
 
 class InnerFold(Fold):
+    r"""
+    Simple extension of the Fold class that returns a dictionary with training and validation indices (model selection).
     """
-    Simple extension of the Fold class that returns a dictionary with training and validation indices (model selection)
-    """
+    def todict(self) -> dict:
+        r"""
+        Creates a dictionary with the training/validation indices.
 
-    def todict(self):
+        Returns:
+            a dict with keys ``['train', 'val']`` associated with the respective indices
+        """
         return {"train": self.train_idxs, "val": self.val_idxs}
 
 
 class OuterFold(Fold):
-    """
+    r"""
     Simple extension of the Fold class that returns a dictionary with training and test indices (risk assessment)
     """
+    def todict(self) -> dict:
+        r"""
+        Creates a dictionary with the training/validation/test indices.
 
-    def todict(self):
+        Returns:
+            a dict with keys ``['train', 'val', 'test']`` associated with the respective indices
+        """
         return {"train": self.train_idxs, "val": self.val_idxs, "test": self.test_idxs}
 
 
-class NoShuffleTrainTestSplit:
 
+class NoShuffleTrainTestSplit:
+    r"""
+    Class that implements a very simple training/test split. Can be used to further split training data into training
+    and validation.
+
+    Args:
+        test_ratio: percentage of data to use for evaluation.
+    """
     def __init__(self, test_ratio):
         self.test_ratio = test_ratio
 
+    # Leave the arguments as they are. The parameter `y` is needed to implement the same interface as sklearn
     def split(self, idxs, y=None):
         n_samples = len(idxs)
         n_test = int(n_samples * self.test_ratio)
@@ -51,11 +74,53 @@ class NoShuffleTrainTestSplit:
 
 
 class Splitter:
-    """
-    Class that generates the splits at dataset creation time.
-    """
+    r"""
+    Class that generates and stores the data splits at dataset creation time.
 
-    def get_graph_targets(self, dataset):
+    Args:
+        n_outer_folds (int): number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
+        n_inner_folds (int): number of inner folds (model selection). 1 means hold-out, >1 means k-fold
+        seed (int): random seed for reproducibility (on the same machine)
+        stratify (bool): whether to apply stratification or not (should be true for classification tasks)
+        shuffle (bool): whether to apply shuffle or not
+        inner_val_ratio  (float): percentage of validation set for hold_out model selection. Default is ``0.1``
+        outer_val_ratio  (float): percentage of validation set for hold_out model assessment (final training runs). Default is ``0.1``
+        test_ratio  (float): percentage of test set for hold_out model assessment. Default is ``0.1``
+    """
+    def __init__(self,
+                 n_outer_folds: int,
+                 n_inner_folds: int,
+                 seed: int,
+                 stratify: bool,
+                 shuffle: bool,
+                 inner_val_ratio: float=0.1,
+                 outer_val_ratio: float=0.1,
+                 test_ratio: float=0.1):
+        self.outer_folds = []
+        self.inner_folds = []
+        self.stratify = stratify
+        self.shuffle = shuffle
+
+        self.n_outer_folds = n_outer_folds
+        self.n_inner_folds = n_inner_folds
+        self.seed = seed
+
+        self.inner_val_ratio = inner_val_ratio
+        self.outer_val_ratio = outer_val_ratio
+        self.test_ratio = test_ratio
+
+    def get_graph_targets(self, dataset: pydgn.data.dataset.DatasetInterface) -> (bool, np.ndarray):
+        r"""
+        Reads the entire dataset and returns the targets.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the dataset
+
+        Returns:
+            a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
+            exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
+            first boolean value.
+        """
         try:
             targets = np.array([d.y.item() for d in dataset])
             return True, targets
@@ -63,11 +128,15 @@ class Splitter:
             return False, None
 
     @classmethod
-    def load(cls, path):
-        """
-        Loads the splits from disk
-        :param path: the path of the yaml file with the splits
-        :return: a Splitter object
+    def load(cls, path: str):
+        r"""
+        Loads the data splits from disk.
+
+        Args:
+            :param path: the path of the yaml file with the splits
+
+        Returns:
+            a :class:`~pydgn.data.splitter.Splitter` object
         """
         splits = torch.load(path)
 
@@ -92,34 +161,18 @@ class Splitter:
 
         return splitter
 
-    def __init__(self, n_outer_folds, n_inner_folds, seed, stratify, shuffle,
-                 inner_val_ratio=0.1, outer_val_ratio=0.1, test_ratio=0.1):
+    def _get_splitter(self, n_splits: int, stratified: bool, eval_ratio: float):
+        r"""
+        Instantiates the appropriate splitter to use depending on the situation.
+
+        Args:
+              n_splits (int): the number of different splits to create
+              stratified (bool): whether or not to perform stratification. **Works with graph classification tasks only!**
+              eval_ratio (float): the amount of evaluation (validation/test) data to use in case ``n_splits==1`` (i.e., hold-out data split)
+
+        Returns:
+            a :class:`~pydgn.data.splitter.Splitter` object
         """
-        Initializes the splitter
-        :param n_outer_folds: number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
-        :param n_inner_folds: number of inner folds (model selection). 1 means hold-out, >1 means k-fold
-        :param seed: random seed for reproducibility (on the same machine)
-        :param stratify: whether to apply stratification or not (should be true for classification tasks)
-        :param shuffle: whether to apply shuffle or not
-        :param inner_val_ratio: percentage of validation set for hold_out model selection
-        :param outer_val_ratio: percentage of validation set for hold_out model assessment (final training runs)
-        :param test_ratio: percentage of test set for hold_out model assessment
-        """
-        self.outer_folds = []
-        self.inner_folds = []
-        self.processed = False
-        self.stratify = stratify
-        self.shuffle = shuffle
-
-        self.n_outer_folds = n_outer_folds
-        self.n_inner_folds = n_inner_folds
-        self.seed = seed
-
-        self.inner_val_ratio = inner_val_ratio
-        self.outer_val_ratio = outer_val_ratio
-        self.test_ratio = test_ratio
-
-    def _get_splitter(self, n_splits, stratified, eval_ratio):
         if n_splits == 1:
             if not self.shuffle:
                 assert stratified == False, "Stratified not implemented when shuffle is False"
@@ -139,70 +192,71 @@ class Splitter:
 
         return splitter
 
-    def split(self, dataset, targets=None):
-        """
-        Computes the splits. The outer split does not include validation (can be extracted from the training set if needed)
-        :param dataset: the Dataset object
-        :param targets: targets used for stratification
-        :param test_ratio: percentage of validation/test set when using an internal/external hold-out split. Default value is 0.1.
-        :return:
+    def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
+        r"""
+        Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
+            targets (np.ndarray]): targets used for stratification. Default is ``None``
         """
         idxs = range(len(dataset))
-        print(len(dataset))
 
-        if not self.processed:
+        stratified = self.stratify
+        outer_idxs = np.array(idxs)
 
-            stratified = self.stratify
-            outer_idxs = np.array(idxs)
+        outer_splitter = self._get_splitter(
+            n_splits=self.n_outer_folds,
+            stratified=stratified,
+            eval_ratio=self.test_ratio)  # This is the true test (outer test)
 
-            outer_splitter = self._get_splitter(
-                n_splits=self.n_outer_folds,
+        for train_idxs, test_idxs in outer_splitter.split(outer_idxs, y=targets):
+
+            assert set(train_idxs) == set(outer_idxs[train_idxs])
+            assert set(test_idxs) == set(outer_idxs[test_idxs])
+
+            inner_fold_splits = []
+            inner_idxs = outer_idxs[train_idxs]  # equals train_idxs because outer_idxs was ordered
+            inner_targets = targets[train_idxs] if targets is not None else None
+
+            inner_splitter = self._get_splitter(
+                n_splits=self.n_inner_folds,
                 stratified=stratified,
-                eval_ratio=self.test_ratio)  # This is the true test (outer test)
+                eval_ratio=self.inner_val_ratio)  # The inner "test" is, instead, the validation set
 
-            for train_idxs, test_idxs in outer_splitter.split(outer_idxs, y=targets):
+            for inner_train_idxs, inner_val_idxs in inner_splitter.split(inner_idxs, y=inner_targets):
+                inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(),
+                                       val_idxs=inner_idxs[inner_val_idxs].tolist())
+                inner_fold_splits.append(inner_fold)
+            self.inner_folds.append(inner_fold_splits)
 
-                assert set(train_idxs) == set(outer_idxs[train_idxs])
-                assert set(test_idxs) == set(outer_idxs[test_idxs])
+            # Obtain outer val from outer train in an holdout fashion
+            outer_val_splitter = self._get_splitter(n_splits=1, stratified=stratified,
+                                                    eval_ratio=self.outer_val_ratio)
+            outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=inner_targets))[0]
 
-                inner_fold_splits = []
-                inner_idxs = outer_idxs[train_idxs]  # equals train_idxs because outer_idxs was ordered
-                inner_targets = targets[train_idxs] if targets is not None else None
+            # False if empty
+            assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
+            assert not bool(set(inner_idxs[inner_train_idxs]) & set(inner_idxs[inner_val_idxs]) & set(test_idxs))
+            assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+            assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+            assert not bool(set(inner_idxs[outer_train_idxs]) & set(inner_idxs[outer_val_idxs]) & set(test_idxs))
 
-                inner_splitter = self._get_splitter(
-                    n_splits=self.n_inner_folds,
-                    stratified=stratified,
-                    eval_ratio=self.inner_val_ratio)  # The inner "test" is, instead, the validation set
+            np.random.shuffle(outer_train_idxs)
+            np.random.shuffle(outer_val_idxs)
+            np.random.shuffle(test_idxs)
+            outer_fold = OuterFold(train_idxs=inner_idxs[outer_train_idxs].tolist(),
+                                   val_idxs=inner_idxs[outer_val_idxs].tolist(),
+                                   test_idxs=outer_idxs[test_idxs].tolist())
+            self.outer_folds.append(outer_fold)
 
-                for inner_train_idxs, inner_val_idxs in inner_splitter.split(inner_idxs, y=inner_targets):
-                    inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(),
-                                           val_idxs=inner_idxs[inner_val_idxs].tolist())
-                    inner_fold_splits.append(inner_fold)
-                self.inner_folds.append(inner_fold_splits)
+    def _splitter_args(self) -> dict:
+        r"""
+        Returns a dict with all the splitter's arguments for subsequent re-loading at experiment time.
 
-                # Obtain outer val from outer train in an holdout fashion
-                outer_val_splitter = self._get_splitter(n_splits=1, stratified=stratified,
-                                                        eval_ratio=self.outer_val_ratio)
-                outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=inner_targets))[0]
-
-                # False if empty
-                assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
-                assert not bool(set(inner_idxs[inner_train_idxs]) & set(inner_idxs[inner_val_idxs]) & set(test_idxs))
-                assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
-                assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
-                assert not bool(set(inner_idxs[outer_train_idxs]) & set(inner_idxs[outer_val_idxs]) & set(test_idxs))
-
-                np.random.shuffle(outer_train_idxs)
-                np.random.shuffle(outer_val_idxs)
-                np.random.shuffle(test_idxs)
-                outer_fold = OuterFold(train_idxs=inner_idxs[outer_train_idxs].tolist(),
-                                       val_idxs=inner_idxs[outer_val_idxs].tolist(),
-                                       test_idxs=outer_idxs[test_idxs].tolist())
-                self.outer_folds.append(outer_fold)
-
-            self.processed = True
-
-    def _splitter_args(self):
+        Returns:
+            a dict containing all splitter's arguments.
+        """
         return {
             "n_outer_folds": self.n_outer_folds,
             "n_inner_folds": self.n_inner_folds,
@@ -214,10 +268,17 @@ class Splitter:
             "test_ratio": self.test_ratio,
         }
 
-    def save(self, path):
-        """
-        Saves the split into a yaml file
-        :param path: filepath where to save the object
+    def save(self, path: str):
+        r"""
+        Saves the split as a dictionary into a ``torch`` file. The arguments of the dictionary are
+        * seed (int)
+        * splitter_class (str)
+        * splitter_args (dict)
+        * outer_folds (list of dicts)
+        * inner_folds (list of lists of dicts)
+
+        Args:
+            path (str): filepath where to save the object
         """
         print("Saving splits on disk...")
 
@@ -229,13 +290,11 @@ class Splitter:
 
         savedict = {"seed": self.seed,
                     "splitter_class": splitter_class,
-                    "splitter_args": self._splitter_args()
+                    "splitter_args": self._splitter_args(),
+                    "outer_folds": [o.todict() for o in self.outer_folds],
+                    "inner_folds": []}
 
-                    }
-
-        savedict["outer_folds"] = [o.todict() for o in self.outer_folds]
-        savedict["inner_folds"] = []
-        for inner_split in self.inner_folds:
+        for inner_split in self.inner_folds:  # len(self.inner_folds) == # of **outer** folds
             savedict["inner_folds"].append([i.todict() for i in inner_split])
         torch.save(savedict, path)
         print("Done.")
@@ -244,39 +303,29 @@ class Splitter:
 class OGBGSplitter(Splitter):
 
     def split(self, dataset, targets=None):
-        """
-        Computes the splits. The outer split does not include validation (can be extracted from the training set if needed)
-        :param dataset: the Dataset object
-        :param targets: targets used for stratification
-        :param test_ratio: percentage of validation/test set when using an internal/external hold-out split. Default value is 0.1.
-        :return:
-        """
         assert self.n_outer_folds == 1 and self.n_inner_folds == 1, "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
         original_splits = dataset.get_idx_split()
 
-        if not self.processed:
-            outer_train_indices = original_splits['train'].numpy().tolist()
-            outer_valid_indices = original_splits['valid'].numpy().tolist()
-            outer_test_indices = original_splits['test'].numpy().tolist()
+        outer_train_indices = original_splits['train'].numpy().tolist()
+        outer_valid_indices = original_splits['valid'].numpy().tolist()
+        outer_test_indices = original_splits['test'].numpy().tolist()
 
-            np.random.shuffle(outer_train_indices)
-            np.random.shuffle(outer_valid_indices)
-            np.random.shuffle(outer_test_indices)
+        np.random.shuffle(outer_train_indices)
+        np.random.shuffle(outer_valid_indices)
+        np.random.shuffle(outer_test_indices)
 
-            inner_fold_splits = []
-            inner_fold = InnerFold(train_idxs=outer_train_indices, val_idxs=outer_valid_indices)
-            inner_fold_splits.append(inner_fold)
-            self.inner_folds.append(inner_fold_splits)
+        inner_fold_splits = []
+        inner_fold = InnerFold(train_idxs=outer_train_indices, val_idxs=outer_valid_indices)
+        inner_fold_splits.append(inner_fold)
+        self.inner_folds.append(inner_fold_splits)
 
-            outer_fold = OuterFold(train_idxs=outer_train_indices, val_idxs=outer_valid_indices,
-                                   test_idxs=outer_test_indices)
-            self.outer_folds.append(outer_fold)
-
-            self.processed = True
+        outer_fold = OuterFold(train_idxs=outer_train_indices, val_idxs=outer_valid_indices,
+                               test_idxs=outer_test_indices)
+        self.outer_folds.append(outer_fold)
 
 
-def to_lower_triangular(edge_index):
-    """
+def to_lower_triangular(edge_index: torch.Tensor):
+    r"""
     Transform Pytorch Geometric undirected edge index into its "lower triangular counterpart"
     """
     row, col = edge_index
@@ -287,21 +336,52 @@ def to_lower_triangular(edge_index):
 
 
 class LinkPredictionSingleGraphSplitter(Splitter):
-    """
-    Class that computes link splits for link classification tasks.
-    IMPORTANT: This class implements bootstrapping rather than k-fold cross-validation, as outer test sets may overlap.
-    """
+    r"""
+    Class that inherits from :class:`~pydgn.data.splitter.Splitter` and computes link splits for link classification tasks.
+    **IMPORTANT:** This class implements **bootstrapping** rather than k-fold cross-validation, so different
+    outer test sets may have overlapping indices.
 
-    def __init__(self, n_outer_folds, n_inner_folds, seed, stratify, shuffle, val_ratio, test_ratio, undirected,
-                 avoid_opposite_negative_edges, run_checks=False):
-        super().__init__(n_outer_folds, n_inner_folds, seed, stratify, shuffle, val_ratio, test_ratio)
+    **Does not support edge attributes at the moment.**
+
+    Args:
+        n_outer_folds (int): number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
+        n_inner_folds (int): number of inner folds (model selection). 1 means hold-out, >1 means k-fold
+        seed (int): random seed for reproducibility (on the same machine)
+        stratify (bool): whether to apply stratification or not (should be true for classification tasks)
+        shuffle (bool): whether to apply shuffle or not
+        inner_val_ratio  (float): percentage of validation set for hold_out model selection. Default is ``0.1``
+        outer_val_ratio  (float): percentage of validation set for hold_out model assessment (final training runs). Default is ``0.1``
+        test_ratio  (float): percentage of test set for hold_out model assessment. Default is ``0.1``
+        undirected (bool): whether or not the graph is undirected. Default is ``False``
+        avoid_opposite_negative_edges (bool): whether or not to **avoid** creating negative edges that are opposite to existing edges Default is ``True``
+        run_checks (bool): whether or not to run correctness checks. Creates a full adjacency matrix, can be memory intensive.
+    """
+    def __init__(self,
+                 n_outer_folds: int,
+                 n_inner_folds: int,
+                 seed: int,
+                 stratify: bool,
+                 shuffle: bool,
+                 inner_val_ratio: float=0.1,
+                 outer_val_ratio: float=0.1,
+                 test_ratio: float=0.1,
+                 undirected: bool=False,
+                 avoid_opposite_negative_edges: bool=True,
+                 run_checks=False):
+        super().__init__(n_outer_folds,
+                         n_inner_folds,
+                         seed,
+                         stratify,
+                         shuffle,
+                         inner_val_ratio,
+                         outer_val_ratio,
+                         test_ratio)
         self.run_checks = run_checks
         self.undirected = undirected
         self.avoid_opposite_negative_edges = avoid_opposite_negative_edges
 
     def _run_checks(self, A, pos_train_edges, neg_train_edges, pos_val_edges, neg_val_edges, pos_test_edges,
                     neg_test_edges):
-
         print(
             f'Inner splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {pos_val_edges.shape}, {neg_val_edges.shape}')
 
@@ -327,7 +407,7 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         assert torch.all((A_neg + A_pos) <= 1.)
 
     def train_val_test_edge_split(self, edge_index, edge_attr, val_ratio, test_ratio, num_nodes):
-        """
+        r"""
         Sample training/validation/test edges at random.
         """
         if self.undirected:
@@ -366,16 +446,16 @@ class LinkPredictionSingleGraphSplitter(Splitter):
 
         return train_edges, train_attr, val_edges, val_attr, test_edges, test_attr
 
-    def split(self, dataset, targets=None):
-        """
-        Computes the splits.
+    def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
+        r"""
+        Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
         Links are selected at random: this means outer test folds will overlap almost surely with if test_ratio is 10% of the total samples.
         The recommended procedure here is to use the outer folds to do bootstrapping rather than k-fold cross-validation.
-        :param dataset: the Dataset object
-        :param targets: (UNUSED) targets used for stratification
-        :param val_ratio: percentage of validation set when using an internal hold-out split. Default value is 0.05.
-        :param test_ratio: percentage of test set when using an external hold-out split. Default value is 0.1.
-        :return:
+        Idea taken from: https://arxiv.org/pdf/1811.05868.pdf
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
+            targets (np.ndarray]): targets used for stratification. Default is ``None``
         """
         random.seed(self.seed)
         assert len(dataset) == 1, "LinkPredictionSingleGraphSplitter works on single graph dataset only!"
@@ -390,104 +470,101 @@ class LinkPredictionSingleGraphSplitter(Splitter):
             A = to_dense_adj(edge_index)[0]
             assert torch.any(A != A.transpose(1, 0)), "Passed undirected == False with a symmetric adj matrix"
 
-        if not self.processed:
 
-            inner_val_ratio = self.inner_val_ratio if self.n_inner_folds == 1 else float(1 / self.n_inner_folds)
-            outer_val_ratio = self.outer_val_ratio if self.n_inner_folds == 1 else float(1 / self.n_inner_folds)
-            test_ratio = self.test_ratio if self.n_outer_folds == 1 else float(1 / self.n_outer_folds)
+        inner_val_ratio = self.inner_val_ratio if self.n_inner_folds == 1 else float(1 / self.n_inner_folds)
+        outer_val_ratio = self.outer_val_ratio if self.n_inner_folds == 1 else float(1 / self.n_inner_folds)
+        test_ratio = self.test_ratio if self.n_outer_folds == 1 else float(1 / self.n_outer_folds)
 
-            # Used by negative sampling later
-            original_edge_index = edge_index
+        # Used by negative sampling later
+        original_edge_index = edge_index
 
-            # Add self loops to prevent negative edges from being self loops
-            original_edge_index_plus_selfloops, _ = add_self_loops(original_edge_index)
+        # Add self loops to prevent negative edges from being self loops
+        original_edge_index_plus_selfloops, _ = add_self_loops(original_edge_index)
 
-            for outer_k in range(self.n_outer_folds):
-                print(f'Processing splits for outer fold n {outer_k + 1}')
+        for outer_k in range(self.n_outer_folds):
+            print(f'Processing splits for outer fold n {outer_k + 1}')
 
-                # Create positive train and test edges for outer fold
-                print(f'Split positive edges from edge index of shape {original_edge_index.shape[1]}')
-                pos_train_edges, train_attr, outer_pos_val_edges, outer_val_attr, pos_test_edges, test_attr = self.train_val_test_edge_split(
-                    original_edge_index, edge_attr, outer_val_ratio, test_ratio, num_nodes)
+            # Create positive train and test edges for outer fold
+            print(f'Split positive edges from edge index of shape {original_edge_index.shape[1]}')
+            pos_train_edges, train_attr, outer_pos_val_edges, outer_val_attr, pos_test_edges, test_attr = self.train_val_test_edge_split(
+                original_edge_index, edge_attr, outer_val_ratio, test_ratio, num_nodes)
 
-                ###
-                # Generate NEGATIVE training/validation/test edges for each fold using the original edge_index
-                ###
+            ###
+            # Generate NEGATIVE training/validation/test edges for each fold using the original edge_index
+            ###
 
-                # We generate directed negative edges of the same number as true edges
-                num_neg_samples = original_edge_index.shape[1]
+            # We generate directed negative edges of the same number as true edges
+            num_neg_samples = original_edge_index.shape[1]
 
-                # Note: negative edges are directed, but can be considered as undirected if the loss/score is symmetric
-                if self.avoid_opposite_negative_edges:
-                    # We generate symmetric edges to avoid sampling an opposite edge as negative
-                    # Remember that negative sampling without additional args samples directed edges, so we are good
-                    negative_edge_index = negative_sampling(to_undirected(original_edge_index_plus_selfloops),
-                                                            num_nodes=num_nodes, num_neg_samples=num_neg_samples)
-                else:
-                    negative_edge_index = negative_sampling(original_edge_index_plus_selfloops, num_nodes=num_nodes,
-                                                            num_neg_samples=num_neg_samples)
+            # Note: negative edges are directed, but can be considered as undirected if the loss/score is symmetric
+            if self.avoid_opposite_negative_edges:
+                # We generate symmetric edges to avoid sampling an opposite edge as negative
+                # Remember that negative sampling without additional args samples directed edges, so we are good
+                negative_edge_index = negative_sampling(to_undirected(original_edge_index_plus_selfloops),
+                                                        num_nodes=num_nodes, num_neg_samples=num_neg_samples)
+            else:
+                negative_edge_index = negative_sampling(original_edge_index_plus_selfloops, num_nodes=num_nodes,
+                                                        num_neg_samples=num_neg_samples)
+
+            # Negative edges are directed, and it does not make sense to double them.
+            tmp_undirected = self.undirected
+            self.undirected = False
+            neg_train_edges, _, outer_neg_val_edges, _, neg_test_edges, _ = self.train_val_test_edge_split(
+                negative_edge_index, None, outer_val_ratio, test_ratio, num_nodes=num_nodes)
+            self.undirected = tmp_undirected
+
+            if self.run_checks:
+                print(
+                    f'Outer splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {outer_pos_val_edges.shape}, {outer_neg_val_edges.shape}, {pos_test_edges.shape}, {neg_test_edges.shape}')
+
+            inner_fold_splits = []
+            for inner_k in range(self.n_inner_folds):
+
+                # Do not need to create additional negative edges here! Just split what we already have
+
+                # Create positive train and validation edges for outer fold
+                inner_pos_train_edges, inner_train_attr, inner_pos_val_edges, inner_val_attr, _, _ = self.train_val_test_edge_split(
+                    pos_train_edges, train_attr, inner_val_ratio, 0., num_nodes=num_nodes)
 
                 # Negative edges are directed, and it does not make sense to double them.
                 tmp_undirected = self.undirected
                 self.undirected = False
-                neg_train_edges, _, outer_neg_val_edges, _, neg_test_edges, _ = self.train_val_test_edge_split(
-                    negative_edge_index, None, outer_val_ratio, test_ratio, num_nodes=num_nodes)
+                # Create negative train and validation edges for outer fold
+                inner_neg_train_edges, _, inner_neg_val_edges, _, _, _ = self.train_val_test_edge_split(
+                    neg_train_edges, None, inner_val_ratio, 0., num_nodes=num_nodes)
                 self.undirected = tmp_undirected
 
+                inner_fold = InnerFold(train_idxs=(inner_pos_train_edges.tolist(),
+                                                   inner_train_attr,
+                                                   inner_neg_train_edges.tolist()),
+                                       val_idxs=(inner_pos_val_edges.tolist(),
+                                                 inner_val_attr,
+                                                 inner_neg_val_edges.tolist()))
+                inner_fold_splits.append(inner_fold)
+
                 if self.run_checks:
-                    print(
-                        f'Outer splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {outer_pos_val_edges.shape}, {outer_neg_val_edges.shape}, {pos_test_edges.shape}, {neg_test_edges.shape}')
+                    print("Running additional checks: disable this option after testing the function")
+                    self._run_checks(A, inner_pos_train_edges, inner_neg_train_edges, inner_pos_val_edges,
+                                     inner_neg_val_edges, pos_test_edges, neg_test_edges)
 
-                inner_fold_splits = []
-                for inner_k in range(self.n_inner_folds):
+            # Finally, check we are not creating positive links for some mistake
+            if self.run_checks:
+                A = to_dense_adj(edge_index)[0]
+                neg_A = to_dense_adj(negative_edge_index, max_num_nodes=A.shape[0])[0, :, :]
+                assert torch.all(A + neg_A <= 1.)
 
-                    # Do not need to create additional negative edges here! Just split what we already have
+            self.inner_folds.append(inner_fold_splits)
 
-                    # Create positive train and validation edges for outer fold
-                    inner_pos_train_edges, inner_train_attr, inner_pos_val_edges, inner_val_attr, _, _ = self.train_val_test_edge_split(
-                        pos_train_edges, train_attr, inner_val_ratio, 0., num_nodes=num_nodes)
-
-                    # Negative edges are directed, and it does not make sense to double them.
-                    tmp_undirected = self.undirected
-                    self.undirected = False
-                    # Create negative train and validation edges for outer fold
-                    inner_neg_train_edges, _, inner_neg_val_edges, _, _, _ = self.train_val_test_edge_split(
-                        neg_train_edges, None, inner_val_ratio, 0., num_nodes=num_nodes)
-                    self.undirected = tmp_undirected
-
-                    inner_fold = InnerFold(train_idxs=(inner_pos_train_edges.tolist(),
-                                                       inner_train_attr,
-                                                       inner_neg_train_edges.tolist()),
-                                           val_idxs=(inner_pos_val_edges.tolist(),
-                                                     inner_val_attr,
-                                                     inner_neg_val_edges.tolist()))
-                    inner_fold_splits.append(inner_fold)
-
-                    if self.run_checks:
-                        print("Running additional checks: disable this option after testing the function")
-                        self._run_checks(A, inner_pos_train_edges, inner_neg_train_edges, inner_pos_val_edges,
-                                         inner_neg_val_edges, pos_test_edges, neg_test_edges)
-
-                # Finally, check we are not creating positive links for some mistake
-                if self.run_checks:
-                    A = to_dense_adj(edge_index)[0]
-                    neg_A = to_dense_adj(negative_edge_index, max_num_nodes=A.shape[0])[0, :, :]
-                    assert torch.all(A + neg_A <= 1.)
-
-                self.inner_folds.append(inner_fold_splits)
-
-                outer_fold = OuterFold(train_idxs=(pos_train_edges.tolist(),
-                                                   train_attr,
-                                                   neg_train_edges.tolist()),
-                                       val_idxs=(outer_pos_val_edges.tolist(),
-                                                 outer_val_attr,
-                                                 outer_neg_val_edges.tolist()),
-                                       test_idxs=(pos_test_edges.tolist(),
-                                                  test_attr,
-                                                  neg_test_edges.tolist()))
-                self.outer_folds.append(outer_fold)
-
-            self.processed = True
+            outer_fold = OuterFold(train_idxs=(pos_train_edges.tolist(),
+                                               train_attr,
+                                               neg_train_edges.tolist()),
+                                   val_idxs=(outer_pos_val_edges.tolist(),
+                                             outer_val_attr,
+                                             outer_neg_val_edges.tolist()),
+                                   test_idxs=(pos_test_edges.tolist(),
+                                              test_attr,
+                                              neg_test_edges.tolist()))
+            self.outer_folds.append(outer_fold)
 
     def _splitter_args(self):
         splitter_args = super()._splitter_args()

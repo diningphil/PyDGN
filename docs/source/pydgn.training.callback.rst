@@ -1,4 +1,4 @@
-pydgn.training.callback
+pydgn.training.callback package
 ===============================
 
 Submodules

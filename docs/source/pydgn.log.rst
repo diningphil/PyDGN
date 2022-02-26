@@ -1,4 +1,4 @@
-pydgn.log
+pydgn.log package
 =================
 
 Submodules

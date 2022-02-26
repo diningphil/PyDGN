@@ -1,24 +1,8 @@
-pydgn.model.dgn
+pydgn.model.dgn package
 =======================
 
 Submodules
 ----------
-
-pydgn.model.dgn.cgmm module
----------------------------
-
-.. automodule:: pydgn.model.dgn.cgmm
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.model.dgn.ecgmm module
-----------------------------
-
-.. automodule:: pydgn.model.dgn.ecgmm
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 pydgn.model.dgn.gcn module
 --------------------------

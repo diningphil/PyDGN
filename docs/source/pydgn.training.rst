@@ -1,4 +1,4 @@
-pydgn.training
+pydgn.training package
 ======================
 
 Subpackages

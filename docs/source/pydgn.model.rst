@@ -1,4 +1,4 @@
-pydgn.model
+pydgn.model package
 ===================
 
 Subpackages
@@ -8,9 +8,7 @@ Subpackages
    :maxdepth: 4
 
    pydgn.model.dgn
-   pydgn.model.distribution
    pydgn.model.predictor
-   pydgn.model.util
 
 Module contents
 ---------------

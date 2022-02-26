@@ -121,4 +121,4 @@ questions, please email us rather than opening an issue.
 
 ## License:
 
-PyDGN is GPL 3.0 licensed, as written in the LICENSE file.
+PyDGN >= 1.0.0 is `BSD 3-Clause` licensed, as written in the `LICENSE` file.

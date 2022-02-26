@@ -1,8 +1,11 @@
 import random
+from typing import Union
 
 import numpy as np
+import pydgn.data.dataset
 import torch
-from pydgn.data.dataset import ZipDataset
+import torch_geometric.loader
+from pydgn.data.dataset import DatasetInterface
 from pydgn.data.sampler import RandomSampler
 from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
 from pydgn.data.util import load_dataset
@@ -11,33 +14,49 @@ from torch_geometric.data import Data
 
 
 def seed_worker(exp_seed, worker_id):
+    r"""
+    Used to set a different, but reproducible, seed for all data-retriever workers. Without this,
+    all workers will retrieve the data in the same order.
+
+    Args:
+        exp_seed (int): base seed to be used for reproducibility
+        worker_id (int): id number of the worker
+    """
     np.random.seed(exp_seed + worker_id)
     random.seed(exp_seed + worker_id)
 
 
 class DataProvider:
-    """
-    This class is responsible for building the dataset at runtime.
-    """
+    r"""
+    A DataProvider object retrieves the correct data according to the external and internal data splits.
+    It can be additionally used to augment the data, or to create a specific type of data loader. The base class
+    does nothing special, but here is where the i-th element of a dataset could be pre-processed before constructing
+    the mini-batches.
 
-    def __init__(self, data_root, splits_root, splits_filepath,
-                 dataset_class, dataset_name,
-                 data_loader_class,
-                 outer_folds, inner_folds,
-                 num_workers, pin_memory):
-        """
-        Initializes the object with all the relevant information
-        :param data_root: the path of the root folder in which data is stored
-        :param splits_root: the path of the splits folder in which data splits are stored
-        :param splits_filepath: the filepath of the splits. with additional metadata
-        :param dataset_class: the class of the dataset
-        :param data_loader_class: the class of the data loader
-        :param dataset_name: the name of the dataset
-        :param outer_folds: the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
-        :param inner_folds: the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
-        :param num_workers: the number of workers to use in the DataLoader. A value > 0 triggers multiprocessing. Useful to prefetch data from disk to GPU.
-        :param pin_memory: should be True when working on GPU.
-        """
+    Args:
+        data_root (str): the path of the root folder in which data is stored
+        splits_root (str): the path of the splits folder in which data splits are stored
+        splits_filepath (str): the filepath of the splits. with additional metadata
+        dataset_class (:class:`pydgn.data.dataset.DatasetInterface`): the class of the dataset
+        data_loader_class (Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`]): the class of the data loader to use
+        dataset_name (str): the name of the dataset
+        outer_folds (int): the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
+        inner_folds (int): the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
+        num_workers (int): the number of workers to use in the DataLoader. A value > 0 triggers multiprocessing. Useful to prefetch data from disk to GPU.
+        pin_memory (bool): should be True when working on GPU.
+    """
+    def __init__(self,
+                 data_root: str,
+                 splits_root: str,
+                 splits_filepath: str,
+                 dataset_class: pydgn.data.dataset.DatasetInterface,
+                 dataset_name: str,
+                 data_loader_class: Union[torch.utils.data.DataLoader,torch_geometric.loader.DataLoader],
+                 outer_folds: int,
+                 inner_folds: int,
+                 num_workers: int,
+                 pin_memory: bool):
+
         self.exp_seed = None
 
         self.data_root = data_root
@@ -59,41 +78,73 @@ class DataProvider:
         self.num_workers = num_workers
         self.pin_memory = pin_memory
 
-    def set_exp_seed(self, seed):
-        """
-        Sets the experiment seed to give to the DataLoader. Helps with reproducibility
-        :param seed: id of the seed
-        :return:
+    def set_exp_seed(self, seed: int):
+        r"""
+        Sets the experiment seed to give to the DataLoader. Helps with reproducibility.
+
+        Args:
+            seed (int): id of the seed
         """
         self.exp_seed = seed
 
-    def set_outer_k(self, k):
-        """
-        Sets the parameter k of the risk assessment procedure. Called by the evaluation sub-package.
-        :param k: the id of the fold, ranging from 0 to K-1
-        :return:
+    def set_outer_k(self, k: int):
+        r"""
+        Sets the parameter k of the `risk assessment` procedure. Called by the evaluation modules to load the correct
+        subset of the data.
+
+        Args:
+            param k (int): the id of the fold, ranging from 0 to K-1.
         """
         self.outer_k = k
 
     def set_inner_k(self, k):
-        """
-        Sets the parameter k of the model selection procedure. Called by the evaluation sub-package.
-        :param k: the id of the fold, ranging from 0 to K-1.
-        :return:
+        r"""
+        Sets the parameter k of the `model selection` procedure. Called by the evaluation modules to load the correct
+        subset of the data.
+
+        Args:
+            param k (int): the id of the fold, ranging from 0 to K-1.
         """
         self.inner_k = k
 
-    def _get_splitter(self):
+    def _get_splitter(self) -> Splitter:
+        """
+        Instantiates the splitter with the parameters stored in the file ``self.splits_filepath``
+
+        Returns:
+            a :class:`~pydgn.data.splitter.Splitter` object
+        """
         if self.splitter is None:
             self.splitter = Splitter.load(self.splits_filepath)
         return self.splitter
 
-    def _get_dataset(self, **kwargs):
+    def _get_dataset(self, **kwargs: dict) -> DatasetInterface:
+        """
+        Instantiates the dataset. Relies on the parameters stored in the ``dataset_kwargs.pt`` file.
+
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset. Not used in the base version
+
+        Returns:
+            a :class:`~pydgn.data.dataset.DatasetInterface` object
+        """
         if self.dataset is None:
             self.dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class)
         return self.dataset
 
-    def _get_loader(self, indices, **kwargs):
+    def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+        r"""
+        Instantiates the data loader.
+
+        Args:
+            indices (sequence): Indices in the whole set selected for subset
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+        """
         dataset = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
         shuffle = kwargs.pop("shuffle", False)
@@ -115,34 +166,48 @@ class DataProvider:
 
         return dataloader
 
-    def get_inner_train(self, **kwargs):
-        """
+    def get_inner_train(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                 torch_geometric.loader.DataLoader]:
+        r"""
         Returns the training set for model selection associated with specific outer and inner folds
-        :param kwargs: any extra information that has to be passed to the _get_loader function
-        :return: a Dataloader
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
         """
         assert self.outer_k is not None and self.inner_k is not None
         splitter = self._get_splitter()
         indices = splitter.inner_folds[self.outer_k][self.inner_k].train_idxs
         return self._get_loader(indices, **kwargs)
 
-    def get_inner_val(self, **kwargs):
-        """
+    def get_inner_val(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                torch_geometric.loader.DataLoader]:
+        r"""
         Returns the validation set for model selection associated with specific outer and inner folds
-        :param kwargs: any extra information that has to be passed to the _get_loader function
-        :return: a Dataloader
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
         """
         assert self.outer_k is not None and self.inner_k is not None
         splitter = self._get_splitter()
         indices = splitter.inner_folds[self.outer_k][self.inner_k].val_idxs
         return self._get_loader(indices, **kwargs)
 
-    def get_outer_train(self, train_perc=None, **kwargs):
-        """
+    def get_outer_train(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+        r"""
         Returns the training set for risk assessment associated with specific outer and inner folds
-        :param train_perc: the percentage of the outer training set that has to be used for training. If None, it uses (1 - inner validation_ratio)
-        :param kwargs: any extra information that has to be passed to the _get_loader function
-        :return: a Dataloader
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
@@ -150,58 +215,73 @@ class DataProvider:
         train_indices = splitter.outer_folds[self.outer_k].train_idxs
         return self._get_loader(train_indices, **kwargs)
 
-    def get_outer_val(self, train_perc=None, **kwargs):
-        """
+    def get_outer_val(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+        r"""
         Returns the validation set for risk assessment associated with specific outer and inner folds
-        :param train_perc: the percentage of the outer training set that has to be used for training. If None, it uses (1 - inner validation_ratio)
-        :param kwargs: any extra information that has to be passed to the _get_loader function
-        :return: a Dataloader
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
-        train_indices = splitter.outer_folds[self.outer_k].train_idxs
         val_indices = splitter.outer_folds[self.outer_k].val_idxs
         return self._get_loader(val_indices, **kwargs)
 
-    def get_outer_test(self, **kwargs):
-        """
+    def get_outer_test(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                torch_geometric.loader.DataLoader]:
+        r"""
         Returns the test set for risk assessment associated with specific outer and inner folds
-        :param kwargs: any extra information that has to be passed to the _get_loader function
-        :return: a Dataloader
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
         indices = splitter.outer_folds[self.outer_k].test_idxs
         return self._get_loader(indices, **kwargs)
 
-    def get_dim_node_features(self):
-        """
+    def get_dim_node_features(self) -> int:
+        r"""
         Returns the number of node features of the dataset
-        :return: an arbitrary object that depends on the implementation of the dataset
+
+        Returns:
+            the value of the property ``dim_node_features`` in the dataset
         """
         return self._get_dataset().dim_node_features
 
-    def get_dim_edge_features(self):
-        """
+    def get_dim_edge_features(self) -> int:
+        r"""
         Returns the number of node features of the dataset
-        :return: an arbitrary object that depends on the implementation of the dataset
+
+        Returns:
+            the value of the property ``dim_edge_features`` in the dataset
         """
         return self._get_dataset().dim_edge_features
 
-    def get_dim_target(self):
-        """
+    def get_dim_target(self) -> int:
+        r"""
         Returns the dimension of the target for the task
-        :return: an arbitrary object that depends on the implementation of the dataset num_classes property
+
+        Returns:
+            the value of the property ``dim_target`` in the dataset
         """
         return self._get_dataset().dim_target
 
 
 class LinkPredictionSingleGraphDataProvider(DataProvider):
-    """
-    An extension of the DataProvider class to deal with link prediction on a single graph
-    Designed to work with LinkPredictionSingleGraphSplitter
-    We assume the single-graph dataset can fit in memory
-    # WARNING: BE CAREFUL IF SHARED DATA IS IMPLEMENTED IN THE FUTURE: EXTENDING THE DATASET MAY NOT WORK ANYMORE
+    r"""
+    An extension of the DataProvider class to deal with link prediction on a single graph.
+    Designed to work with :class:`~pydgn.data.splitter.LinkPredictionSingleGraphSplitter`.
+    We also assume the single-graph dataset can fit in memory
+    **WARNING**: this class **modifies** the dataset by creating copies. It may not work if a "shared dataset" feature
+    is added to PyDGN.
     """
 
     # Since we modify the dataset, we need different istances of the same graph
@@ -338,66 +418,3 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         eval_indices = splitter.outer_folds[self.outer_k].test_idxs
         indices = train_indices, eval_indices
         return self._get_loader(indices, **kwargs)
-
-
-class IncrementalDataProvider(DataProvider):
-    """
-    An extension of the DataProvider class to deal with the intermediate outputs produced by incremental architectures
-    Used by CGMM to deal with node/graph classification/regression.
-    """
-
-    def _get_loader(self, indices, **kwargs):
-        """
-        Takes the "extra" argument from kwargs and zips it together with the original data into a ZipDataset
-        :param indices: indices of the subset of the data to be extracted
-        :param kwargs: an arbitrary dictionary
-        :return: a DataLoader
-        """
-        dataset = self._get_dataset()
-        dataset = Subset(dataset, indices)
-        dataset_extra = kwargs.pop("extra", None)
-
-        if dataset_extra is not None and isinstance(dataset_extra, list) and len(dataset_extra) > 0:
-            assert len(dataset) == len(dataset_extra), (dataset, dataset_extra)
-            datasets = [dataset, dataset_extra]
-            dataset = ZipDataset(*datasets)
-        elif dataset_extra is None or (isinstance(dataset_extra, list) and len(dataset_extra) == 0):
-            pass
-        else:
-            raise NotImplementedError("Check that extra is None, an empty list or a non-empty list")
-
-        assert self.exp_seed is not None, 'DataLoader seed has not been specified! Is this a bug?'
-        kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
-
-        shuffle = kwargs.pop("shuffle", False)
-        if shuffle is True:
-            sampler = RandomSampler(dataset)
-            dataloader = self.data_loader_class(dataset, sampler=sampler,
-                                                num_workers=self.num_workers,
-                                                pin_memory=self.pin_memory,
-                                                **kwargs)
-        else:
-            dataloader = self.data_loader_class(dataset, shuffle=False,
-                                                num_workers=self.num_workers,
-                                                pin_memory=self.pin_memory,
-                                                **kwargs)
-
-        return dataloader
-
-
-class ContinualDataProvider(DataProvider):
-
-    def _get_loader(self, indices, **kwargs):
-        dataset = self._get_dataset(**kwargs)
-        dataset = Subset(dataset, indices)
-        shuffle = kwargs.pop("shuffle", False)
-        kwargs.pop('task_id', None)
-        if shuffle is True:
-            sampler = RandomSampler(dataset)
-            dataloader = self.data_loader_class(dataset, sampler=sampler, num_workers=self.num_workers, pin_memory=self.pin_memory,
-                                                **kwargs)
-        else:
-            dataloader = self.data_loader_class(dataset, shuffle=False, num_workers=self.num_workers, pin_memory=self.pin_memory,
-                                                **kwargs)
-
-        return dataloader

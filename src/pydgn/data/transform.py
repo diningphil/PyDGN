@@ -3,9 +3,11 @@ from torch_geometric.utils import degree
 
 
 class ConstantIfEmpty:
-    r"""Adds a constant value to each node feature only if x is None.
+    r"""
+    Adds a constant value to each node feature only if x is None.
+
     Args:
-        value (int, optional): The value to add. (default: :obj:`1`)
+        value (int): The value to add. Default is ``1``
     """
 
     def __init__(self, value=1):
@@ -22,9 +24,11 @@ class ConstantIfEmpty:
 
 
 class ConstantEdgeIfEmpty:
-    r"""Adds a constant value to each edge feature only if edge_attr is None.
+    r"""
+    Adds a constant value to each edge feature only if edge_attr is None.
+
     Args:
-        value (int, optional): The value to add. (default: :obj:`1`)
+        value (int): The value to add. Default is ``1``)
     """
 
     def __init__(self, value=1):
@@ -41,17 +45,15 @@ class ConstantEdgeIfEmpty:
 
 
 class Degree:
-    """
+    r"""
     Adds the node degree to the node features.
 
-    :param in_degree: If set to :obj:`True`, will compute the in-degree of nodes instead of the out-degree.
-    Not relevant if the graph is undirected (default: :obj:`False`).
-    :type in_degree: [Optional] bool
-    :param cat: Concat node degrees to node features instead
-            of replacing them. (default: :obj:`True`)
-    :type cat: [Optional] bool
+    Args:
+        in_degree (bool): If set to :obj:`True`, will compute the in-degree of nodes instead of the out-degree.
+        Not relevant if the graph is undirected (default: :obj:`False`).
+        cat (bool): Concat node degrees to node features instead of replacing them. (default: :obj:`True`)
     """
-    def __init__(self, in_degree=False, cat=True):
+    def __init__(self, in_degree: bool=False, cat: bool=True):
         self.in_degree = in_degree
         self.cat = cat
 

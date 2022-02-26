@@ -1,4 +1,4 @@
-pydgn.model.predictor
+pydgn.model.predictor package
 =============================
 
 Submodules
@@ -24,14 +24,6 @@ pydgn.model.predictor.node\_predictor module
 --------------------------------------------
 
 .. automodule:: pydgn.model.predictor.node_predictor
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.model.predictor.probabilistic\_readout module
----------------------------------------------------
-
-.. automodule:: pydgn.model.predictor.probabilistic_readout
    :members:
    :undoc-members:
    :show-inheritance:

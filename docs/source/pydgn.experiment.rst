@@ -1,32 +1,8 @@
-pydgn.experiment
+pydgn.experiment package
 ========================
 
 Submodules
 ----------
-
-pydgn.experiment.cgmm\_classifier\_task module
-----------------------------------------------
-
-.. automodule:: pydgn.experiment.cgmm_classifier_task
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.experiment.cgmm\_embedding\_task module
----------------------------------------------
-
-.. automodule:: pydgn.experiment.cgmm_embedding_task
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.experiment.cgmm\_incremental\_task module
------------------------------------------------
-
-.. automodule:: pydgn.experiment.cgmm_incremental_task
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 pydgn.experiment.experiment module
 ----------------------------------

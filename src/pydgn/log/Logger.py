@@ -3,14 +3,16 @@ from pathlib import Path
 
 
 class Logger:
-    """ Class that implements simple logging facilities (with multi-process support if needed) """
+    r"""
+    Class that implements simple logging facilities
 
+    Args:
+        filepath (str): the path to the file where to write
+        mode (str):  can be 'w' (write) or 'a' (append)
+        debug (bool): whether to print con screen (``True``)or to actually log on file (``False``)
+
+    """
     def __init__(self, filepath, mode, debug):
-        """
-        Initializes the logger
-        :param filepath: the path to the file where to write
-        :param mode: can be 'w' or 'a'
-        """
         self.debug = debug
         self.filepath = Path(filepath)
         if not os.path.exists(self.filepath.parent):
@@ -21,13 +23,17 @@ class Logger:
         else:
             self.mode = mode
 
-    def log(self, str):
-        """ Logs a string to the file associated to self.filepath """
-        if self.debug:
-            print(str)
+    def log(self, content):
+        r"""
+        Logs a string to the file associated to ``filepath``
 
+        Args:
+            content (str): content to log
+        """
+        if self.debug:
+            print(content)
         try:
             with open(self.filepath, self.mode) as f:
-                f.write(str + '\n')
+                f.write(content + '\n')
         except Exception as e:
             print(e)

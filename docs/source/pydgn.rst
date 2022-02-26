@@ -1,4 +1,4 @@
-pydgn
+pydgn package
 =============
 
 Subpackages

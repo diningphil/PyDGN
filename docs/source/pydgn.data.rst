@@ -1,10 +1,10 @@
-pydgn.data
+pydgn.data package
 ==================
 
 Submodules
 ----------
 
-pydgn.data.dataset
+pydgn.data.dataset module
 -------------------------
 
 .. automodule:: pydgn.data.dataset
@@ -12,7 +12,7 @@ pydgn.data.dataset
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.provider
+pydgn.data.provider module
 --------------------------
 
 .. automodule:: pydgn.data.provider
@@ -20,7 +20,7 @@ pydgn.data.provider
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.sampler
+pydgn.data.sampler module
 -------------------------
 
 .. automodule:: pydgn.data.sampler
@@ -28,7 +28,7 @@ pydgn.data.sampler
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.splitter
+pydgn.data.splitter module
 --------------------------
 
 .. automodule:: pydgn.data.splitter
@@ -36,7 +36,7 @@ pydgn.data.splitter
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.temporal\_dataset
+pydgn.data.temporal\_dataset module
 -----------------------------------
 
 .. automodule:: pydgn.data.temporal_dataset
@@ -44,7 +44,7 @@ pydgn.data.temporal\_dataset
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.temporal\_provider
+pydgn.data.temporal\_provider module
 ------------------------------------
 
 .. automodule:: pydgn.data.temporal_provider
@@ -52,7 +52,7 @@ pydgn.data.temporal\_provider
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.temporal\_splitter
+pydgn.data.temporal\_splitter module
 ------------------------------------
 
 .. automodule:: pydgn.data.temporal_splitter
@@ -60,7 +60,7 @@ pydgn.data.temporal\_splitter
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.transform
+pydgn.data.transform module
 ---------------------------
 
 .. automodule:: pydgn.data.transform
@@ -68,7 +68,7 @@ pydgn.data.transform
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.util
+pydgn.data.util module
 ----------------------
 
 .. automodule:: pydgn.data.util
