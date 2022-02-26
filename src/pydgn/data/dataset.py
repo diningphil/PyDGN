@@ -93,6 +93,9 @@ class DatasetInterface:
         """
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
+    def __len__(self):
+        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
 
 class TUDatasetInterface(TUDataset, DatasetInterface):
     r"""

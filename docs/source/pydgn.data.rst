@@ -36,30 +36,6 @@ pydgn.data.splitter module
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.temporal\_dataset module
------------------------------------
-
-.. automodule:: pydgn.data.temporal_dataset
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.data.temporal\_provider module
-------------------------------------
-
-.. automodule:: pydgn.data.temporal_provider
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.data.temporal\_splitter module
-------------------------------------
-
-.. automodule:: pydgn.data.temporal_splitter
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pydgn.data.transform module
 ---------------------------
 

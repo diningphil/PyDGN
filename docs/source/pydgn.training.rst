@@ -29,14 +29,6 @@ pydgn.training.profiler module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.temporal\_engine module
---------------------------------------
-
-.. automodule:: pydgn.training.temporal_engine
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 pydgn.training.util module
 --------------------------
 

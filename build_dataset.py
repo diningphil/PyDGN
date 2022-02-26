@@ -1,7 +1,8 @@
 import argparse
 
 import yaml
-from src.pydgn.data import preprocess_data
+from pydgn.data.util import preprocess_data
+from pydgn.static import CONFIG_FILE_CLI_ARGUMENT, CONFIG_FILE
 
 
 def get_args_dict():

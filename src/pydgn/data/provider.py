@@ -93,7 +93,7 @@ class DataProvider:
         subset of the data.
 
         Args:
-            param k (int): the id of the fold, ranging from 0 to K-1.
+            k (int): the id of the fold, ranging from 0 to K-1.
         """
         self.outer_k = k
 
@@ -103,7 +103,7 @@ class DataProvider:
         subset of the data.
 
         Args:
-            param k (int): the id of the fold, ranging from 0 to K-1.
+            k (int): the id of the fold, ranging from 0 to K-1.
         """
         self.inner_k = k
 
@@ -143,7 +143,7 @@ class DataProvider:
                            Not used in the base version
 
         Returns:
-            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
         """
         dataset = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
@@ -170,12 +170,14 @@ class DataProvider:
                                                  torch_geometric.loader.DataLoader]:
         r"""
         Returns the training set for model selection associated with specific outer and inner folds
+
         Args:
             kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
                            Not used in the base version
 
         Returns:
-            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
+
         """
         assert self.outer_k is not None and self.inner_k is not None
         splitter = self._get_splitter()
@@ -186,12 +188,14 @@ class DataProvider:
                                                 torch_geometric.loader.DataLoader]:
         r"""
         Returns the validation set for model selection associated with specific outer and inner folds
+
         Args:
             kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
                            Not used in the base version
 
         Returns:
-            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
+
         """
         assert self.outer_k is not None and self.inner_k is not None
         splitter = self._get_splitter()
@@ -202,12 +206,14 @@ class DataProvider:
                                                                   torch_geometric.loader.DataLoader]:
         r"""
         Returns the training set for risk assessment associated with specific outer and inner folds
+
         Args:
             kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
                            Not used in the base version
 
         Returns:
-            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
+
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
@@ -219,12 +225,14 @@ class DataProvider:
                                                                   torch_geometric.loader.DataLoader]:
         r"""
         Returns the validation set for risk assessment associated with specific outer and inner folds
+
         Args:
             kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
                            Not used in the base version
 
         Returns:
-            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
+
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
@@ -235,12 +243,14 @@ class DataProvider:
                                                 torch_geometric.loader.DataLoader]:
         r"""
         Returns the test set for risk assessment associated with specific outer and inner folds
+
         Args:
             kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
                            Not used in the base version
 
         Returns:
-            a Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`] object
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
+
         """
         assert self.outer_k is not None
         splitter = self._get_splitter()
@@ -253,6 +263,7 @@ class DataProvider:
 
         Returns:
             the value of the property ``dim_node_features`` in the dataset
+
         """
         return self._get_dataset().dim_node_features
 
@@ -262,6 +273,7 @@ class DataProvider:
 
         Returns:
             the value of the property ``dim_edge_features`` in the dataset
+
         """
         return self._get_dataset().dim_edge_features
 
@@ -271,6 +283,7 @@ class DataProvider:
 
         Returns:
             the value of the property ``dim_target`` in the dataset
+
         """
         return self._get_dataset().dim_target
 

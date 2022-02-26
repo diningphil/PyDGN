@@ -7,7 +7,6 @@ from pydgn.training.event.dispatcher import EventDispatcher
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State
 from pydgn.training.profiler import Profiler
-from pydgn.training.util import extend_lists, to_tensor_lists
 from torch_geometric.data import Data
 
 

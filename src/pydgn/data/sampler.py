@@ -1,4 +1,5 @@
 import torch
+from pydgn.data.dataset import DatasetInterface
 from torch.utils.data import sampler
 
 
@@ -11,7 +12,7 @@ class RandomSampler(sampler.RandomSampler):
     Args:
         data_source (:class:`pydgn.data.DatasetInterface`): the dataset object
     """
-    def __init__(self, data_source):
+    def __init__(self, data_source: DatasetInterface):
         super().__init__(data_source)
         self.permutation = None
 
