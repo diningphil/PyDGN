@@ -15,9 +15,7 @@ splitter:
     run_checks: True  # in case you want to debug the first time. Computes full adj matrix, be careful.
 dataset:
   root: DATA/
-  class_name: pydgn.data.dataset.LinkPredictionPlanetoid
+  class_name: pydgn.data.dataset.PlanetoidDatasetInterface
   args:
     root: DATA/
     name: pubmed
-  transform:
-    - class_name: pydgn.data.transform.NormalizeFeatures

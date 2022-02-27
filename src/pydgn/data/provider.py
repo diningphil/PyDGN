@@ -1,5 +1,5 @@
 import random
-from typing import Union
+from typing import Union, Callable
 
 import numpy as np
 import pydgn.data.dataset
@@ -37,8 +37,8 @@ class DataProvider:
         data_root (str): the path of the root folder in which data is stored
         splits_root (str): the path of the splits folder in which data splits are stored
         splits_filepath (str): the filepath of the splits. with additional metadata
-        dataset_class (:class:`pydgn.data.dataset.DatasetInterface`): the class of the dataset
-        data_loader_class (Union[:class:`torch.utils.data.DataLoader`,:class:`torch_geometric.loader.DataLoader`]): the class of the data loader to use
+        dataset_class (Callable[...,:class:`pydgn.data.dataset.DatasetInterface`]): the class of the dataset
+        data_loader_class (Union[Callable[...,:class:`torch.utils.data.DataLoader`],Callable[...,:class:`torch_geometric.loader.DataLoader`]]): the class of the data loader to use
         dataset_name (str): the name of the dataset
         outer_folds (int): the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
         inner_folds (int): the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
@@ -49,9 +49,10 @@ class DataProvider:
                  data_root: str,
                  splits_root: str,
                  splits_filepath: str,
-                 dataset_class: pydgn.data.dataset.DatasetInterface,
+                 dataset_class: Callable[...,pydgn.data.dataset.DatasetInterface],
                  dataset_name: str,
-                 data_loader_class: Union[torch.utils.data.DataLoader,torch_geometric.loader.DataLoader],
+                 data_loader_class: Union[Callable[...,torch.utils.data.DataLoader],
+                                          Callable[...,torch_geometric.loader.DataLoader]],
                  outer_folds: int,
                  inner_folds: int,
                  num_workers: int,
@@ -145,11 +146,11 @@ class DataProvider:
         Returns:
             a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
         """
-        dataset = self._get_dataset(**kwargs)
+        dataset: DatasetInterface = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
         shuffle = kwargs.pop("shuffle", False)
 
-        assert self.exp_seed is not None, 'DataLoader seed has not been specified! Is this a bug?'
+        assert self.exp_seed is not None, "DataLoader's seed has not been specified! Is this a bug?"
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
 
         if shuffle is True:

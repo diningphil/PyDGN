@@ -11,15 +11,15 @@ seed: 42
 grid:
   supervised_config:
     checkpoint: True
+    shuffle: True
     batch_size:
       - 32
-      - 64
     epochs:
-      - 5
+      - 10
     dim_embedding:
-      - 4
-    num_layers:
       - 5
+    num_layers:
+      - 3
     aggregation:
       - mean
     optimizer:
@@ -28,21 +28,21 @@ grid:
           optimizer_class_name: torch.optim.Adam
           lr: 0.01
           weight_decay: 0.
-
     scheduler:
       - null
     loss:
-      class_name: pydgn.training.callback.loss.AdditiveLoss
-      args:
-        loss1: pydgn.training.callback.loss.MulticlassClassificationLoss
-        loss2: pydgn.training.callback.loss.MulticlassClassificationLoss
+      - class_name: pydgn.training.callback.metric.AdditiveLoss
+        args:
+          loss1: pydgn.training.callback.metric.MulticlassClassification
+          loss2: pydgn.training.callback.metric.MulticlassClassification
+      - pydgn.training.callback.metric.MulticlassClassification
     scorer:
       #- pydgn.training.callback.score.MulticlassAccuracyScore
-      - class_name: pydgn.training.callback.score.MultiScore
+      - class_name: pydgn.training.callback.metric.MultiScore
         args:
           # used at model selection time. Should be the one on which to perform early stopping
-          main_scorer: pydgn.training.callback.score.MulticlassAccuracyScore
-          my_metric2: pydgn.training.callback.score.Toy1Score
+          main_scorer: pydgn.training.callback.metric.MulticlassAccuracy
+          my_metric2: pydgn.training.callback.metric.ToyMetric
     predictor:
       - pydgn.model.predictor.graph_predictor.LinearGraphPredictor
     wrapper:
@@ -65,5 +65,3 @@ grid:
           checkpoint: True
     plotter:
       - pydgn.training.callback.plotter.Plotter
-    shuffle:
-      - True

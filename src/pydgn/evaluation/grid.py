@@ -1,26 +1,32 @@
 from copy import deepcopy
+from typing import Callable, List
 
+from pydgn.data.dataset import DatasetInterface
 from pydgn.static import *
 
 
 class Grid:
-    """ This class computes all possible hyper-parameters configurations based on the configuration file """
+    r"""
+    Class that implements grid-search. It computes all possible configurations starting from a suitable config file.
 
-    def __init__(self, data_root, dataset_class, dataset_name, **configs_dict):
-        """
-        Initializes the Grid object by looking for specific keys in the dictionary, namely 'experiment', 'device',
-        'model', 'dataset-getter' and 'higher_results_are_better'. The configuration dictionary should have
-        a field named 'grid' in which all possible hyper-parameters are listed (see examples)
-        :param data_root: the root directory in which the dataset is stored
-        :param dataset_class: one of the classes in datasets.datasets that specifies how to process the data
-        :param dataset_name: the name of the dataset
-        :param configs_dict: the configuration dictionary
-        """
+    Args:
+        data_root (str): the root directory in which the dataset is stored
+        dataset_class (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]): class of the dataset to use
+        dataset_name (str): the name of the dataset
+        configs_dict (dict): the configuration dictionary specifying the different configurations to try
+    """
+    def __init__(self,
+                 data_root: str,
+                 dataset_class: Callable[...,DatasetInterface],
+                 dataset_name: str,
+                 **configs_dict: dict):
+
         self.configs_dict = configs_dict
         self.seed = self.configs_dict.get(SEED, None)
         self.data_root = data_root
         self.dataset_class = dataset_class
         self.dataset_name = dataset_name
+        self.data_loader_class = self.configs_dict[DATA_LOADER]
         self.experiment = self.configs_dict[EXPERIMENT]
         self.higher_results_are_better = self.configs_dict[HIGHER_RESULTS_ARE_BETTER]
         self.log_every = self.configs_dict[LOG_EVERY]
@@ -30,23 +36,21 @@ class Grid:
         self.model = self.configs_dict[MODEL]
         self.dataset_getter = self.configs_dict[DATASET_GETTER]
 
-        # For continual learning tasks
-        # - Rehearsal
-        self.n_tasks = self.configs_dict.get(NUM_TASKS, None)
-        self.n_rehearsal_patterns_per_task = self.configs_dict.get(NUM_REHEARSAL_PATTERNS_PER_TASK, None)
-
         # This MUST be called at the END of the init method!
         self.hparams = self._gen_configs()
 
-    def _gen_configs(self):
-        '''
-        Takes a dictionary of key:list pairs and computes all possible permutations.
-        :return: A list of al possible configurations
-        '''
+    def _gen_configs(self) -> List[dict]:
+        r"""
+        Takes a dictionary of key:list pairs and computes all possible combinations.
+
+        Returns:
+            A list of al possible configurations in the form of dictionaries
+        """
         configs = [cfg for cfg in self._gen_helper(self.configs_dict[GRID_SEARCH])]
         for cfg in configs:
             cfg.update({DATASET: self.dataset_name,
                         DATASET_GETTER: self.dataset_getter,
+                        DATA_LOADER: self.data_loader_class,
                         DATASET_CLASS: self.dataset_class,
                         DATA_ROOT: self.data_root,
                         MODEL: self.model,
@@ -55,12 +59,10 @@ class Grid:
                         PIN_MEMORY: self.pin_memory,
                         EXPERIMENT: self.experiment,
                         HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
-                        LOG_EVERY: self.log_every,
-                        NUM_TASKS: self.n_tasks,
-                        NUM_REHEARSAL_PATTERNS_PER_TASK: self.n_rehearsal_patterns_per_task})
+                        LOG_EVERY: self.log_every})
         return configs
 
-    def _gen_helper(self, cfgs_dict):
+    def _gen_helper(self, cfgs_dict: dict) -> dict:
         keys = cfgs_dict.keys()
         result = {}
 
@@ -120,7 +122,7 @@ class Grid:
                             result.update(nested_config)
                             yield deepcopy(result)
 
-    def _list_helper(self, values):
+    def _list_helper(self, values: object) -> object:
         for value in values:
             if type(value) == str or type(value) == int or type(value) == float or type(value) == bool or value is None:
                 yield value
@@ -141,9 +143,21 @@ class Grid:
         return self.hparams[index]
 
     @property
-    def exp_name(self):
+    def exp_name(self) -> str:
+        r"""
+        Computes the name of the root folder
+
+        Returns:
+             the name of the root folder as made of MODEL-NAME_DATASET-NAME
+        """
         return f"{self.model.split('.')[-1]}_{self.dataset_name}"
 
     @property
-    def num_configs(self):
+    def num_configs(self) -> int:
+        r"""
+        Computes the number of configurations to try during model selection
+
+        Returns:
+             the number of configurations
+        """
         return len(self)

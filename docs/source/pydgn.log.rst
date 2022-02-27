@@ -4,10 +4,10 @@ pydgn.log package
 Submodules
 ----------
 
-pydgn.log.Logger module
+pydgn.log.logger module
 -----------------------
 
-.. automodule:: pydgn.log.Logger
+.. automodule:: pydgn.log.logger
    :members:
    :undoc-members:
    :show-inheritance:

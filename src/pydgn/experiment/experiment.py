@@ -1,18 +1,28 @@
 import random
+from typing import Callable, Tuple, List
 
 import numpy as np
 import torch
+from pydgn.data.provider import DataProvider
 from pydgn.evaluation.config import Config
 from pydgn.experiment.util import s2c
+from pydgn.model.model import ModelInterface, ReadoutInterface
+from pydgn.log.logger import Logger
 from pydgn.static import DEFAULT_ENGINE_CALLBACK
+from pydgn.training.engine import TrainingEngine
+
 
 
 class Experiment:
-    """
-    Experiment provides useful utilities to support supervised, semi-supervised and incremental tasks on graphs
-    """
+    r"""
+    Class that handles a single experiment.
 
-    def __init__(self, model_configuration, exp_path, exp_seed):
+    Args:
+        model_configuration (dict): the dictionary holding the experiment-specific configuration
+        exp_path (str): path to the experiment folder
+        exp_seed (int): the experiment's seed to use
+    """
+    def __init__(self, model_configuration: dict, exp_path: str, exp_seed: int):
         self.model_config = Config(model_configuration)
         self.exp_path = exp_path
         self.exp_seed = exp_seed
@@ -26,12 +36,17 @@ class Experiment:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-    def _return_class_and_args(self, config, key):
-        """
+    def _return_class_and_args(self, config: Config, key: str) -> Tuple[Callable[...,object],
+                                                                        dict]:
+        r"""
         Returns the class and arguments associated to a specific key in the configuration file.
-        :param config: the configuration dictionary
-        :param key: a string representing a particular class in the configuration dictionary
-        :return: a tuple (class, arguments) or (None, None) if the key is not present in the config dictionary
+
+        Args:
+            config: the configuration dictionary
+            key: a string representing a particular class in the configuration dictionary
+
+        Returns:
+            a tuple (class, dict of arguments), or (None, None) if the key is not present in the config dictionary
         """
         if key not in config or config[key] is None:
             return None, None
@@ -42,60 +57,119 @@ class Experiment:
         else:
             raise NotImplementedError('Parameter has not been formatted properly')
 
-    def _create_model(self, dim_node_features, dim_edge_features, dim_target, predictor_classname, config):
-        """
-        Instantiates a model that implements a fixed interface in models.predictors
-        :param dim_node_features: input node features
-        :param dim_edge_features: input edge features
-        :param dim_target: target size
-        :param predictor_classname: string containing the model's class
-        :param config: the configuration dictionary
-        :return: a generic model, see the models.predictors sub-package.
-        """
+    def _create_model(self,
+                      dim_node_features: int,
+                      dim_edge_features: int,
+                      dim_target: int,
+                      predictor_classname: str,
+                      config: Config) -> ModelInterface:
+        r"""
+        Instantiates a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
 
+        Args:
+            dim_node_features (int): number of node features
+            dim_edge_features (int): number of edge features
+            dim_target (int): target dimension
+            predictor_classname (str): string containing the model's class
+            config (:class:`~pydgn.evaluation.config.Config`): the configuration dictionary
+
+        Returns:
+            a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+        """
         model = s2c(self.model_config.model)(dim_node_features=dim_node_features,
                                              dim_edge_features=dim_edge_features,
                                              dim_target=dim_target,
                                              predictor_class=s2c(predictor_classname)
                                              if predictor_classname is not None else None,
                                              config=config)
+
+        # move to device
         model.to(self.model_config.device)  # model .to() may not return anything
         return model
 
-    def create_supervised_model(self, dim_node_features, dim_edge_features, dim_target):
-        """ Instantiates a supervised model """
+    def create_supervised_model(self,
+                                dim_node_features: int,
+                                dim_edge_features: int,
+                                dim_target: int) -> ModelInterface:
+        r"""
+        Instantiates a **supervised** model that implements the :class:`~pydgn.model.model.ModelInterface` interface,
+        using the ``supervised_config`` field in the configuration file.
+
+        Args:
+            dim_node_features (int): number of node features
+            dim_edge_features (int): number of edge features
+            dim_target (int): target dimension
+
+        Returns:
+            a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+        """
         predictor_classname = self.model_config.supervised_config['predictor'] \
             if 'predictor' in self.model_config.supervised_config else None
         return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
                                   self.model_config.supervised_config)
 
-    def create_supervised_predictor(self, dim_node_features, dim_edge_features, dim_target):
-        """ Directly instantiates a supervised predictor for semi-supervised tasks """
+    def create_supervised_predictor(self,
+                                dim_node_features: int,
+                                dim_edge_features: int,
+                                dim_target: int) -> ReadoutInterface:
+        r"""
+        Instantiates an **supervised** predictor that implements the :class:`~pydgn.model.model.ReadoutInterface` interface,
+        using the ``supervised_config`` field in the configuration file.
+
+        Args:
+            dim_node_features (int): number of node features
+            dim_edge_features (int): number of edge features
+            dim_target (int): target dimension
+
+        Returns:
+            a model that implements the :class:`~pydgn.model.model.ReadoutInterface` interface
+        """
         return s2c(self.model_config.supervised_config['predictor'])(dim_node_features=dim_node_features,
                                                                      dim_edge_features=dim_edge_features,
                                                                      dim_target=dim_target,
                                                                      config=self.model_config.supervised_config)
 
-    def create_unsupervised_model(self, dim_node_features, dim_edge_features, dim_target):
-        """ Instantiates an unsupervised model """
+    def create_unsupervised_model(self,
+                                  dim_node_features: int,
+                                  dim_edge_features: int,
+                                  dim_target: int) -> ModelInterface:
+        r"""
+        Instantiates an **unsupervised** model that implements the :class:`~pydgn.model.model.ModelInterface` interface,
+        using the ``unsupervised_config`` field in the configuration file.
+
+        Args:
+            dim_node_features (int): number of node features
+            dim_edge_features (int): number of edge features
+            dim_target (int): target dimension
+
+        Returns:
+            a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+        """
         predictor_classname = self.model_config.unsupervised_config['predictor'] \
             if 'predictor' in self.model_config.unsupervised_config else None
         return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
                                   self.model_config.unsupervised_config)
 
-    def create_incremental_model(self, dim_node_features, dim_edge_features, dim_target,
-                                 depth, prev_outputs_to_consider):
-        """
-        Instantiates a layer (model) of an incremental architecture. It assumes the config file has a field called
-        'arbitrary_function_config' that holds any kind of information for the arbitrary function of an incremental
-        architecture
-        :param dim_node_features: input node features
-        :param dim_edge_features: input edge features
-        :param dim_target: target size
-        :param depth: current depth of the architecture
-        :param prev_outputs_to_consider: A list of previous layers to consider, e.g. [1,2] means the last
-        two previous layers.
-        :return: an incremental model
+    def create_incremental_model(self,
+                                 dim_node_features: (int),
+                                 dim_edge_features: (int),
+                                 dim_target: (int),
+                                 depth: (int),
+                                 prev_outputs_to_consider: List[int]) -> ModelInterface:
+        r"""
+        Instantiates a layer of an incremental architecture. It assumes the config file has a field ``layer_config``
+        and another ``layer_config.arbitrary_function_config`` that holds any kind of information for the arbitrary
+        function of an incremental architecture
+
+        Args:
+            dim_node_features: input node features
+            dim_edge_features: input edge features
+            dim_target: target size
+            depth: current depth of the architecture
+            prev_outputs_to_consider: A list of previous layers to consider, e.g. [1,2] means the last two previous layers.
+
+        Returns:
+            a layer of a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
         """
         predictor_classname = self.model_config.layer_config.get('predictor', None)
         self.model_config.layer_config['depth'] = depth
@@ -103,26 +177,31 @@ class Experiment:
         return self._create_model(dim_node_features, dim_edge_features, dim_target,
                                   predictor_classname, self.model_config.layer_config)
 
-    def _create_wrapper(self, config, model, device, log_every):
-        """
-        Instantiates the training engine (see training.core.engine). It looks for pre-defined fields in the
-        configuration file, i.e. 'loss', 'scorer', 'optimizer', 'scheduler', 'gradient_clipping', 'early_stopper' and
-        'plotter', all of which should be classes implementing the EventHandler interface
-        (see training.core.event.handler subpackage)
-        :param config: the configuration dictionary
-        :param model: the core model that need be trained
-        :param wrapper_classname: string containing the dotted path of the class associated with the training engine
-        :param device:
-        :param log_every:
-        :return: a training engine implementing (see training.core.engine.TrainingEngine for the base class
-        doing most of the work)
+    def _create_wrapper(self,
+                        config: Config,
+                        model: ModelInterface,
+                        device: str,
+                        log_every: int) -> TrainingEngine:
+        r"""
+        Utility that instantiates the training engine. It looks for pre-defined fields in the configuration file,
+        i.e. ``loss``, ``scorer``, ``optimizer``, ``scheduler``, ``gradient_clipping``, ``early_stopper`` and
+        ``plotter``, all of which should be classes implementing the :class:`~pydgn.training.event.handler.EventHandler` interface
+
+        Args:
+            config (:class:`~pydgn.evaluation.config.Config`): the configuration dictionary
+            model: the  model that needs be trained
+            device (str): the string with the CUDA device to be used, or ``cpu``
+            log_every: number of epochs after which to log information
+
+        Returns:
+            a :class:`~pydgn.training.engine.TrainingEngine` object
         """
 
         loss_class, loss_args = self._return_class_and_args(config, 'loss')
-        loss = loss_class(**loss_args) if loss_class is not None else None
+        loss = loss_class(use_as_loss=True, **loss_args) if loss_class is not None else None
 
         scorer_class, scorer_args = self._return_class_and_args(config, 'scorer')
-        scorer = scorer_class(**scorer_args) if scorer_class is not None else None
+        scorer = scorer_class(use_as_loss=False, **scorer_args) if scorer_class is not None else None
 
         optim_class, optim_args = self._return_class_and_args(config, 'optimizer')
         optimizer = optim_class(model=model, **optim_args) if optim_class is not None else None
@@ -155,34 +234,82 @@ class Experiment:
                                 store_last_checkpoint=store_last_checkpoint)
         return wrapper
 
-    def create_supervised_wrapper(self, model):
-        """ Instantiates the training engine by using the 'supervised_config' key in the config file """
+    def create_supervised_wrapper(self, model: ModelInterface) -> TrainingEngine:
+        r"""
+        Instantiates the training engine by using the ``supervised_config`` key in the config file
+
+        Args:
+            model: the  model that needs be trained
+
+        Returns:
+            a :class:`~pydgn.training.engine.TrainingEngine` object
+        """
         device = self.model_config.device
         log_every = self.model_config.log_every
         return self._create_wrapper(self.model_config.supervised_config, model, device, log_every)
 
-    def create_unsupervised_wrapper(self, model):
-        """ Instantiates the training engine by using the 'unsupervised_config' key in the config file """
+    def create_unsupervised_wrapper(self, model: ModelInterface) -> TrainingEngine:
+        r"""
+        Instantiates the training engine by using the ``unsupervised_config`` key in the config file
+
+        Args:
+            model: the  model that needs be trained
+
+        Returns:
+            a :class:`~pydgn.training.engine.TrainingEngine` object
+        """
         device = self.model_config.device
         log_every = self.model_config.log_every
         return self._create_wrapper(self.model_config.unsupervised_config, model, device, log_every)
 
-    def create_incremental_wrapper(self, model):
-        """ Instantiates the training engine by using the 'layer_config' key in the config file """
+    def create_incremental_wrapper(self, model: ModelInterface) -> TrainingEngine:
+        r"""
+        Instantiates the training engine by using the ``layer_config`` key in the config file
+
+        Args:
+            model: the  model that needs be trained
+
+        Returns:
+            a :class:`~pydgn.training.engine.TrainingEngine` object
+        """
         device = self.model_config.device
         log_every = self.model_config.log_every
         return self._create_wrapper(self.model_config.layer_config, model, device, log_every)
 
-    def run_valid(self, dataset_getter, logger):
-        """
-        This function returns the training and validation scores
-        :return: (training score, validation score)
+    def run_valid(self, dataset_getter, logger) -> Tuple[dict, dict]:
+        r"""
+        This function returns the training and validation results for a `model selection run`. **Do not attempt to load the set inside this method!**
+        **If possible, rely on already available subclasses of this class**.
+
+        Args:
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            logger (:class:`~pydgn.log.logger.Logger`): the logger
+
+        Returns:
+            a tuple of training and test dictionaries. Each dictionary has two keys:
+
+            * ``LOSS`` (as defined in ``pydgn.static``)
+            * ``SCORE`` (as defined in ``pydgn.static``)
+
+            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
         """
         raise NotImplementedError('You must implement this function!')
 
-    def run_test(self, dataset_getter, logger):
+    def run_test(self, dataset_getter: DataProvider, logger: Logger) -> Tuple[dict, dict, dict]:
         """
-        This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
-        :return: (training score, test score)
+        This function returns the training, validation and test results for a `final run`. **Do not use the test to train the model nor for early stopping reasons!**
+        **If possible, rely on already available subclasses of this class**.
+
+        Args:
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            logger (:class:`~pydgn.log.logger.Logger`): the logger
+
+        Returns:
+            a tuple of training,validation,test dictionaries. Each dictionary has two keys:
+
+            * ``LOSS`` (as defined in ``pydgn.static``)
+            * ``SCORE`` (as defined in ``pydgn.static``)
+
+            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
         """
         raise NotImplementedError('You must implement this function!')

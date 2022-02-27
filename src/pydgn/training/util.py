@@ -1,8 +1,6 @@
 import os
-from typing import Tuple, Optional, List
 
 import torch
-import torch_geometric.data.batch
 from pydgn.static import *
 
 

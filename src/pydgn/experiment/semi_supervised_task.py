@@ -7,16 +7,17 @@ from torch_geometric.data import Batch
 
 
 class SemiSupervisedTask(Experiment):
-
+    """
+    Class that implements a semi-supervised experiment. There is an ``unsupervised_config`` field in the configuration
+    file that is used, together with the field ``model``, to produce unsupervised embeddings. These are later used
+    by a **predictor** extracted from a ``supervised_config`` field in the configuration file to perform the supervised
+    task.
+    """
     def __init__(self, model_configuration, exp_path, exp_seed):
         super(SemiSupervisedTask, self).__init__(model_configuration, exp_path, exp_seed)
         self.root_exp_path = exp_path  # to distinguish unsup. and sup. exp paths
 
     def run_valid(self, dataset_getter, logger):
-        """
-        This function returns the training and validation scores
-        :return: (training score, validation score)
-        """
         unsupervised_config = self.model_config.unsupervised_config
         supervised_config = self.model_config.supervised_config
 
@@ -88,10 +89,6 @@ class SemiSupervisedTask(Experiment):
         return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
-        """
-        This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
-        :return: (training score, test score)
-        """
         unsupervised_config = self.model_config.unsupervised_config
         supervised_config = self.model_config.supervised_config
 

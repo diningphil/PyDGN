@@ -10,6 +10,17 @@ Subpackages
    pydgn.model.dgn
    pydgn.model.predictor
 
+Submodules
+----------
+
+pydgn.model.model module
+------------------------
+
+.. automodule:: pydgn.model.model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

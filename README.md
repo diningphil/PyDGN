@@ -1,6 +1,3 @@
-[![Documentation Status](https://readthedocs.org/projects/pydgn/badge/?version=latest)](https://pydgn.readthedocs.io/en/latest/?badge=latest)
-
-
 # PyDGN
 
 ## [Wiki](https://github.com/diningphil/PyDGN/wiki)
@@ -26,6 +23,10 @@ If you are interested in a rigorous evaluation of Deep Graph Networks, check thi
 [Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph
 Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning
 Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
+
+## Projects using PyDGN
+
+Todo
 
 ## What's New
 With PyDGN 0.7.0, we have released the first support for temporal experiments! In particular, we can now tackle node prediction in single graph sequence tasks!
@@ -54,7 +55,7 @@ that [PyTorch MacOS Binaries dont support CUDA, install from source if CUDA is n
 
     python build_dataset.py --config-file [your data config file]
 
-#### Exampla
+#### Examples
 
     python build_dataset.py --config-file DATA_CONFIGS/config_PROTEINS.yml 
 

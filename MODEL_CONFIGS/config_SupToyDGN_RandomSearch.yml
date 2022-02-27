@@ -48,13 +48,9 @@ random:
                 - 0.01
             weight_decay: 0.
     scheduler: null
-    loss: pydgn.training.callback.loss.MulticlassClassificationLoss
+    loss: pydgn.training.callback.metric.MulticlassClassification
     scorer:
-      class_name: pydgn.training.callback.score.MultiScore
-      args:
-        # used at model selection time. Should be the one on which to perform early stopping
-        main_scorer: pydgn.training.callback.score.MulticlassAccuracyScore
-        my_metric2: pydgn.training.callback.score.Toy1Score
+      class_name: pydgn.training.callback.metric.MulticlassAccuracy
     predictor: pydgn.model.predictor.graph_predictor.LinearGraphPredictor
     wrapper: pydgn.training.engine.TrainingEngine
     l2: 0.

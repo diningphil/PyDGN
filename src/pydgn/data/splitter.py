@@ -7,6 +7,8 @@ from pydgn.experiment.util import s2c
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold
 from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
 
+from pydgn.data.dataset import OGBGDatasetInterface
+
 
 class Fold:
     r"""
@@ -228,6 +230,11 @@ class Splitter:
                 inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(),
                                        val_idxs=inner_idxs[inner_val_idxs].tolist())
                 inner_fold_splits.append(inner_fold)
+
+                # False if empty
+                assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
+                assert not bool(set(inner_idxs[inner_train_idxs]) & set(inner_idxs[inner_val_idxs]) & set(test_idxs))
+
             self.inner_folds.append(inner_fold_splits)
 
             # Obtain outer val from outer train in an holdout fashion
@@ -236,8 +243,6 @@ class Splitter:
             outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=inner_targets))[0]
 
             # False if empty
-            assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
-            assert not bool(set(inner_idxs[inner_train_idxs]) & set(inner_idxs[inner_val_idxs]) & set(test_idxs))
             assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
             assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
             assert not bool(set(inner_idxs[outer_train_idxs]) & set(inner_idxs[outer_val_idxs]) & set(test_idxs))
@@ -302,7 +307,7 @@ class Splitter:
 
 class OGBGSplitter(Splitter):
 
-    def split(self, dataset, targets=None):
+    def split(self, dataset: OGBGDatasetInterface, targets=None):
         assert self.n_outer_folds == 1 and self.n_inner_folds == 1, "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
         original_splits = dataset.get_idx_split()
 
@@ -380,7 +385,8 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         self.undirected = undirected
         self.avoid_opposite_negative_edges = avoid_opposite_negative_edges
 
-    def _run_checks(self, A, pos_train_edges, neg_train_edges, pos_val_edges, neg_val_edges, pos_test_edges,
+    @staticmethod
+    def _run_checks(A, pos_train_edges, neg_train_edges, pos_val_edges, neg_val_edges, pos_test_edges,
                     neg_test_edges):
         print(
             f'Inner splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {pos_val_edges.shape}, {neg_val_edges.shape}')

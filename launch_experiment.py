@@ -3,8 +3,8 @@ import os
 from pydgn.experiment.util import s2c
 from pydgn.static import *
 
-os.environ[
-    OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
+os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
+
 import sys
 import yaml
 import torch
@@ -55,6 +55,7 @@ def evaluation(args):
     data_root = get_key(DATA_ROOT, kwargs, configs_dict)
     data_splits_filepath = get_key(DATA_SPLITS_FILE, kwargs, configs_dict)
     dataset_class = get_key(DATASET_CLASS, kwargs, configs_dict)
+    data_loader_class = get_key(DATA_LOADER, kwargs, configs_dict)
     dataset_name = get_key(DATASET_NAME, kwargs, configs_dict)
     debug = get_key(DEBUG, kwargs, configs_dict)
     final_training_runs = get_key(FINAL_TRAINING_RUNS, kwargs, configs_dict)
@@ -127,6 +128,7 @@ def get_args():
     parser.add_argument(DATA_ROOT_CLI_ARGUMENT, dest=DATA_ROOT, default=None)
     parser.add_argument(DATA_SPLITS_FILE_CLI_ARGUMENT, dest=DATA_SPLITS_FILE, default=None)
     parser.add_argument(DATASET_CLASS_CLI_ARGUMENT, dest=DATASET_CLASS, default=None)
+    parser.add_argument(DATA_LOADER_CLASS_CLI_ARGUMENT, dest=DATA_LOADER, default=None)
     parser.add_argument(DATASET_GETTER_CLI_ARGUMENT, dest=DATASET_GETTER, default=None)
     parser.add_argument(DATASET_NAME_CLI_ARGUMENT, dest=DATASET_NAME, default=None)
     parser.add_argument(DEBUG_CLI_ARGUMENT, action="store_true", dest=DEBUG, default=False)

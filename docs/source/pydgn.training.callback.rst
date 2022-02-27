@@ -28,10 +28,10 @@ pydgn.training.callback.gradient\_clipping module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.loss module
------------------------------------
+pydgn.training.callback.metric module
+-------------------------------------
 
-.. automodule:: pydgn.training.callback.loss
+.. automodule:: pydgn.training.callback.metric
    :members:
    :undoc-members:
    :show-inheritance:
@@ -56,38 +56,6 @@ pydgn.training.callback.scheduler module
 ----------------------------------------
 
 .. automodule:: pydgn.training.callback.scheduler
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.training.callback.score module
-------------------------------------
-
-.. automodule:: pydgn.training.callback.score
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.training.callback.temporal\_engine\_callback module
----------------------------------------------------------
-
-.. automodule:: pydgn.training.callback.temporal_engine_callback
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.training.callback.temporal\_loss module
----------------------------------------------
-
-.. automodule:: pydgn.training.callback.temporal_loss
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-pydgn.training.callback.temporal\_score module
-----------------------------------------------
-
-.. automodule:: pydgn.training.callback.temporal_score
    :members:
    :undoc-members:
    :show-inheritance:

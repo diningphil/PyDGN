@@ -1,50 +1,59 @@
 from pydgn.experiment.util import s2c
 from pydgn.static import *
 from pydgn.training.event.handler import EventHandler
+from pydgn.training.event.state import State
+from torch.optim.optimizer import Optimizer
 
 
 class Scheduler(EventHandler):
     """
     Scheduler is the main event handler for schedulers. Just pass a PyTorch scheduler together with its arguments in the
     configuration file.
-    """
-    __name__ = 'scheduler'
 
-    def __init__(self, scheduler_class_name, optimizer, **kwargs):
+    Args:
+        scheduler_class_name (str): dotted path to class name of the scheduler
+        optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer to use. **This is automatically recovered by PyDGN when providing an optimizer**
+        kwargs: additional parameters for the specific scheduler to be used
+
+    """
+
+    def __init__(self, scheduler_class_name: str, optimizer: Optimizer, **kwargs: dict):
         self.scheduler = s2c(scheduler_class_name)(optimizer, **kwargs)
 
-    def on_fit_start(self, state):
-        """
-        Load scheduler from state if any
-        :param state: the shared State object
-        """
+    def on_fit_start(self, state: State):
         if self.scheduler and state.scheduler_state is not None:
             self.scheduler.load_state_dict(state.scheduler_state)
 
-    def on_epoch_end(self, state):
-        """
-        Save the scheduler state into the state object
-        :param state: the shared State object
-        """
+    def on_epoch_end(self, state: State):
         state.update(scheduler_state=self.scheduler.state_dict())
 
 
 class EpochScheduler(Scheduler):
-    __name__ = 'epoch-based scheduler'
-
-    def on_training_epoch_end(self, state):
+    """
+    Implements a scheduler which uses epochs to modify the step size
+    """
+    def on_training_epoch_end(self, state: State):
         self.scheduler.step(state.epoch)
 
 
 class MetricScheduler(Scheduler):
-    __name__ = 'metric-based scheduler'
+    """
+    Implements a scheduler which uses variations in the metric of interest to modify the step size
 
-    def __init__(self, scheduler_class_name, use_loss, monitor, optimizer, **kwargs):
+    Args:
+        scheduler_class_name (str): dotted path to class name of the scheduler
+        use_loss (str): whether to monitor scores or losses
+        monitor (str): the metric to monitor. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+                       ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+        optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer to use. **This is automatically recovered by PyDGN when providing an optimizer**
+        kwargs: additional parameters for the specific scheduler to be used
+    """
+    def __init__(self, scheduler_class_name: str, use_loss: bool, monitor: str, optimizer: Optimizer, **kwargs: dict):
         self.scheduler = s2c(scheduler_class_name)(optimizer, **kwargs)
         self.use_loss = use_loss
         self.monitor = monitor
 
-    def on_epoch_end(self, state):
+    def on_epoch_end(self, state: State):
         monitor_main_key = LOSSES if self.use_loss else SCORES
         assert self.monitor in state.epoch_results[monitor_main_key], f'{self.monitor} not found in epoch_results'
         metric = state.epoch_results[monitor_main_key][self.monitor]

@@ -2,17 +2,21 @@ import datetime
 import math
 import os
 import random
-
 import tqdm
+import gpustat
+
 from pydgn.static import *
 
 
 def set_gpus(num_gpus):
-    try:
-        import gpustat
-    except ImportError as e:
-        print("gpustat module is not installed. No GPU allocated.")
+    """
+    Sets the visible GPUS for the experiments according to the availability in terms of memory. Prioritize GPUs with
+    less memory usage. Sets the ``CUDA_DEVICE_ORDER`` env variable to ``PCI_BUS_ID`` and ``CUDA_VISIBLE_DEVICES``
+    to the ordered list of GPU indices.
 
+    Args:
+        num_gpus: maximum number of GPUs to use when launching experiments in parallel
+    """
     try:
         selected = []
 
@@ -42,6 +46,9 @@ def set_gpus(num_gpus):
 
 
 def clear_screen():
+    """
+    Clears the CLI interface.
+    """
     try:
         os.system('clear')
     except Exception as e:
@@ -52,37 +59,24 @@ def clear_screen():
 
 
 class ProgressManager:
-    '''
-    Possible vars of bar_format:
-          l_bar, bar, r_bar,
-          n, n_fmt, total, total_fmt,
-          percentage, elapsed, elapsed_s,
-          ncols, nrows, desc, unit,
-          rate, rate_fmt, rate_noinv,
-          rate_noinv_fmt, rate_inv, rate_inv_fmt,
-          postfix, unit_divisor, remaining, remaining_s
-    '''
+    r"""
+    Class that is responsible for drawing progress bars.
 
-    def _init_selection_pbar(self, i, j):
-        position = i * self.inner_folds + j
-        pbar = tqdm.tqdm(total=self.no_configs, ncols=self.ncols, ascii=True,
-                         position=position, unit="config",
-                         bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
-        pbar.set_description(f'Out_{i + 1}/Inn_{j + 1}')
-        mean = str(datetime.timedelta(seconds=0))
-        pbar.set_postfix_str(f'(1 cfg every {mean})')
-        return pbar
-
-    def _init_assessment_pbar(self, i):
-        position = self.outer_folds * self.inner_folds + i
-        pbar = tqdm.tqdm(total=self.final_runs, ncols=self.ncols, ascii=True,
-                         position=position, unit="config",
-                         bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
-        pbar.set_description(f'Final run {i + 1}')
-        mean = str(datetime.timedelta(seconds=0))
-        pbar.set_postfix_str(f'(1 run every {mean})')
-        return pbar
-
+    Args:
+        outer_folds (int): number of external folds for model assessment
+        inner_folds (int): number of internal folds for model selection
+        no_configs (int): number of possible configurations in model selection
+        final_runs (int): number of final runs per outer fold once the best model has been selected
+        show (bool): whether to show the progress bar or not. Default is ``True``
+    """
+    # Possible vars of ``bar_format``:
+    #       * ``l_bar, bar, r_bar``,
+    #       * ``n, n_fmt, total, total_fmt``,
+    #       * ``percentage, elapsed, elapsed_s``,
+    #       * ``ncols, nrows, desc, unit``,
+    #       * ``rate, rate_fmt, rate_noinv``,
+    #       * ``rate_noinv_fmt, rate_inv, rate_inv_fmt``,
+    #       * ``postfix, unit_divisor, remaining, remaining_s``
     def __init__(self, outer_folds, inner_folds, no_configs, final_runs, show=True):
         self.ncols = 100
         self.outer_folds = outer_folds
@@ -108,7 +102,30 @@ class ProgressManager:
 
         self.times = [{} for _ in range(len(self.pbars))]
 
+    def _init_selection_pbar(self, i, j):
+        position = i * self.inner_folds + j
+        pbar = tqdm.tqdm(total=self.no_configs, ncols=self.ncols, ascii=True,
+                         position=position, unit="config",
+                         bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
+        pbar.set_description(f'Out_{i + 1}/Inn_{j + 1}')
+        mean = str(datetime.timedelta(seconds=0))
+        pbar.set_postfix_str(f'(1 cfg every {mean})')
+        return pbar
+
+    def _init_assessment_pbar(self, i):
+        position = self.outer_folds * self.inner_folds + i
+        pbar = tqdm.tqdm(total=self.final_runs, ncols=self.ncols, ascii=True,
+                         position=position, unit="config",
+                         bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
+        pbar.set_description(f'Final run {i + 1}')
+        mean = str(datetime.timedelta(seconds=0))
+        pbar.set_postfix_str(f'(1 run every {mean})')
+        return pbar
+
     def show_header(self):
+        """
+        Prints the header of the progress bar
+        """
         '''
         \033[F --> move cursor to the beginning of the previous line
         \033[A --> move cursor up one line
@@ -121,6 +138,9 @@ class ProgressManager:
         pass  # need to work how how to print after tqdm
 
     def refresh(self):
+        """
+        Refreshes the progress bar
+        """
 
         self.show_header()
         for i, pbar in enumerate(self.pbars):
@@ -145,7 +165,14 @@ class ProgressManager:
             pbar.refresh()
         self.show_footer()
 
-    def update_state(self, msg):
+    def update_state(self, msg: dict):
+        """
+        Updates the state of the progress bar (different from showing it on screen, see :func:`refresh`) once a message
+        is received
+
+        Args:
+            msg (dict): message with updates to be parsed
+        """
         if not self.show:
             return
 
@@ -190,13 +217,24 @@ class ProgressManager:
             pbar.close()
 
 
+'''
+Various options for random search model selection
+'''
 choice = lambda *args: random.choice(args)
 uniform = lambda *args: random.uniform(*args)
 normal = lambda *args: random.normalvariate(*args)
 randint = lambda *args: random.randint(*args)
 
-
 def loguniform(*args):
+    """
+    Performs a log-uniform random selection.
+
+    Args:
+        *args: a tuple of (log min, log max, [base]) to use. Base 10 is used if the third argument is not available.
+
+    Returns:
+        a randomly chosen value
+    """
     log_min, log_max, *base = args
     base = base[0] if len(base) > 0 else 10
 

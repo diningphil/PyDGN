@@ -3,12 +3,10 @@ from pydgn.static import LOSS, SCORE
 
 
 class SupervisedTask(Experiment):
-
+    """
+    Class that implements a standard supervised experiment.
+    """
     def run_valid(self, dataset_getter, logger):
-        """
-        This function returns the training and validation scores
-        :return: (training score, validation score)
-        """
         batch_size = self.model_config.supervised_config['batch_size']
         shuffle = self.model_config.supervised_config['shuffle'] \
             if 'shuffle' in self.model_config.supervised_config else True
@@ -40,10 +38,6 @@ class SupervisedTask(Experiment):
         return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
-        """
-        This function returns the training and test score. DO NOT USE THE TEST TO TRAIN OR FOR EARLY STOPPING REASONS!
-        :return: (training score, test score)
-        """
         batch_size = self.model_config.supervised_config['batch_size']
         shuffle = self.model_config.supervised_config['shuffle'] \
             if 'shuffle' in self.model_config.supervised_config else True

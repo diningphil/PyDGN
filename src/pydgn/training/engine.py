@@ -1,49 +1,77 @@
 import os
 from pathlib import Path
+from typing import Callable, List, Union, Tuple
 
 import torch
+from pydgn.model.model import ModelInterface
 from pydgn.static import *
+from pydgn.training.callback.early_stopping import EarlyStopper
+from pydgn.training.callback.engine_callback import EngineCallback
+from pydgn.training.callback.metric import Metric
+from pydgn.training.callback.optimizer import Optimizer
+from pydgn.training.callback.plotter import Plotter
+from pydgn.training.callback.scheduler import Scheduler
+from pydgn.training.callback.gradient_clipping import GradientClipper
 from pydgn.training.event.dispatcher import EventDispatcher
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State
 from pydgn.training.profiler import Profiler
+from pydgn.log.logger import Logger
 from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 
-def log(msg, logger):
+def log(msg, logger: Logger):
     if logger is not None:
         logger.log(msg)
 
 
 class TrainingEngine(EventDispatcher):
     """
-    This is the most important class when it comes to training a model. It implements the EventDispatcher interface,
+    This is the most important class when it comes to training a model. It implements the :class:`~pydgn.training.event.dispatcher.EventDispatcher` interface,
     which means that after registering some callbacks in a given order, it will proceed to trigger specific events that
-    will result in the shared State object being updated by the callbacks. Callbacks implement the EventHandler
+    will result in the shared :class:`~pydgn.training.event.state.State` object being updated by the callbacks. Callbacks implement the EventHandler
     interface, and they receive the shared State object when any event is triggered. Knowing the order in which
     callbacks are called is important.
-    The order is: loss function - score function - gradient clipper - optimizer - early stopper - scheduler - plotter
-    """
+    The order is:
 
-    def __init__(self, engine_callback, model, loss, optimizer, scorer=None,
-                 scheduler=None, early_stopper=None, gradient_clipping=None, device='cpu', plotter=None, exp_path=None,
-                 log_every=1, store_last_checkpoint=False):
-        """
-        Initializes the engine
-        :param model: the engine_callback subclass to be used
-        :param model: the model to be trained
-        :param loss: an object of a subclass of training.core.callback.Loss
-        :param optimizer: an object of a subclass of training.core.callback.Optimizer
-        :param scorer: an object of a subclass of training.core.callback.Scorer
-        :param scheduler: an object of a subclass of training.core.callback.Scheduler
-        :param early_stopper: an object of a subclass of training.core.callback.EarlyStopper
-        :param gradient_clipping: an object of a subclass of training.core.callback.GradientClipper
-        :param device: the device on which to train.
-        :param plotter: an object of a subclass of training.core.callback.Plotter
-        :param exp_path: the path of the experiment folder
-        :param log_every: the frequency of logging epoch results
-        :param store_last_checkpoint: whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch.
-        """
+    * loss function
+    * score function
+    * gradient clipper
+    * optimizer
+    * early stopper
+    * scheduler
+    * plotter
+
+    Args:
+        engine_callback ( Callable[..., :class:`~pydgn.training.callback.engine_callback.EngineCallback`]): the engine callback object to be used for data fetching and checkpoints (or even other purposes if necessary)
+        model (:class:`~pydgn.model.model.ModelInterface`): the model to be trained
+        loss (:class:`~pydgn.training.callback.metric.Metric`): the loss to be used
+        optimizer (:class:`~pydgn.training.callback.optimizer.Optimizer`): the optimizer to be used
+        scorer (:class:`~pydgn.training.callback.metric.Metric`): the score to be used
+        scheduler (:class:`~pydgn.training.callback.scheduler.Scheduler`): the scheduler to be used Default is ``None``.
+        early_stopper (:class:`~pydgn.training.callback.early_stopping.EarlyStopper`): the early stopper to be used. Default is ``None``.
+        gradient_clipping (:class:`~pydgn.training.callback.gradient_clipping.GradientClipper`): the gradient clipper to be used. Default is ``None``.
+        device (str): the device on which to train. Default is ``cpu``.
+        plotter (:class:`~pydgn.training.callback.plotter.Plotter`): the plotter to be used. Default is ``None``.
+        exp_path (str): the path of the experiment folder. Default is ``None`` but it is always instantiated.
+        log_every(int): the frequency of logging epoch results. Default is ``1``.
+        store_last_checkpoint (bool): whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch. Default is ``False``.
+    """
+    def __init__(self,
+                 engine_callback: Callable[...,EngineCallback],
+                 model: ModelInterface,
+                 loss: Metric,
+                 optimizer: Optimizer,
+                 scorer: Metric,
+                 scheduler: Scheduler=None,
+                 early_stopper: EarlyStopper=None,
+                 gradient_clipping: GradientClipper=None,
+                 device: str='cpu',
+                 plotter: Plotter=None,
+                 exp_path: str=None,
+                 log_every: int=1,
+                 store_last_checkpoint: bool=False):
         super().__init__()
 
         self.engine_callback = engine_callback
@@ -79,15 +107,18 @@ class TrainingEngine(EventDispatcher):
         self.state = State(self.model, self.optimizer, self.device)  # Initialize the state
         self.state.update(exp_path=self.exp_path)
 
-    def _to_data_list(self, x, batch, y):
+    # TODO in general, there are no guarantees that y will be sufficient to determine the task. This may have to be changed in the future.
+    def _to_data_list(self, x: torch.Tensor, batch: torch.Tensor, y: torch.Tensor) -> List[Data]:
         """
-        Converts a graphs outputs back to a list of Tensors elements. Useful for incremental architectures.
-        :param embeddings: a tuple of embeddings: (vertex_output, edge_output, graph_output, other_output). Each of
-        the elements should be a Tensor.
-        :param x: big Tensor holding information of different graphs
-        :param batch: the usual batch list provided by Pytorch Geometric. Used to split Tensors graph-wise.
-        :param y: target labels Tensor, used to determine whether the task is graph classification or not (to be changed)
-        :return: a list of PyTorch Geometric Data objects
+        Converts model outputs back to a list of Data elements. Useful for incremental architectures.
+
+        Args:
+            x (:class:`torch.Tensor`): tensor holding information of different nodes/graphs embeddings
+            batch (:class:`torch.Tensor`): the usual PyG batch tensor. Used to split node/graph embeddings graph-wise.
+            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction
+
+        Returns:
+            a list of PyG Data objects (with only ``x`` and ``y`` attributes)
         """
         data_list = []
 
@@ -107,9 +138,24 @@ class TrainingEngine(EventDispatcher):
 
         return data_list
 
-    def _to_list(self, data_list, embeddings, batch, edge_index, y):
-        assert isinstance(y, torch.Tensor), "Expecting a tensor as target"
+    def _to_list(self, data_list: List[Data],
+                 embeddings: Union[Tuple[torch.Tensor], torch.Tensor],
+                 batch: torch.Tensor,
+                 edge_index: torch.Tensor,
+                 y: torch.Tensor) -> List[Data]:
+        """
+        Extends the ``data_list`` list of PyG Data objects with new samples.
 
+        Args:
+            data_list: a list of PyG Data objects (with only ``x`` and ``y`` attributes)
+            embeddings (:class:`torch.Tensor`): tensor holding information of different nodes/graphs embeddings
+            batch (:class:`torch.Tensor`): the usual PyG batch tensor. Used to split node/graph embeddings graph-wise.
+            edge_index:
+            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction
+
+        Returns:
+            a list of PyG Data objects (with only ``x`` and ``y`` attributes)
+        """
         # Crucial: Detach the embeddings to free the computation graph!!
         if isinstance(embeddings, tuple):
             embeddings = tuple([e.detach().cpu() if e is not None else None for e in embeddings])
@@ -127,7 +173,16 @@ class TrainingEngine(EventDispatcher):
         data_list.extend(self._to_data_list(embeddings, batch, y))
         return data_list
 
-    def _num_targets(self, targets):
+    def _num_targets(self, targets: torch.Tensor) -> int:
+        """
+        Computes the number of targets (**different from the dimension of each target**).
+
+        Args:
+            targets (:class:`torch.Tensor`: the ground truth tensor
+
+        Returns:
+             an integer with the number of targets to predict
+        """
         if targets is None:
             return 0
         assert isinstance(targets, torch.Tensor), "Expecting a tensor as target"
@@ -135,20 +190,34 @@ class TrainingEngine(EventDispatcher):
         return num_targets
 
     def set_device(self):
+        """
+        Moves the model and the loss metric to the proper device.
+        """
         self.model.to(self.device)
         self.loss_fun.to(self.device)
 
     def set_training_mode(self):
+        """
+        Sets the model and the internal state in ``TRAINING`` mode
+        """
         self.model.train()
         self.training = True
 
     def set_eval_mode(self):
+        """
+        Sets the model and the internal state in ``EVALUATION`` mode
+        """
         self.model.eval()
         self.training = False
 
     # loop over all data (i.e. computes an epoch)
-    def _loop(self, loader):
+    def _loop(self, loader: DataLoader):
+        """
+        Main method that computes a pass over the dataset using the data loader provided.
 
+        Args:
+            loader (:class:`torch_geometric.loader.DataLoader`): the loader to be used
+        """
         # Reset epoch state (DO NOT REMOVE)
         self.state.update(epoch_data_list=None)
         self.state.update(epoch_loss=None)
@@ -235,12 +304,17 @@ class TrainingEngine(EventDispatcher):
         loss, score = self.state.epoch_loss, self.state.epoch_score
         return loss, score, None
 
-    def infer(self, loader, set):
+    def infer(self, loader: DataLoader, set: str) -> Tuple[dict, dict, List[Data]]:
         """
-        Performs an inference step
-        :param loader: the DataLoader
-        :set: the type of dataset being used, can be TRAINING, VALIDATION or TEST
-        :return: a tuple (loss, score, embeddings)
+        Performs an evaluation step on the data.
+
+        Args:
+            loader (:class:`torch_geometric.loader.DataLoader`): the loader to be used
+            set (str): the type of dataset being used, can be ``TRAINING``, ``VALIDATION`` or ``TEST`` (as defined in ``pydgn.static``)
+
+        Returns:
+             a tuple (loss dict, score dict, list of :class:`torch_geometric.data.Data` objects with ``x`` and ``y`` attributes only).
+             The data list can be used, for instance, in semi-supervised experiments or in incremental architectures
         """
         self.set_eval_mode()
         self.state.update(set=set)
@@ -256,27 +330,37 @@ class TrainingEngine(EventDispatcher):
         loss, score, data_list = self.state.epoch_loss, self.state.epoch_score, self.state.epoch_data_list
 
         # Add the main loss we want to return as a special key
-        main_loss_name = self.loss_fun.get_main_loss_name()
+        main_loss_name = self.loss_fun.get_main_metric_name()
         loss[MAIN_LOSS] = loss[main_loss_name]
 
         # Add the main score we want to return as a special key
         # Needed by the experimental evaluation framework
-        main_score_name = self.score_fun.get_main_score_name()
+        main_score_name = self.score_fun.get_main_metric_name()
         score[MAIN_SCORE] = score[main_score_name]
 
         return loss, score, data_list
 
-    def train(self, train_loader, validation_loader=None, test_loader=None, max_epochs=100, zero_epoch=False,
-              logger=None):
+    def train(self,
+              train_loader: DataLoader,
+              validation_loader: DataLoader=None,
+              test_loader: DataLoader=None,
+              max_epochs: int=100,
+              zero_epoch: bool=False,
+              logger: Logger=None) -> Tuple[dict, dict, List[Data], dict, dict, List[Data], dict, dict, List[Data]]:
         """
-        Trains the model
-        :param train_loader: the DataLoader associated with training data
-        :param validation_loader: the DataLoader associated with validation data, if any
-        :param test_loader:  the DataLoader associated with test data, if any
-        :param max_epochs: maximum number of training epochs
-        :param zero_epoch: if True, starts again from epoch 0 and resets optimizer and scheduler states.
-        :param logger: a log.Logger for logging purposes
-        :return: a tuple (train_loss, train_score, train_embeddings, validation_loss, validation_score, validation_embeddings, test_loss, test_score, test_embeddings)
+        Trains the model and regularly evaluates on validation and test data (if given).
+        May perform early stopping and checkpointing.
+
+        Args:
+            train_loader (:class:`torch_geometric.loader.DataLoader`): the DataLoader associated with training data
+            validation_loader (:class:`torch_geometric.loader.DataLoader`): the DataLoader associated with validation data, if any
+            test_loader (:class:`torch_geometric.loader.DataLoader`):  the DataLoader associated with test data, if any
+            max_epochs (int): maximum number of training epochs. Default is ``100``
+            zero_epoch: if ``True``, starts again from epoch 0 and resets optimizer and scheduler states. Default is ``False``
+            logger: the logger
+
+        Returns:
+             a tuple (train_loss, train_score, train_embeddings, validation_loss, validation_score, validation_embeddings, test_loss, test_score, test_embeddings)
         """
 
         try:
@@ -456,7 +540,10 @@ class TrainingEngine(EventDispatcher):
 
 
 class LinkPredictionSingleGraphEngine(TrainingEngine):
-
+    """
+    Specific engine for link prediction tasks. Here, we expect target values in the form of tuples: ``(_, pos_edges, neg_edges)``,
+    where ``pos_edges`` and ``neg_edges`` have been generated by the splitter and provided by the data provider.
+    """
     def _to_data_list(self, x, batch, y):
         data_list = []
         # Return node embeddings and their original class, if any (or dumb value which is required nonetheless)

@@ -1,10 +1,15 @@
 import json
+from collections import KeysView, ItemsView
 
 
 class Config:
-    """ Simple class to manage the configuration dictionary """
+    r"""
+    Simple class to manage the configuration dictionary as a Python object with fields.
 
-    def __init__(self, config_dict):
+    Args:
+        config_dict (dict): the configuration dictionary
+    """
+    def __init__(self, config_dict: dict):
         self.config_dict = config_dict
 
     def __getattr__(self, attr):
@@ -22,10 +27,22 @@ class Config:
     def __iter__(self):
         return iter(self.config_dict)
 
-    def keys(self):
+    def keys(self) -> KeysView:
+        r"""
+        Invokes the `keys()` method of the configuration dictionary
+
+        Returns:
+            the set of keys in the dictionary
+        """
         return self.config_dict.keys()
 
-    def items(self):
+    def items(self) -> ItemsView:
+        r"""
+        Invokes the `items()` method of the configuration dictionary
+
+        Returns:
+            a list of (key, value) pairs
+        """
         return self.config_dict.items()
 
     def __str__(self):

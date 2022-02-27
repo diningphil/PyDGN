@@ -2,12 +2,11 @@ import inspect
 import os
 import os.path as osp
 import warnings
-from typing import Optional
+from typing import Optional, Callable
 
 import torch
 from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
-from torch_geometric.datasets import TUDataset
 from torch_geometric.transforms import Compose
 
 
@@ -149,14 +148,14 @@ def preprocess_data(options: dict):
         print("Data splits are already present, I will not overwrite them.")
 
 
-def load_dataset(data_root: str, dataset_name:str, dataset_class: object) -> DatasetInterface:
+def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,DatasetInterface]) -> DatasetInterface:
     r"""
     Loads the dataset using the ``dataset_kwargs.pt`` file created when parsing the data config file.
 
     Args:
         data_root (str): path of the folder that contains the dataset folder
         dataset_name (str): name of the dataset (same as the name of the dataset folder that has been already created)
-        dataset_class (object): the class of the dataset to instantiate with the parameters stored in the ``dataset_kwargs.pt`` file.
+        dataset_class (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]): the class of the dataset to instantiate with the parameters stored in the ``dataset_kwargs.pt`` file.
 
     Returns:
         a :class:`~pydgn.data.dataset.DatasetInterface` object

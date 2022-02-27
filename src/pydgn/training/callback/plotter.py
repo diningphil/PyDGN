@@ -3,16 +3,19 @@ from pathlib import Path
 
 from pydgn.static import *
 from pydgn.training.event.handler import EventHandler
+from pydgn.training.event.state import State
 from torch.utils.tensorboard import SummaryWriter
 
 
 class Plotter(EventHandler):
-    """
+    r"""
     Plotter is the main event handler for plotting at training time.
-    """
-    __name__ = 'plotter'
 
-    def __init__(self, exp_path, **kwargs):
+    Args:
+        exp_path (str): path where to store the Tensorboard logs
+        keargs (dict): additional arguments that may depend on the plotter
+    """
+    def __init__(self, exp_path: str, **kwargs: dict):
         super().__init__()
         self.exp_path = exp_path
 
@@ -20,7 +23,7 @@ class Plotter(EventHandler):
             os.makedirs(Path(self.exp_path, TENSORBOARD))
         self.writer = SummaryWriter(log_dir=Path(self.exp_path, 'tensorboard'))
 
-    def on_epoch_end(self, state):
+    def on_epoch_end(self, state: State):
 
         for k, v in state.epoch_results[LOSSES].items():
             loss_scalars = {}
@@ -48,5 +51,5 @@ class Plotter(EventHandler):
 
             self.writer.add_scalars(score_name, score_scalars, state.epoch)
 
-    def on_fit_end(self, state):
+    def on_fit_end(self, state: State):
         self.writer.close()
