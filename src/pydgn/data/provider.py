@@ -39,11 +39,11 @@ class DataProvider:
         splits_filepath (str): the filepath of the splits. with additional metadata
         dataset_class (Callable[...,:class:`pydgn.data.dataset.DatasetInterface`]): the class of the dataset
         data_loader_class (Union[Callable[...,:class:`torch.utils.data.DataLoader`],Callable[...,:class:`torch_geometric.loader.DataLoader`]]): the class of the data loader to use
+        data_loader_args (dict): the arguments of the data loader
         dataset_name (str): the name of the dataset
         outer_folds (int): the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
         inner_folds (int): the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
-        num_workers (int): the number of workers to use in the DataLoader. A value > 0 triggers multiprocessing. Useful to prefetch data from disk to GPU.
-        pin_memory (bool): should be True when working on GPU.
+
     """
     def __init__(self,
                  data_root: str,
@@ -53,10 +53,9 @@ class DataProvider:
                  dataset_name: str,
                  data_loader_class: Union[Callable[...,torch.utils.data.DataLoader],
                                           Callable[...,torch_geometric.loader.DataLoader]],
+                 data_loader_args: dict,
                  outer_folds: int,
-                 inner_folds: int,
-                 num_workers: int,
-                 pin_memory: bool):
+                 inner_folds: int):
 
         self.exp_seed = None
 
@@ -65,6 +64,7 @@ class DataProvider:
         self.dataset_name = dataset_name
 
         self.data_loader_class = data_loader_class
+        self.data_loader_args = data_loader_args
 
         self.outer_folds = outer_folds
         self.inner_folds = inner_folds
@@ -76,8 +76,7 @@ class DataProvider:
         self.splits_filepath = splits_filepath
         self.splitter = None
         self.dataset = None
-        self.num_workers = num_workers
-        self.pin_memory = pin_memory
+
 
     def set_exp_seed(self, seed: int):
         r"""
@@ -155,15 +154,12 @@ class DataProvider:
 
         if shuffle is True:
             sampler = RandomSampler(dataset)
+            print(self.data_loader_args)
             dataloader = self.data_loader_class(dataset, sampler=sampler,
-                                                num_workers=self.num_workers,
-                                                pin_memory=self.pin_memory,
-                                                **kwargs)
+                                                **self.data_loader_args)
         else:
             dataloader = self.data_loader_class(dataset, shuffle=False,
-                                                num_workers=self.num_workers,
-                                                pin_memory=self.pin_memory,
-                                                **kwargs)
+                                                **self.data_loader_args)
 
         return dataloader
 
@@ -383,10 +379,8 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
 
         # Single graph dataset, shuffle does not make sense (unless we know how to do mini-batch training with nodes)
-        dataloader = self.data_loader_class(batched_edge_dataset, batch_size=1,
-                                            shuffle=False, num_workers=self.num_workers,
-                                            pin_memory=self.pin_memory,
-                                            **kwargs)
+        dataloader = self.data_loader_class(batched_edge_dataset, batch_size=1, shuffle=False,
+                                            **self.data_loader_args)
 
         return dataloader
 

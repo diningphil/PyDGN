@@ -326,10 +326,9 @@ class RiskAssesser:
                                               s2c(self.model_configs.dataset_class),
                                               self.model_configs.dataset_name,
                                               s2c(self.model_configs.data_loader_class),
+                                              self.model_configs.data_loader_args,
                                               self.outer_folds,
-                                              self.inner_folds,
-                                              self.model_configs.num_dataloader_workers,
-                                              self.model_configs.pin_memory)
+                                              self.inner_folds)
 
         # Tell the data provider to take data relative
         # to a specific OUTER split
@@ -416,10 +415,9 @@ class RiskAssesser:
                                               s2c(self.model_configs.dataset_class),
                                               self.model_configs.dataset_name,
                                               s2c(self.model_configs.data_loader_class),
+                                              self.model_configs.data_loader_args,
                                               self.outer_folds,
-                                              self.inner_folds,
-                                              self.model_configs.num_dataloader_workers,
-                                              self.model_configs.pin_memory)
+                                              self.inner_folds)
         # Tell the data provider to take data relative
         # to a specific OUTER split
         dataset_getter.set_outer_k(outer_k)

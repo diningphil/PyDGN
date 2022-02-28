@@ -7,9 +7,9 @@ splitter:
     seed: 42
     stratify: True  # works for graph classification tasks
     shuffle: True
-    inner_val_ratio: 0.1
+    inner_val_ratio: 0.1  # this will be ignored when the number of inner folds is > than 1
     outer_val_ratio: 0.1
-    test_ratio: 0.1
+    test_ratio: 0.1  # this will be ignored when the number of outer folds is > than 1
 dataset:
   root: DATA/
   class_name: pydgn.data.dataset.TUDataset

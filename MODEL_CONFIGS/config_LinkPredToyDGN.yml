@@ -1,14 +1,18 @@
-model: pydgn.model.dgn.toy_dgn.ToyDGN
+exp_name: link_prediction_grid_search_toy
 experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
 dataset_getter: data.provider.LinkPredictionSingleGraphDataProvider
-data_loader: torch_geometric.loader.DataLoader
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 0  # > 0 only with --debug option and GPU device
+    pin_memory: False  # True only with --debug option and GPU device
 device: cpu
-num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-pin_memory: False  # True only with --debug option and GPU device
+seed: 42
 grid:
   supervised_config:
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: True
     batch_size:
       - 32

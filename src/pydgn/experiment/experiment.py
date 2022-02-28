@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from pydgn.data.provider import DataProvider
 from pydgn.evaluation.config import Config
+from pydgn.evaluation.util import return_class_and_args
 from pydgn.experiment.util import s2c
 from pydgn.model.model import ModelInterface, ReadoutInterface
 from pydgn.log.logger import Logger
@@ -36,7 +37,7 @@ class Experiment:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
-    def _return_class_and_args(self, config: Config, key: str) -> Tuple[Callable[...,object],
+    def _return_class_and_args(config: Config, key: str) -> Tuple[Callable[...,object],
                                                                         dict]:
         r"""
         Returns the class and arguments associated to a specific key in the configuration file.
@@ -76,7 +77,7 @@ class Experiment:
         Returns:
             a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
         """
-        model = s2c(self.model_config.model)(dim_node_features=dim_node_features,
+        model = s2c(config['model'])(dim_node_features=dim_node_features,
                                              dim_edge_features=dim_edge_features,
                                              dim_target=dim_target,
                                              predictor_class=s2c(predictor_classname)
@@ -197,16 +198,16 @@ class Experiment:
             a :class:`~pydgn.training.engine.TrainingEngine` object
         """
 
-        loss_class, loss_args = self._return_class_and_args(config, 'loss')
+        loss_class, loss_args = return_class_and_args(config, 'loss')
         loss = loss_class(use_as_loss=True, **loss_args) if loss_class is not None else None
 
-        scorer_class, scorer_args = self._return_class_and_args(config, 'scorer')
+        scorer_class, scorer_args = return_class_and_args(config, 'scorer')
         scorer = scorer_class(use_as_loss=False, **scorer_args) if scorer_class is not None else None
 
-        optim_class, optim_args = self._return_class_and_args(config, 'optimizer')
+        optim_class, optim_args = return_class_and_args(config, 'optimizer')
         optimizer = optim_class(model=model, **optim_args) if optim_class is not None else None
 
-        sched_class, sched_args = self._return_class_and_args(config, 'scheduler')
+        sched_class, sched_args = return_class_and_args(config, 'scheduler')
         if sched_args is not None:
             sched_args['optimizer'] = optimizer.optimizer
         scheduler = sched_class(**sched_args) if sched_class is not None else None
@@ -214,17 +215,17 @@ class Experiment:
         if sched_args is not None:
             sched_args.pop('optimizer', None)
 
-        grad_clip_class, grad_clip_args = self._return_class_and_args(config, 'gradient_clipping')
+        grad_clip_class, grad_clip_args = return_class_and_args(config, 'gradient_clipping')
         grad_clipper = grad_clip_class(**grad_clip_args) if grad_clip_class is not None else None
 
-        early_stop_class, early_stop_args = self._return_class_and_args(config, 'early_stopper')
+        early_stop_class, early_stop_args = return_class_and_args(config, 'early_stopper')
         early_stopper = early_stop_class(**early_stop_args) if early_stop_class is not None else None
 
-        plot_class, plot_args = self._return_class_and_args(config, 'plotter')
+        plot_class, plot_args = return_class_and_args(config, 'plotter')
         plotter = plot_class(exp_path=self.exp_path, **plot_args) if plot_class is not None else None
 
         store_last_checkpoint = config.get('checkpoint', False)
-        wrapper_class, wrapper_args = self._return_class_and_args(config, 'wrapper')
+        wrapper_class, wrapper_args = return_class_and_args(config, 'wrapper')
         engine_callback = s2c(wrapper_args.get('engine_callback', DEFAULT_ENGINE_CALLBACK))
 
         wrapper = wrapper_class(engine_callback=engine_callback, model=model, loss=loss,

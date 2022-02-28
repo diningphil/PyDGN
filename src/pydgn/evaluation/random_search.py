@@ -4,6 +4,7 @@ from typing import Callable, List
 from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
 from pydgn.static import *
+from pydgn.evaluation.util import return_class_and_args
 
 
 class RandomSearch:
@@ -24,17 +25,16 @@ class RandomSearch:
 
         self.configs_dict = configs_dict
         self.seed = self.configs_dict.get(SEED, None)
+        self._exp_name = self.configs_dict.get(EXP_NAME)
         self.data_root = data_root
         self.dataset_class = dataset_class
         self.dataset_name = dataset_name
-        self.data_loader_class = self.configs_dict[DATA_LOADER]
+        self.data_loader_class, self.data_loader_args = return_class_and_args(self.configs_dict, DATA_LOADER,
+                                                                              return_class_name=True)
         self.experiment = self.configs_dict[EXPERIMENT]
         self.higher_results_are_better = self.configs_dict[HIGHER_RESULTS_ARE_BETTER]
         self.log_every = self.configs_dict[LOG_EVERY]
         self.device = self.configs_dict[DEVICE]
-        self.num_dataloader_workers = self.configs_dict[NUM_DATALOADER_WORKERS]
-        self.pin_memory = self.configs_dict[PIN_MEMORY]
-        self.model = self.configs_dict[MODEL]
         self.dataset_getter = self.configs_dict[DATASET_GETTER]
         self.num_samples = self.configs_dict[NUM_SAMPLES]
 
@@ -53,12 +53,10 @@ class RandomSearch:
             cfg.update({DATASET: self.dataset_name,
                         DATASET_GETTER: self.dataset_getter,
                         DATA_LOADER: self.data_loader_class,
+                        DATA_LOADER_ARGS: self.data_loader_args,
                         DATASET_CLASS: self.dataset_class,
                         DATA_ROOT: self.data_root,
-                        MODEL: self.model,
                         DEVICE: self.device,
-                        NUM_DATALOADER_WORKERS: self.num_dataloader_workers,
-                        PIN_MEMORY: self.pin_memory,
                         EXPERIMENT: self.experiment,
                         HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
                         LOG_EVERY: self.log_every})
@@ -123,7 +121,7 @@ class RandomSearch:
         Returns:
              the name of the root folder as made of MODEL-NAME_DATASET-NAME
         """
-        return f"{self.model.split('.')[-1]}_{self.dataset_name}"
+        return f"{self._exp_name}_{self.dataset_name}"
 
     @property
     def num_configs(self) -> int:

@@ -1,14 +1,18 @@
-model: pydgn.model.dgn.toy_dgn.ToyDGN
+exp_name: semi_supervised_grid_search_toy
 experiment: pydgn.experiment.semi_supervised_task.SemiSupervisedTask
 higher_results_are_better: True
 log_every: 1
 dataset_getter: pydgn.data.provider.DataProvider
-data_loader: torch_geometric.loader.DataLoader
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 0  # > 0 only with --debug option and GPU device
+    pin_memory: False  # True only with --debug option and GPU device
 device: cpu
-num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-pin_memory: False  # True only with --debug option and GPU device
+seed: 42
 grid:
-  unsupervised_config:
+  unsupervised_config:  # unsupervised config to produce node/graph embeddings
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: True
     batch_size:
       - 32
@@ -33,7 +37,7 @@ grid:
     scorer:
       - null
     predictor:
-      - [ A predictor of your choice ]
+      - pydgn.model.predictor.GraphPredictor.LinearGraphPredictor
     wrapper:
       - pydgn.training.engine.TrainingEngine
     gradient_clipping:
@@ -42,7 +46,8 @@ grid:
       - null
     shuffle:
       - True
-  supervised_config:
+  supervised_config:  # supervised config to classify/predict values associated with unsup. node/graph embeddings
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: True
     batch_size:
       - 32
@@ -63,11 +68,11 @@ grid:
     scheduler:
       - null
     loss:
-      - pydgn.training.callback.loss.MulticlassClassificationLoss
+      - pydgn.training.callback.metric.MulticlassClassification
     scorer:
-      - pydgn.training.callback.score.MulticlassAccuracyScore
+      - pydgn.training.callback.metric.MulticlassAccuracy
     predictor:
-      - pydgn.model.predictor.GraphPredictor.LinearGraphPredictor
+      - null
     wrapper:
       - pydgn.training.engine.TrainingEngine
     gradient_clipping:

@@ -1,16 +1,19 @@
-model: pydgn.model.dgn.toy_dgn.ToyDGN
+exp_name: supervised_random_search_toy
 experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 log_every: 1
 dataset_getter: pydgn.data.provider.DataProvider
-data_loader: torch_geometric.loader.DataLoader
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 0  # > 0 only with --debug option and GPU device
+    pin_memory: False  # True only with --debug option and GPU device
 device: cpu
-num_dataloader_workers: 0  # > 0 only with --debug option and GPU device
-pin_memory: False  # True only with --debug option and GPU device
-num_samples: 3
 seed: 42
+num_samples: 7  # number of random searches to try
 random:
   supervised_config:
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: True
     batch_size:
       sample_method: pydgn.evaluation.util.choice

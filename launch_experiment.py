@@ -83,7 +83,7 @@ def evaluation(args):
     experiment = search.experiment
     experiment_class = s2c(experiment)
     use_cuda = CUDA in search.device
-    exp_path = os.path.join(result_folder, f"{search.exp_name}_{experiment.split('.')[-1]}")
+    exp_path = os.path.join(result_folder, f"{search.exp_name}")
 
     # Ensure a generic "cuda" device is set when using more than 1 GPU
     # We will choose the GPU with least ratio of memory usage
@@ -144,10 +144,6 @@ def get_args():
     parser.add_argument(MAX_CPUS_CLI_ARGUMENT, dest=MAX_CPUS, default=1, type=int)
     parser.add_argument(MAX_GPUS_CLI_ARGUMENT, dest=MAX_GPUS, default=1, type=int)
     parser.add_argument(MODEL_CLI_ARGUMENT, dest=MODEL, default=None)
-    parser.add_argument(NUM_DATALOADER_WORKERS_CLI_ARGUMENT,
-                        dest=NUM_DATALOADER_WORKERS, default=None, type=int)
-    parser.add_argument(PIN_MEMORY_CLI_ARGUMENT, dest=PIN_MEMORY, action="store_true",
-                        default=None)
     parser.add_argument(RESULT_FOLDER_CLI_ARGUMENT, dest=RESULT_FOLDER, default=None)
     parser.add_argument(SPLITS_FOLDER_CLI_ARGUMENT, dest=SPLITS_FOLDER, default=None)
     return parser.parse_args()

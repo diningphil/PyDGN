@@ -148,7 +148,7 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
 class TUDatasetInterface(TUDataset):
     r"""
     Class that wraps the :class:`torch_geometric.datasets.TUDataset` class to provide aliases of some fields.
-    It implements the interface ``DatasetInterface`` but does not extend directly to avoid clases of ``__init__`` methods
+    It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
     def __init__(self, root, name, transform=None, pre_transform=None, pre_filter=None, **kwargs):
         self.name = name
@@ -182,13 +182,13 @@ class TUDatasetInterface(TUDataset):
 class PlanetoidDatasetInterface(Planetoid):
     r"""
     Class that wraps the :class:`torch_geometric.datasets.Planetoid` class to provide aliases of some fields.
-    It implements the interface ``DatasetInterface`` but does not extend directly to avoid clases of ``__init__`` methods
+    It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
     def __init__(self, root, name, transform=None, pre_transform=None, pre_filter=None, **kwargs):
         self.name = name
         # Do not call DatasetInterface __init__ method in this case, because otherwise it will break
         super().__init__(root=root, name=name,
-                         transform=transform, pre_transform=pre_transform, pre_filter=pre_filter,
+                         transform=transform, pre_transform=pre_transform,
                          **kwargs)
     @property
     def dim_node_features(self):
@@ -215,7 +215,7 @@ class PlanetoidDatasetInterface(Planetoid):
 class OGBGDatasetInterface(PygGraphPropPredDataset):
     r"""
     Class that wraps the :class:`ogb.graphproppred.PygGraphPropPredDataset` class to provide aliases of some fields.
-    It implements the interface ``DatasetInterface`` but does not extend directly to avoid clases of ``__init__`` methods
+    It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
     def __init__(self, root, name, transform=None,
                  pre_transform=None, pre_filter=None, meta_dict=None):
