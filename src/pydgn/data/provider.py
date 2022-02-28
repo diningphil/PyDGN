@@ -151,15 +151,15 @@ class DataProvider:
 
         assert self.exp_seed is not None, "DataLoader's seed has not been specified! Is this a bug?"
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
+        kwargs.update(self.data_loader_args)
 
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            print(self.data_loader_args)
             dataloader = self.data_loader_class(dataset, sampler=sampler,
-                                                **self.data_loader_args)
+                                                **kwargs)
         else:
             dataloader = self.data_loader_class(dataset, shuffle=False,
-                                                **self.data_loader_args)
+                                                **kwargs)
 
         return dataloader
 
@@ -377,10 +377,11 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
 
         assert self.exp_seed is not None, 'DataLoader seed has not been specified! Is this a bug?'
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
+        kwargs.update(self.data_loader_args)
 
         # Single graph dataset, shuffle does not make sense (unless we know how to do mini-batch training with nodes)
         dataloader = self.data_loader_class(batched_edge_dataset, batch_size=1, shuffle=False,
-                                            **self.data_loader_args)
+                                            **kwargs)
 
         return dataloader
 
