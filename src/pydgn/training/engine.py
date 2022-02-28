@@ -573,7 +573,7 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
     def _num_targets(self, targets):
         assert isinstance(targets, list), "Expecting a list of (_, pos_edges, neg_edges)"
         # positive links + negative links provided separately
-        num_targets = targets[0][1].shape[1] + targets[0][2].shape[1]
+        num_targets = targets[1].shape[1] + targets[2].shape[1]
         # Just a single graph for link prediction
         return num_targets
 

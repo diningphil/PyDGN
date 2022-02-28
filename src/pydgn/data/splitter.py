@@ -464,7 +464,7 @@ class LinkPredictionSingleGraphSplitter(Splitter):
             targets (np.ndarray]): targets used for stratification. Default is ``None``
         """
         random.seed(self.seed)
-        assert len(dataset) == 1, "LinkPredictionSingleGraphSplitter works on single graph dataset only!"
+        assert len(dataset) == 1, f"LinkPredictionSingleGraphSplitter works on single graph dataset only! Here we have {len(dataset)}"
         edge_index = dataset.data.edge_index
         edge_attr = dataset.data.edge_attr
         num_nodes = dataset.data.x.shape[0]

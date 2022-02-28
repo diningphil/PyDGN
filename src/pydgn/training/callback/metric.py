@@ -342,7 +342,7 @@ class Classification(Metric):
                 *outputs: List[torch.Tensor],
                 batch_loss_extra: dict=None) -> dict:
         outputs = outputs[0]
-        metric = self.metric(outputs, targets)
+        metric = self.metric(outputs.squeeze(dim=1), targets.squeeze(dim=1))
         return metric
 
 
@@ -419,7 +419,7 @@ class DotProductLink(Metric):
                 *outputs: List[torch.Tensor],
                 batch_loss_extra: dict=None) -> dict:
         node_embs = outputs[1]
-        _, pos_edges, neg_edges = targets[0]
+        _, pos_edges, neg_edges = targets
 
         loss_edge_index = torch.cat((pos_edges, neg_edges), dim=1)
         loss_target = torch.cat((torch.ones(pos_edges.shape[1]),
@@ -429,8 +429,30 @@ class DotProductLink(Metric):
         x_j = torch.index_select(node_embs, 0, loss_edge_index[0])
         x_i = torch.index_select(node_embs, 0, loss_edge_index[1])
         link_logits = torch.einsum("ef,ef->e", x_i, x_j)
-        loss = torch.nn.functional.binary_cross_entropy_with_logits(link_logits, loss_target)
+        loss = torch.nn.functional.binary_cross_entropy_with_logits(link_logits, loss_target.to(link_logits.device))
         return loss
+
+
+class MulticlassAccuracy(Metric):
+    """
+    Implements multiclass classification accuracy.
+    """
+
+    @property
+    def name(self) -> str:
+        return 'Multiclass Accuracy'
+
+    @staticmethod
+    def _get_correct(output):
+        return torch.argmax(output, dim=1)
+
+    def forward(self,
+                targets: torch.Tensor,
+                *outputs: List[torch.Tensor],
+                batch_loss_extra: dict=None) -> dict:
+        pred = outputs[0]
+        correct = self._get_correct(pred)
+        return 100. * (correct == targets).sum().float() / targets.size(0)
 
 
 class ToyMetric(Metric):
@@ -463,23 +485,14 @@ class ToyMetric(Metric):
         return 100. * torch.ones(1)
 
 
-class MulticlassAccuracy(Metric):
-    """
-    Implements multiclass classification accuracy.
-    """
+class ToyUnsupervisedMetric(Metric):
 
     @property
     def name(self) -> str:
-        return 'Multiclass Accuracy'
-
-    @staticmethod
-    def _get_correct(output):
-        return torch.argmax(output, dim=1)
+        return 'Toy Unsupervised Metric'
 
     def forward(self,
                 targets: torch.Tensor,
                 *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
-        pred = outputs[0]
-        correct = self._get_correct(pred)
-        return 100. * (correct == targets).sum().float() / targets.size(0)
+                batch_loss_extra: dict = None) -> dict:
+        return (outputs[0]*0.).mean()

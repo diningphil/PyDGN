@@ -38,7 +38,7 @@ class SemiSupervisedTask(Experiment):
         self.exp_path = os.path.join(self.root_exp_path, f'unsupervised_training')
 
         # Istantiate the Model
-        model = self.create_unsupervised_model(dim_node_features, dim_edge_features, None)
+        model = self.create_unsupervised_model(dim_node_features, dim_edge_features, dim_target)
 
         # Istantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
         unsupervised_training_wrapper = self.create_unsupervised_wrapper(model)
@@ -70,8 +70,8 @@ class SemiSupervisedTask(Experiment):
         self.exp_path = os.path.join(self.root_exp_path, f'supervised_training')
 
         # Instantiate the Model
-        model = self.create_supervised_predictor(dim_node_features=embedding_size, dim_edge_features=0,
-                                                 dim_target=dim_target)
+        model = self.create_supervised_model(dim_node_features=embedding_size, dim_edge_features=0,
+                                             dim_target=dim_target)
 
         # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
         supervised_training_wrapper = self.create_supervised_wrapper(model)
@@ -110,7 +110,7 @@ class SemiSupervisedTask(Experiment):
         self.exp_path = os.path.join(self.root_exp_path, f'unsupervised_training')
 
         # Instantiate the Model
-        model = self.create_unsupervised_model(dim_node_features, dim_edge_features, None)
+        model = self.create_unsupervised_model(dim_node_features, dim_edge_features, dim_target)
 
         # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
         unsupervised_training_wrapper = self.create_unsupervised_wrapper(model)
@@ -143,8 +143,8 @@ class SemiSupervisedTask(Experiment):
         self.exp_path = os.path.join(self.root_exp_path, f'supervised_training')
 
         # Instantiate the Model
-        model = self.create_supervised_predictor(dim_node_features=embedding_size, dim_edge_features=0,
-                                                 dim_target=dim_target)
+        model = self.create_supervised_model(dim_node_features=embedding_size, dim_edge_features=0,
+                                             dim_target=dim_target)
 
         # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
         supervised_training_wrapper = self.create_supervised_wrapper(model)

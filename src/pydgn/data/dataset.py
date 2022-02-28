@@ -209,6 +209,8 @@ class PlanetoidDatasetInterface(Planetoid):
         super().process()
 
     def __len__(self) -> int:
+        if isinstance(self.data, Data):
+            return 1
         return len(self.data)
 
 

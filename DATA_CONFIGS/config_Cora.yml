@@ -18,4 +18,5 @@ dataset:
   class_name: pydgn.data.dataset.PlanetoidDatasetInterface
   args:
     root: DATA/
-    name: pubmed
+    name: cora
+    split: full  # we will split the full graph according to the edges, not according to classes
