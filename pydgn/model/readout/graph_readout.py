@@ -5,7 +5,7 @@ from torch_geometric.nn import global_add_pool
 from pydgn.model.model import ReadoutInterface
 
 
-class LinearGraphPredictor(ReadoutInterface):
+class LinearGraphReadout(ReadoutInterface):
     """
     Class that implements a simple readout mapping for graph prediction
     """

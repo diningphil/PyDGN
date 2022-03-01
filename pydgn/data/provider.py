@@ -35,7 +35,6 @@ class DataProvider:
 
     Args:
         data_root (str): the path of the root folder in which data is stored
-        splits_root (str): the path of the splits folder in which data splits are stored
         splits_filepath (str): the filepath of the splits. with additional metadata
         dataset_class (Callable[...,:class:`pydgn.data.dataset.DatasetInterface`]): the class of the dataset
         data_loader_class (Union[Callable[...,:class:`torch.utils.data.DataLoader`],Callable[...,:class:`torch_geometric.loader.DataLoader`]]): the class of the data loader to use
@@ -47,7 +46,6 @@ class DataProvider:
     """
     def __init__(self,
                  data_root: str,
-                 splits_root: str,
                  splits_filepath: str,
                  dataset_class: Callable[...,pydgn.data.dataset.DatasetInterface],
                  dataset_name: str,
@@ -72,7 +70,6 @@ class DataProvider:
         self.outer_k = None
         self.inner_k = None
 
-        self.splits_root = splits_root
         self.splits_filepath = splits_filepath
         self.splitter = None
         self.dataset = None

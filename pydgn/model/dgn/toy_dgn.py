@@ -12,8 +12,8 @@ class ToyDGN(ModelInterface):
     """
     A toy Deep Graph Network used to test the library
     """
-    def __init__(self, dim_node_features, dim_edge_features, dim_target, predictor_class, config):
-        super().__init__(dim_node_features, dim_edge_features, dim_target, predictor_class, config)
+    def __init__(self, dim_node_features, dim_edge_features, dim_target, readout_class, config):
+        super().__init__(dim_node_features, dim_edge_features, dim_target, readout_class, config)
 
         num_layers = config['num_layers']
         dim_embedding = config['dim_embedding']
@@ -24,7 +24,7 @@ class ToyDGN(ModelInterface):
         if self.aggregation == 'max':
             self.fc_max = nn.Linear(dim_embedding, dim_embedding)
 
-        self.predictor = predictor_class(dim_node_features=dim_embedding * num_layers,
+        self.readout = readout_class(dim_node_features=dim_embedding * num_layers,
                                          dim_edge_features=dim_edge_features,
                                          dim_target=dim_target, config=config)
 
@@ -52,6 +52,6 @@ class ToyDGN(ModelInterface):
         node_embs = torch.cat(x_all, dim=1)
 
         if not self.is_link_prediction:
-           return self.predictor(node_embs, batch)
+           return self.readout(node_embs, batch)
         else:
-            return self.predictor(node_embs, batch, **dict(edge_index=edge_index))
+            return self.readout(node_embs, batch, **dict(edge_index=edge_index))

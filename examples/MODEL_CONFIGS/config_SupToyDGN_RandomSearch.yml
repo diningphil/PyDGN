@@ -54,10 +54,10 @@ random:
     loss: pydgn.training.callback.metric.MulticlassClassification
     scorer:
       class_name: pydgn.training.callback.metric.MulticlassAccuracy
-    predictor: pydgn.model.predictor.graph_predictor.LinearGraphPredictor
-    wrapper: pydgn.training.engine.TrainingEngine
+    readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+    engine: pydgn.training.engine.TrainingEngine
     l2: 0.
-    gradient_clipping: null
+    gradient_clipper: null
     dropout: 0.
     early_stopper:
       class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper

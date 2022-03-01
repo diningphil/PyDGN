@@ -34,7 +34,7 @@
 
 
 ### Fixed
-- Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the predictor
+- Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the readout
 - Feature request: loss, score, and additiveloss now take a parameter `use_nodes_batch_size` to force computation w.r.t. input nodes rather than target dimension (the default)
 
 ## [0.7.1] 
@@ -92,7 +92,7 @@
 
 - Changed name from `transforms` to `transform` for data preprocessing config files (backward compatible)
 - Minor fix when handling edge data with incremental models like E-CGMM
-- Fix in graph predictor: forgot to pass arguments to super when inheriting from `GraphPredictor`
+- Fix in graph readout: forgot to pass arguments to super when inheriting from `GraphReadout`
 
 ## [0.5.0] - Pytorch 1.8.1, random search, and many fixes
 

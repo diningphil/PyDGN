@@ -11,7 +11,7 @@ from pydgn.training.callback.metric import Metric
 from pydgn.training.callback.optimizer import Optimizer
 from pydgn.training.callback.plotter import Plotter
 from pydgn.training.callback.scheduler import Scheduler
-from pydgn.training.callback.gradient_clipping import GradientClipper
+from pydgn.training.callback.gradient_clipper import GradientClipper
 from pydgn.training.event.dispatcher import EventDispatcher
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State
@@ -51,7 +51,7 @@ class TrainingEngine(EventDispatcher):
         scorer (:class:`~pydgn.training.callback.metric.Metric`): the score to be used
         scheduler (:class:`~pydgn.training.callback.scheduler.Scheduler`): the scheduler to be used Default is ``None``.
         early_stopper (:class:`~pydgn.training.callback.early_stopping.EarlyStopper`): the early stopper to be used. Default is ``None``.
-        gradient_clipping (:class:`~pydgn.training.callback.gradient_clipping.GradientClipper`): the gradient clipper to be used. Default is ``None``.
+        gradient_clipper (:class:`~pydgn.training.callback.gradient_clipper.GradientClipper`): the gradient clipper to be used. Default is ``None``.
         device (str): the device on which to train. Default is ``cpu``.
         plotter (:class:`~pydgn.training.callback.plotter.Plotter`): the plotter to be used. Default is ``None``.
         exp_path (str): the path of the experiment folder. Default is ``None`` but it is always instantiated.
@@ -66,7 +66,7 @@ class TrainingEngine(EventDispatcher):
                  scorer: Metric,
                  scheduler: Scheduler=None,
                  early_stopper: EarlyStopper=None,
-                 gradient_clipping: GradientClipper=None,
+                 gradient_clipper: GradientClipper=None,
                  device: str='cpu',
                  plotter: Plotter=None,
                  exp_path: str=None,
@@ -81,7 +81,7 @@ class TrainingEngine(EventDispatcher):
         self.score_fun = scorer
         self.scheduler = scheduler
         self.early_stopper = early_stopper
-        self.gradient_clipping = gradient_clipping
+        self.gradient_clipper = gradient_clipper
         self.device = device
         self.plotter = plotter
         self.exp_path = exp_path
@@ -94,7 +94,7 @@ class TrainingEngine(EventDispatcher):
         # Now register the callbacks (IN THIS ORDER, WHICH IS KNOWN TO THE USER)
         # Decorate with a profiler
         self.callbacks = [self.profiler(c) for c in [self.loss_fun, self.score_fun,
-                                                     self.gradient_clipping, self.optimizer,
+                                                     self.gradient_clipper, self.optimizer,
                                                      self.early_stopper, self.scheduler, self.plotter] if
                           c is not None]  # filter None callbacks
 

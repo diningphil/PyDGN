@@ -3,7 +3,7 @@ import torch.nn as nn
 from pydgn.model.model import ReadoutInterface
 
 
-class LinearNodePredictor(ReadoutInterface):
+class LinearNodeReadout(ReadoutInterface):
     """
     Class that implements a simple readout mapping for node prediction
     """

@@ -55,7 +55,7 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.early_stopping">pydgn.training.callback.early_stopping module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.engine_callback">pydgn.training.callback.engine_callback module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.gradient_clipping">pydgn.training.callback.gradient_clipping module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.gradient_clipper">pydgn.training.callback.gradient_clipper module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#pydgn-training-callback-metric-module">pydgn.training.callback.metric module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.optimizer">pydgn.training.callback.optimizer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.plotter">pydgn.training.callback.plotter module</a></li>
@@ -239,19 +239,19 @@ in``state.id_batch``</p>
 </dd></dl>
 
 </section>
-<section id="module-pydgn.training.callback.gradient_clipping">
-<span id="pydgn-training-callback-gradient-clipping-module"></span><h2>pydgn.training.callback.gradient_clipping module<a class="headerlink" href="#module-pydgn.training.callback.gradient_clipping" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.training.callback.gradient_clipper">
+<span id="pydgn-training-callback-gradient-clipping-module"></span><h2>pydgn.training.callback.gradient_clipper module<a class="headerlink" href="#module-pydgn.training.callback.gradient_clipper" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipping.GradientClipping">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipping.</span></span><span class="sig-name descname"><span class="pre">GradientClipping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradient_clipping_class_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipping.GradientClipping" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.GradientClipping">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipper.</span></span><span class="sig-name descname"><span class="pre">GradientClipping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradient_clipper_class_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.GradientClipping" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
 <dl class="simple">
 <dt>GradientClipping is the main event handler for gradient clippers. Just pass a PyTorch scheduler together with its</dt><dd><p>arguments in the configuration file.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipping.GradientClipping.on_backward">
-<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipping.GradientClipping.on_backward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.GradientClipping.on_backward">
+<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.GradientClipping.on_backward" title="Permalink to this definition"></a></dt>
 <dd><p>Clip the gradient using the gradient clipper
 :param state: the State object shared during training</p>
 </dd></dl>
@@ -259,12 +259,12 @@ in``state.id_batch``</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipping.StandardGradientClipper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipping.</span></span><span class="sig-name descname"><span class="pre">StandardGradientClipper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipping.StandardGradientClipper" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.StandardGradientClipper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipper.</span></span><span class="sig-name descname"><span class="pre">StandardGradientClipper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.StandardGradientClipper" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipping.StandardGradientClipper.clip_gradients">
-<span class="sig-name descname"><span class="pre">clip_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipping.StandardGradientClipper.clip_gradients" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.StandardGradientClipper.clip_gradients">
+<span class="sig-name descname"><span class="pre">clip_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.StandardGradientClipper.clip_gradients" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

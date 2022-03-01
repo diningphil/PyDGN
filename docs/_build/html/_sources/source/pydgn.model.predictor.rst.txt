@@ -1,29 +1,29 @@
-pydgn.model.predictor package
+pydgn.model.readout package
 =============================
 
 Submodules
 ----------
 
-pydgn.model.predictor.graph\_predictor module
+pydgn.model.readout.graph\_readout module
 ---------------------------------------------
 
-.. automodule:: pydgn.model.predictor.graph_predictor
+.. automodule:: pydgn.model.readout.graph_readout
    :members:
    :undoc-members:
    :show-inheritance:
 
-pydgn.model.predictor.link\_predictor module
+pydgn.model.readout.link\_readout module
 --------------------------------------------
 
-.. automodule:: pydgn.model.predictor.link_predictor
+.. automodule:: pydgn.model.readout.link_readout
    :members:
    :undoc-members:
    :show-inheritance:
 
-pydgn.model.predictor.node\_predictor module
+pydgn.model.readout.node\_readout module
 --------------------------------------------
 
-.. automodule:: pydgn.model.predictor.node_predictor
+.. automodule:: pydgn.model.readout.node_readout
    :members:
    :undoc-members:
    :show-inheritance:
@@ -31,7 +31,7 @@ pydgn.model.predictor.node\_predictor module
 Module contents
 ---------------
 
-.. automodule:: pydgn.model.predictor
+.. automodule:: pydgn.model.readout
    :members:
    :undoc-members:
    :show-inheritance:

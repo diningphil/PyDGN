@@ -38,11 +38,11 @@ grid:
       - pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy loss
     scorer:
       - pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy score
-    predictor:
-      - pydgn.model.predictor.graph_predictor.LinearGraphPredictor
-    wrapper:
+    readout:
+      - pydgn.model.readout.graph_readout.LinearGraphReadout
+    engine:
       - pydgn.training.engine.TrainingEngine
-    gradient_clipping:
+    gradient_clipper:
       - null
     early_stopper:
       - null
@@ -69,11 +69,11 @@ grid:
       - pydgn.training.callback.metric.MulticlassClassification
     scorer:
       - pydgn.training.callback.metric.MulticlassAccuracy
-    predictor:
+    readout:
       - null
-    wrapper:
+    engine:
       - pydgn.training.engine.TrainingEngine
-    gradient_clipping:
+    gradient_clipper:
       - null
     early_stopper:
       - class_name:

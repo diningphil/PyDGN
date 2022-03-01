@@ -13,20 +13,20 @@ class ModelInterface(torch.nn.Module):
         dim_node_features (int): dimension of node features (according to the :class:`~pydgn.data.dataset.DatasetInterface` property)
         dim_edge_features (int): dimension of edge features (according to the :class:`~pydgn.data.dataset.DatasetInterface` property)
         dim_target (int): dimension of the target (according to the :class:`~pydgn.data.dataset.DatasetInterface` property)
-        predictor_class (Callable[...,:class:`torch.nn.Module`]): class of the module implementing the readout. This is optional, but useful to put different readouts to try in the config file
+        readout_class (Callable[...,:class:`torch.nn.Module`]): class of the module implementing the readout. This is optional, but useful to put different readouts to try in the config file
         config (dict): config dictionary containing all the necessary hyper-parameters plus additional information (if needed)
     """
     def __init__(self,
                  dim_node_features: int,
                  dim_edge_features: int,
                  dim_target: int,
-                 predictor_class: Callable[...,torch.nn.Module],
+                 readout_class: Callable[...,torch.nn.Module],
                  config: dict):
         super().__init__()
         self.dim_node_features = dim_node_features
         self.dim_edge_features = dim_edge_features
         self.dim_target = dim_target
-        self.predictor_class = predictor_class
+        self.readout_class = readout_class
         self.config = config
 
     def forward(self, data: Batch) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:

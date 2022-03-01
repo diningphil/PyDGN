@@ -1,66 +1,22 @@
 from copy import deepcopy
 from typing import Callable, List
 
+from pydgn.evaluation.grid import Grid
+
 from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
 from pydgn.static import *
 from pydgn.evaluation.util import return_class_and_args
 
 
-class RandomSearch:
+class RandomSearch(Grid):
     r"""
     Class that implements random-search. It computes all possible configurations starting from a suitable config file.
 
     Args:
-        data_root (str): the root directory in which the dataset is stored
-        dataset_class (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]): class of the dataset to use
-        dataset_name (str): the name of the dataset
         configs_dict (dict): the configuration dictionary specifying the different configurations to try
     """
-    def __init__(self,
-                 data_root: str,
-                 dataset_class: Callable[...,DatasetInterface],
-                 dataset_name: str,
-                 **configs_dict: dict):
-
-        self.configs_dict = configs_dict
-        self.seed = self.configs_dict.get(SEED, None)
-        self._exp_name = self.configs_dict.get(EXP_NAME)
-        self.data_root = data_root
-        self.dataset_class = dataset_class
-        self.dataset_name = dataset_name
-        self.data_loader_class, self.data_loader_args = return_class_and_args(self.configs_dict, DATA_LOADER,
-                                                                              return_class_name=True)
-        self.experiment = self.configs_dict[EXPERIMENT]
-        self.higher_results_are_better = self.configs_dict[HIGHER_RESULTS_ARE_BETTER]
-        self.log_every = self.configs_dict[LOG_EVERY]
-        self.device = self.configs_dict[DEVICE]
-        self.dataset_getter = self.configs_dict[DATASET_GETTER]
-        self.num_samples = self.configs_dict[NUM_SAMPLES]
-
-        # Generation has to be moved to first usage because of reproducibility (seed is set inside RiskAssesser)
-        self.hparams = None
-
-    def _gen_configs(self) -> List[dict]:
-        r"""
-        Takes a dictionary of key:list pairs and computes all possible combinations.
-
-        Returns:
-            A list of al possible configurations in the form of dictionaries
-        """
-        configs = [cfg for cfg in self._gen_helper(self.configs_dict[RANDOM_SEARCH])]
-        for cfg in configs:
-            cfg.update({DATASET: self.dataset_name,
-                        DATASET_GETTER: self.dataset_getter,
-                        DATA_LOADER: self.data_loader_class,
-                        DATA_LOADER_ARGS: self.data_loader_args,
-                        DATASET_CLASS: self.dataset_class,
-                        DATA_ROOT: self.data_root,
-                        DEVICE: self.device,
-                        EXPERIMENT: self.experiment,
-                        HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
-                        LOG_EVERY: self.log_every})
-        return configs
+    __search_type__ = RANDOM_SEARCH
 
     def _gen_helper(self, cfgs_dict):
         keys = cfgs_dict.keys()
@@ -112,23 +68,3 @@ class RandomSearch:
         if self.hparams is None:
             self.hparams = self._gen_configs()
         return self.hparams[index]
-
-    @property
-    def exp_name(self) -> str:
-        r"""
-        Computes the name of the root folder
-
-        Returns:
-             the name of the root folder as made of MODEL-NAME_DATASET-NAME
-        """
-        return f"{self._exp_name}_{self.dataset_name}"
-
-    @property
-    def num_configs(self) -> int:
-        r"""
-        Computes the number of configurations to try during model selection
-
-        Returns:
-             the number of configurations
-        """
-        return len(self)

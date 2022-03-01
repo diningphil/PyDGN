@@ -4,7 +4,7 @@ from torch_geometric.utils import to_dense_adj, to_dense_batch
 from pydgn.model.model import ReadoutInterface
 
 
-class DotProductLinkPredictor(ReadoutInterface):
+class DotProductLinkReadout(ReadoutInterface):
     """
     Class that implements a simple readout mapping for link prediction via dot product
     """

@@ -8,7 +8,7 @@ Subpackages
    :maxdepth: 4
 
    pydgn.model.dgn
-   pydgn.model.predictor
+   pydgn.model.readout
 
 Submodules
 ----------

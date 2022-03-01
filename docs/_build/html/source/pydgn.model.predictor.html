@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pydgn.model.predictor package &mdash; PyDGN 1.0.0 documentation</title>
+  <title>pydgn.model.readout package &mdash; PyDGN 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -51,12 +51,12 @@
 <li class="toctree-l1 current"><a class="reference internal" href="pydgn.model.html">pydgn.model package</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="pydgn.model.html#subpackages">Subpackages</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="pydgn.model.dgn.html">pydgn.model.dgn package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">pydgn.model.predictor package</a><ul>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">pydgn.model.readout package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.predictor.graph_predictor">pydgn.model.predictor.graph_predictor module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.predictor.link_predictor">pydgn.model.predictor.link_predictor module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.predictor.node_predictor">pydgn.model.predictor.node_predictor module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.predictor">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.readout.graph_readout">pydgn.model.readout.graph_readout module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.readout.link_readout">pydgn.model.readout.link_readout module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.readout.node_readout">pydgn.model.readout.node_readout module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.readout">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -84,9 +84,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="pydgn.model.html">pydgn.model package</a> &raquo;</li>
-      <li>pydgn.model.predictor package</li>
+      <li>pydgn.model.readout package</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../_sources/source/pydgn.model.predictor.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/source/pydgn.model.readout.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -94,21 +94,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pydgn-model-predictor-package">
-<h1>pydgn.model.predictor package<a class="headerlink" href="#pydgn-model-predictor-package" title="Permalink to this headline"></a></h1>
+  <section id="pydgn-model-readout-package">
+<h1>pydgn.model.readout package<a class="headerlink" href="#pydgn-model-readout-package" title="Permalink to this headline"></a></h1>
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
 </section>
-<section id="module-pydgn.model.predictor.graph_predictor">
-<span id="pydgn-model-predictor-graph-predictor-module"></span><h2>pydgn.model.predictor.graph_predictor module<a class="headerlink" href="#module-pydgn.model.predictor.graph_predictor" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.model.readout.graph_readout">
+<span id="pydgn-model-readout-graph-readout-module"></span><h2>pydgn.model.readout.graph_readout module<a class="headerlink" href="#module-pydgn.model.readout.graph_readout" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.predictor.graph_predictor.LinearGraphPredictor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.predictor.graph_predictor.</span></span><span class="sig-name descname"><span class="pre">LinearGraphPredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.graph_predictor.LinearGraphPredictor" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.graph_readout.LinearGraphReadout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.graph_readout.</span></span><span class="sig-name descname"><span class="pre">LinearGraphReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.graph_readout.LinearGraphReadout" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ReadoutInterface" title="pydgn.model.model.ReadoutInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.model.ReadoutInterface</span></code></a></p>
 <p>Class that implements a simple readout mapping for graph prediction</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.predictor.graph_predictor.LinearGraphPredictor.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.graph_predictor.LinearGraphPredictor.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.graph_readout.LinearGraphReadout.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.graph_readout.LinearGraphReadout.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a forward pass over a batch of graphs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -125,23 +125,23 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.predictor.graph_predictor.LinearGraphPredictor.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.predictor.graph_predictor.LinearGraphPredictor.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.graph_readout.LinearGraphReadout.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.graph_readout.LinearGraphReadout.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-pydgn.model.predictor.link_predictor">
-<span id="pydgn-model-predictor-link-predictor-module"></span><h2>pydgn.model.predictor.link_predictor module<a class="headerlink" href="#module-pydgn.model.predictor.link_predictor" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.model.readout.link_readout">
+<span id="pydgn-model-readout-link-readout-module"></span><h2>pydgn.model.readout.link_readout module<a class="headerlink" href="#module-pydgn.model.readout.link_readout" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.predictor.link_predictor.DotProductLinkPredictor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.predictor.link_predictor.</span></span><span class="sig-name descname"><span class="pre">DotProductLinkPredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.link_predictor.DotProductLinkPredictor" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.link_readout.DotProductLinkReadout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.link_readout.</span></span><span class="sig-name descname"><span class="pre">DotProductLinkReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.link_readout.DotProductLinkReadout" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ReadoutInterface" title="pydgn.model.model.ReadoutInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.model.ReadoutInterface</span></code></a></p>
 <p>Class that implements a simple readout mapping for link prediction via dot product</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.predictor.link_predictor.DotProductLinkPredictor.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.link_predictor.DotProductLinkPredictor.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.link_readout.DotProductLinkReadout.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.link_readout.DotProductLinkReadout.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a forward pass over a batch of graphs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -158,22 +158,22 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.predictor.link_predictor.DotProductLinkPredictor.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.predictor.link_predictor.DotProductLinkPredictor.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.link_readout.DotProductLinkReadout.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.link_readout.DotProductLinkReadout.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-pydgn.model.predictor.node_predictor">
-<span id="pydgn-model-predictor-node-predictor-module"></span><h2>pydgn.model.predictor.node_predictor module<a class="headerlink" href="#module-pydgn.model.predictor.node_predictor" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.model.readout.node_readout">
+<span id="pydgn-model-readout-node-readout-module"></span><h2>pydgn.model.readout.node_readout module<a class="headerlink" href="#module-pydgn.model.readout.node_readout" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.IdentityNodePredictor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.predictor.node_predictor.</span></span><span class="sig-name descname"><span class="pre">IdentityNodePredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.node_predictor.IdentityNodePredictor" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pydgn.model.predictor.node_predictor.NodePredictor" title="pydgn.model.predictor.node_predictor.NodePredictor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.predictor.node_predictor.NodePredictor</span></code></a></p>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.IdentityNodeReadout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.node_readout.</span></span><span class="sig-name descname"><span class="pre">IdentityNodeReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.IdentityNodeReadout" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.model.readout.node_readout.NodeReadout" title="pydgn.model.readout.node_readout.NodeReadout"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.readout.node_readout.NodeReadout</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.IdentityNodePredictor.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.node_predictor.IdentityNodePredictor.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.IdentityNodeReadout.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.IdentityNodeReadout.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -186,19 +186,19 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.IdentityNodePredictor.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.predictor.node_predictor.IdentityNodePredictor.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.IdentityNodeReadout.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.node_readout.IdentityNodeReadout.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.LinearNodePredictor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.predictor.node_predictor.</span></span><span class="sig-name descname"><span class="pre">LinearNodePredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.node_predictor.LinearNodePredictor" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pydgn.model.predictor.node_predictor.NodePredictor" title="pydgn.model.predictor.node_predictor.NodePredictor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.predictor.node_predictor.NodePredictor</span></code></a></p>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.LinearNodeReadout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.node_readout.</span></span><span class="sig-name descname"><span class="pre">LinearNodeReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.model.readout.node_readout.NodeReadout" title="pydgn.model.readout.node_readout.NodeReadout"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.readout.node_readout.NodeReadout</span></code></a></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.LinearNodePredictor.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.node_predictor.LinearNodePredictor.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.LinearNodeReadout.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -211,19 +211,19 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.LinearNodePredictor.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.predictor.node_predictor.LinearNodePredictor.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.LinearNodeReadout.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.NodePredictor">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.predictor.node_predictor.</span></span><span class="sig-name descname"><span class="pre">NodePredictor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.node_predictor.NodePredictor" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.NodeReadout">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.node_readout.</span></span><span class="sig-name descname"><span class="pre">NodeReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.NodeReadout" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.NodePredictor.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.predictor.node_predictor.NodePredictor.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.NodeReadout.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.NodeReadout.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Defines the computation performed at every call.</p>
 <p>Should be overridden by all subclasses.</p>
 <div class="admonition note">
@@ -236,15 +236,15 @@ registered hooks while the latter silently ignores them.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.predictor.node_predictor.NodePredictor.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.predictor.node_predictor.NodePredictor.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.NodeReadout.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.node_readout.NodeReadout.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 </section>
-<section id="module-pydgn.model.predictor">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.model.predictor" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.model.readout">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.model.readout" title="Permalink to this headline"></a></h2>
 </section>
 </section>
 

@@ -62,7 +62,7 @@ class Experiment:
                       dim_node_features: int,
                       dim_edge_features: int,
                       dim_target: int,
-                      predictor_classname: str,
+                      readout_classname: str,
                       config: Config) -> ModelInterface:
         r"""
         Instantiates a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
@@ -71,7 +71,7 @@ class Experiment:
             dim_node_features (int): number of node features
             dim_edge_features (int): number of edge features
             dim_target (int): target dimension
-            predictor_classname (str): string containing the model's class
+            readout_classname (str): string containing the model's class
             config (:class:`~pydgn.evaluation.config.Config`): the configuration dictionary
 
         Returns:
@@ -80,8 +80,8 @@ class Experiment:
         model = s2c(config['model'])(dim_node_features=dim_node_features,
                                              dim_edge_features=dim_edge_features,
                                              dim_target=dim_target,
-                                             predictor_class=s2c(predictor_classname)
-                                             if predictor_classname is not None else None,
+                                             readout_class=s2c(readout_classname)
+                                             if readout_classname is not None else None,
                                              config=config)
 
         # move to device
@@ -104,17 +104,17 @@ class Experiment:
         Returns:
             a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
         """
-        predictor_classname = self.model_config.supervised_config['predictor'] \
-            if 'predictor' in self.model_config.supervised_config else None
-        return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
+        readout_classname = self.model_config.supervised_config['readout'] \
+            if 'readout' in self.model_config.supervised_config else None
+        return self._create_model(dim_node_features, dim_edge_features, dim_target, readout_classname,
                                   self.model_config.supervised_config)
 
-    def create_supervised_predictor(self,
+    def create_supervised_readout(self,
                                 dim_node_features: int,
                                 dim_edge_features: int,
                                 dim_target: int) -> ReadoutInterface:
         r"""
-        Instantiates an **supervised** predictor that implements the :class:`~pydgn.model.model.ReadoutInterface` interface,
+        Instantiates an **supervised** readout that implements the :class:`~pydgn.model.model.ReadoutInterface` interface,
         using the ``supervised_config`` field in the configuration file.
 
         Args:
@@ -125,7 +125,7 @@ class Experiment:
         Returns:
             a model that implements the :class:`~pydgn.model.model.ReadoutInterface` interface
         """
-        return s2c(self.model_config.supervised_config['predictor'])(dim_node_features=dim_node_features,
+        return s2c(self.model_config.supervised_config['readout'])(dim_node_features=dim_node_features,
                                                                      dim_edge_features=dim_edge_features,
                                                                      dim_target=dim_target,
                                                                      config=self.model_config.supervised_config)
@@ -146,9 +146,9 @@ class Experiment:
         Returns:
             a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
         """
-        predictor_classname = self.model_config.unsupervised_config['predictor'] \
-            if 'predictor' in self.model_config.unsupervised_config else None
-        return self._create_model(dim_node_features, dim_edge_features, dim_target, predictor_classname,
+        readout_classname = self.model_config.unsupervised_config['readout'] \
+            if 'readout' in self.model_config.unsupervised_config else None
+        return self._create_model(dim_node_features, dim_edge_features, dim_target, readout_classname,
                                   self.model_config.unsupervised_config)
 
     def create_incremental_model(self,
@@ -172,20 +172,20 @@ class Experiment:
         Returns:
             a layer of a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
         """
-        predictor_classname = self.model_config.layer_config.get('predictor', None)
+        readout_classname = self.model_config.layer_config.get('readout', None)
         self.model_config.layer_config['depth'] = depth
         self.model_config.layer_config['prev_outputs_to_consider'] = prev_outputs_to_consider
         return self._create_model(dim_node_features, dim_edge_features, dim_target,
-                                  predictor_classname, self.model_config.layer_config)
+                                  readout_classname, self.model_config.layer_config)
 
-    def _create_wrapper(self,
+    def _create_engine(self,
                         config: Config,
                         model: ModelInterface,
                         device: str,
                         log_every: int) -> TrainingEngine:
         r"""
         Utility that instantiates the training engine. It looks for pre-defined fields in the configuration file,
-        i.e. ``loss``, ``scorer``, ``optimizer``, ``scheduler``, ``gradient_clipping``, ``early_stopper`` and
+        i.e. ``loss``, ``scorer``, ``optimizer``, ``scheduler``, ``gradient_clipper``, ``early_stopper`` and
         ``plotter``, all of which should be classes implementing the :class:`~pydgn.training.event.handler.EventHandler` interface
 
         Args:
@@ -215,7 +215,7 @@ class Experiment:
         if sched_args is not None:
             sched_args.pop('optimizer', None)
 
-        grad_clip_class, grad_clip_args = return_class_and_args(config, 'gradient_clipping')
+        grad_clip_class, grad_clip_args = return_class_and_args(config, 'gradient_clipper')
         grad_clipper = grad_clip_class(**grad_clip_args) if grad_clip_class is not None else None
 
         early_stop_class, early_stop_args = return_class_and_args(config, 'early_stopper')
@@ -225,17 +225,17 @@ class Experiment:
         plotter = plot_class(exp_path=self.exp_path, **plot_args) if plot_class is not None else None
 
         store_last_checkpoint = config.get('checkpoint', False)
-        wrapper_class, wrapper_args = return_class_and_args(config, 'wrapper')
-        engine_callback = s2c(wrapper_args.get('engine_callback', DEFAULT_ENGINE_CALLBACK))
+        engine_class, engine_args = return_class_and_args(config, 'engine')
+        engine_callback = s2c(engine_args.get('engine_callback', DEFAULT_ENGINE_CALLBACK))
 
-        wrapper = wrapper_class(engine_callback=engine_callback, model=model, loss=loss,
+        engine = engine_class(engine_callback=engine_callback, model=model, loss=loss,
                                 optimizer=optimizer, scorer=scorer, scheduler=scheduler,
-                                early_stopper=early_stopper, gradient_clipping=grad_clipper,
+                                early_stopper=early_stopper, gradient_clipper=grad_clipper,
                                 device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every,
                                 store_last_checkpoint=store_last_checkpoint)
-        return wrapper
+        return engine
 
-    def create_supervised_wrapper(self, model: ModelInterface) -> TrainingEngine:
+    def create_supervised_engine(self, model: ModelInterface) -> TrainingEngine:
         r"""
         Instantiates the training engine by using the ``supervised_config`` key in the config file
 
@@ -247,9 +247,9 @@ class Experiment:
         """
         device = self.model_config.device
         log_every = self.model_config.log_every
-        return self._create_wrapper(self.model_config.supervised_config, model, device, log_every)
+        return self._create_engine(self.model_config.supervised_config, model, device, log_every)
 
-    def create_unsupervised_wrapper(self, model: ModelInterface) -> TrainingEngine:
+    def create_unsupervised_engine(self, model: ModelInterface) -> TrainingEngine:
         r"""
         Instantiates the training engine by using the ``unsupervised_config`` key in the config file
 
@@ -261,9 +261,9 @@ class Experiment:
         """
         device = self.model_config.device
         log_every = self.model_config.log_every
-        return self._create_wrapper(self.model_config.unsupervised_config, model, device, log_every)
+        return self._create_engine(self.model_config.unsupervised_config, model, device, log_every)
 
-    def create_incremental_wrapper(self, model: ModelInterface) -> TrainingEngine:
+    def create_incremental_engine(self, model: ModelInterface) -> TrainingEngine:
         r"""
         Instantiates the training engine by using the ``layer_config`` key in the config file
 
@@ -275,7 +275,7 @@ class Experiment:
         """
         device = self.model_config.device
         log_every = self.model_config.log_every
-        return self._create_wrapper(self.model_config.layer_config, model, device, log_every)
+        return self._create_engine(self.model_config.layer_config, model, device, log_every)
 
     def run_valid(self, dataset_getter, logger) -> Tuple[dict, dict]:
         r"""

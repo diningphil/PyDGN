@@ -113,7 +113,6 @@ class RiskAssesser:
         outer_folds (int): The number K of inner VALIDATION folds. You should have generated the splits accordingly
         experiment_class (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]): the experiment class to be instantiated
         exp_path (str): The folder in which to store **all** results
-        splits_folder (str): The folder in which data splits are stored
         splits_filepath (str): The splits filepath with additional meta information
         model_configs (Union[:class:`~pydgn.evaluation.grid.Grid`, :class:`~pydgn.evaluation.random_search.RandomSearch`]): an object storing all possible model configurations, e.g. config.base.Grid
         final_training_runs (int): no of final training runs to mitigate bad initializations
@@ -126,7 +125,6 @@ class RiskAssesser:
                  inner_folds: int,
                  experiment_class: Callable[...,Experiment],
                  exp_path: str,
-                 splits_folder: str,
                  splits_filepath: str,
                  model_configs: Union[Grid, RandomSearch],
                  final_training_runs: int,
@@ -158,7 +156,6 @@ class RiskAssesser:
 
         # Main folders
         self.exp_path = exp_path
-        self.splits_folder = splits_folder
 
         # Splits filepath
         self.splits_filepath = splits_filepath
@@ -321,7 +318,6 @@ class RiskAssesser:
         # Create the dataset provider
         dataset_getter_class = s2c(self.model_configs.dataset_getter)
         dataset_getter = dataset_getter_class(self.model_configs.data_root,
-                                              self.splits_folder,
                                               self.splits_filepath,
                                               s2c(self.model_configs.dataset_class),
                                               self.model_configs.dataset_name,
@@ -410,7 +406,6 @@ class RiskAssesser:
 
         dataset_getter_class = s2c(self.model_configs.dataset_getter)
         dataset_getter = dataset_getter_class(self.model_configs.data_root,
-                                              self.splits_folder,
                                               self.splits_filepath,
                                               s2c(self.model_configs.dataset_class),
                                               self.model_configs.dataset_name,

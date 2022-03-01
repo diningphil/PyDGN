@@ -9,11 +9,11 @@ class GradientClipper(EventHandler):
     arguments in the configuration file.
 
     Args:
-        gradient_clipping_class_name (str): the dotted path to the gradient clipper class name
+        gradient_clipper_class_name (str): the dotted path to the gradient clipper class name
         kwargs (dict): additional arguments
     """
-    def __init__(self, gradient_clipping_class_name: str, **kwargs: dict):
-        self.gradient_clipper = s2c(gradient_clipping_class_name)(**kwargs)
+    def __init__(self, gradient_clipper_class_name: str, **kwargs: dict):
+        self.gradient_clipper = s2c(gradient_clipper_class_name)(**kwargs)
 
     def on_backward(self, state: State):
         self.gradient_clipper.clip_gradients(state.model.parameters())

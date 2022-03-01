@@ -10,7 +10,7 @@ class SemiSupervisedTask(Experiment):
     """
     Class that implements a semi-supervised experiment. There is an ``unsupervised_config`` field in the configuration
     file that is used, together with the field ``model``, to produce unsupervised embeddings. These are later used
-    by a **predictor** extracted from a ``supervised_config`` field in the configuration file to perform the supervised
+    by a **readout** extracted from a ``supervised_config`` field in the configuration file to perform the supervised
     task.
     """
     def __init__(self, model_configuration, exp_path, exp_seed):
@@ -40,12 +40,12 @@ class SemiSupervisedTask(Experiment):
         # Istantiate the Model
         model = self.create_unsupervised_model(dim_node_features, dim_edge_features, dim_target)
 
-        # Istantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
-        unsupervised_training_wrapper = self.create_unsupervised_wrapper(model)
+        # Istantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        unsupervised_training_engine = self.create_unsupervised_engine(model)
 
         _, _, train_data_list, \
         _, _, val_data_list, \
-        _, _, _ = unsupervised_training_wrapper.train(train_loader=train_loader,
+        _, _, _ = unsupervised_training_engine.train(train_loader=train_loader,
                                                       validation_loader=val_loader,
                                                       test_loader=None,
                                                       max_epochs=unsupervised_config['epochs'],
@@ -73,12 +73,12 @@ class SemiSupervisedTask(Experiment):
         model = self.create_supervised_model(dim_node_features=embedding_size, dim_edge_features=0,
                                              dim_target=dim_target)
 
-        # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
-        supervised_training_wrapper = self.create_supervised_wrapper(model)
+        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        supervised_training_engine = self.create_supervised_engine(model)
 
         train_loss, train_score, _, \
         val_loss, val_score, _, \
-        _, _, _ = supervised_training_wrapper.train(train_loader=train_loader,
+        _, _, _ = supervised_training_engine.train(train_loader=train_loader,
                                                     validation_loader=val_loader,
                                                     test_loader=None,
                                                     max_epochs=supervised_config['epochs'],
@@ -112,12 +112,12 @@ class SemiSupervisedTask(Experiment):
         # Instantiate the Model
         model = self.create_unsupervised_model(dim_node_features, dim_edge_features, dim_target)
 
-        # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
-        unsupervised_training_wrapper = self.create_unsupervised_wrapper(model)
+        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        unsupervised_training_engine = self.create_unsupervised_engine(model)
 
         _, _, train_data_list, \
         _, _, val_data_list, \
-        _, _, test_data_list = unsupervised_training_wrapper.train(train_loader=train_loader,
+        _, _, test_data_list = unsupervised_training_engine.train(train_loader=train_loader,
                                                                    validation_loader=val_loader,
                                                                    test_loader=test_loader,
                                                                    max_epochs=unsupervised_config['epochs'],
@@ -146,12 +146,12 @@ class SemiSupervisedTask(Experiment):
         model = self.create_supervised_model(dim_node_features=embedding_size, dim_edge_features=0,
                                              dim_target=dim_target)
 
-        # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
-        supervised_training_wrapper = self.create_supervised_wrapper(model)
+        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        supervised_training_engine = self.create_supervised_engine(model)
 
         train_loss, train_score, _, \
         val_loss, val_score, _, \
-        test_loss, test_score, _ = supervised_training_wrapper.train(train_loader=train_loader,
+        test_loss, test_score, _ = supervised_training_engine.train(train_loader=train_loader,
                                                                      validation_loader=val_loader,
                                                                      test_loader=test_loader,
                                                                      max_epochs=supervised_config['epochs'],

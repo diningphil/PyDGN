@@ -11,23 +11,18 @@ class Grid:
     Class that implements grid-search. It computes all possible configurations starting from a suitable config file.
 
     Args:
-        data_root (str): the root directory in which the dataset is stored
-        dataset_class (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]): class of the dataset to use
-        dataset_name (str): the name of the dataset
         configs_dict (dict): the configuration dictionary specifying the different configurations to try
     """
-    def __init__(self,
-                 data_root: str,
-                 dataset_class: Callable[...,DatasetInterface],
-                 dataset_name: str,
-                 **configs_dict: dict):
+    __search_type__ = GRID_SEARCH
+
+    def __init__(self, configs_dict: dict):
 
         self.configs_dict = configs_dict
         self.seed = self.configs_dict.get(SEED, None)
         self._exp_name = self.configs_dict.get(EXP_NAME)
-        self.data_root = data_root
-        self.dataset_class = dataset_class
-        self.dataset_name = dataset_name
+        self.data_root = self.configs_dict[DATA_ROOT]
+        self.dataset_class = self.configs_dict[DATASET_CLASS]
+        self.dataset_name = self.configs_dict[DATASET_NAME]
         self.data_loader_class, self.data_loader_args = return_class_and_args(self.configs_dict, DATA_LOADER,
                                                                               return_class_name=True)
         self.experiment = self.configs_dict[EXPERIMENT]
@@ -46,7 +41,7 @@ class Grid:
         Returns:
             A list of al possible configurations in the form of dictionaries
         """
-        configs = [cfg for cfg in self._gen_helper(self.configs_dict[GRID_SEARCH])]
+        configs = [cfg for cfg in self._gen_helper(self.configs_dict[self.__search_type__])]
         for cfg in configs:
             cfg.update({DATASET: self.dataset_name,
                         DATASET_GETTER: self.dataset_getter,

@@ -39,13 +39,13 @@ grid:
       - pydgn.training.callback.metric.DotProductLink
     scorer:
       - pydgn.training.callback.metric.ToyMetric
-    predictor:
-      - pydgn.model.predictor.link_predictor.DotProductLinkPredictor
-    wrapper:
+    readout:
+      - pydgn.model.readout.link_readout.DotProductLinkReadout
+    engine:
       - pydgn.training.engine.LinkPredictionSingleGraphEngine
     l2:
       - 0.
-    gradient_clipping:
+    gradient_clipper:
       - null
     dropout:
       - 0.

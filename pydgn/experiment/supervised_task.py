@@ -21,12 +21,12 @@ class SupervisedTask(Experiment):
         # Instantiate the Model
         model = self.create_supervised_model(dim_node_features, dim_edge_features, dim_target)
 
-        # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
-        supervised_training_wrapper = self.create_supervised_wrapper(model)
+        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        supervised_training_engine = self.create_supervised_engine(model)
 
         train_loss, train_score, _, \
         val_loss, val_score, _, \
-        _, _, _ = supervised_training_wrapper.train(
+        _, _, _ = supervised_training_engine.train(
             train_loader=train_loader,
             validation_loader=val_loader,
             test_loader=None,
@@ -53,12 +53,12 @@ class SupervisedTask(Experiment):
         # Instantiate the Model
         model = self.create_supervised_model(dim_node_features, dim_edge_features, dim_target)
 
-        # Instantiate the wrapper (it handles the training loop and the inference phase by abstracting the specifics)
-        supervised_training_wrapper = self.create_supervised_wrapper(model)
+        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        supervised_training_engine = self.create_supervised_engine(model)
 
         train_loss, train_score, _, \
         val_loss, val_score, _, \
-        test_loss, test_score, _ = supervised_training_wrapper.train(
+        test_loss, test_score, _ = supervised_training_engine.train(
             train_loader=train_loader,
             validation_loader=val_loader,
             test_loader=test_loader,
