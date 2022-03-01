@@ -11,8 +11,13 @@
 
 ### Added
 
-- A documentation
+- A documentation (it was about time!!!)
 - Possibility of specifying inner and outer validation ratio
+- We can now use a specific data loader and specify its arguments in the configuration file
+- We can now force a metric to compute node-based or graph-based metrics, rather than looking at the ground truth's shape.
+- Possibility of evaluating on validation (and test) every `n` epochs
+- Use entrypoints to simplify usage of the library
+- All arguments must be now specified in the config file. There is a template one can use in the doc.
 
 ### Changed (IMPORTANT!)
 

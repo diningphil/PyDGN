@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydgn.evaluation package &mdash; PyDGN 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pydgn.experiment package" href="pydgn.experiment.html" />
+    <link rel="prev" title="pydgn.data package" href="pydgn.data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyDGN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Intro and Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.evaluation package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.config">pydgn.evaluation.config module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pydgn-evaluation-evaluator-module">pydgn.evaluation.evaluator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.grid">pydgn.evaluation.grid module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.random_search">pydgn.evaluation.random_search module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.util">pydgn.evaluation.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.training.html">pydgn.training package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyDGN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pydgn.evaluation package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/pydgn.evaluation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pydgn-evaluation-package">
+<h1>pydgn.evaluation package<a class="headerlink" href="#pydgn-evaluation-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pydgn.evaluation.config">
+<span id="pydgn-evaluation-config-module"></span><h2>pydgn.evaluation.config module<a class="headerlink" href="#module-pydgn.evaluation.config" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.evaluation.config.Config">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.config.Config" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Simple class to manage the configuration dictionary as a Python object with fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>config_dict</strong> (<em>dict</em>) – the configuration dictionary</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.config.Config.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.ItemsView</span></span></span><a class="headerlink" href="#pydgn.evaluation.config.Config.items" title="Permalink to this definition"></a></dt>
+<dd><p>Invokes the <cite>items()</cite> method of the configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a list of (key, value) pairs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.config.Config.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">collections.abc.KeysView</span></span></span><a class="headerlink" href="#pydgn.evaluation.config.Config.keys" title="Permalink to this definition"></a></dt>
+<dd><p>Invokes the <cite>keys()</cite> method of the configuration dictionary</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the set of keys in the dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="pydgn-evaluation-evaluator-module">
+<h2>pydgn.evaluation.evaluator module<a class="headerlink" href="#pydgn-evaluation-evaluator-module" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pydgn.evaluation.grid">
+<span id="pydgn-evaluation-grid-module"></span><h2>pydgn.evaluation.grid module<a class="headerlink" href="#module-pydgn.evaluation.grid" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.evaluation.grid.Grid">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.grid.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">configs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.grid.Grid" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that implements grid-search. It computes all possible configurations starting from a suitable config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – the root directory in which the dataset is stored</p></li>
+<li><p><strong>dataset_class</strong> (Callable[…, <a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>]) – class of the dataset to use</p></li>
+<li><p><strong>dataset_name</strong> (<em>str</em>) – the name of the dataset</p></li>
+<li><p><strong>configs_dict</strong> (<em>dict</em>) – the configuration dictionary specifying the different configurations to try</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.evaluation.grid.Grid.exp_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exp_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.evaluation.grid.Grid.exp_name" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the name of the root folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the name of the root folder as made of MODEL-NAME_DATASET-NAME</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.evaluation.grid.Grid.num_configs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_configs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pydgn.evaluation.grid.Grid.num_configs" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the number of configurations to try during model selection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of configurations</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.evaluation.random_search">
+<span id="pydgn-evaluation-random-search-module"></span><h2>pydgn.evaluation.random_search module<a class="headerlink" href="#module-pydgn.evaluation.random_search" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.evaluation.random_search.RandomSearch">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.random_search.</span></span><span class="sig-name descname"><span class="pre">RandomSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">configs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that implements random-search. It computes all possible configurations starting from a suitable config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – the root directory in which the dataset is stored</p></li>
+<li><p><strong>dataset_class</strong> (Callable[…, <a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>]) – class of the dataset to use</p></li>
+<li><p><strong>dataset_name</strong> (<em>str</em>) – the name of the dataset</p></li>
+<li><p><strong>configs_dict</strong> (<em>dict</em>) – the configuration dictionary specifying the different configurations to try</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.evaluation.random_search.RandomSearch.exp_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exp_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch.exp_name" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the name of the root folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the name of the root folder as made of MODEL-NAME_DATASET-NAME</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.evaluation.random_search.RandomSearch.num_configs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_configs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch.num_configs" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the number of configurations to try during model selection</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the number of configurations</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.evaluation.util">
+<span id="pydgn-evaluation-util-module"></span><h2>pydgn.evaluation.util module<a class="headerlink" href="#module-pydgn.evaluation.util" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.ProgressManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">ProgressManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outer_folds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_folds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_configs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.ProgressManager" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that is responsible for drawing progress bars.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outer_folds</strong> (<em>int</em>) – number of external folds for model assessment</p></li>
+<li><p><strong>inner_folds</strong> (<em>int</em>) – number of internal folds for model selection</p></li>
+<li><p><strong>no_configs</strong> (<em>int</em>) – number of possible configurations in model selection</p></li>
+<li><p><strong>final_runs</strong> (<em>int</em>) – number of final runs per outer fold once the best model has been selected</p></li>
+<li><p><strong>show</strong> (<em>bool</em>) – whether to show the progress bar or not. Default is <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.ProgressManager.refresh">
+<span class="sig-name descname"><span class="pre">refresh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.ProgressManager.refresh" title="Permalink to this definition"></a></dt>
+<dd><p>Refreshes the progress bar</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.ProgressManager.show_footer">
+<span class="sig-name descname"><span class="pre">show_footer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.ProgressManager.show_footer" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.ProgressManager.show_header">
+<span class="sig-name descname"><span class="pre">show_header</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.ProgressManager.show_header" title="Permalink to this definition"></a></dt>
+<dd><p>Prints the header of the progress bar</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.ProgressManager.update_state">
+<span class="sig-name descname"><span class="pre">update_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.ProgressManager.update_state" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the state of the progress bar (different from showing it on screen, see <a class="reference internal" href="#pydgn.evaluation.util.ProgressManager.refresh" title="pydgn.evaluation.util.ProgressManager.refresh"><code class="xref py py-func docutils literal notranslate"><span class="pre">refresh()</span></code></a>) once a message
+is received</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>msg</strong> (<em>dict</em>) – message with updates to be parsed</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.choice">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">choice</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.choice" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.clear_screen">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">clear_screen</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.clear_screen" title="Permalink to this definition"></a></dt>
+<dd><p>Clears the CLI interface.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.loguniform">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">loguniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.loguniform" title="Permalink to this definition"></a></dt>
+<dd><p>Performs a log-uniform random selection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>*args</strong> – a tuple of (log min, log max, [base]) to use. Base 10 is used if the third argument is not available.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a randomly chosen value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.normal">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.normal" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.randint">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">randint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.randint" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.set_gpus">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">set_gpus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_gpus</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.set_gpus" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the visible GPUS for the experiments according to the availability in terms of memory. Prioritize GPUs with
+less memory usage. Sets the <code class="docutils literal notranslate"><span class="pre">CUDA_DEVICE_ORDER</span></code> env variable to <code class="docutils literal notranslate"><span class="pre">PCI_BUS_ID</span></code> and <code class="docutils literal notranslate"><span class="pre">CUDA_VISIBLE_DEVICES</span></code>
+to the ordered list of GPU indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>num_gpus</strong> – maximum number of GPUs to use when launching experiments in parallel</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.uniform">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">uniform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.uniform" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pydgn.evaluation">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.evaluation" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pydgn.data.html" class="btn btn-neutral float-left" title="pydgn.data package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pydgn.experiment.html" class="btn btn-neutral float-right" title="pydgn.experiment package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Federico Errica.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

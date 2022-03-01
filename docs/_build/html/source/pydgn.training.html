@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydgn.training package &mdash; PyDGN 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pydgn.training.callback package" href="pydgn.training.callback.html" />
+    <link rel="prev" title="pydgn.model.predictor package" href="pydgn.model.predictor.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyDGN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Intro and Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model package</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.training package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.training.callback.html">pydgn.training.callback package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.training.event.html">pydgn.training.event package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.training.engine">pydgn.training.engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.training.profiler">pydgn.training.profiler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.training.util">pydgn.training.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.training">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyDGN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pydgn.training package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/pydgn.training.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pydgn-training-package">
+<h1>pydgn.training package<a class="headerlink" href="#pydgn-training-package" title="Permalink to this headline"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.training.callback.html">pydgn.training.callback package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback.early_stopping">pydgn.training.callback.early_stopping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback.engine_callback">pydgn.training.callback.engine_callback module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback.gradient_clipping">pydgn.training.callback.gradient_clipping module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#pydgn-training-callback-metric-module">pydgn.training.callback.metric module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback.optimizer">pydgn.training.callback.optimizer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback.plotter">pydgn.training.callback.plotter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback.scheduler">pydgn.training.callback.scheduler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.callback.html#module-pydgn.training.callback">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.training.event.html">pydgn.training.event package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.event.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.event.html#module-pydgn.training.event.dispatcher">pydgn.training.event.dispatcher module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.event.html#module-pydgn.training.event.handler">pydgn.training.event.handler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.event.html#module-pydgn.training.event.state">pydgn.training.event.state module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.event.html#module-pydgn.training.event">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pydgn.training.engine">
+<span id="pydgn-training-engine-module"></span><h2>pydgn.training.engine module<a class="headerlink" href="#module-pydgn.training.engine" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.engine.LinkPredictionSingleGraphEngine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.engine.</span></span><span class="sig-name descname"><span class="pre">LinkPredictionSingleGraphEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scorer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradient_clipping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_every</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_last_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.LinkPredictionSingleGraphEngine" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.engine.TrainingEngine</span></code></a></p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.engine.TrainingEngine">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.engine.</span></span><span class="sig-name descname"><span class="pre">TrainingEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_callback</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scorer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scheduler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">early_stopper</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gradient_clipping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'cpu'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plotter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_every</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_last_checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.TrainingEngine" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.dispatcher.EventDispatcher" title="pydgn.training.event.dispatcher.EventDispatcher"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.dispatcher.EventDispatcher</span></code></a></p>
+<p>This is the most important class when it comes to training a model. It implements the EventDispatcher interface,
+which means that after registering some callbacks in a given order, it will proceed to trigger specific events that
+will result in the shared State object being updated by the callbacks. Callbacks implement the EventHandler
+interface, and they receive the shared State object when any event is triggered. Knowing the order in which
+callbacks are called is important.
+The order is: loss function - score function - gradient clipper - optimizer - early stopper - scheduler - plotter</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.engine.TrainingEngine.infer">
+<span class="sig-name descname"><span class="pre">infer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.TrainingEngine.infer" title="Permalink to this definition"></a></dt>
+<dd><p>Performs an inference step
+:param loader: the DataLoader
+:set: the type of dataset being used, can be TRAINING, VALIDATION or TEST
+:return: a tuple (loss, score, embeddings)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.engine.TrainingEngine.set_device">
+<span class="sig-name descname"><span class="pre">set_device</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.TrainingEngine.set_device" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.engine.TrainingEngine.set_eval_mode">
+<span class="sig-name descname"><span class="pre">set_eval_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.TrainingEngine.set_eval_mode" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.engine.TrainingEngine.set_training_mode">
+<span class="sig-name descname"><span class="pre">set_training_mode</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.TrainingEngine.set_training_mode" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.engine.TrainingEngine.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_loader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_loader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_epochs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_epoch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.TrainingEngine.train" title="Permalink to this definition"></a></dt>
+<dd><p>Trains the model
+:param train_loader: the DataLoader associated with training data
+:param validation_loader: the DataLoader associated with validation data, if any
+:param test_loader:  the DataLoader associated with test data, if any
+:param max_epochs: maximum number of training epochs
+:param zero_epoch: if True, starts again from epoch 0 and resets optimizer and scheduler states.
+:param logger: a log.Logger for logging purposes
+:return: a tuple (train_loss, train_score, train_embeddings, validation_loss, validation_score, validation_embeddings, test_loss, test_score, test_embeddings)</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.training.engine.log">
+<span class="sig-prename descclassname"><span class="pre">pydgn.training.engine.</span></span><span class="sig-name descname"><span class="pre">log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><span class="pre">pydgn.log.logger.Logger</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.engine.log" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-pydgn.training.profiler">
+<span id="pydgn-training-profiler-module"></span><h2>pydgn.training.profiler module<a class="headerlink" href="#module-pydgn.training.profiler" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.profiler.Profiler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.profiler.</span></span><span class="sig-name descname"><span class="pre">Profiler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">threshold</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.profiler.Profiler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A decorator class that is applied to a <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandler</span></code></a> object implementing a
+set of callback functions. For each callback, the Profiler stores the average and total running time across epochs.
+When the experiment terminates (either correctly or abruptly) the Profiler can produce a report to be stored in the
+experiment’s log file.</p>
+<p>The Profiler is used as a singleton, and it produces wrappers that update its own state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>threshold</strong> (<em>float</em>) – used to filter out callback functions that consume a negligible amount of time from the report</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Usage:</dt><dd><p>Istantiate a profiler, and then register an event_handler with the syntax profiler(event_handler), which returns
+another object implementing the <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandler</span></code></a> interface</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.profiler.Profiler.report">
+<span class="sig-name descname"><span class="pre">report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pydgn.training.profiler.Profiler.report" title="Permalink to this definition"></a></dt>
+<dd><p>Builds a report string containing the statistics of the experiment accumulated so far.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a string containing the report</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.training.util">
+<span id="pydgn-training-util-module"></span><h2>pydgn.training.util module<a class="headerlink" href="#module-pydgn.training.util" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.training.util.atomic_save">
+<span class="sig-prename descclassname"><span class="pre">pydgn.training.util.</span></span><span class="sig-name descname"><span class="pre">atomic_save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.util.atomic_save" title="Permalink to this definition"></a></dt>
+<dd><p>Atomically stores a dictionary that can be serialized by <code class="xref py py-func docutils literal notranslate"><span class="pre">torch.save()</span></code>,
+exploiting the atomic <code class="xref py py-func docutils literal notranslate"><span class="pre">os.replace()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>dict</em>) – the dictionary to be stored</p></li>
+<li><p><strong>filepath</strong> (<em>str</em>) – the absolute filepath where to store the dictionary</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pydgn.training">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.training" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pydgn.model.predictor.html" class="btn btn-neutral float-left" title="pydgn.model.predictor package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pydgn.training.callback.html" class="btn btn-neutral float-right" title="pydgn.training.callback package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Federico Errica.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
