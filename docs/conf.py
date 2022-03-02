@@ -54,5 +54,7 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+# This is needed because `torch-sparse` imports `torch` in its `setup.py` file. So we need to dynamically install it
+# in the readthedocs virtual env
 #import os
 #os.system('pip install torch')
