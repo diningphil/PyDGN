@@ -24,7 +24,6 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: POSIX :: Linux",
     ],
-    packages=setuptools.find_packages(),
     python_requires=">=3.8,<3.10",
     install_requires=[
         'PyYAML >= 5.4',
@@ -41,5 +40,7 @@ setuptools.setup(
         'torch >= 1.10.2',
         'torch_geometric >= 2.0.3',
         'torch_geometric_temporal >= 0.40'
-    ]
+    ],
+    packages=setuptools.find_packages(),
+    include_package_data=True
 )
