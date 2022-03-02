@@ -8,6 +8,7 @@
 - Add again continual learning (with documentation)
 - Add unit test
 - Add integration tests
+- Add template to show how we can use PyDGN on a cluster
 - Add Multi-GPU processing for single experiment
 
 ### Added
