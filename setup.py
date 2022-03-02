@@ -15,7 +15,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url=URL,
     keywords=[
-        'deep-graph-networks'
+        'deep-graph-networks',
         'evaluation-framework',
         'deep-learning-for-graphs'
     ],

@@ -91,7 +91,8 @@ You can also apply ``transform``, ``pre_transform`` and ``pre_filter`` that foll
 
 Once our data configuration file is ready, we can create the dataset using (for the example above)
 
-.. code-block:: python
+.. code-block:: bash
+
     pydgn-dataset --config-file examples/DATA_CONFIGS/config_PROTEINS.yml
 
 Experiment Setup
@@ -104,7 +105,7 @@ readout module that must implement the :class:`~pydgn.model.interface.ReadoutInt
 At this point, it is time to define the experiment. The general template that we can use is the following, with an
 explanation of each field as a comment:
 
-.. code-block:: python
+.. code-block:: yaml
 
     # Dataset and Splits
     data_root:  # path to DATA root folder (same as in data config file)
@@ -219,144 +220,130 @@ explanation of each field as a comment:
 Data Information
 -----------------
 
+Here we can specify some information about the dataset:
+
+.. code-block:: yaml
+
+    data_root: DATA
+    dataset_class: pydgn.data.dataset.TUDatasetInterface
+    dataset_name:  PROTEINS
+    data_splits_file:  examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits
+
 
 Hardware
 -----------------
+
+Here we can define how many resources to allocate to parallelize different experiments:
+
+.. code-block:: yaml
+
+    # this will run a maximum of 4 experiments to allocate all of the 2 gpus we have.
+    # We use some more cpu resources to take into account potential `data loader workers <https://pytorch.org/docs/stable/data.html#multi-process-data-loading>`_.
+    device:  cuda
+    max_cpus:  8
+    max_gpus: 2
+    gpus_per_task:  0.5
 
 
 Data Loading
 -----------------
 
+Here we specify which :class:`~pydgn.data.provider.DataProvider` we want to use to load the data associated with the
+given splits, and the :class:`DataLoader` that needs to handle such data:
+
+.. code-block:: yaml
+
+    # Data Loading
+    dataset_getter: pydgn.data.provider.DataProvider
+    data_loader:
+      class_name: torch_geometric.loader.DataLoader
+      args:
+        num_workers : 2
+        pin_memory: True  # should be True when device is set to `cuda`
+
 
 Experiment Details
 --------------------
 
+Here we define the experiment details, including the experiment name and type, and the folder where we want to store
+our results:
+
+.. code-block:: yaml
+
+result_folder: RESULTS
+exp_name: supervised_grid_search_toy
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: True
+evaluate_every: 3
+final_training_runs: 3
 
 
 Grid Search
 --------------
 
-There is one config file ``examples/MODEL_CONFIGS/config_SupToyDGN.yml`` that you can check.
+Grid search is identified by the keyword ``grid`` after the experimental details. This is the easiest setting, in which
+you can define lists associated to an hyper-parameter and all possible combinations will be created. You can even have
+nesting of these combinations for maximum flexibility.
+
+There is one config file ``examples/MODEL_CONFIGS/config_SupToyDGN.yml`` that you can check to get a better idea.
 
 
 Random Search
 --------------
 
-Specify a ``num_samples`` in the config file with the number of random trials, replace ``grid``
-with ``random``, and specify a sampling method for each hyper-parameter. We provide different sampling methods:
+Random search, on the other hand, is identified by the keyword ``random`` after the experimental details. One line above
+we have to specify the number of random trials, using the keyword ``num_samples``.
 
-- choice --> pick at random from a list of arguments
-- uniform --> pick uniformly from min and max arguments
-- normal --> sample from normal distribution with mean and std
-- randint --> pick at random from min and max
-- loguniform --> pick following the recprocal distribution from log_min, log_max, with a specified base
+We provide different sampling methods:
+ * choice --> pick at random from a list of arguments
+ * uniform --> pick uniformly from min and max arguments
+ * normal --> sample from normal distribution with mean and std
+ * randint --> pick at random from min and max
+ * loguniform --> pick following the recprocal distribution from log_min, log_max, with a specified base
 
-There is one config file ``examples/MODEL_CONFIGS/config_SupToyDGN_RandomSearch.yml`` that you can check.
+There is one config file ``examples/MODEL_CONFIGS/config_SupToyDGN_RandomSearch.yml`` that you can check to get a better idea.
 
 
 Experiment
 --------------
 
-.. code-block:: python
+Depending on the experiment type, different main keywords are required:
 
-    """This example demonstrates a simple BLE client that scans for devices,
-    connects to a device (GATT server) of choice and continuously reads a characteristic on that device.
+ * :class:`~pydgn.experiment.supervised_task.SupervisedTask` -> ``supervised_config``
+ * :class:`~pydgn.experiment.semi_supervised_task.SemiSupervisedTask` -> ``unsupervised_config`` and ``supervised_config``
 
-    The GATT Server in this example runs on an ESP32 with Arduino. For the
-    exact script used for this example see `here <https://github.com/nkolban/ESP32_BLE_Arduino/blob/6bad7b42a96f0aa493323ef4821a8efb0e8815f2/examples/BLE_notify/BLE_notify.ino/>`_
-    """
+Note that an **unsupervised** task may be seen as a supervised task with a loss objective that does not depend on the target.
+In the **supervised** task, we have the "standard" training procedure. In the **semi-supervised** task, we expect a first
+training phase which is unsupervised and that can produce node/graph embeddings. After that, a second, supervised model
+is trained on such embeddings, but adjacency information is not preserved in this second stage.
 
-    from bluepy.btle import *
-    from simpleble import SimpleBleClient, SimpleBleDevice
+Inside the dictionary associated to the keyword ``[un]supervised_config``, we expect another number of keywords to be
+present:
 
-    # The UUID of the characteristic we want to read and the name of the device # we want to read it from
-    Characteristic_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8"
-    Device_Name = "MyESP32"
+.. code-block:: yaml
 
-    # Define our scan and notification callback methods
-    def myScanCallback(client, device, isNewDevice, isNewData):
-        client._yes = True
-        print("#MAC: " + device.addr + " #isNewDevice: " +
-            str(isNewDevice) + " #isNewData: " + str(isNewData))
-    # TODO: NOTIFICATIONS ARE NOT SUPPORTED YET
-    # def myNotificationCallback(client, characteristic, data):
-    #     print("Notification received!")
-    #     print("  Characteristic UUID: " + characteristic.uuid)
-    #     print("  Data: " + str(data))
+    model:  # dotted path to model class
+    checkpoint:  # whether to keep a checkpoint of the last epoch to resume training
+    shuffle:  # whether to shuffle the data
+    batch_size:
+    epochs:  # number of maximum training epochs
 
-    # Instantiate a SimpleBleClient and set it's scan callback
-    bleClient = SimpleBleClient()
-    bleClient.setScanCallback(myScanCallback)
-    # TODO: NOTIFICATIONS ARE NOT SUPPORTED YET
-    # bleClient.setNotificationCallback(myNotificationCollback)
+    # Model specific arguments #
 
-    # Error handling to detect Keyboard interrupt (Ctrl+C)
-    # Loop to ensure we can survive connection drops
-    while(not bleClient.isConnected()):
-        try:
-            # Search for 2 seconds and return a device of interest if found.
-            # Internally this makes a call to bleClient.scan(timeout), thus
-            # triggering the scan callback method when nearby devices are detected
-            device = bleClient.searchDevice(name="MyESP32", timeout=2)
-            if(device is not None):
-                # If the device was found print out it's info
-                print("Found device!!")
-                device.printInfo()
+    # ------------------------ #
 
-                # Proceed to connect to the device
-                print("Proceeding to connect....")
-                if(bleClient.connect(device)):
+    optimizer:
+    scheduler:  # (can be "null")
+    loss:
+    scorer:
+    readout:   # (can be "null")
+    engine:  # training engine
+    gradient_clipper:  # (can be "null")
+    early_stopper:   # (can be "null")
+    plotter:   # (can be "null")
 
-                    # Have a peek at the services provided by the device
-                    services = device.getServices()
-                    for service in services:
-                        print("Service ["+str(service.uuid)+"]")
+Once our experiment configuration file is ready, we can launch an experiment using (see below for an example)
 
-                    # Check to see if the device provides a characteristic with the
-                    # desired UUID
-                    counter = bleClient.getCharacteristics(
-                        uuids=[Characteristic_UUID])[0]
-                    if(counter):
-                        # If it does, then we proceed to read its value every second
-                        while(True):
-                            # Error handling ensures that we can survive from
-                            # potential connection drops
-                            try:
-                                # Read the data as bytes and convert to string
-                                data_bytes = bleClient.readCharacteristic(
-                                    counter)
-                                data_str = "".join(map(chr, data_bytes))
+.. code-block:: bash
 
-                                # Now print the data and wait for a second
-                                print("Data: " + data_str)
-                                time.sleep(1.0)
-                            except BTLEException as e:
-                                # If we get disconnected from the device, keep
-                                # looping until we have reconnected
-                                if(e.code == BTLEException.DISCONNECTED):
-                                    bleClient.disconnect()
-                                    print(
-                                        "Connection to BLE device has been lost!")
-                                    break
-                                    # while(not bleClient.isConnected()):
-                                    #     bleClient.connect(device)
-
-                else:
-                    print("Could not connect to device! Retrying in 3 sec...")
-                    time.sleep(3.0)
-            else:
-                print("Device not found! Retrying in 3 sec...")
-                time.sleep(3.0)
-        except BTLEException as e:
-            # If we get disconnected from the device, keep
-            # looping until we have reconnected
-            if(e.code == BTLEException.DISCONNECTED):
-                bleClient.disconnect()
-                print(
-                    "Connection to BLE device has been lost!")
-                break
-        except KeyboardInterrupt as e:
-            # Detect keyboard interrupt and close down
-            # bleClient gracefully
-            bleClient.disconnect()
-            raise e
+    pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml

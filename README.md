@@ -4,6 +4,7 @@
 
 # PyDGN: a research library for Deep Graph Networks 
 [![Documentation Status](https://readthedocs.org/projects/pydgn/badge/?version=latest)](https://pydgn.readthedocs.io/en/latest/?badge=latest)
+[![Coverage Status](https://coveralls.io/repos/github/diningphil/PyDGN/badge.svg?branch=master)](https://coveralls.io/github/diningphil/PyDGN?branch=master)
 
 #### Read the [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 

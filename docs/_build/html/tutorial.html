@@ -175,6 +175,9 @@ dataset of Pytorch Geometric in <a class="reference internal" href="source/pydgn
 </div>
 <p>You can also apply <code class="docutils literal notranslate"><span class="pre">transform</span></code>, <code class="docutils literal notranslate"><span class="pre">pre_transform</span></code> and <code class="docutils literal notranslate"><span class="pre">pre_filter</span></code> that follow the same semantic of PyG.</p>
 <p>Once our data configuration file is ready, we can create the dataset using (for the example above)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydgn-dataset --config-file examples/DATA_CONFIGS/config_PROTEINS.yml
+</pre></div>
+</div>
 </section>
 </section>
 <section id="experiment-setup">
@@ -184,248 +187,227 @@ Every model must implement the <a class="reference internal" href="source/pydgn.
 readout module that must implement the <a class="reference internal" href="source/pydgn.model.html#pydgn.model.interface.ReadoutInterface" title="pydgn.model.interface.ReadoutInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadoutInterface</span></code></a>.</p>
 <p>At this point, it is time to define the experiment. The general template that we can use is the following, with an
 explanation of each field as a comment:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dataset and Splits</span>
-<span class="n">data_root</span><span class="p">:</span>  <span class="c1"># path to DATA root folder (same as in data config file)</span>
-<span class="n">dataset_class</span><span class="p">:</span>  <span class="c1"># dotted path to dataset class</span>
-<span class="n">dataset_name</span><span class="p">:</span>  <span class="c1"># dataset name (same as in data config file)</span>
-<span class="n">data_splits_file</span><span class="p">:</span>  <span class="c1"># path to data splits file</span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Dataset and Splits</span><span class="w"></span>
+<span class="nt">data_root</span><span class="p">:</span><span class="w">  </span><span class="c1"># path to DATA root folder (same as in data config file)</span><span class="w"></span>
+<span class="nt">dataset_class</span><span class="p">:</span><span class="w">  </span><span class="c1"># dotted path to dataset class</span><span class="w"></span>
+<span class="nt">dataset_name</span><span class="p">:</span><span class="w">  </span><span class="c1"># dataset name (same as in data config file)</span><span class="w"></span>
+<span class="nt">data_splits_file</span><span class="p">:</span><span class="w">  </span><span class="c1"># path to data splits file</span><span class="w"></span>
 
 
-<span class="c1"># Hardware</span>
-<span class="n">device</span><span class="p">:</span>  <span class="c1"># cpu | cuda</span>
-<span class="n">max_cpus</span><span class="p">:</span>  <span class="c1"># &gt; 1 for parallelism</span>
-<span class="n">max_gpus</span><span class="p">:</span> <span class="c1"># &gt; 0 for gpu usage (device must be cuda though)</span>
-<span class="n">gpus_per_task</span><span class="p">:</span>  <span class="c1"># percentage of gpus to allocate for each task</span>
+<span class="c1"># Hardware</span><span class="w"></span>
+<span class="nt">device</span><span class="p">:</span><span class="w">  </span><span class="c1"># cpu | cuda</span><span class="w"></span>
+<span class="nt">max_cpus</span><span class="p">:</span><span class="w">  </span><span class="c1"># &gt; 1 for parallelism</span><span class="w"></span>
+<span class="nt">max_gpus</span><span class="p">:</span><span class="w"> </span><span class="c1"># &gt; 0 for gpu usage (device must be cuda though)</span><span class="w"></span>
+<span class="nt">gpus_per_task</span><span class="p">:</span><span class="w">  </span><span class="c1"># percentage of gpus to allocate for each task</span><span class="w"></span>
 
 
-<span class="c1"># Data Loading</span>
-<span class="n">dataset_getter</span><span class="p">:</span>  <span class="c1"># dotted path to dataset provider class</span>
-<span class="n">data_loader</span><span class="p">:</span>
-  <span class="n">class_name</span><span class="p">:</span>  <span class="c1"># dotted path to data loader class</span>
-  <span class="n">args</span><span class="p">:</span>
-    <span class="n">num_workers</span> <span class="p">:</span>
-    <span class="n">pin_memory</span><span class="p">:</span>
-    <span class="c1"># possibly other arguments (we set `worker_init_fn`, `sampler` and `shuffle`, so do not override)</span>
+<span class="c1"># Data Loading</span><span class="w"></span>
+<span class="nt">dataset_getter</span><span class="p">:</span><span class="w">  </span><span class="c1"># dotted path to dataset provider class</span><span class="w"></span>
+<span class="nt">data_loader</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w">  </span><span class="c1"># dotted path to data loader class</span><span class="w"></span>
+<span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_workers </span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">pin_memory</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># possibly other arguments (we set `worker_init_fn`, `sampler` and `shuffle`, so do not override)</span><span class="w"></span>
 
 
-<span class="c1"># Reproducibility</span>
-<span class="n">seed</span><span class="p">:</span> <span class="mi">42</span>
+<span class="c1"># Reproducibility</span><span class="w"></span>
+<span class="nt">seed</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">42</span><span class="w"></span>
 
 
-<span class="c1"># Experiment</span>
-<span class="n">result_folder</span><span class="p">:</span>  <span class="c1"># path of the folder where to store results</span>
-<span class="n">exp_name</span><span class="p">:</span>  <span class="c1"># name of the experiment</span>
-<span class="n">experiment</span><span class="p">:</span>  <span class="c1"># dotted path to experiment class</span>
-<span class="n">higher_results_are_better</span><span class="p">:</span>  <span class="c1"># model selection: should we select based on max (True) or min (False) main score?</span>
-<span class="n">evaluate_every</span><span class="p">:</span>  <span class="c1"># evaluate on train/val/test every `n` epochs and log results</span>
-<span class="n">final_training_runs</span><span class="p">:</span>  <span class="c1"># how many final (model assessment) training runs to perform to mitigate bad initializations</span>
+<span class="c1"># Experiment</span><span class="w"></span>
+<span class="nt">result_folder</span><span class="p">:</span><span class="w">  </span><span class="c1"># path of the folder where to store results</span><span class="w"></span>
+<span class="nt">exp_name</span><span class="p">:</span><span class="w">  </span><span class="c1"># name of the experiment</span><span class="w"></span>
+<span class="nt">experiment</span><span class="p">:</span><span class="w">  </span><span class="c1"># dotted path to experiment class</span><span class="w"></span>
+<span class="nt">higher_results_are_better</span><span class="p">:</span><span class="w">  </span><span class="c1"># model selection: should we select based on max (True) or min (False) main score?</span><span class="w"></span>
+<span class="nt">evaluate_every</span><span class="p">:</span><span class="w">  </span><span class="c1"># evaluate on train/val/test every `n` epochs and log results</span><span class="w"></span>
+<span class="nt">final_training_runs</span><span class="p">:</span><span class="w">  </span><span class="c1"># how many final (model assessment) training runs to perform to mitigate bad initializations</span><span class="w"></span>
 
-<span class="c1"># Grid Search</span>
-<span class="c1"># if only 1 configuration is selected, any inner model selection will be skipped</span>
-<span class="n">grid</span><span class="p">:</span>
-  <span class="n">supervised_config</span><span class="p">:</span>
-    <span class="n">model</span><span class="p">:</span>  <span class="c1"># dotted path to model class</span>
-    <span class="n">checkpoint</span><span class="p">:</span>  <span class="c1"># whether to keep a checkpoint of the last epoch to resume training</span>
-    <span class="n">shuffle</span><span class="p">:</span>  <span class="c1"># whether to shuffle the data</span>
-    <span class="n">batch_size</span><span class="p">:</span>  <span class="c1"># batch size</span>
-    <span class="n">epochs</span><span class="p">:</span>  <span class="c1"># number of maximum training epochs</span>
+<span class="c1"># Grid Search</span><span class="w"></span>
+<span class="c1"># if only 1 configuration is selected, any inner model selection will be skipped</span><span class="w"></span>
+<span class="nt">grid</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">supervised_config</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">model</span><span class="p">:</span><span class="w">  </span><span class="c1"># dotted path to model class</span><span class="w"></span>
+<span class="w">    </span><span class="nt">checkpoint</span><span class="p">:</span><span class="w">  </span><span class="c1"># whether to keep a checkpoint of the last epoch to resume training</span><span class="w"></span>
+<span class="w">    </span><span class="nt">shuffle</span><span class="p">:</span><span class="w">  </span><span class="c1"># whether to shuffle the data</span><span class="w"></span>
+<span class="w">    </span><span class="nt">batch_size</span><span class="p">:</span><span class="w">  </span><span class="c1"># batch size</span><span class="w"></span>
+<span class="w">    </span><span class="nt">epochs</span><span class="p">:</span><span class="w">  </span><span class="c1"># number of maximum training epochs</span><span class="w"></span>
 
-    <span class="c1"># Model specific arguments #</span>
+<span class="w">    </span><span class="c1"># Model specific arguments #</span><span class="w"></span>
 
-    <span class="c1"># TBD</span>
+<span class="w">    </span><span class="c1"># TBD</span><span class="w"></span>
 
-    <span class="c1"># ------------------------ #</span>
+<span class="w">    </span><span class="c1"># ------------------------ #</span><span class="w"></span>
 
-    <span class="c1"># Optimizer (with an example - 3 possible alternatives)</span>
-    <span class="n">optimizer</span><span class="p">:</span>
-      <span class="o">-</span> <span class="n">class_name</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">Optimizer</span>
-        <span class="n">args</span><span class="p">:</span>
-          <span class="n">optimizer_class_name</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span>
-          <span class="n">lr</span><span class="p">:</span>
-            <span class="o">-</span> <span class="mf">0.01</span>
-            <span class="o">-</span> <span class="mf">0.001</span>
-          <span class="n">weight_decay</span><span class="p">:</span> <span class="mf">0.</span>
-      <span class="o">-</span> <span class="n">class_name</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">optimizer</span><span class="o">.</span><span class="n">Optimizer</span>
-        <span class="n">args</span><span class="p">:</span>
-          <span class="n">optimizer_class_name</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adagrad</span>
-          <span class="n">lr</span><span class="p">:</span>
-            <span class="o">-</span> <span class="mf">0.1</span>
-          <span class="n">weight_decay</span><span class="p">:</span> <span class="mf">0.</span>
+<span class="w">    </span><span class="c1"># Optimizer (with an example - 3 possible alternatives)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.optimizer.Optimizer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">optimizer_class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">torch.optim.Adam</span><span class="w"></span>
+<span class="w">          </span><span class="nt">lr</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.01</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.001</span><span class="w"></span>
+<span class="w">          </span><span class="nt">weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.optimizer.Optimizer</span><span class="w"></span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">optimizer_class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">torch.optim.Adagrad</span><span class="w"></span>
+<span class="w">          </span><span class="nt">lr</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1</span><span class="w"></span>
+<span class="w">          </span><span class="nt">weight_decay</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.</span><span class="w"></span>
 
-    <span class="c1"># Scheduler (optional)</span>
-    <span class="n">scheduler</span><span class="p">:</span> <span class="n">null</span>
+<span class="w">    </span><span class="c1"># Scheduler (optional)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">scheduler</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
 
-    <span class="c1"># Loss metric (with an example of Additive Loss)</span>
-    <span class="n">loss</span><span class="p">:</span>
-      <span class="o">-</span> <span class="n">class_name</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">AdditiveLoss</span>
-        <span class="n">args</span><span class="p">:</span>
-          <span class="n">loss_1</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">MulticlassClassification</span>
-          <span class="n">loss_2</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">MulticlassClassification</span>
+<span class="w">    </span><span class="c1"># Loss metric (with an example of Additive Loss)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.metric.AdditiveLoss</span><span class="w"></span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">loss_1</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.metric.MulticlassClassification</span><span class="w"></span>
+<span class="w">          </span><span class="nt">loss_2</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.metric.MulticlassClassification</span><span class="w"></span>
 
-    <span class="c1"># Score metric (with an example of Multi Score)</span>
-    <span class="n">scorer</span><span class="p">:</span>
-      <span class="o">-</span> <span class="n">class_name</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">MultiScore</span>
-        <span class="n">args</span><span class="p">:</span>
-          <span class="n">main_scorer</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">MulticlassAccuracy</span>
-          <span class="n">my_second_metric</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">metric</span><span class="o">.</span><span class="n">ToyMetric</span>
+<span class="w">    </span><span class="c1"># Score metric (with an example of Multi Score)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">scorer</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.metric.MultiScore</span><span class="w"></span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">main_scorer</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.metric.MulticlassAccuracy</span><span class="w"></span>
+<span class="w">          </span><span class="nt">my_second_metric</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.metric.ToyMetric</span><span class="w"></span>
 
-    <span class="c1"># Readout (optional)</span>
-    <span class="n">readout</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Readout (optional)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">readout</span><span class="p">:</span><span class="w"></span>
 
-    <span class="c1"># Training engine</span>
-    <span class="n">engine</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">engine</span><span class="o">.</span><span class="n">TrainingEngine</span>
+<span class="w">    </span><span class="c1"># Training engine</span><span class="w"></span>
+<span class="w">    </span><span class="nt">engine</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.engine.TrainingEngine</span><span class="w"></span>
 
-    <span class="c1"># Gradient clipper (optional)</span>
-    <span class="n">gradient_clipper</span><span class="p">:</span> <span class="n">null</span>
+<span class="w">    </span><span class="c1"># Gradient clipper (optional)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">gradient_clipper</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">null</span><span class="w"></span>
 
-    <span class="c1"># Early stopper (optional, with an example of &quot;patience&quot; early stopping on the validation score)</span>
-    <span class="n">early_stopper</span><span class="p">:</span>
-      <span class="o">-</span> <span class="n">class_name</span><span class="p">:</span>
-          <span class="o">-</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">early_stopping</span><span class="o">.</span><span class="n">PatienceEarlyStopper</span>
-        <span class="n">args</span><span class="p">:</span>
-          <span class="n">patience</span><span class="p">:</span>
-            <span class="o">-</span> <span class="mi">5</span>
-          <span class="c1"># SYNTAX: (train_,validation_)[name_of_the_scorer_or_loss_to_monitor] -&gt; we can use MAIN_LOSS or MAIN_SCORE</span>
-          <span class="n">monitor</span><span class="p">:</span> <span class="n">validation_main_score</span>
-          <span class="n">mode</span><span class="p">:</span> <span class="nb">max</span>  <span class="c1"># is best the `max` or the `min` value we are monitoring?</span>
-          <span class="n">checkpoint</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># store the best checkpoint</span>
+<span class="w">    </span><span class="c1"># Early stopper (optional, with an example of &quot;patience&quot; early stopping on the validation score)</span><span class="w"></span>
+<span class="w">    </span><span class="nt">early_stopper</span><span class="p">:</span><span class="w"></span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">class_name</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.early_stopping.PatienceEarlyStopper</span><span class="w"></span>
+<span class="w">        </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">          </span><span class="nt">patience</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
+<span class="w">          </span><span class="c1"># SYNTAX: (train_,validation_)[name_of_the_scorer_or_loss_to_monitor] -&gt; we can use MAIN_LOSS or MAIN_SCORE</span><span class="w"></span>
+<span class="w">          </span><span class="nt">monitor</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">validation_main_score</span><span class="w"></span>
+<span class="w">          </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">max</span><span class="w">  </span><span class="c1"># is best the `max` or the `min` value we are monitoring?</span><span class="w"></span>
+<span class="w">          </span><span class="nt">checkpoint</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># store the best checkpoint</span><span class="w"></span>
 
-    <span class="c1"># Plotter of metrics</span>
-    <span class="n">plotter</span><span class="p">:</span> <span class="n">pydgn</span><span class="o">.</span><span class="n">training</span><span class="o">.</span><span class="n">callback</span><span class="o">.</span><span class="n">plotter</span><span class="o">.</span><span class="n">Plotter</span>
+<span class="w">    </span><span class="c1"># Plotter of metrics</span><span class="w"></span>
+<span class="w">    </span><span class="nt">plotter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.training.callback.plotter.Plotter</span><span class="w"></span>
 </pre></div>
 </div>
 <section id="data-information">
 <h3>Data Information<a class="headerlink" href="#data-information" title="Permalink to this headline"></a></h3>
+<p>Here we can specify some information about the dataset:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">data_root</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATA</span><span class="w"></span>
+<span class="nt">dataset_class</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.data.dataset.TUDatasetInterface</span><span class="w"></span>
+<span class="nt">dataset_name</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">PROTEINS</span><span class="w"></span>
+<span class="nt">data_splits_file</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="hardware">
 <h3>Hardware<a class="headerlink" href="#hardware" title="Permalink to this headline"></a></h3>
+<p>Here we can define how many resources to allocate to parallelize different experiments:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># this will run a maximum of 4 experiments to allocate all of the 2 gpus we have.</span><span class="w"></span>
+<span class="c1"># We use some more cpu resources to take into account potential `data loader workers &lt;https://pytorch.org/docs/stable/data.html#multi-process-data-loading&gt;`_.</span><span class="w"></span>
+<span class="nt">device</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">cuda</span><span class="w"></span>
+<span class="nt">max_cpus</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">8</span><span class="w"></span>
+<span class="nt">max_gpus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="nt">gpus_per_task</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">0.5</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="data-loading">
 <h3>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline"></a></h3>
+<p>Here we specify which <a class="reference internal" href="source/pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a> we want to use to load the data associated with the
+given splits, and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code> that needs to handle such data:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data Loading</span><span class="w"></span>
+<span class="nt">dataset_getter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.data.provider.DataProvider</span><span class="w"></span>
+<span class="nt">data_loader</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="nt">class_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">torch_geometric.loader.DataLoader</span><span class="w"></span>
+<span class="w">  </span><span class="nt">args</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">num_workers </span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">    </span><span class="nt">pin_memory</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w">  </span><span class="c1"># should be True when device is set to `cuda`</span><span class="w"></span>
+</pre></div>
+</div>
 </section>
 <section id="experiment-details">
 <h3>Experiment Details<a class="headerlink" href="#experiment-details" title="Permalink to this headline"></a></h3>
+<p>Here we define the experiment details, including the experiment name and type, and the folder where we want to store
+our results:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
+<p>result_folder: RESULTS
+exp_name: supervised_grid_search_toy
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: True
+evaluate_every: 3
+final_training_runs: 3</p>
 </section>
 <section id="grid-search">
 <h3>Grid Search<a class="headerlink" href="#grid-search" title="Permalink to this headline"></a></h3>
-<p>There is one config file <code class="docutils literal notranslate"><span class="pre">examples/MODEL_CONFIGS/config_SupToyDGN.yml</span></code> that you can check.</p>
+<p>Grid search is identified by the keyword <code class="docutils literal notranslate"><span class="pre">grid</span></code> after the experimental details. This is the easiest setting, in which
+you can define lists associated to an hyper-parameter and all possible combinations will be created. You can even have
+nesting of these combinations for maximum flexibility.</p>
+<p>There is one config file <code class="docutils literal notranslate"><span class="pre">examples/MODEL_CONFIGS/config_SupToyDGN.yml</span></code> that you can check to get a better idea.</p>
 </section>
 <section id="random-search">
 <h3>Random Search<a class="headerlink" href="#random-search" title="Permalink to this headline"></a></h3>
-<p>Specify a <code class="docutils literal notranslate"><span class="pre">num_samples</span></code> in the config file with the number of random trials, replace <code class="docutils literal notranslate"><span class="pre">grid</span></code>
-with <code class="docutils literal notranslate"><span class="pre">random</span></code>, and specify a sampling method for each hyper-parameter. We provide different sampling methods:</p>
-<ul class="simple">
+<p>Random search, on the other hand, is identified by the keyword <code class="docutils literal notranslate"><span class="pre">random</span></code> after the experimental details. One line above
+we have to specify the number of random trials, using the keyword <code class="docutils literal notranslate"><span class="pre">num_samples</span></code>.</p>
+<dl class="simple">
+<dt>We provide different sampling methods:</dt><dd><ul class="simple">
 <li><p>choice –&gt; pick at random from a list of arguments</p></li>
 <li><p>uniform –&gt; pick uniformly from min and max arguments</p></li>
 <li><p>normal –&gt; sample from normal distribution with mean and std</p></li>
 <li><p>randint –&gt; pick at random from min and max</p></li>
 <li><p>loguniform –&gt; pick following the recprocal distribution from log_min, log_max, with a specified base</p></li>
 </ul>
-<p>There is one config file <code class="docutils literal notranslate"><span class="pre">examples/MODEL_CONFIGS/config_SupToyDGN_RandomSearch.yml</span></code> that you can check.</p>
+</dd>
+</dl>
+<p>There is one config file <code class="docutils literal notranslate"><span class="pre">examples/MODEL_CONFIGS/config_SupToyDGN_RandomSearch.yml</span></code> that you can check to get a better idea.</p>
 </section>
 <section id="experiment">
 <h3>Experiment<a class="headerlink" href="#experiment" title="Permalink to this headline"></a></h3>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;This example demonstrates a simple BLE client that scans for devices,</span>
-<span class="sd">connects to a device (GATT server) of choice and continuously reads a characteristic on that device.</span>
+<p>Depending on the experiment type, different main keywords are required:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><a class="reference internal" href="source/pydgn.experiment.html#pydgn.experiment.supervised_task.SupervisedTask" title="pydgn.experiment.supervised_task.SupervisedTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">SupervisedTask</span></code></a> -&gt; <code class="docutils literal notranslate"><span class="pre">supervised_config</span></code></p></li>
+<li><p><a class="reference internal" href="source/pydgn.experiment.html#pydgn.experiment.semi_supervised_task.SemiSupervisedTask" title="pydgn.experiment.semi_supervised_task.SemiSupervisedTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">SemiSupervisedTask</span></code></a> -&gt; <code class="docutils literal notranslate"><span class="pre">unsupervised_config</span></code> and <code class="docutils literal notranslate"><span class="pre">supervised_config</span></code></p></li>
+</ul>
+</div></blockquote>
+<p>Note that an <strong>unsupervised</strong> task may be seen as a supervised task with a loss objective that does not depend on the target.
+In the <strong>supervised</strong> task, we have the “standard” training procedure. In the <strong>semi-supervised</strong> task, we expect a first
+training phase which is unsupervised and that can produce node/graph embeddings. After that, a second, supervised model
+is trained on such embeddings, but adjacency information is not preserved in this second stage.</p>
+<p>Inside the dictionary associated to the keyword <code class="docutils literal notranslate"><span class="pre">[un]supervised_config</span></code>, we expect another number of keywords to be
+present:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">model</span><span class="p">:</span><span class="w">  </span><span class="c1"># dotted path to model class</span><span class="w"></span>
+<span class="nt">checkpoint</span><span class="p">:</span><span class="w">  </span><span class="c1"># whether to keep a checkpoint of the last epoch to resume training</span><span class="w"></span>
+<span class="nt">shuffle</span><span class="p">:</span><span class="w">  </span><span class="c1"># whether to shuffle the data</span><span class="w"></span>
+<span class="nt">batch_size</span><span class="p">:</span><span class="w"></span>
+<span class="nt">epochs</span><span class="p">:</span><span class="w">  </span><span class="c1"># number of maximum training epochs</span><span class="w"></span>
 
-<span class="sd">The GATT Server in this example runs on an ESP32 with Arduino. For the</span>
-<span class="sd">exact script used for this example see `here &lt;https://github.com/nkolban/ESP32_BLE_Arduino/blob/6bad7b42a96f0aa493323ef4821a8efb0e8815f2/examples/BLE_notify/BLE_notify.ino/&gt;`_</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Model specific arguments #</span><span class="w"></span>
 
-<span class="kn">from</span> <span class="nn">bluepy.btle</span> <span class="kn">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">simpleble</span> <span class="kn">import</span> <span class="n">SimpleBleClient</span><span class="p">,</span> <span class="n">SimpleBleDevice</span>
+<span class="c1"># ------------------------ #</span><span class="w"></span>
 
-<span class="c1"># The UUID of the characteristic we want to read and the name of the device # we want to read it from</span>
-<span class="n">Characteristic_UUID</span> <span class="o">=</span> <span class="s2">&quot;beb5483e-36e1-4688-b7f5-ea07361b26a8&quot;</span>
-<span class="n">Device_Name</span> <span class="o">=</span> <span class="s2">&quot;MyESP32&quot;</span>
-
-<span class="c1"># Define our scan and notification callback methods</span>
-<span class="k">def</span> <span class="nf">myScanCallback</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">isNewDevice</span><span class="p">,</span> <span class="n">isNewData</span><span class="p">):</span>
-    <span class="n">client</span><span class="o">.</span><span class="n">_yes</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;#MAC: &quot;</span> <span class="o">+</span> <span class="n">device</span><span class="o">.</span><span class="n">addr</span> <span class="o">+</span> <span class="s2">&quot; #isNewDevice: &quot;</span> <span class="o">+</span>
-        <span class="nb">str</span><span class="p">(</span><span class="n">isNewDevice</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; #isNewData: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">isNewData</span><span class="p">))</span>
-<span class="c1"># TODO: NOTIFICATIONS ARE NOT SUPPORTED YET</span>
-<span class="c1"># def myNotificationCallback(client, characteristic, data):</span>
-<span class="c1">#     print(&quot;Notification received!&quot;)</span>
-<span class="c1">#     print(&quot;  Characteristic UUID: &quot; + characteristic.uuid)</span>
-<span class="c1">#     print(&quot;  Data: &quot; + str(data))</span>
-
-<span class="c1"># Instantiate a SimpleBleClient and set it&#39;s scan callback</span>
-<span class="n">bleClient</span> <span class="o">=</span> <span class="n">SimpleBleClient</span><span class="p">()</span>
-<span class="n">bleClient</span><span class="o">.</span><span class="n">setScanCallback</span><span class="p">(</span><span class="n">myScanCallback</span><span class="p">)</span>
-<span class="c1"># TODO: NOTIFICATIONS ARE NOT SUPPORTED YET</span>
-<span class="c1"># bleClient.setNotificationCallback(myNotificationCollback)</span>
-
-<span class="c1"># Error handling to detect Keyboard interrupt (Ctrl+C)</span>
-<span class="c1"># Loop to ensure we can survive connection drops</span>
-<span class="k">while</span><span class="p">(</span><span class="ow">not</span> <span class="n">bleClient</span><span class="o">.</span><span class="n">isConnected</span><span class="p">()):</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Search for 2 seconds and return a device of interest if found.</span>
-        <span class="c1"># Internally this makes a call to bleClient.scan(timeout), thus</span>
-        <span class="c1"># triggering the scan callback method when nearby devices are detected</span>
-        <span class="n">device</span> <span class="o">=</span> <span class="n">bleClient</span><span class="o">.</span><span class="n">searchDevice</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;MyESP32&quot;</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">device</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="c1"># If the device was found print out it&#39;s info</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Found device!!&quot;</span><span class="p">)</span>
-            <span class="n">device</span><span class="o">.</span><span class="n">printInfo</span><span class="p">()</span>
-
-            <span class="c1"># Proceed to connect to the device</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Proceeding to connect....&quot;</span><span class="p">)</span>
-            <span class="k">if</span><span class="p">(</span><span class="n">bleClient</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">device</span><span class="p">)):</span>
-
-                <span class="c1"># Have a peek at the services provided by the device</span>
-                <span class="n">services</span> <span class="o">=</span> <span class="n">device</span><span class="o">.</span><span class="n">getServices</span><span class="p">()</span>
-                <span class="k">for</span> <span class="n">service</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service [&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">uuid</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;]&quot;</span><span class="p">)</span>
-
-                <span class="c1"># Check to see if the device provides a characteristic with the</span>
-                <span class="c1"># desired UUID</span>
-                <span class="n">counter</span> <span class="o">=</span> <span class="n">bleClient</span><span class="o">.</span><span class="n">getCharacteristics</span><span class="p">(</span>
-                    <span class="n">uuids</span><span class="o">=</span><span class="p">[</span><span class="n">Characteristic_UUID</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">if</span><span class="p">(</span><span class="n">counter</span><span class="p">):</span>
-                    <span class="c1"># If it does, then we proceed to read its value every second</span>
-                    <span class="k">while</span><span class="p">(</span><span class="kc">True</span><span class="p">):</span>
-                        <span class="c1"># Error handling ensures that we can survive from</span>
-                        <span class="c1"># potential connection drops</span>
-                        <span class="k">try</span><span class="p">:</span>
-                            <span class="c1"># Read the data as bytes and convert to string</span>
-                            <span class="n">data_bytes</span> <span class="o">=</span> <span class="n">bleClient</span><span class="o">.</span><span class="n">readCharacteristic</span><span class="p">(</span>
-                                <span class="n">counter</span><span class="p">)</span>
-                            <span class="n">data_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">chr</span><span class="p">,</span> <span class="n">data_bytes</span><span class="p">))</span>
-
-                            <span class="c1"># Now print the data and wait for a second</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data: &quot;</span> <span class="o">+</span> <span class="n">data_str</span><span class="p">)</span>
-                            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-                        <span class="k">except</span> <span class="n">BTLEException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                            <span class="c1"># If we get disconnected from the device, keep</span>
-                            <span class="c1"># looping until we have reconnected</span>
-                            <span class="k">if</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">BTLEException</span><span class="o">.</span><span class="n">DISCONNECTED</span><span class="p">):</span>
-                                <span class="n">bleClient</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-                                <span class="nb">print</span><span class="p">(</span>
-                                    <span class="s2">&quot;Connection to BLE device has been lost!&quot;</span><span class="p">)</span>
-                                <span class="k">break</span>
-                                <span class="c1"># while(not bleClient.isConnected()):</span>
-                                <span class="c1">#     bleClient.connect(device)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Could not connect to device! Retrying in 3 sec...&quot;</span><span class="p">)</span>
-                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Device not found! Retrying in 3 sec...&quot;</span><span class="p">)</span>
-            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">3.0</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">BTLEException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># If we get disconnected from the device, keep</span>
-        <span class="c1"># looping until we have reconnected</span>
-        <span class="k">if</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">BTLEException</span><span class="o">.</span><span class="n">DISCONNECTED</span><span class="p">):</span>
-            <span class="n">bleClient</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="s2">&quot;Connection to BLE device has been lost!&quot;</span><span class="p">)</span>
-            <span class="k">break</span>
-    <span class="k">except</span> <span class="ne">KeyboardInterrupt</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="c1"># Detect keyboard interrupt and close down</span>
-        <span class="c1"># bleClient gracefully</span>
-        <span class="n">bleClient</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
-        <span class="k">raise</span> <span class="n">e</span>
+<span class="nt">optimizer</span><span class="p">:</span><span class="w"></span>
+<span class="nt">scheduler</span><span class="p">:</span><span class="w">  </span><span class="c1"># (can be &quot;null&quot;)</span><span class="w"></span>
+<span class="nt">loss</span><span class="p">:</span><span class="w"></span>
+<span class="nt">scorer</span><span class="p">:</span><span class="w"></span>
+<span class="nt">readout</span><span class="p">:</span><span class="w">   </span><span class="c1"># (can be &quot;null&quot;)</span><span class="w"></span>
+<span class="nt">engine</span><span class="p">:</span><span class="w">  </span><span class="c1"># training engine</span><span class="w"></span>
+<span class="nt">gradient_clipper</span><span class="p">:</span><span class="w">  </span><span class="c1"># (can be &quot;null&quot;)</span><span class="w"></span>
+<span class="nt">early_stopper</span><span class="p">:</span><span class="w">   </span><span class="c1"># (can be &quot;null&quot;)</span><span class="w"></span>
+<span class="nt">plotter</span><span class="p">:</span><span class="w">   </span><span class="c1"># (can be &quot;null&quot;)</span><span class="w"></span>
+</pre></div>
+</div>
+<p>Once our experiment configuration file is ready, we can launch an experiment using (see below for an example)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
 </pre></div>
 </div>
 </section>
