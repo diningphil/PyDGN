@@ -1,7 +1,5 @@
 # PyDGN
 
-## [Wiki](https://github.com/diningphil/PyDGN/wiki)
-
 ## Description
 
 ![](https://github.com/diningphil/PyDGN/blob/master/images/pydgn-logo.png)
