@@ -270,12 +270,12 @@ our results:
 
 .. code-block:: yaml
 
-result_folder: RESULTS
-exp_name: supervised_grid_search_toy
-experiment: pydgn.experiment.supervised_task.SupervisedTask
-higher_results_are_better: True
-evaluate_every: 3
-final_training_runs: 3
+    result_folder: RESULTS
+    exp_name: supervised_grid_search_toy
+    experiment: pydgn.experiment.supervised_task.SupervisedTask
+    higher_results_are_better: True
+    evaluate_every: 3
+    final_training_runs: 3
 
 
 Grid Search
