@@ -12,6 +12,14 @@ pydgn.model.dgn.toy\_dgn module
    :undoc-members:
    :show-inheritance:
 
+pydgn.model.dgn.toy\_mlp module
+-------------------------------
+
+.. automodule:: pydgn.model.dgn.toy_mlp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

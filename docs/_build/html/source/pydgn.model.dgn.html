@@ -53,6 +53,7 @@
 <li class="toctree-l3 current"><a class="current reference internal" href="#">pydgn.model.dgn package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.dgn.toy_dgn">pydgn.model.dgn.toy_dgn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.dgn.toy_mlp">pydgn.model.dgn.toy_mlp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.model.dgn">Module contents</a></li>
 </ul>
 </li>
@@ -121,6 +122,35 @@
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.model.dgn.toy_dgn.ToyDGN.training">
 <span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.dgn.toy_dgn.ToyDGN.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.model.dgn.toy_mlp">
+<span id="pydgn-model-dgn-toy-mlp-module"></span><h2>pydgn.model.dgn.toy_mlp module<a class="headerlink" href="#module-pydgn.model.dgn.toy_mlp" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.model.dgn.toy_mlp.ToyMLP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.dgn.toy_mlp.</span></span><span class="sig-name descname"><span class="pre">ToyMLP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.dgn.toy_mlp.ToyMLP" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.model.ModelInterface</span></code></a></p>
+<p>A toy MLP model used to test the library. Technically, a DGN that ignores the adjacency matrix.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.model.dgn.toy_mlp.ToyMLP.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch_geometric.data.batch.Batch</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.model.dgn.toy_mlp.ToyMLP.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Performs a forward pass over a batch of graphs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Batch</span></code>) – a batch of graphs</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple (model’s output, [optional] node embeddings, [optional] additional outputs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.model.dgn.toy_mlp.ToyMLP.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.dgn.toy_mlp.ToyMLP.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

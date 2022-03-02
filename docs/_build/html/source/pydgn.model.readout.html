@@ -168,76 +168,31 @@
 <section id="module-pydgn.model.readout.node_readout">
 <span id="pydgn-model-readout-node-readout-module"></span><h2>pydgn.model.readout.node_readout module<a class="headerlink" href="#module-pydgn.model.readout.node_readout" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.IdentityNodeReadout">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.node_readout.</span></span><span class="sig-name descname"><span class="pre">IdentityNodeReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.IdentityNodeReadout" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pydgn.model.readout.node_readout.NodeReadout" title="pydgn.model.readout.node_readout.NodeReadout"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.readout.node_readout.NodeReadout</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.IdentityNodeReadout.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.IdentityNodeReadout.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.IdentityNodeReadout.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.node_readout.IdentityNodeReadout.training" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
 <dt class="sig sig-object py" id="pydgn.model.readout.node_readout.LinearNodeReadout">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.node_readout.</span></span><span class="sig-name descname"><span class="pre">LinearNodeReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="#pydgn.model.readout.node_readout.NodeReadout" title="pydgn.model.readout.node_readout.NodeReadout"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.readout.node_readout.NodeReadout</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ReadoutInterface" title="pydgn.model.model.ReadoutInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.model.model.ReadoutInterface</span></code></a></p>
+<p>Class that implements a simple readout mapping for node prediction</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.model.readout.node_readout.LinearNodeReadout.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Performs a forward pass over a batch of graphs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_embeddings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Batch</span></code>) – the node embeddings</p></li>
+<li><p><strong>batch</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – the usual <code class="docutils literal notranslate"><span class="pre">batch</span></code> object of PyG</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – additional and optional arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple (model’s output, [optional] node embeddings, [optional] additional outputs</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.model.readout.node_readout.LinearNodeReadout.training">
 <span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.node_readout.LinearNodeReadout.training" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.NodeReadout">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.readout.node_readout.</span></span><span class="sig-name descname"><span class="pre">NodeReadout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.NodeReadout" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.NodeReadout.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.readout.node_readout.NodeReadout.forward" title="Permalink to this definition"></a></dt>
-<dd><p>Defines the computation performed at every call.</p>
-<p>Should be overridden by all subclasses.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Although the recipe for forward pass needs to be defined within
-this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
-instead of this since the former takes care of running the
-registered hooks while the latter silently ignores them.</p>
-</div>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.readout.node_readout.NodeReadout.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.readout.node_readout.NodeReadout.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>

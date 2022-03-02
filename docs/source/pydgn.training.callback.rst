@@ -23,7 +23,7 @@ pydgn.training.callback.engine\_callback module
 pydgn.training.callback.gradient\_clipping module
 -------------------------------------------------
 
-.. automodule:: pydgn.training.callback.gradient_clipper
+.. automodule:: pydgn.training.callback.gradient_clipping
    :members:
    :undoc-members:
    :show-inheritance:

@@ -48,7 +48,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.evaluation package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.config">pydgn.evaluation.config module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pydgn-evaluation-evaluator-module">pydgn.evaluation.evaluator module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.evaluator">pydgn.evaluation.evaluator module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.grid">pydgn.evaluation.grid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.random_search">pydgn.evaluation.random_search module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pydgn.evaluation.util">pydgn.evaluation.util module</a></li>
@@ -127,24 +127,134 @@
 </dd></dl>
 
 </section>
-<section id="pydgn-evaluation-evaluator-module">
-<h2>pydgn.evaluation.evaluator module<a class="headerlink" href="#pydgn-evaluation-evaluator-module" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.evaluation.evaluator">
+<span id="pydgn-evaluation-evaluator-module"></span><h2>pydgn.evaluation.evaluator module<a class="headerlink" href="#module-pydgn.evaluation.evaluator" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.evaluator.</span></span><span class="sig-name descname"><span class="pre">RiskAssesser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">experiment_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pydgn.experiment.html#pydgn.experiment.experiment.Experiment" title="pydgn.experiment.experiment.Experiment"><span class="pre">pydgn.experiment.experiment.Experiment</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits_filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pydgn.evaluation.grid.Grid" title="pydgn.evaluation.grid.Grid"><span class="pre">pydgn.evaluation.grid.Grid</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pydgn.evaluation.random_search.RandomSearch" title="pydgn.evaluation.random_search.RandomSearch"><span class="pre">pydgn.evaluation.random_search.RandomSearch</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_training_runs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">higher_is_better</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gpus_per_task</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">42</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class implementing a K-Fold technique to do Risk Assessment  (estimate of the true generalization performances)
+and K-Fold Model Selection (select the best hyper-parameters for <strong>each</strong> external fold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outer_folds</strong> (<em>int</em>) – The number K of outer TEST folds. You should have generated the splits accordingly</p></li>
+<li><p><strong>outer_folds</strong> – The number K of inner VALIDATION folds. You should have generated the splits accordingly</p></li>
+<li><p><strong>experiment_class</strong> (Callable[…, <a class="reference internal" href="pydgn.experiment.html#pydgn.experiment.experiment.Experiment" title="pydgn.experiment.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">Experiment</span></code></a>]) – the experiment class to be instantiated</p></li>
+<li><p><strong>exp_path</strong> (<em>str</em>) – The folder in which to store <strong>all</strong> results</p></li>
+<li><p><strong>splits_filepath</strong> (<em>str</em>) – The splits filepath with additional meta information</p></li>
+<li><p><strong>model_configs</strong> (Union[<a class="reference internal" href="#pydgn.evaluation.grid.Grid" title="pydgn.evaluation.grid.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Grid</span></code></a>, <a class="reference internal" href="#pydgn.evaluation.random_search.RandomSearch" title="pydgn.evaluation.random_search.RandomSearch"><code class="xref py py-class docutils literal notranslate"><span class="pre">RandomSearch</span></code></a>]) – an object storing all possible model configurations, e.g. config.base.Grid</p></li>
+<li><p><strong>final_training_runs</strong> (<em>int</em>) – no of final training runs to mitigate bad initializations</p></li>
+<li><p><strong>higher_is_better</strong> (<em>bool</em>) – whether or not the best model for each external fold should be selected by higher or lower score values</p></li>
+<li><p><strong>gpus_per_task</strong> (<em>float</em>) – Number of gpus to assign to each experiment. Can be &lt; <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p></li>
+<li><p><strong>base_seed</strong> (<em>int</em>) – Seed used to generate experiments seeds. Used to replicate results. Default is <code class="docutils literal notranslate"><span class="pre">42</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.model_selection">
+<span class="sig-name descname"><span class="pre">model_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kfold_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.model_selection" title="Permalink to this definition"></a></dt>
+<dd><p>Performs model selection.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>kfold_folder</strong> – The root folder for model selection</p></li>
+<li><p><strong>outer_k</strong> – the current outer fold to consider</p></li>
+<li><p><strong>debug</strong> – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, sequential execution is performed and logs are printed to screen</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.process_config">
+<span class="sig-name descname"><span class="pre">process_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.evaluation.config.Config" title="pydgn.evaluation.config.Config"><span class="pre">pydgn.evaluation.config.Config</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.process_config" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the best configuration for each external fold and stores it into a file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config_folder</strong> (<em>str</em>) – </p></li>
+<li><p><strong>config</strong> (<a class="reference internal" href="#pydgn.evaluation.config.Config" title="pydgn.evaluation.config.Config"><code class="xref py py-class docutils literal notranslate"><span class="pre">Config</span></code></a>) – the configuration object</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.process_final_runs">
+<span class="sig-name descname"><span class="pre">process_final_runs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outer_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.process_final_runs" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the average scores for the final runs of a specific outer fold</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>outer_k</strong> (<em>int</em>) – id of the outer fold from 0 to K-1</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.process_inner_results">
+<span class="sig-name descname"><span class="pre">process_inner_results</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_configurations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.process_inner_results" title="Permalink to this definition"></a></dt>
+<dd><p>Chooses the best hyper-parameters configuration using the HIGHEST validation mean score.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – a folder which holds all configurations results after K INNER folds</p></li>
+<li><p><strong>no_configurations</strong> (<em>int</em>) – number of possible configurations</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.process_outer_results">
+<span class="sig-name descname"><span class="pre">process_outer_results</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.process_outer_results" title="Permalink to this definition"></a></dt>
+<dd><p>Aggregates Outer Folds results and compute Training and Test mean/std</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.risk_assessment">
+<span class="sig-name descname"><span class="pre">risk_assessment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.risk_assessment" title="Permalink to this definition"></a></dt>
+<dd><p>Performs risk assessment to evaluate the performances of a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>debug</strong> – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, sequential execution is performed and logs are printed to screen</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.run_final_model">
+<span class="sig-name descname"><span class="pre">run_final_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outer_k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.run_final_model" title="Permalink to this definition"></a></dt>
+<dd><p>Performs the final runs once the best model for outer fold <code class="docutils literal notranslate"><span class="pre">outer_k</span></code> has been chosen.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outer_k</strong> (<em>int</em>) – the current outer fold to consider</p></li>
+<li><p><strong>debug</strong> (<em>bool</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, sequential execution is performed and logs are printed to screen</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.evaluation.evaluator.RiskAssesser.wait_configs">
+<span class="sig-name descname"><span class="pre">wait_configs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.evaluator.RiskAssesser.wait_configs" title="Permalink to this definition"></a></dt>
+<dd><p>Waits for configurations to terminate and updates the state of the progress manager</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-pydgn.evaluation.grid">
 <span id="pydgn-evaluation-grid-module"></span><h2>pydgn.evaluation.grid module<a class="headerlink" href="#module-pydgn.evaluation.grid" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.evaluation.grid.Grid">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.grid.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">configs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.grid.Grid" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.grid.</span></span><span class="sig-name descname"><span class="pre">Grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.grid.Grid" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class that implements grid-search. It computes all possible configurations starting from a suitable config file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_root</strong> (<em>str</em>) – the root directory in which the dataset is stored</p></li>
-<li><p><strong>dataset_class</strong> (Callable[…, <a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>]) – class of the dataset to use</p></li>
-<li><p><strong>dataset_name</strong> (<em>str</em>) – the name of the dataset</p></li>
-<li><p><strong>configs_dict</strong> (<em>dict</em>) – the configuration dictionary specifying the different configurations to try</p></li>
-</ul>
+<dd class="field-odd"><p><strong>configs_dict</strong> (<em>dict</em>) – the configuration dictionary specifying the different configurations to try</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -176,41 +286,14 @@
 <span id="pydgn-evaluation-random-search-module"></span><h2>pydgn.evaluation.random_search module<a class="headerlink" href="#module-pydgn.evaluation.random_search" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.evaluation.random_search.RandomSearch">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.random_search.</span></span><span class="sig-name descname"><span class="pre">RandomSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">configs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.random_search.</span></span><span class="sig-name descname"><span class="pre">RandomSearch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configs_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.evaluation.grid.Grid" title="pydgn.evaluation.grid.Grid"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.evaluation.grid.Grid</span></code></a></p>
 <p>Class that implements random-search. It computes all possible configurations starting from a suitable config file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>data_root</strong> (<em>str</em>) – the root directory in which the dataset is stored</p></li>
-<li><p><strong>dataset_class</strong> (Callable[…, <a class="reference internal" href="pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>]) – class of the dataset to use</p></li>
-<li><p><strong>dataset_name</strong> (<em>str</em>) – the name of the dataset</p></li>
-<li><p><strong>configs_dict</strong> (<em>dict</em>) – the configuration dictionary specifying the different configurations to try</p></li>
-</ul>
+<dd class="field-odd"><p><strong>configs_dict</strong> (<em>dict</em>) – the configuration dictionary specifying the different configurations to try</p>
 </dd>
 </dl>
-<dl class="py property">
-<dt class="sig sig-object py" id="pydgn.evaluation.random_search.RandomSearch.exp_name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">exp_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch.exp_name" title="Permalink to this definition"></a></dt>
-<dd><p>Computes the name of the root folder</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the name of the root folder as made of MODEL-NAME_DATASET-NAME</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pydgn.evaluation.random_search.RandomSearch.num_configs">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">num_configs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#pydgn.evaluation.random_search.RandomSearch.num_configs" title="Permalink to this definition"></a></dt>
-<dd><p>Computes the number of configurations to try during model selection</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>the number of configurations</p>
-</dd>
-</dl>
-</dd></dl>
-
 </dd></dl>
 
 </section>
@@ -297,6 +380,24 @@ is received</p>
 <dt class="sig sig-object py" id="pydgn.evaluation.util.randint">
 <span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">randint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.evaluation.util.randint" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.evaluation.util.return_class_and_args">
+<span class="sig-prename descclassname"><span class="pre">pydgn.evaluation.util.</span></span><span class="sig-name descname"><span class="pre">return_class_and_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.evaluation.util.return_class_and_args" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the class and arguments associated to a specific key in the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – the configuration dictionary</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – a string representing a particular class in the configuration dictionary</p></li>
+<li><p><strong>return_class_name</strong> (<em>bool</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, returns the class name as a string rather than the class object</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple (class, dict of arguments), or (None, None) if the key is not present in the config dictionary</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="pydgn.evaluation.util.set_gpus">

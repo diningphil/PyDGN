@@ -17,6 +17,22 @@ Subpackages
 Submodules
 ----------
 
+pydgn.build\_dataset module
+---------------------------
+
+.. automodule:: pydgn.build_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+pydgn.launch\_experiment module
+-------------------------------
+
+.. automodule:: pydgn.launch_experiment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 pydgn.static module
 -------------------
 

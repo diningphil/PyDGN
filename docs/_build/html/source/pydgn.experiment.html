@@ -48,9 +48,9 @@
 <li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation package</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.experiment package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pydgn-experiment-experiment-module">pydgn.experiment.experiment module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pydgn-experiment-semi-supervised-task-module">pydgn.experiment.semi_supervised_task module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pydgn-experiment-supervised-task-module">pydgn.experiment.supervised_task module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.experiment.experiment">pydgn.experiment.experiment module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.experiment.semi_supervised_task">pydgn.experiment.semi_supervised_task module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.experiment.supervised_task">pydgn.experiment.supervised_task module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pydgn.experiment.util">pydgn.experiment.util module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-pydgn.experiment">Module contents</a></li>
 </ul>
@@ -89,14 +89,324 @@
 <section id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
 </section>
-<section id="pydgn-experiment-experiment-module">
-<h2>pydgn.experiment.experiment module<a class="headerlink" href="#pydgn-experiment-experiment-module" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.experiment.experiment">
+<span id="pydgn-experiment-experiment-module"></span><h2>pydgn.experiment.experiment module<a class="headerlink" href="#module-pydgn.experiment.experiment" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.experiment.experiment.</span></span><span class="sig-name descname"><span class="pre">Experiment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that handles a single experiment.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_configuration</strong> (<em>dict</em>) – the dictionary holding the experiment-specific configuration</p></li>
+<li><p><strong>exp_path</strong> (<em>str</em>) – path to the experiment folder</p></li>
+<li><p><strong>exp_seed</strong> (<em>int</em>) – the experiment’s seed to use</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_incremental_engine">
+<span class="sig-name descname"><span class="pre">create_incremental_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.training.html#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><span class="pre">pydgn.training.engine.TrainingEngine</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_incremental_engine" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates the training engine by using the <code class="docutils literal notranslate"><span class="pre">layer_config</span></code> key in the config file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> – the  model that needs be trained</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="pydgn.training.html#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingEngine</span></code></a> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_incremental_model">
+<span class="sig-name descname"><span class="pre">create_incremental_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_outputs_to_consider</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_incremental_model" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates a layer of an incremental architecture. It assumes the config file has a field <code class="docutils literal notranslate"><span class="pre">layer_config</span></code>
+and another <code class="docutils literal notranslate"><span class="pre">layer_config.arbitrary_function_config</span></code> that holds any kind of information for the arbitrary
+function of an incremental architecture</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim_node_features</strong> – input node features</p></li>
+<li><p><strong>dim_edge_features</strong> – input edge features</p></li>
+<li><p><strong>dim_target</strong> – target size</p></li>
+<li><p><strong>depth</strong> – current depth of the architecture</p></li>
+<li><p><strong>prev_outputs_to_consider</strong> – A list of previous layers to consider, e.g. [1,2] means the last two previous layers.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a layer of a model that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a> interface</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_supervised_engine">
+<span class="sig-name descname"><span class="pre">create_supervised_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.training.html#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><span class="pre">pydgn.training.engine.TrainingEngine</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_supervised_engine" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates the training engine by using the <code class="docutils literal notranslate"><span class="pre">supervised_config</span></code> key in the config file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> – the  model that needs be trained</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="pydgn.training.html#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingEngine</span></code></a> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_supervised_model">
+<span class="sig-name descname"><span class="pre">create_supervised_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_supervised_model" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates a <strong>supervised</strong> model that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a> interface,
+using the <code class="docutils literal notranslate"><span class="pre">supervised_config</span></code> field in the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim_node_features</strong> (<em>int</em>) – number of node features</p></li>
+<li><p><strong>dim_edge_features</strong> (<em>int</em>) – number of edge features</p></li>
+<li><p><strong>dim_target</strong> (<em>int</em>) – target dimension</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a model that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a> interface</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_supervised_readout">
+<span class="sig-name descname"><span class="pre">create_supervised_readout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ReadoutInterface" title="pydgn.model.model.ReadoutInterface"><span class="pre">pydgn.model.model.ReadoutInterface</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_supervised_readout" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates an <strong>supervised</strong> readout that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ReadoutInterface" title="pydgn.model.model.ReadoutInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadoutInterface</span></code></a> interface,
+using the <code class="docutils literal notranslate"><span class="pre">supervised_config</span></code> field in the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim_node_features</strong> (<em>int</em>) – number of node features</p></li>
+<li><p><strong>dim_edge_features</strong> (<em>int</em>) – number of edge features</p></li>
+<li><p><strong>dim_target</strong> (<em>int</em>) – target dimension</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a model that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ReadoutInterface" title="pydgn.model.model.ReadoutInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReadoutInterface</span></code></a> interface</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_unsupervised_engine">
+<span class="sig-name descname"><span class="pre">create_unsupervised_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.training.html#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><span class="pre">pydgn.training.engine.TrainingEngine</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_unsupervised_engine" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates the training engine by using the <code class="docutils literal notranslate"><span class="pre">unsupervised_config</span></code> key in the config file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>model</strong> – the  model that needs be trained</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="pydgn.training.html#pydgn.training.engine.TrainingEngine" title="pydgn.training.engine.TrainingEngine"><code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingEngine</span></code></a> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.create_unsupervised_model">
+<span class="sig-name descname"><span class="pre">create_unsupervised_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.create_unsupervised_model" title="Permalink to this definition"></a></dt>
+<dd><p>Instantiates an <strong>unsupervised</strong> model that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a> interface,
+using the <code class="docutils literal notranslate"><span class="pre">unsupervised_config</span></code> field in the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim_node_features</strong> (<em>int</em>) – number of node features</p></li>
+<li><p><strong>dim_edge_features</strong> (<em>int</em>) – number of edge features</p></li>
+<li><p><strong>dim_target</strong> (<em>int</em>) – target dimension</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a model that implements the <a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a> interface</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.run_test">
+<span class="sig-name descname"><span class="pre">run_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_getter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><span class="pre">pydgn.data.provider.DataProvider</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><span class="pre">pydgn.log.logger.Logger</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.run_test" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the training, validation and test results for a <cite>final run</cite>. <strong>Do not use the test to train the model nor for early stopping reasons!</strong>
+<strong>If possible, rely on already available subclasses of this class</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_getter</strong> (<a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) – a data provider</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – the logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LOSS</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCORE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<p>For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a tuple of training,validation,test dictionaries. Each dictionary has two keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.experiment.Experiment.run_valid">
+<span class="sig-name descname"><span class="pre">run_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_getter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.experiment.experiment.Experiment.run_valid" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the training and validation results for a <cite>model selection run</cite>. <strong>Do not attempt to load the set inside this method!</strong>
+<strong>If possible, rely on already available subclasses of this class</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_getter</strong> (<a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) – a data provider</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – the logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LOSS</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCORE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<p>For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a tuple of training and test dictionaries. Each dictionary has two keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="pydgn-experiment-semi-supervised-task-module">
-<h2>pydgn.experiment.semi_supervised_task module<a class="headerlink" href="#pydgn-experiment-semi-supervised-task-module" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.experiment.semi_supervised_task">
+<span id="pydgn-experiment-semi-supervised-task-module"></span><h2>pydgn.experiment.semi_supervised_task module<a class="headerlink" href="#module-pydgn.experiment.semi_supervised_task" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.experiment.semi_supervised_task.SemiSupervisedTask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.experiment.semi_supervised_task.</span></span><span class="sig-name descname"><span class="pre">SemiSupervisedTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_configuration</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_seed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.semi_supervised_task.SemiSupervisedTask" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.experiment.experiment.Experiment" title="pydgn.experiment.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.experiment.experiment.Experiment</span></code></a></p>
+<p>Class that implements a semi-supervised experiment. There is an <code class="docutils literal notranslate"><span class="pre">unsupervised_config</span></code> field in the configuration
+file that is used, together with the field <code class="docutils literal notranslate"><span class="pre">model</span></code>, to produce unsupervised embeddings. These are later used
+by a <strong>readout</strong> extracted from a <code class="docutils literal notranslate"><span class="pre">supervised_config</span></code> field in the configuration file to perform the supervised
+task.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.semi_supervised_task.SemiSupervisedTask.run_test">
+<span class="sig-name descname"><span class="pre">run_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_getter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.semi_supervised_task.SemiSupervisedTask.run_test" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the training, validation and test results for a <cite>final run</cite>. <strong>Do not use the test to train the model nor for early stopping reasons!</strong>
+<strong>If possible, rely on already available subclasses of this class</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_getter</strong> (<a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) – a data provider</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – the logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LOSS</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCORE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<p>For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a tuple of training,validation,test dictionaries. Each dictionary has two keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.semi_supervised_task.SemiSupervisedTask.run_valid">
+<span class="sig-name descname"><span class="pre">run_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_getter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.semi_supervised_task.SemiSupervisedTask.run_valid" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the training and validation results for a <cite>model selection run</cite>. <strong>Do not attempt to load the set inside this method!</strong>
+<strong>If possible, rely on already available subclasses of this class</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_getter</strong> (<a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) – a data provider</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – the logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LOSS</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCORE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<p>For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a tuple of training and test dictionaries. Each dictionary has two keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
-<section id="pydgn-experiment-supervised-task-module">
-<h2>pydgn.experiment.supervised_task module<a class="headerlink" href="#pydgn-experiment-supervised-task-module" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.experiment.supervised_task">
+<span id="pydgn-experiment-supervised-task-module"></span><h2>pydgn.experiment.supervised_task module<a class="headerlink" href="#module-pydgn.experiment.supervised_task" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.experiment.supervised_task.SupervisedTask">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.experiment.supervised_task.</span></span><span class="sig-name descname"><span class="pre">SupervisedTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_configuration</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exp_seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.supervised_task.SupervisedTask" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.experiment.experiment.Experiment" title="pydgn.experiment.experiment.Experiment"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.experiment.experiment.Experiment</span></code></a></p>
+<p>Class that implements a standard supervised experiment.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.supervised_task.SupervisedTask.run_test">
+<span class="sig-name descname"><span class="pre">run_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_getter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.supervised_task.SupervisedTask.run_test" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the training, validation and test results for a <cite>final run</cite>. <strong>Do not use the test to train the model nor for early stopping reasons!</strong>
+<strong>If possible, rely on already available subclasses of this class</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_getter</strong> (<a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) – a data provider</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – the logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LOSS</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCORE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<p>For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a tuple of training,validation,test dictionaries. Each dictionary has two keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.experiment.supervised_task.SupervisedTask.run_valid">
+<span class="sig-name descname"><span class="pre">run_valid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_getter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.experiment.supervised_task.SupervisedTask.run_valid" title="Permalink to this definition"></a></dt>
+<dd><p>This function returns the training and validation results for a <cite>model selection run</cite>. <strong>Do not attempt to load the set inside this method!</strong>
+<strong>If possible, rely on already available subclasses of this class</strong>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_getter</strong> (<a class="reference internal" href="pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a>) – a data provider</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="pydgn.log.html#pydgn.log.logger.Logger" title="pydgn.log.logger.Logger"><code class="xref py py-class docutils literal notranslate"><span class="pre">Logger</span></code></a>) – the logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LOSS</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCORE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<p>For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.</p>
+</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>a tuple of training and test dictionaries. Each dictionary has two keys</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="module-pydgn.experiment.util">
 <span id="pydgn-experiment-util-module"></span><h2>pydgn.experiment.util module<a class="headerlink" href="#module-pydgn.experiment.util" title="Permalink to this headline"></a></h2>

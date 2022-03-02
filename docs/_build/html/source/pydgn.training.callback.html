@@ -55,8 +55,8 @@
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.early_stopping">pydgn.training.callback.early_stopping module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.engine_callback">pydgn.training.callback.engine_callback module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.gradient_clipper">pydgn.training.callback.gradient_clipper module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pydgn-training-callback-metric-module">pydgn.training.callback.metric module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.gradient_clipping">pydgn.training.callback.gradient_clipping module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.metric">pydgn.training.callback.metric module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.optimizer">pydgn.training.callback.optimizer module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.plotter">pydgn.training.callback.plotter module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.callback.scheduler">pydgn.training.callback.scheduler module</a></li>
@@ -109,27 +109,50 @@
 <span id="pydgn-training-callback-early-stopping-module"></span><h2>pydgn.training.callback.early_stopping module<a class="headerlink" href="#module-pydgn.training.callback.early_stopping" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.callback.early_stopping.EarlyStopper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.early_stopping.</span></span><span class="sig-name descname"><span class="pre">EarlyStopper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.EarlyStopper" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.early_stopping.</span></span><span class="sig-name descname"><span class="pre">EarlyStopper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.EarlyStopper" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
 <p>EarlyStopper is the main event handler for optimizers. Just create a subclass that implements an early stopping
 method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monitor</strong> (<em>str</em>) – the metric to monitor. The format is <code class="docutils literal notranslate"><span class="pre">[TRAINING|VALIDATION]_[METRIC</span> <span class="pre">NAME]</span></code>, where</p></li>
+<li><p><strong>pydgn.static</strong> (<em>TRAINING and VALIDATION are defined in</em>) – </p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – can be <code class="docutils literal notranslate"><span class="pre">MIN</span></code> or <code class="docutils literal notranslate"><span class="pre">MAX</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><strong>checkpoint</strong> (<em>bool</em>) – whether we are interested in the checkpoint of the “best” epoch or not</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.early_stopping.EarlyStopper.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.EarlyStopper.on_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.EarlyStopper.on_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>At the end of an epoch, check that the validation score improves over the current best validation score.
 If so, store the necessary info in a dictionary and save it into the “best_epoch_results” property of the state.
-If it is time to stop, updates the stop_training field of the state.
-:param state: the State object that is shared by the TrainingEngine during training</p>
+If it is time to stop, updates the stop_training field of the state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.early_stopping.EarlyStopper.stop">
-<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_or_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.EarlyStopper.stop" title="Permalink to this definition"></a></dt>
-<dd><p>Returns true when the early stopping technique decides it is time to stop.
-:param state: the State object
-:param score_or_loss: whether to check in scores or losses
-:param metric: the metric to consider
-:return:</p>
+<span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_or_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pydgn.training.callback.early_stopping.EarlyStopper.stop" title="Permalink to this definition"></a></dt>
+<dd><p>Returns true when the early stopping technique decides it is time to stop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p></li>
+<li><p><strong>score_or_loss</strong> (<em>str</em>) – whether to monitor scores or losses</p></li>
+<li><p><strong>metric</strong> (<em>str</em>) – the metric to consider. The format is <code class="docutils literal notranslate"><span class="pre">[TRAINING|VALIDATION]_[METRIC</span> <span class="pre">NAME]</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">TRAINING</span></code> and <code class="docutils literal notranslate"><span class="pre">VALIDATION</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean specifying whether training should be stopped or not</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -139,14 +162,34 @@ If it is time to stop, updates the stop_training field of the state.
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.early_stopping.</span></span><span class="sig-name descname"><span class="pre">PatienceEarlyStopper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">monitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patience</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checkpoint</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.PatienceEarlyStopper" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.early_stopping.EarlyStopper" title="pydgn.training.callback.early_stopping.EarlyStopper"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.early_stopping.EarlyStopper</span></code></a></p>
 <p>Early Stopper that implements patience</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>monitor</strong> (<em>str</em>) – the metric to monitor. The format is <code class="docutils literal notranslate"><span class="pre">[TRAINING|VALIDATION]_[METRIC</span> <span class="pre">NAME]</span></code>, where</p></li>
+<li><p><strong>pydgn.static</strong> (<em>TRAINING and VALIDATION are defined in</em>) – </p></li>
+<li><p><strong>mode</strong> (<em>str</em>) – can be <code class="docutils literal notranslate"><span class="pre">MIN</span></code> or <code class="docutils literal notranslate"><span class="pre">MAX</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><strong>patience</strong> (<em>int</em>) – the number of epochs of patience</p></li>
+<li><p><strong>checkpoint</strong> (<em>bool</em>) – whether we are interested in the checkpoint of the “best” epoch or not</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.early_stopping.PatienceEarlyStopper.stop">
 <span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score_or_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metric</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.early_stopping.PatienceEarlyStopper.stop" title="Permalink to this definition"></a></dt>
-<dd><p>Returns true when the early stopping technique decides it is time to stop.
-:param state: the State object
-:param score_or_loss: whether to check in scores or losses
-:param metric: the metric to consider
-:return:</p>
+<dd><p>Returns true when the early stopping technique decides it is time to stop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p></li>
+<li><p><strong>score_or_loss</strong> (<em>str</em>) – whether to monitor scores or losses</p></li>
+<li><p><strong>metric</strong> (<em>str</em>) – the metric to consider. The format is <code class="docutils literal notranslate"><span class="pre">[TRAINING|VALIDATION]_[METRIC</span> <span class="pre">NAME]</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">TRAINING</span></code> and <code class="docutils literal notranslate"><span class="pre">VALIDATION</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a boolean specifying whether training should be stopped or not</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -156,11 +199,1120 @@ If it is time to stop, updates the stop_training field of the state.
 <span id="pydgn-training-callback-engine-callback-module"></span><h2>pydgn.training.callback.engine_callback module<a class="headerlink" href="#module-pydgn.training.callback.engine_callback" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.callback.engine_callback.EngineCallback">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.engine_callback.</span></span><span class="sig-name descname"><span class="pre">EngineCallback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_last_checkpoint</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.engine_callback.</span></span><span class="sig-name descname"><span class="pre">EngineCallback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store_last_checkpoint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
+<p>Class responsible for fetching data and handling current-epoch checkpoints at training time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>store_last_checkpoint</strong> (<em>bool</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, keep the model’s checkpoint for the last training epoch</p>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.engine_callback.EngineCallback.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback.on_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback.on_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Stores the checkpoint in a dictionary with the following fields:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">EPOCH</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">MODEL_STATE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OPTIMIZER_STATE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SCHEDULER_STATE</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">STOP_TRAINING</span></code> (as defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code>)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.engine_callback.EngineCallback.on_fetch_data">
+<span class="sig-name descname"><span class="pre">on_fetch_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback.on_fetch_data" title="Permalink to this definition"></a></dt>
+<dd><p>Load the next batch of data, possibly applying some kind of additional pre-processing not
+included in the <a class="reference internal" href="pydgn.data.html#module-pydgn.data.transform" title="pydgn.data.transform"><code class="xref py py-mod docutils literal notranslate"><span class="pre">transform</span></code></a> package.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><p>The data loader is contained in  <code class="docutils literal notranslate"><span class="pre">state.loader_iterable</span></code> and the minibatch ID (i.e., a counter) is stored
+in``state.id_batch``</p>
+</dd>
+<dt>Post-condition:</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">state</span></code> object now has a field <code class="docutils literal notranslate"><span class="pre">batch_input</span></code> with the next batch of data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.engine_callback.EngineCallback.on_forward">
+<span class="sig-name descname"><span class="pre">on_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback.on_forward" title="Permalink to this definition"></a></dt>
+<dd><p>Feed the input data to the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_input</span></code>: the input to be fed to the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_targets</span></code>: the ground truth values to be fed to the model (if any, ow a dummy value can be used)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_outputs</span></code>: the output produced the model (a tuple of values)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.training.callback.gradient_clipping">
+<span id="pydgn-training-callback-gradient-clipping-module"></span><h2>pydgn.training.callback.gradient_clipping module<a class="headerlink" href="#module-pydgn.training.callback.gradient_clipping" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipping.GradientClipper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipping.</span></span><span class="sig-name descname"><span class="pre">GradientClipper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradient_clipper_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipping.GradientClipper" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
+<p>GradientClipper is the main event handler for gradient clippers. Just pass a PyTorch scheduler together with its
+arguments in the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gradient_clipper_class_name</strong> (<em>str</em>) – the dotted path to the gradient clipper class name</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – additional arguments</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipping.GradientClipper.on_backward">
+<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipping.GradientClipper.on_backward" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the parameters of the model using loss information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.training.callback.metric">
+<span id="pydgn-training-callback-metric-module"></span><h2>pydgn.training.callback.metric module<a class="headerlink" href="#module-pydgn.training.callback.metric" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">AdditiveLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">losses</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>AdditiveLoss sums an arbitrary number of losses together.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong></p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+<li><p><strong>losses</strong> (<em>dict</em>) – dictionary of metrics to add together</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_compute_metrics">
+<span class="sig-name descname"><span class="pre">on_compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_compute_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metrics of interest using the output and ground truth information obtained so far.
+The loss-related subscriber MUST be called before the score-related one</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_input</span></code>: the input to be fed to the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_targets</span></code>: the ground truth values to be fed to the model (if any, ow a dummy value can be used)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_outputs</span></code>: the output produced the model (a tuple of values)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_eval_batch_end">
+<span class="sig-name descname"><span class="pre">on_eval_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_eval_batch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state after evaluating on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: the dataset type (can be <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code>, <code class="xref py py-const docutils literal notranslate"><span class="pre">VALIDATION</span></code> or <code class="xref py py-const docutils literal notranslate"><span class="pre">TEST</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_eval_epoch_end">
+<span class="sig-name descname"><span class="pre">on_eval_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_eval_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the end of an evaluation epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_eval_epoch_start">
+<span class="sig-name descname"><span class="pre">on_eval_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_eval_epoch_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the start of an evaluation epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: the dataset type (can be <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code>, <code class="xref py py-const docutils literal notranslate"><span class="pre">VALIDATION</span></code> or <code class="xref py py-const docutils literal notranslate"><span class="pre">TEST</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_training_batch_end">
+<span class="sig-name descname"><span class="pre">on_training_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_training_batch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state after training on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_training_epoch_end">
+<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_training_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the end of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.on_training_epoch_start">
+<span class="sig-name descname"><span class="pre">on_training_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.on_training_epoch_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the start of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.AdditiveLoss.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.AdditiveLoss.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Classification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">Classification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Classification" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>Generic metric for classification tasks. Used to maximize code reuse for classical metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong></p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Classification.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.Classification.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Classification.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.Classification.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Classification.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.Classification.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.DotProductLink">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">DotProductLink</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.DotProductLink" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>Implements a dot product link prediction metric, as defined in <a class="reference external" href="https://arxiv.org/abs/1611.07308">https://arxiv.org/abs/1611.07308</a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.DotProductLink.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.DotProductLink.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.DotProductLink.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.DotProductLink.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.DotProductLink.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.DotProductLink.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MeanSquareError">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">MeanSquareError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MeanSquareError" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Regression" title="pydgn.training.callback.metric.Regression"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Regression</span></code></a></p>
+<p>Wrapper around <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.MSELoss</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong>.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MeanSquareError.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MeanSquareError.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MeanSquareError.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MeanSquareError.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">Metric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code>, <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
+<p>Metric is the main event handler for all metrics. Other metrics can easily subclass by implementing the <a class="reference internal" href="#pydgn.training.callback.metric.Metric.forward" title="pydgn.training.callback.metric.Metric.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward()</span></code></a>
+method, though sometimes more complex implementations are required.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <a class="reference internal" href="#pydgn.training.callback.metric.Metric.on_backward" title="pydgn.training.callback.metric.Metric.on_backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code></a> is called). <strong>Used by PyDGN, no need to care about this.</strong></p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.get_main_metric_name">
+<span class="sig-name descname"><span class="pre">get_main_metric_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.get_main_metric_name" title="Permalink to this definition"></a></dt>
+<dd><p>Return the metric’s main name. Useful when a metric is the combination of many.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the metric’s main name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.Metric.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_backward">
+<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_backward" title="Permalink to this definition"></a></dt>
+<dd><p>Updates the parameters of the model using loss information.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_compute_metrics">
+<span class="sig-name descname"><span class="pre">on_compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_compute_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metrics of interest using the output and ground truth information obtained so far.
+The loss-related subscriber MUST be called before the score-related one</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_input</span></code>: the input to be fed to the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_targets</span></code>: the ground truth values to be fed to the model (if any, ow a dummy value can be used)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_outputs</span></code>: the output produced the model (a tuple of values)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_eval_batch_end">
+<span class="sig-name descname"><span class="pre">on_eval_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_eval_batch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state after evaluating on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: the dataset type (can be <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code>, <code class="xref py py-const docutils literal notranslate"><span class="pre">VALIDATION</span></code> or <code class="xref py py-const docutils literal notranslate"><span class="pre">TEST</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_eval_epoch_end">
+<span class="sig-name descname"><span class="pre">on_eval_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_eval_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the end of an evaluation epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_eval_epoch_start">
+<span class="sig-name descname"><span class="pre">on_eval_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_eval_epoch_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the start of an evaluation epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: the dataset type (can be <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code>, <code class="xref py py-const docutils literal notranslate"><span class="pre">VALIDATION</span></code> or <code class="xref py py-const docutils literal notranslate"><span class="pre">TEST</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_training_batch_end">
+<span class="sig-name descname"><span class="pre">on_training_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_training_batch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state after training on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_training_epoch_end">
+<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_training_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the end of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.on_training_epoch_start">
+<span class="sig-name descname"><span class="pre">on_training_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.on_training_epoch_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the start of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.Metric.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">MultiScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">main_scorer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra_scorers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>This class is used to keep track of multiple additional metrics used as scores, rather than losses.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong></p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.get_main_metric_name">
+<span class="sig-name descname"><span class="pre">get_main_metric_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.get_main_metric_name" title="Permalink to this definition"></a></dt>
+<dd><p>Return the metric’s main name. Useful when a metric is the combination of many.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the metric’s main name</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_compute_metrics">
+<span class="sig-name descname"><span class="pre">on_compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_compute_metrics" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metrics of interest using the output and ground truth information obtained so far.
+The loss-related subscriber MUST be called before the score-related one</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_input</span></code>: the input to be fed to the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_targets</span></code>: the ground truth values to be fed to the model (if any, ow a dummy value can be used)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_outputs</span></code>: the output produced the model (a tuple of values)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_eval_batch_end">
+<span class="sig-name descname"><span class="pre">on_eval_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_eval_batch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state after evaluating on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: the dataset type (can be <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code>, <code class="xref py py-const docutils literal notranslate"><span class="pre">VALIDATION</span></code> or <code class="xref py py-const docutils literal notranslate"><span class="pre">TEST</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_eval_epoch_end">
+<span class="sig-name descname"><span class="pre">on_eval_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_eval_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the end of an evaluation epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_eval_epoch_start">
+<span class="sig-name descname"><span class="pre">on_eval_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_eval_epoch_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the start of an evaluation epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: the dataset type (can be <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code>, <code class="xref py py-const docutils literal notranslate"><span class="pre">VALIDATION</span></code> or <code class="xref py py-const docutils literal notranslate"><span class="pre">TEST</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_training_batch_end">
+<span class="sig-name descname"><span class="pre">on_training_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_training_batch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state after training on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_training_epoch_end">
+<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_training_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the end of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.on_training_epoch_start">
+<span class="sig-name descname"><span class="pre">on_training_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.on_training_epoch_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize/reset some internal state at the start of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MultiScore.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MultiScore.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassAccuracy">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">MulticlassAccuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassAccuracy" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>Implements multiclass classification accuracy.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassAccuracy.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassAccuracy.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassAccuracy.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassAccuracy.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassAccuracy.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassAccuracy.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassClassification">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">MulticlassClassification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassClassification" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Classification" title="pydgn.training.callback.metric.Classification"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Classification</span></code></a></p>
+<p>Wrapper around <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.CrossEntropyLoss</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong>.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassClassification.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassClassification.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.MulticlassClassification.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.MulticlassClassification.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Regression">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">Regression</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.Regression" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>Generic metric for regression tasks. Used to maximize code reuse for classical metrics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong></p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Regression.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.Regression.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Regression.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.Regression.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.Regression.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.Regression.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">ToyMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.ToyMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<p>Implements a toy metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>use_as_loss</strong> (<em>bool</em>) – whether this metric should act as a loss (i.e., it should act when <code class="xref py py-func docutils literal notranslate"><span class="pre">on_backward()</span></code> is called). <strong>Used by PyDGN, no need to care about this.</strong>.</p></li>
+<li><p><strong>reduction</strong> (<em>str</em>) – the type of reduction to apply across samples of the mini-batch. Supports <code class="docutils literal notranslate"><span class="pre">mean</span></code> and <code class="docutils literal notranslate"><span class="pre">sum</span></code>. Default is <code class="docutils literal notranslate"><span class="pre">mean</span></code>.</p></li>
+<li><p><strong>use_nodes_batch_size</strong> (<em>bool</em>) – whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute</p></li>
+<li><p><strong>epoch.</strong> (<em>the metric's aggregated value for the entire</em>) – </p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyMetric.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.ToyMetric.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyMetric.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.ToyMetric.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyMetric.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.ToyMetric.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyUnsupervisedMetric">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.metric.</span></span><span class="sig-name descname"><span class="pre">ToyUnsupervisedMetric</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_as_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reduction</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mean'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_nodes_batch_size</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.metric.ToyUnsupervisedMetric" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.metric.Metric" title="pydgn.training.callback.metric.Metric"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.metric.Metric</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyUnsupervisedMetric.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.ToyUnsupervisedMetric.forward" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>targets</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>) – ground truth</p></li>
+<li><p><strong>outputs</strong> (List[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.Tensor</span></code>]) – outputs of the model</p></li>
+<li><p><strong>batch_loss_extra</strong> (<em>dict</em>) – dictionary of information computed by metrics used as losses</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyUnsupervisedMetric.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.training.callback.metric.ToyUnsupervisedMetric.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.training.callback.metric.ToyUnsupervisedMetric.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.training.callback.metric.ToyUnsupervisedMetric.training" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.training.callback.optimizer">
+<span id="pydgn-training-callback-optimizer-module"></span><h2>pydgn.training.callback.optimizer module<a class="headerlink" href="#module-pydgn.training.callback.optimizer" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.optimizer.</span></span><span class="sig-name descname"><span class="pre">Optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><span class="pre">pydgn.model.model.ModelInterface</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accumulate_gradients</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
+<p>Optimizer is the main event handler for optimizers.
+Just pass a PyTorch optimizer together with its arguments in the configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<a class="reference internal" href="pydgn.model.html#pydgn.model.model.ModelInterface" title="pydgn.model.model.ModelInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInterface</span></code></a>) – the model that has to be trained</p></li>
+<li><p><strong>optimizer_class_name</strong> (<em>str</em>) – dotted path to the optimizer class to use</p></li>
+<li><p><strong>accumulate_gradients</strong> (<em>bool</em>) – if <code class="docutils literal notranslate"><span class="pre">True</span></code>, accumulate mini-batch gradients to perform a batch gradient update without loading the entire batch in memory</p></li>
+<li><p><strong>kwargs</strong> (<em>dict</em>) – additional parameters for the specific optimizer</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.load_state_dict">
+<span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.load_state_dict" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_epoch_end">
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Perform bookkeeping operations at the end of an epoch, e.g., early stopping, plotting, etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -190,28 +1342,10 @@ If it is time to stop, updates the stop_training field of the state.
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.engine_callback.EngineCallback.on_fetch_data">
-<span class="sig-name descname"><span class="pre">on_fetch_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback.on_fetch_data" title="Permalink to this definition"></a></dt>
-<dd><p>Load the next batch of data, possibly applying some kind of additional pre-processing not
-included in the <a class="reference internal" href="pydgn.data.html#module-pydgn.data.transform" title="pydgn.data.transform"><code class="xref py py-mod docutils literal notranslate"><span class="pre">transform</span></code></a> package.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
-</dd>
-</dl>
-<dl class="simple">
-<dt>Pre-condition:</dt><dd><p>The data loader is contained in  <code class="docutils literal notranslate"><span class="pre">state.loader_iterable</span></code> and the minibatch ID (i.e., a counter) is stored
-in``state.id_batch``</p>
-</dd>
-<dt>Post-condition:</dt><dd><p>The <code class="docutils literal notranslate"><span class="pre">state</span></code> object now has a field <code class="docutils literal notranslate"><span class="pre">batch_input</span></code> with the next batch of data</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.engine_callback.EngineCallback.on_forward">
-<span class="sig-name descname"><span class="pre">on_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.engine_callback.EngineCallback.on_forward" title="Permalink to this definition"></a></dt>
-<dd><p>Feed the input data to the model.</p>
+<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_fit_start">
+<span class="sig-name descname"><span class="pre">on_fit_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_fit_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an object at the beginning of the training phase, e.g., the internals of an optimizer,
+using the information contained in <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
@@ -220,115 +1354,108 @@ in``state.id_batch``</p>
 <dl class="simple">
 <dt>Pre-condition:</dt><dd><dl class="simple">
 <dt>The following fields have been initialized:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_input</span></code>: the input to be fed to the model</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_targets</span></code>: the ground truth values to be fed to the model (if any, ow a dummy value can be used)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.initial_epoch</span></code>: the initial epoch from which to start/resume training</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.stop_training</span></code>: do/don’t train the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.optimizer_state</span></code>: the internal state of the optimizer (can be <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.scheduler_state</span></code>: the internal state of the scheduler (can be  <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.best_epoch_results</span></code>: a dictionary with the best results computed so far (can be used when resuming training, either for early stopping or to keep some information about the last checkpoint).</p></li>
 </ul>
 </dd>
 </dl>
 </dd>
-<dt>Post-condition:</dt><dd><dl class="simple">
-<dt>The following fields have been initialized:</dt><dd><ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_outputs</span></code>: the output produced the model (a tuple of values)</p></li>
-</ul>
-</dd>
 </dl>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="module-pydgn.training.callback.gradient_clipper">
-<span id="pydgn-training-callback-gradient-clipping-module"></span><h2>pydgn.training.callback.gradient_clipper module<a class="headerlink" href="#module-pydgn.training.callback.gradient_clipper" title="Permalink to this headline"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.GradientClipping">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipper.</span></span><span class="sig-name descname"><span class="pre">GradientClipping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gradient_clipper_class_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.GradientClipping" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
-<dl class="simple">
-<dt>GradientClipping is the main event handler for gradient clippers. Just pass a PyTorch scheduler together with its</dt><dd><p>arguments in the configuration file.</p>
-</dd>
-</dl>
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.GradientClipping.on_backward">
-<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.GradientClipping.on_backward" title="Permalink to this definition"></a></dt>
-<dd><p>Clip the gradient using the gradient clipper
-:param state: the State object shared during training</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py class">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.StandardGradientClipper">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.gradient_clipper.</span></span><span class="sig-name descname"><span class="pre">StandardGradientClipper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.StandardGradientClipper" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.gradient_clipper.StandardGradientClipper.clip_gradients">
-<span class="sig-name descname"><span class="pre">clip_gradients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.gradient_clipper.StandardGradientClipper.clip_gradients" title="Permalink to this definition"></a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="pydgn-training-callback-metric-module">
-<h2>pydgn.training.callback.metric module<a class="headerlink" href="#pydgn-training-callback-metric-module" title="Permalink to this headline"></a></h2>
-</section>
-<section id="module-pydgn.training.callback.optimizer">
-<span id="pydgn-training-callback-optimizer-module"></span><h2>pydgn.training.callback.optimizer module<a class="headerlink" href="#module-pydgn.training.callback.optimizer" title="Permalink to this headline"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.optimizer.</span></span><span class="sig-name descname"><span class="pre">Optimizer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accumulate_gradients</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer" title="Permalink to this definition"></a></dt>
-<dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
-<p>Optimizer is the main event handler for optimizers. Just pass a PyTorch scheduler together with its arguments in the
-configuration file.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.load_state_dict">
-<span class="sig-name descname"><span class="pre">load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.load_state_dict" title="Permalink to this definition"></a></dt>
-<dd><p>Loads the optimizer state
-:param state_dict: the optimizer state
-:return:</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_epoch_end" title="Permalink to this definition"></a></dt>
-<dd><p>Stores the optimizer at the end of each epoch
-:param state: the shared State object</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_fit_start">
-<span class="sig-name descname"><span class="pre">on_fit_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_fit_start" title="Permalink to this definition"></a></dt>
-<dd><p>Load scheduler from state if any
-:param state: the shared State object</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_training_batch_end">
 <span class="sig-name descname"><span class="pre">on_training_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_training_batch_end" title="Permalink to this definition"></a></dt>
-<dd><p>Optimized the model at the end of each (mini-)batch if gradient does not need to be accumulated
-:param state: the shared State object</p>
+<dd><p>Initialize/reset some internal state after training on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss</span></code>: a dictionary holding the loss of the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_loss_extra</span></code>: a dictionary containing extra info, e.g., intermediate loss scores etc.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_score</span></code>: a dictionary holding the score of the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_training_batch_start">
 <span class="sig-name descname"><span class="pre">on_training_batch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_training_batch_start" title="Permalink to this definition"></a></dt>
-<dd><p>Zeroes the gradient at the start of each (mini-)batch if gradient does not need to be accumulated
-:param state: the shared State object</p>
+<dd><p>Initialize/reset some internal state before training on a new minibatch of data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_input</span></code>: the input to be fed to the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_targets</span></code>: the ground truth values to be fed to the model (if any, ow a dummy value can be used)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_graphs</span></code>: the total number of graphs in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_nodes</span></code>: the total number of nodes in the minibatch</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.batch_num_targets</span></code>: the total number of ground truth values in the minibatch</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_training_epoch_end">
 <span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_training_epoch_end" title="Permalink to this definition"></a></dt>
-<dd><p>Stores the optimizer at the end of each epoch. If gradient needs to be accumulated performs an optimization step
-:param state: the shared State object</p>
+<dd><p>Initialize/reset some internal state at the end of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.optimizer.Optimizer.on_training_epoch_start">
 <span class="sig-name descname"><span class="pre">on_training_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.optimizer.Optimizer.on_training_epoch_start" title="Permalink to this definition"></a></dt>
-<dd><p>Zeroes the gradient at the start of each epoch if gradient needs to be accumulated
-:param state: the shared State object</p>
+<dd><p>Initialize/reset some internal state at the start of a training epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.set</span></code>: it must be set to <code class="xref py py-const docutils literal notranslate"><span class="pre">TRAINING</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -338,12 +1465,20 @@ configuration file.</p>
 <span id="pydgn-training-callback-plotter-module"></span><h2>pydgn.training.callback.plotter module<a class="headerlink" href="#module-pydgn.training.callback.plotter" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.callback.plotter.Plotter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.plotter.</span></span><span class="sig-name descname"><span class="pre">Plotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.plotter.Plotter" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.plotter.</span></span><span class="sig-name descname"><span class="pre">Plotter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.plotter.Plotter" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
 <p>Plotter is the main event handler for plotting at training time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exp_path</strong> (<em>str</em>) – path where to store the Tensorboard logs</p></li>
+<li><p><strong>keargs</strong> (<em>dict</em>) – additional arguments that may depend on the plotter</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.plotter.Plotter.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.plotter.Plotter.on_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.plotter.Plotter.on_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Perform bookkeeping operations at the end of an epoch, e.g., early stopping, plotting, etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -374,7 +1509,7 @@ configuration file.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.plotter.Plotter.on_fit_end">
-<span class="sig-name descname"><span class="pre">on_fit_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.plotter.Plotter.on_fit_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_fit_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.plotter.Plotter.on_fit_end" title="Permalink to this definition"></a></dt>
 <dd><p>Training has ended, free all resources, e.g., close Tensorboard writers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -390,11 +1525,12 @@ configuration file.</p>
 <span id="pydgn-training-callback-scheduler-module"></span><h2>pydgn.training.callback.scheduler module<a class="headerlink" href="#module-pydgn.training.callback.scheduler" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.EpochScheduler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.scheduler.</span></span><span class="sig-name descname"><span class="pre">EpochScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.EpochScheduler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.scheduler.</span></span><span class="sig-name descname"><span class="pre">EpochScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.optim.optimizer.Optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.EpochScheduler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.scheduler.Scheduler" title="pydgn.training.callback.scheduler.Scheduler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.scheduler.Scheduler</span></code></a></p>
+<p>Implements a scheduler which uses epochs to modify the step size</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.EpochScheduler.on_training_epoch_end">
-<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.EpochScheduler.on_training_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.EpochScheduler.on_training_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state at the end of a training epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -417,35 +1553,123 @@ configuration file.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.MetricScheduler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.scheduler.</span></span><span class="sig-name descname"><span class="pre">MetricScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_loss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.MetricScheduler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.scheduler.</span></span><span class="sig-name descname"><span class="pre">MetricScheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_loss</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">monitor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.optim.optimizer.Optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.MetricScheduler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pydgn.training.callback.scheduler.Scheduler" title="pydgn.training.callback.scheduler.Scheduler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.callback.scheduler.Scheduler</span></code></a></p>
+<p>Implements a scheduler which uses variations in the metric of interest to modify the step size</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scheduler_class_name</strong> (<em>str</em>) – dotted path to class name of the scheduler</p></li>
+<li><p><strong>use_loss</strong> (<em>str</em>) – whether to monitor scores or losses</p></li>
+<li><p><strong>monitor</strong> (<em>str</em>) – the metric to monitor. The format is <code class="docutils literal notranslate"><span class="pre">[TRAINING|VALIDATION]_[METRIC</span> <span class="pre">NAME]</span></code>, where
+<code class="docutils literal notranslate"><span class="pre">TRAINING</span></code> and <code class="docutils literal notranslate"><span class="pre">VALIDATION</span></code> are defined in <code class="docutils literal notranslate"><span class="pre">pydgn.static</span></code></p></li>
+<li><p><strong>optimizer</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.optimizer</span></code>) – the Pytorch optimizer to use. <strong>This is automatically recovered by PyDGN when providing an optimizer</strong></p></li>
+<li><p><strong>kwargs</strong> – additional parameters for the specific scheduler to be used</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.MetricScheduler.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.MetricScheduler.on_epoch_end" title="Permalink to this definition"></a></dt>
-<dd><p>Save the scheduler state into the state object
-:param state: the shared State object</p>
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.MetricScheduler.on_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Perform bookkeeping operations at the end of an epoch, e.g., early stopping, plotting, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.stop_training</span></code>: do/don’t train the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.optimizer_state</span></code>: the internal state of the optimizer (can be <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.scheduler_state</span></code>: the internal state of the scheduler (can be  <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.best_epoch_results</span></code>: a dictionary with the best results computed so far (can be used when resuming training, either for early stopping or to keep some information about the last checkpoint).</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.Scheduler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.scheduler.</span></span><span class="sig-name descname"><span class="pre">Scheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler_class_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.Scheduler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.callback.scheduler.</span></span><span class="sig-name descname"><span class="pre">Scheduler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scheduler_class_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.optim.optimizer.Optimizer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.Scheduler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.training.event.handler.EventHandler</span></code></a></p>
 <p>Scheduler is the main event handler for schedulers. Just pass a PyTorch scheduler together with its arguments in the
 configuration file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scheduler_class_name</strong> (<em>str</em>) – dotted path to class name of the scheduler</p></li>
+<li><p><strong>optimizer</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.optim.optimizer</span></code>) – the Pytorch optimizer to use. <strong>This is automatically recovered by PyDGN when providing an optimizer</strong></p></li>
+<li><p><strong>kwargs</strong> – additional parameters for the specific scheduler to be used</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.Scheduler.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.Scheduler.on_epoch_end" title="Permalink to this definition"></a></dt>
-<dd><p>Save the scheduler state into the state object
-:param state: the shared State object</p>
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.Scheduler.on_epoch_end" title="Permalink to this definition"></a></dt>
+<dd><p>Perform bookkeeping operations at the end of an epoch, e.g., early stopping, plotting, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_loss</span></code>: a dictionary containing the aggregated loss value across all minibatches</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.epoch_score</span></code>: a dictionary containing the aggregated score value across all minibatches</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+<dt>Post-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.stop_training</span></code>: do/don’t train the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.optimizer_state</span></code>: the internal state of the optimizer (can be <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.scheduler_state</span></code>: the internal state of the scheduler (can be  <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.best_epoch_results</span></code>: a dictionary with the best results computed so far (can be used when resuming training, either for early stopping or to keep some information about the last checkpoint).</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.scheduler.Scheduler.on_fit_start">
-<span class="sig-name descname"><span class="pre">on_fit_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.Scheduler.on_fit_start" title="Permalink to this definition"></a></dt>
-<dd><p>Load scheduler from state if any
-:param state: the shared State object</p>
+<span class="sig-name descname"><span class="pre">on_fit_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="pydgn.training.event.html#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.callback.scheduler.Scheduler.on_fit_start" title="Permalink to this definition"></a></dt>
+<dd><p>Initialize an object at the beginning of the training phase, e.g., the internals of an optimizer,
+using the information contained in <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Pre-condition:</dt><dd><dl class="simple">
+<dt>The following fields have been initialized:</dt><dd><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">state.initial_epoch</span></code>: the initial epoch from which to start/resume training</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.stop_training</span></code>: do/don’t train the model</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.optimizer_state</span></code>: the internal state of the optimizer (can be <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.scheduler_state</span></code>: the internal state of the scheduler (can be  <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">state.best_epoch_results</span></code>: a dictionary with the best results computed so far (can be used when resuming training, either for early stopping or to keep some information about the last checkpoint).</p></li>
+</ul>
+</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
