@@ -15,8 +15,8 @@ class RandomSearch(Grid):
     __search_type__ = RANDOM_SEARCH
 
     def __init__(self, configs_dict: dict):
-        super().__init__(configs_dict)
         self.num_samples = configs_dict[NUM_SAMPLES]
+        super().__init__(configs_dict)
 
     def _gen_helper(self, cfgs_dict):
         keys = cfgs_dict.keys()
