@@ -1,7 +1,7 @@
 Welcome to PyDGN's documentation!
 =================================
 
-.. automodule:: src.pydgn
+.. automodule:: pydgn
     :members:
 
 .. toctree::
