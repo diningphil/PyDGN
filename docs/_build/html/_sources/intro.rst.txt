@@ -26,5 +26,23 @@ To this day, we have already used older **PyDGN** versions far beyond the simple
 
 **DISCLAIMER:** while we are trying hard to make this library as user-friendly as possible, in the end it is a library for *research*.
 Depending on what strange experiments you will need to perform, it is possible that you will have to subclass and implement your own modules.
-For instance, subclassing an :class:`EventHandler` requires you to know a bit about how the :class:`TrainingEngine` works and when specific events are triggered.
+For instance, subclassing an :class:`~pydgn.training.event.handler.EventHandler` requires you to know a bit about how the :class:`~pydgn.training.engine.TrainingEngine` works and when specific events are triggered.
 However, we believe reading boilerplate code is far easier than writing your own, and it reduces the risks of doing something wrong (and if you find a bug please tell us!)
+
+
+Installation:
+*******************
+
+The recommended way to install the library is to follow the steps to install ``torch`` and ``torch_geometric`` prior to installing PyDGN.
+
+You can automatically create a Conda environment (assuming you have conda or miniconda installed) using
+
+.. code-block:: python
+
+    source setup/install.sh [<your_cuda_version>]
+
+where ``[<your_cuda_version>]`` can be ``cpu``, ``cu102``, ``cu113``. Then, install the library with
+
+.. code-block:: python
+
+    pip install pydgn

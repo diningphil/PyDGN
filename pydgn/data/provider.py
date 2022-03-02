@@ -38,7 +38,7 @@ class DataProvider:
         data_root (str): the path of the root folder in which data is stored
         splits_filepath (str): the filepath of the splits. with additional metadata
         dataset_class (Callable[...,:class:`pydgn.data.dataset.DatasetInterface`]): the class of the dataset
-        data_loader_class (Union[Callable[...,:class:`torch.utils.data.DataLoader`],Callable[...,:class:`torch_geometric.loader.DataLoader`]]): the class of the data loader to use
+        data_loader_class (Union[Callable[...,:class:`torch.utils.data.DataLoader`], Callable[...,:class:`torch_geometric.loader.DataLoader`]]): the class of the data loader to use
         data_loader_args (dict): the arguments of the data loader
         dataset_name (str): the name of the dataset
         outer_folds (int): the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold

@@ -1,12 +1,11 @@
+<p align="center">
+  <img src="https://github.com/diningphil/PyDGN/blob/master/docs/_static/pydgn-logo.png"  width="300"/>
+</p>
+
 # PyDGN: a research library for Deep Graph Networks 
 [![Documentation Status](https://readthedocs.org/projects/pydgn/badge/?version=latest)](https://pydgn.readthedocs.io/en/latest/?badge=latest)
 
 #### Read the [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
-
-<p align="center">
-  <img src="https://github.com/diningphil/PyDGN/blob/master/images/pydgn-logo.png"  width="300"/>
-</p>
-
 
 This is a Python library to easily experiment
 with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S0893608020302197) (DGNs). It provides
@@ -48,19 +47,6 @@ using `bash` instead of `source`!
     pydgn-train  --config-file MODEL_CONFIGS/config_SupToyDGN.yml 
 
 To debug your code you can add `--debug` to the command above, but the "GUI" will be disabled.
-
-#### Random Search 101
-
-Specify a `num_samples` in the config file with the number of random trials, replace `grid`
-with `random`, and specify a sampling method for each hyper-parameter. We provide different sampling methods:
-
-- choice --> pick at random from a list of arguments
-- uniform --> pick uniformly from min and max arguments
-- normal --> sample from normal distribution with mean and std
-- randint --> pick at random from min and max
-- loguniform --> pick following the recprocal distribution from log_min, log_max, with a specified base
-
-There is one config file, namely `config_SupToyDGN_RandomSearch.yml`, which you can check to see an example.
 
 ## Projects using PyDGN
 

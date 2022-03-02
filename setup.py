@@ -38,7 +38,7 @@ setuptools.setup(
         'ray >= 1.5.2',
         'gpustat >= 0.6.0',
         'torch >= 1.10.2',
-        'torch_geometric >= 2.0.3',
+        'torch-geometric >= 2.0.3',
     ],
     packages=setuptools.find_packages()
 )

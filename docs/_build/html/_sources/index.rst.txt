@@ -9,7 +9,7 @@ PyDGN Documentation
    :caption: Intro and Usage
 
    intro
-   example
+   tutorial
 
 .. toctree::
    :maxdepth: 2

@@ -9,7 +9,7 @@ splitter:
     shuffle:  # whether to shuffle the indices prior to splitting
     inner_val_ratio:  # percentage of validation for hold-out model selection. this will be ignored when the number of inner folds is > than 1
     outer_val_ratio:  # percentage of validation data to extract for risk assessment final runs
-    test_ratio: 0.1  # percentage of test to extract for hold-out risk assessment. this will be ignored when the number of outer folds is > than 1
+    test_ratio:  # percentage of test to extract for hold-out risk assessment. this will be ignored when the number of outer folds is > than 1
 dataset:
   root:  # path to data root folder
   class_name:  # dotted path to dataset class
