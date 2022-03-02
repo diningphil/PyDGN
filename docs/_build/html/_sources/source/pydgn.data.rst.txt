@@ -1,10 +1,7 @@
-pydgn.data package
+pydgn.data
 ==================
 
-Submodules
-----------
-
-pydgn.data.dataset module
+data.dataset
 -------------------------
 
 .. automodule:: pydgn.data.dataset
@@ -12,7 +9,7 @@ pydgn.data.dataset module
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.provider module
+data.provider
 --------------------------
 
 .. automodule:: pydgn.data.provider
@@ -20,7 +17,7 @@ pydgn.data.provider module
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.sampler module
+data.sampler
 -------------------------
 
 .. automodule:: pydgn.data.sampler
@@ -28,7 +25,7 @@ pydgn.data.sampler module
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.splitter module
+data.splitter
 --------------------------
 
 .. automodule:: pydgn.data.splitter
@@ -36,7 +33,7 @@ pydgn.data.splitter module
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.transform module
+data.transform
 ---------------------------
 
 .. automodule:: pydgn.data.transform
@@ -44,18 +41,10 @@ pydgn.data.transform module
    :undoc-members:
    :show-inheritance:
 
-pydgn.data.util module
+data.util
 ----------------------
 
 .. automodule:: pydgn.data.util
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pydgn.data
    :members:
    :undoc-members:
    :show-inheritance:

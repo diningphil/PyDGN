@@ -10,15 +10,17 @@ from typing import Tuple, Callable, Union
 import numpy as np
 import ray
 import torch
+
 from pydgn.data.provider import DataProvider
+from pydgn.evaluation.config import Config
 from pydgn.evaluation.grid import Grid
 from pydgn.evaluation.random_search import RandomSearch
 from pydgn.evaluation.util import ProgressManager
 from pydgn.experiment.experiment import Experiment
 from pydgn.experiment.util import s2c
 from pydgn.log.logger import Logger
-from pydgn.evaluation.config import Config
 from pydgn.static import *
+
 
 # Ignore warnings
 # if not sys.warnoptions:

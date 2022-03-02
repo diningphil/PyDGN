@@ -1,10 +1,5 @@
-pydgn.model.readout package
-===========================
 
-Submodules
-----------
-
-pydgn.model.readout.graph\_readout module
+readout.graph\_readout
 -----------------------------------------
 
 .. automodule:: pydgn.model.readout.graph_readout
@@ -12,7 +7,7 @@ pydgn.model.readout.graph\_readout module
    :undoc-members:
    :show-inheritance:
 
-pydgn.model.readout.link\_readout module
+readout.link\_readout
 ----------------------------------------
 
 .. automodule:: pydgn.model.readout.link_readout
@@ -20,18 +15,10 @@ pydgn.model.readout.link\_readout module
    :undoc-members:
    :show-inheritance:
 
-pydgn.model.readout.node\_readout module
+readout.node\_readout
 ----------------------------------------
 
 .. automodule:: pydgn.model.readout.node_readout
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pydgn.model.readout
    :members:
    :undoc-members:
    :show-inheritance:

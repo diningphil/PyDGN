@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pydgn.model package &mdash; PyDGN 1.0.0 documentation</title>
+  <title>pydgn.model &mdash; PyDGN 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,8 +18,8 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pydgn.model.dgn package" href="pydgn.model.dgn.html" />
-    <link rel="prev" title="pydgn.log package" href="pydgn.log.html" /> 
+    <link rel="next" title="dgn.toy_dgn" href="pydgn.model.dgn.html" />
+    <link rel="prev" title="pydgn.log" href="pydgn.log.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -28,6 +28,7 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> PyDGN
+            <img src="../_static/pydgn-logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -37,29 +38,33 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Intro and Guides</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Intro and Usage</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log package</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.model package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="pydgn.model.dgn.html">pydgn.model.dgn package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="pydgn.model.readout.html">pydgn.model.readout package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#model-dgn">model.dgn</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.model.dgn.html">dgn.toy_dgn</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.model.dgn.html#module-pydgn.model.dgn.toy_mlp">dgn.toy_mlp</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.model.model">pydgn.model.model module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.model">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model-readout">model.readout</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.model.readout.html">readout.graph_readout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.link_readout">readout.link_readout</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.node_readout">readout.node_readout</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.training.html">pydgn.training package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.model.interface">model.interface</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.training.html">pydgn.training</a></li>
 </ul>
 
         </div>
@@ -76,7 +81,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>pydgn.model package</li>
+      <li>pydgn.model</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/source/pydgn.model.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,38 +91,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pydgn-model-package">
-<h1>pydgn.model package<a class="headerlink" href="#pydgn-model-package" title="Permalink to this headline"></a></h1>
-<section id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline"></a></h2>
+  <section id="pydgn-model">
+<h1>pydgn.model<a class="headerlink" href="#pydgn-model" title="Permalink to this headline"></a></h1>
+<section id="model-dgn">
+<h2>model.dgn<a class="headerlink" href="#model-dgn" title="Permalink to this headline"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.model.dgn.html">pydgn.model.dgn package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.dgn.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.dgn.html#module-pydgn.model.dgn.toy_dgn">pydgn.model.dgn.toy_dgn module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.dgn.html#module-pydgn.model.dgn.toy_mlp">pydgn.model.dgn.toy_mlp module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.dgn.html#module-pydgn.model.dgn">Module contents</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.model.readout.html">pydgn.model.readout package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.readout.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.graph_readout">pydgn.model.readout.graph_readout module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.link_readout">pydgn.model.readout.link_readout module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.node_readout">pydgn.model.readout.node_readout module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout">Module contents</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.dgn.html">dgn.toy_dgn</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.dgn.html#module-pydgn.model.dgn.toy_mlp">dgn.toy_mlp</a></li>
 </ul>
 </div>
 </section>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+<section id="model-readout">
+<h2>model.readout<a class="headerlink" href="#model-readout" title="Permalink to this headline"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.readout.html">readout.graph_readout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.link_readout">readout.link_readout</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.readout.html#module-pydgn.model.readout.node_readout">readout.node_readout</a></li>
+</ul>
+</div>
 </section>
-<section id="module-pydgn.model.model">
-<span id="pydgn-model-model-module"></span><h2>pydgn.model.model module<a class="headerlink" href="#module-pydgn.model.model" title="Permalink to this headline"></a></h2>
+<section id="module-pydgn.model.interface">
+<span id="model-interface"></span><h2>model.interface<a class="headerlink" href="#module-pydgn.model.interface" title="Permalink to this headline"></a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.model.ModelInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.model.</span></span><span class="sig-name descname"><span class="pre">ModelInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.nn.modules.module.Module</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.model.ModelInterface" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.interface.ModelInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.interface.</span></span><span class="sig-name descname"><span class="pre">ModelInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readout_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.nn.modules.module.Module</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.interface.ModelInterface" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>Provides the signature for any main model to be trained under PyDGN</p>
 <dl class="field-list simple">
@@ -132,8 +131,8 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.model.ModelInterface.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch_geometric.data.batch.Batch</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.model.model.ModelInterface.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.interface.ModelInterface.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch_geometric.data.batch.Batch</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.model.interface.ModelInterface.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a forward pass over a batch of graphs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -146,15 +145,15 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.model.ModelInterface.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.model.ModelInterface.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.interface.ModelInterface.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.interface.ModelInterface.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pydgn.model.model.ReadoutInterface">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.model.</span></span><span class="sig-name descname"><span class="pre">ReadoutInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.model.ReadoutInterface" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.interface.ReadoutInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.model.interface.</span></span><span class="sig-name descname"><span class="pre">ReadoutInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim_node_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_edge_features</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim_target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.model.interface.ReadoutInterface" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.nn.modules.module.Module</span></code></p>
 <p>Provides the signature for any readout to be trained under PyDGN</p>
 <dl class="field-list simple">
@@ -168,8 +167,8 @@
 </dd>
 </dl>
 <dl class="py method">
-<dt class="sig sig-object py" id="pydgn.model.model.ReadoutInterface.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None._VariableFunctionsClass.tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.model.model.ReadoutInterface.forward" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.interface.ReadoutInterface.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_embeddings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None._VariableFunctionsClass.tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">object</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.model.interface.ReadoutInterface.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Performs a forward pass over a batch of graphs</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -186,15 +185,12 @@
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pydgn.model.model.ReadoutInterface.training">
-<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.model.ReadoutInterface.training" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="pydgn.model.interface.ReadoutInterface.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.model.interface.ReadoutInterface.training" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-</section>
-<section id="module-pydgn.model">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.model" title="Permalink to this headline"></a></h2>
 </section>
 </section>
 
@@ -202,8 +198,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pydgn.log.html" class="btn btn-neutral float-left" title="pydgn.log package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pydgn.model.dgn.html" class="btn btn-neutral float-right" title="pydgn.model.dgn package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pydgn.log.html" class="btn btn-neutral float-left" title="pydgn.log" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pydgn.model.dgn.html" class="btn btn-neutral float-right" title="dgn.toy_dgn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

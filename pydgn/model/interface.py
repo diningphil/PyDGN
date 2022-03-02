@@ -1,7 +1,6 @@
 from typing import Callable, Tuple, Optional, List
 
 import torch
-from pydgn.experiment.util import s2c
 from torch_geometric.data import Batch
 
 

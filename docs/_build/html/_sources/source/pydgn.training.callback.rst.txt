@@ -1,10 +1,5 @@
-pydgn.training.callback package
-===============================
 
-Submodules
-----------
-
-pydgn.training.callback.early\_stopping module
+callback.early\_stopping
 ----------------------------------------------
 
 .. automodule:: pydgn.training.callback.early_stopping
@@ -12,7 +7,7 @@ pydgn.training.callback.early\_stopping module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.engine\_callback module
+callback.engine\_callback
 -----------------------------------------------
 
 .. automodule:: pydgn.training.callback.engine_callback
@@ -20,7 +15,7 @@ pydgn.training.callback.engine\_callback module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.gradient\_clipping module
+callback.gradient\_clipping
 -------------------------------------------------
 
 .. automodule:: pydgn.training.callback.gradient_clipping
@@ -28,7 +23,7 @@ pydgn.training.callback.gradient\_clipping module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.metric module
+callback.metric
 -------------------------------------
 
 .. automodule:: pydgn.training.callback.metric
@@ -36,7 +31,7 @@ pydgn.training.callback.metric module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.optimizer module
+callback.optimizer
 ----------------------------------------
 
 .. automodule:: pydgn.training.callback.optimizer
@@ -44,7 +39,7 @@ pydgn.training.callback.optimizer module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.plotter module
+callback.plotter
 --------------------------------------
 
 .. automodule:: pydgn.training.callback.plotter
@@ -52,7 +47,7 @@ pydgn.training.callback.plotter module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.callback.scheduler module
+callback.scheduler
 ----------------------------------------
 
 .. automodule:: pydgn.training.callback.scheduler
@@ -60,10 +55,3 @@ pydgn.training.callback.scheduler module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pydgn.training.callback
-   :members:
-   :undoc-members:
-   :show-inheritance:

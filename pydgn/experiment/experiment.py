@@ -3,15 +3,15 @@ from typing import Callable, Tuple, List
 
 import numpy as np
 import torch
+
 from pydgn.data.provider import DataProvider
 from pydgn.evaluation.config import Config
 from pydgn.evaluation.util import return_class_and_args
 from pydgn.experiment.util import s2c
-from pydgn.model.model import ModelInterface, ReadoutInterface
 from pydgn.log.logger import Logger
+from pydgn.model.interface import ModelInterface, ReadoutInterface
 from pydgn.static import DEFAULT_ENGINE_CALLBACK
 from pydgn.training.engine import TrainingEngine
-
 
 
 class Experiment:

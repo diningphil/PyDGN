@@ -1,6 +1,7 @@
 import torch
-from pydgn.data.dataset import DatasetInterface
 from torch.utils.data import sampler
+
+from pydgn.data.dataset import DatasetInterface
 
 
 class RandomSampler(sampler.RandomSampler):

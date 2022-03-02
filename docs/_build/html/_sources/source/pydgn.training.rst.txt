@@ -1,19 +1,25 @@
-pydgn.training package
+pydgn.training
 ======================
 
-Subpackages
------------
+training.callback
+------------------------------
 
 .. toctree::
    :maxdepth: 4
 
    pydgn.training.callback
-   pydgn.training.event
 
-Submodules
-----------
 
-pydgn.training.engine module
+training.event
+------------------------------
+
+.. toctree::
+   :maxdepth: 4
+
+ pydgn.training.event
+
+
+training.engine
 ----------------------------
 
 .. automodule:: pydgn.training.engine
@@ -21,7 +27,7 @@ pydgn.training.engine module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.profiler module
+training.profiler
 ------------------------------
 
 .. automodule:: pydgn.training.profiler
@@ -29,7 +35,7 @@ pydgn.training.profiler module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.util module
+training.util
 --------------------------
 
 .. automodule:: pydgn.training.util
@@ -37,10 +43,3 @@ pydgn.training.util module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pydgn.training
-   :members:
-   :undoc-members:
-   :show-inheritance:

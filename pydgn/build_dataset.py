@@ -1,6 +1,7 @@
 import argparse
 
 import yaml
+
 from pydgn.data.util import preprocess_data
 from pydgn.static import CONFIG_FILE_CLI_ARGUMENT, CONFIG_FILE
 

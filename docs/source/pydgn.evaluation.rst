@@ -1,10 +1,7 @@
-pydgn.evaluation package
+pydgn.evaluation
 ========================
 
-Submodules
-----------
-
-pydgn.evaluation.config module
+evaluation.config
 ------------------------------
 
 .. automodule:: pydgn.evaluation.config
@@ -12,7 +9,7 @@ pydgn.evaluation.config module
    :undoc-members:
    :show-inheritance:
 
-pydgn.evaluation.evaluator module
+evaluation.evaluator
 ---------------------------------
 
 .. automodule:: pydgn.evaluation.evaluator
@@ -20,7 +17,7 @@ pydgn.evaluation.evaluator module
    :undoc-members:
    :show-inheritance:
 
-pydgn.evaluation.grid module
+evaluation.grid
 ----------------------------
 
 .. automodule:: pydgn.evaluation.grid
@@ -28,7 +25,7 @@ pydgn.evaluation.grid module
    :undoc-members:
    :show-inheritance:
 
-pydgn.evaluation.random\_search module
+evaluation.random\_search
 --------------------------------------
 
 .. automodule:: pydgn.evaluation.random_search
@@ -36,7 +33,7 @@ pydgn.evaluation.random\_search module
    :undoc-members:
    :show-inheritance:
 
-pydgn.evaluation.util module
+evaluation.util
 ----------------------------
 
 .. automodule:: pydgn.evaluation.util
@@ -44,10 +41,3 @@ pydgn.evaluation.util module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pydgn.evaluation
-   :members:
-   :undoc-members:
-   :show-inheritance:

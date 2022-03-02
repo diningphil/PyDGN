@@ -1,7 +1,7 @@
 import copy
 
 from pydgn.experiment.util import s2c
-from pydgn.model.model import ModelInterface
+from pydgn.model.interface import ModelInterface
 from pydgn.training.event.handler import EventHandler
 
 
@@ -11,7 +11,7 @@ class Optimizer(EventHandler):
     Just pass a PyTorch optimizer together with its arguments in the configuration file.
 
     Args:
-        model (:class:`~pydgn.model.model.ModelInterface`): the model that has to be trained
+        model (:class:`~pydgn.model.interface.ModelInterface`): the model that has to be trained
         optimizer_class_name (str): dotted path to the optimizer class to use
         accumulate_gradients (bool): if ``True``, accumulate mini-batch gradients to perform a batch gradient update without loading the entire batch in memory
         kwargs (dict): additional parameters for the specific optimizer

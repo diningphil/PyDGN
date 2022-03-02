@@ -3,9 +3,9 @@ from typing import List, Optional, Tuple
 import torch
 from torch import nn
 from torch_geometric.data import Batch
-from torch_geometric.nn import SAGEConv, global_add_pool
+from torch_geometric.nn import global_add_pool
 
-from pydgn.model.model import ModelInterface
+from pydgn.model.interface import ModelInterface
 
 
 class ToyMLP(ModelInterface):

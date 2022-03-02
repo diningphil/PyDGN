@@ -1,6 +1,7 @@
 import os
 
 import torch
+
 from pydgn.static import *
 
 

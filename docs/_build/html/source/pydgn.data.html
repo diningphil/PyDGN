@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pydgn.data package &mdash; PyDGN 1.0.0 documentation</title>
+  <title>pydgn.data &mdash; PyDGN 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pydgn.evaluation package" href="pydgn.evaluation.html" />
+    <link rel="next" title="pydgn.evaluation" href="pydgn.evaluation.html" />
     <link rel="prev" title="Examples" href="../example.html" /> 
 </head>
 
@@ -28,6 +28,7 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> PyDGN
+            <img src="../_static/pydgn-logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -37,29 +38,27 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Intro and Guides</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Intro and Usage</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.data package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.dataset">pydgn.data.dataset module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.provider">pydgn.data.provider module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.sampler">pydgn.data.sampler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.splitter">pydgn.data.splitter module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.transform">pydgn.data.transform module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.util">pydgn.data.util module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data">Module contents</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.dataset">data.dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.provider">data.provider</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.sampler">data.sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.splitter">data.splitter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.transform">data.transform</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.util">data.util</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.training.html">pydgn.training package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.training.html">pydgn.training</a></li>
 </ul>
 
         </div>
@@ -76,7 +75,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>pydgn.data package</li>
+      <li>pydgn.data</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/source/pydgn.data.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -86,13 +85,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pydgn-data-package">
-<h1>pydgn.data package<a class="headerlink" href="#pydgn-data-package" title="Permalink to this headline"></a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
-</section>
+  <section id="pydgn-data">
+<h1>pydgn.data<a class="headerlink" href="#pydgn-data" title="Permalink to this headline"></a></h1>
 <section id="module-pydgn.data.dataset">
-<span id="pydgn-data-dataset-module"></span><h2>pydgn.data.dataset module<a class="headerlink" href="#module-pydgn.data.dataset" title="Permalink to this headline"></a></h2>
+<span id="data-dataset"></span><h2>data.dataset<a class="headerlink" href="#module-pydgn.data.dataset" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.data.dataset.ConcatFromListDataset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">ConcatFromListDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch_geometric.data.data.Data</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.ConcatFromListDataset" title="Permalink to this definition"></a></dt>
@@ -346,7 +342,7 @@ all <cite>n</cite> datasets.</p>
 
 </section>
 <section id="module-pydgn.data.provider">
-<span id="pydgn-data-provider-module"></span><h2>pydgn.data.provider module<a class="headerlink" href="#module-pydgn.data.provider" title="Permalink to this headline"></a></h2>
+<span id="data-provider"></span><h2>data.provider<a class="headerlink" href="#module-pydgn.data.provider" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.data.provider.DataProvider">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.provider.</span></span><span class="sig-name descname"><span class="pre">DataProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits_filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader_args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.DataProvider" title="Permalink to this definition"></a></dt>
@@ -617,7 +613,7 @@ all workers will retrieve the data in the same order.</p>
 
 </section>
 <section id="module-pydgn.data.sampler">
-<span id="pydgn-data-sampler-module"></span><h2>pydgn.data.sampler module<a class="headerlink" href="#module-pydgn.data.sampler" title="Permalink to this headline"></a></h2>
+<span id="data-sampler"></span><h2>data.sampler<a class="headerlink" href="#module-pydgn.data.sampler" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.data.sampler.RandomSampler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.sampler.</span></span><span class="sig-name descname"><span class="pre">RandomSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.sampler.RandomSampler" title="Permalink to this definition"></a></dt>
@@ -644,7 +640,7 @@ The permutation is saved in the ‘permutation’ attribute.</p>
 
 </section>
 <section id="module-pydgn.data.splitter">
-<span id="pydgn-data-splitter-module"></span><h2>pydgn.data.splitter module<a class="headerlink" href="#module-pydgn.data.splitter" title="Permalink to this headline"></a></h2>
+<span id="data-splitter"></span><h2>data.splitter<a class="headerlink" href="#module-pydgn.data.splitter" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.data.splitter.Fold">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">Fold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Fold" title="Permalink to this definition"></a></dt>
@@ -872,7 +868,7 @@ first boolean value.</p>
 
 </section>
 <section id="module-pydgn.data.transform">
-<span id="pydgn-data-transform-module"></span><h2>pydgn.data.transform module<a class="headerlink" href="#module-pydgn.data.transform" title="Permalink to this headline"></a></h2>
+<span id="data-transform"></span><h2>data.transform<a class="headerlink" href="#module-pydgn.data.transform" title="Permalink to this headline"></a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.data.transform.ConstantEdgeIfEmpty">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.transform.</span></span><span class="sig-name descname"><span class="pre">ConstantEdgeIfEmpty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.transform.ConstantEdgeIfEmpty" title="Permalink to this definition"></a></dt>
@@ -915,7 +911,7 @@ first boolean value.</p>
 
 </section>
 <section id="module-pydgn.data.util">
-<span id="pydgn-data-util-module"></span><h2>pydgn.data.util module<a class="headerlink" href="#module-pydgn.data.util" title="Permalink to this headline"></a></h2>
+<span id="data-util"></span><h2>data.util<a class="headerlink" href="#module-pydgn.data.util" title="Permalink to this headline"></a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="pydgn.data.util.check_argument">
 <span class="sig-prename descclassname"><span class="pre">pydgn.data.util.</span></span><span class="sig-name descname"><span class="pre">check_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pydgn.data.util.check_argument" title="Permalink to this definition"></a></dt>
@@ -997,9 +993,6 @@ the correct functioning of the data loading steps.</p>
 </dd></dl>
 
 </section>
-<section id="module-pydgn.data">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.data" title="Permalink to this headline"></a></h2>
-</section>
 </section>
 
 
@@ -1007,7 +1000,7 @@ the correct functioning of the data loading steps.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../example.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="pydgn.evaluation.html" class="btn btn-neutral float-right" title="pydgn.evaluation package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="pydgn.evaluation.html" class="btn btn-neutral float-right" title="pydgn.evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

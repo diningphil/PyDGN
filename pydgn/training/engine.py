@@ -3,22 +3,23 @@ from pathlib import Path
 from typing import Callable, List, Union, Tuple
 
 import torch
-from pydgn.model.model import ModelInterface
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
+
+from pydgn.log.logger import Logger
+from pydgn.model.interface import ModelInterface
 from pydgn.static import *
 from pydgn.training.callback.early_stopping import EarlyStopper
 from pydgn.training.callback.engine_callback import EngineCallback
+from pydgn.training.callback.gradient_clipping import GradientClipper
 from pydgn.training.callback.metric import Metric
 from pydgn.training.callback.optimizer import Optimizer
 from pydgn.training.callback.plotter import Plotter
 from pydgn.training.callback.scheduler import Scheduler
-from pydgn.training.callback.gradient_clipping import GradientClipper
 from pydgn.training.event.dispatcher import EventDispatcher
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State
 from pydgn.training.profiler import Profiler
-from pydgn.log.logger import Logger
-from torch_geometric.data import Data
-from torch_geometric.loader import DataLoader
 
 
 def log(msg, logger: Logger):
@@ -45,7 +46,7 @@ class TrainingEngine(EventDispatcher):
 
     Args:
         engine_callback ( Callable[..., :class:`~pydgn.training.callback.engine_callback.EngineCallback`]): the engine callback object to be used for data fetching and checkpoints (or even other purposes if necessary)
-        model (:class:`~pydgn.model.model.ModelInterface`): the model to be trained
+        model (:class:`~pydgn.model.interface.ModelInterface`): the model to be trained
         loss (:class:`~pydgn.training.callback.metric.Metric`): the loss to be used
         optimizer (:class:`~pydgn.training.callback.optimizer.Optimizer`): the optimizer to be used
         scorer (:class:`~pydgn.training.callback.metric.Metric`): the score to be used

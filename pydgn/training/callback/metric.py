@@ -1,11 +1,12 @@
-from typing import List, Any, Optional, Tuple, Dict
+from typing import List
 
 import torch
+from torch.nn import Module, CrossEntropyLoss, MSELoss
+
 from pydgn.experiment.util import s2c
 from pydgn.static import BATCH_LOSS_EXTRA, ARGS, CLASS_NAME
-from pydgn.training.event.state import State
-from torch.nn import Module, CrossEntropyLoss, MSELoss
 from pydgn.training.event.handler import EventHandler
+from pydgn.training.event.state import State
 
 
 class Metric(Module, EventHandler):

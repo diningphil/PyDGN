@@ -5,7 +5,7 @@ from torch import nn
 from torch_geometric.data import Batch
 from torch_geometric.nn import SAGEConv
 
-from pydgn.model.model import ModelInterface
+from pydgn.model.interface import ModelInterface
 
 
 class ToyDGN(ModelInterface):

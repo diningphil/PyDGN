@@ -2,7 +2,6 @@ import bisect
 import datetime
 import time
 
-
 from pydgn.training.event.handler import EventHandler
 
 

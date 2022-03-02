@@ -4,10 +4,11 @@ from typing import List, Union, Tuple, Optional, Callable
 
 import torch
 import torch_geometric
-from torch_geometric.data import InMemoryDataset, Data
-from torch_geometric.datasets import TUDataset, Planetoid
 from ogb.graphproppred import PygGraphPropPredDataset
 from ogb.utils.url import decide_download, download_url, extract_zip
+from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.datasets import TUDataset, Planetoid
+
 
 class ZipDataset(torch.utils.data.Dataset):
     r"""

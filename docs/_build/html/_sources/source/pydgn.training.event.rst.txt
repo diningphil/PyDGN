@@ -1,10 +1,5 @@
-pydgn.training.event package
-============================
 
-Submodules
-----------
-
-pydgn.training.event.dispatcher module
+event.dispatcher
 --------------------------------------
 
 .. automodule:: pydgn.training.event.dispatcher
@@ -12,7 +7,7 @@ pydgn.training.event.dispatcher module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.event.handler module
+event.handler
 -----------------------------------
 
 .. automodule:: pydgn.training.event.handler
@@ -20,7 +15,7 @@ pydgn.training.event.handler module
    :undoc-members:
    :show-inheritance:
 
-pydgn.training.event.state module
+event.state
 ---------------------------------
 
 .. automodule:: pydgn.training.event.state
@@ -28,10 +23,3 @@ pydgn.training.event.state module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pydgn.training.event
-   :members:
-   :undoc-members:
-   :show-inheritance:

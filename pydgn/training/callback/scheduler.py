@@ -1,8 +1,9 @@
+from torch.optim.optimizer import Optimizer
+
 from pydgn.experiment.util import s2c
 from pydgn.static import *
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State
-from torch.optim.optimizer import Optimizer
 
 
 class Scheduler(EventHandler):

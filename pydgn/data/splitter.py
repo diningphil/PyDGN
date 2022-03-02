@@ -1,13 +1,13 @@
 import random
 
 import numpy as np
-import pydgn.data.dataset
 import torch
-from pydgn.experiment.util import s2c
 from sklearn.model_selection import StratifiedKFold, StratifiedShuffleSplit, ShuffleSplit, KFold
 from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj, add_self_loops
 
+import pydgn.data.dataset
 from pydgn.data.dataset import OGBGDatasetInterface
+from pydgn.experiment.util import s2c
 
 
 class Fold:

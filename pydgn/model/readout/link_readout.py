@@ -1,7 +1,7 @@
 import torch
 from torch_geometric.utils import to_dense_adj, to_dense_batch
 
-from pydgn.model.model import ReadoutInterface
+from pydgn.model.interface import ReadoutInterface
 
 
 class DotProductLinkReadout(ReadoutInterface):

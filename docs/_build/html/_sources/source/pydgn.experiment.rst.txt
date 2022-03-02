@@ -1,10 +1,7 @@
-pydgn.experiment package
+pydgn.experiment
 ========================
 
-Submodules
-----------
-
-pydgn.experiment.experiment module
+experiment.experiment
 ----------------------------------
 
 .. automodule:: pydgn.experiment.experiment
@@ -12,7 +9,7 @@ pydgn.experiment.experiment module
    :undoc-members:
    :show-inheritance:
 
-pydgn.experiment.semi\_supervised\_task module
+experiment.semi\_supervised\_task
 ----------------------------------------------
 
 .. automodule:: pydgn.experiment.semi_supervised_task
@@ -20,7 +17,7 @@ pydgn.experiment.semi\_supervised\_task module
    :undoc-members:
    :show-inheritance:
 
-pydgn.experiment.supervised\_task module
+experiment.supervised\_task
 ----------------------------------------
 
 .. automodule:: pydgn.experiment.supervised_task
@@ -28,18 +25,10 @@ pydgn.experiment.supervised\_task module
    :undoc-members:
    :show-inheritance:
 
-pydgn.experiment.util module
+experiment.util
 ----------------------------
 
 .. automodule:: pydgn.experiment.util
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: pydgn.experiment
    :members:
    :undoc-members:
    :show-inheritance:

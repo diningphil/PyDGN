@@ -1,6 +1,6 @@
-import torch
 import torch.nn as nn
-from pydgn.model.model import ReadoutInterface
+
+from pydgn.model.interface import ReadoutInterface
 
 
 class LinearNodeReadout(ReadoutInterface):

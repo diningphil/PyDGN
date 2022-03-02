@@ -5,9 +5,10 @@ import warnings
 from typing import Optional, Callable
 
 import torch
+from torch_geometric.transforms import Compose
+
 from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
-from torch_geometric.transforms import Compose
 
 
 def get_or_create_dir(path: str) -> str:

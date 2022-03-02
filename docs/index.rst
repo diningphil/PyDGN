@@ -1,4 +1,4 @@
-Welcome to PyDGN's documentation!
+PyDGN Documentation
 =================================
 
 .. automodule:: pydgn
@@ -6,7 +6,7 @@ Welcome to PyDGN's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Intro and Guides
+   :caption: Intro and Usage
 
    intro
    example

@@ -1,30 +1,28 @@
-pydgn.model package
+pydgn.model
 ===================
 
-Subpackages
------------
+model.dgn
+------------------------
 
 .. toctree::
    :maxdepth: 4
 
    pydgn.model.dgn
-   pydgn.model.readout
 
-Submodules
-----------
-
-pydgn.model.model module
+model.readout
 ------------------------
 
-.. automodule:: pydgn.model.model
+.. toctree::
+   :maxdepth: 4
+
+   pydgn.model.readout
+
+
+model.interface
+------------------------
+
+.. automodule:: pydgn.model.interface
    :members:
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pydgn.model
-   :members:
-   :undoc-members:
-   :show-inheritance:

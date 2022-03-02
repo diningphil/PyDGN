@@ -4,10 +4,10 @@ import os
 import random
 from typing import Tuple, Callable
 
-import tqdm
 import gpustat
-from pydgn.experiment.util import s2c
+import tqdm
 
+from pydgn.experiment.util import s2c
 from pydgn.static import *
 
 

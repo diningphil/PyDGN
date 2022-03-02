@@ -2,9 +2,7 @@ import os
 OMP_NUM_THREADS = 'OMP_NUM_THREADS'
 # TODO do we still need this?
 os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
-import sys
 import yaml
-import logging
 import argparse
 
 import ray

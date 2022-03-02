@@ -1,9 +1,8 @@
 from copy import deepcopy
-from typing import Callable, List
+from typing import List
 
-from pydgn.data.dataset import DatasetInterface
-from pydgn.static import *
 from pydgn.evaluation.util import return_class_and_args
+from pydgn.static import *
 
 
 class Grid:

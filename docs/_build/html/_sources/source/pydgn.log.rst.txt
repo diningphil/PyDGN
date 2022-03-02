@@ -1,10 +1,7 @@
-pydgn.log package
+pydgn.log
 =================
 
-Submodules
-----------
-
-pydgn.log.logger module
+log.logger
 -----------------------
 
 .. automodule:: pydgn.log.logger
@@ -12,10 +9,3 @@ pydgn.log.logger module
    :undoc-members:
    :show-inheritance:
 
-Module contents
----------------
-
-.. automodule:: pydgn.log
-   :members:
-   :undoc-members:
-   :show-inheritance:

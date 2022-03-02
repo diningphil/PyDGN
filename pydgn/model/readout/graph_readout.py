@@ -1,8 +1,7 @@
-import torch
 import torch.nn as nn
 from torch_geometric.nn import global_add_pool
 
-from pydgn.model.model import ReadoutInterface
+from pydgn.model.interface import ReadoutInterface
 
 
 class LinearGraphReadout(ReadoutInterface):

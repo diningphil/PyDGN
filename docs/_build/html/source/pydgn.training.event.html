@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pydgn.training.event package &mdash; PyDGN 1.0.0 documentation</title>
+  <title>event.dispatcher &mdash; PyDGN 1.0.0 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -18,7 +18,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="pydgn.training.callback package" href="pydgn.training.callback.html" /> 
+    <link rel="prev" title="callback.early_stopping" href="pydgn.training.callback.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -27,6 +27,7 @@
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
             <a href="../index.html" class="icon icon-home"> PyDGN
+            <img src="../_static/pydgn-logo.svg" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -36,36 +37,29 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Intro and Guides</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Intro and Usage</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../example.html">Examples</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log package</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model package</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="pydgn.training.html">pydgn.training package</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="pydgn.training.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="pydgn.training.callback.html">pydgn.training.callback package</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">pydgn.training.event package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.event.dispatcher">pydgn.training.event.dispatcher module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.event.handler">pydgn.training.event.handler module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.event.state">pydgn.training.event.state module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-pydgn.training.event">Module contents</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="pydgn.training.html">pydgn.training</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#training-callback">training.callback</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="pydgn.training.html#training-event">training.event</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">event.dispatcher</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pydgn.training.event.handler">event.handler</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-pydgn.training.event.state">event.state</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training.engine">pydgn.training.engine module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training.profiler">pydgn.training.profiler module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training.util">pydgn.training.util module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training.engine">training.engine</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training.profiler">training.profiler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pydgn.training.html#module-pydgn.training.util">training.util</a></li>
 </ul>
 </li>
 </ul>
@@ -84,8 +78,8 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="pydgn.training.html">pydgn.training package</a> &raquo;</li>
-      <li>pydgn.training.event package</li>
+          <li><a href="pydgn.training.html">pydgn.training</a> &raquo;</li>
+      <li>event.dispatcher</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/source/pydgn.training.event.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -95,13 +89,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="pydgn-training-event-package">
-<h1>pydgn.training.event package<a class="headerlink" href="#pydgn-training-event-package" title="Permalink to this headline"></a></h1>
-<section id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
-</section>
-<section id="module-pydgn.training.event.dispatcher">
-<span id="pydgn-training-event-dispatcher-module"></span><h2>pydgn.training.event.dispatcher module<a class="headerlink" href="#module-pydgn.training.event.dispatcher" title="Permalink to this headline"></a></h2>
+  <section id="module-pydgn.training.event.dispatcher">
+<span id="event-dispatcher"></span><h1>event.dispatcher<a class="headerlink" href="#module-pydgn.training.event.dispatcher" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.event.dispatcher.EventDispatcher">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.dispatcher.</span></span><span class="sig-name descname"><span class="pre">EventDispatcher</span></span><a class="headerlink" href="#pydgn.training.event.dispatcher.EventDispatcher" title="Permalink to this definition"></a></dt>
@@ -134,7 +123,7 @@
 
 </section>
 <section id="module-pydgn.training.event.handler">
-<span id="pydgn-training-event-handler-module"></span><h2>pydgn.training.event.handler module<a class="headerlink" href="#module-pydgn.training.event.handler" title="Permalink to this headline"></a></h2>
+<span id="event-handler"></span><h1>event.handler<a class="headerlink" href="#module-pydgn.training.event.handler" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.handler.</span></span><span class="sig-name descname"><span class="pre">EventHandler</span></span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler" title="Permalink to this definition"></a></dt>
@@ -604,7 +593,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 
 </section>
 <section id="module-pydgn.training.event.state">
-<span id="pydgn-training-event-state-module"></span><h2>pydgn.training.event.state module<a class="headerlink" href="#module-pydgn.training.event.state" title="Permalink to this headline"></a></h2>
+<span id="event-state"></span><h1>event.state<a class="headerlink" href="#module-pydgn.training.event.state" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.event.state.State">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.state.</span></span><span class="sig-name descname"><span class="pre">State</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.state.State" title="Permalink to this definition"></a></dt>
@@ -634,16 +623,12 @@ as well as by the <cite>EventHandler</cite> objects implementing callbacks</p>
 </dd></dl>
 
 </section>
-<section id="module-pydgn.training.event">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.training.event" title="Permalink to this headline"></a></h2>
-</section>
-</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="pydgn.training.callback.html" class="btn btn-neutral float-left" title="pydgn.training.callback package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pydgn.training.callback.html" class="btn btn-neutral float-left" title="callback.early_stopping" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

@@ -1,9 +1,10 @@
 import os
 
-from pydgn.experiment.experiment import Experiment
-from pydgn.static import LOSS, SCORE
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch
+
+from pydgn.experiment.experiment import Experiment
+from pydgn.static import LOSS, SCORE
 
 
 class SemiSupervisedTask(Experiment):

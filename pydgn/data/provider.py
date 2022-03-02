@@ -2,15 +2,16 @@ import random
 from typing import Union, Callable
 
 import numpy as np
-import pydgn.data.dataset
 import torch
 import torch_geometric.loader
+from torch.utils.data import Subset
+from torch_geometric.data import Data
+
+import pydgn.data.dataset
 from pydgn.data.dataset import DatasetInterface
 from pydgn.data.sampler import RandomSampler
 from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
 from pydgn.data.util import load_dataset
-from torch.utils.data import Subset
-from torch_geometric.data import Data
 
 
 def seed_worker(exp_seed, worker_id):
