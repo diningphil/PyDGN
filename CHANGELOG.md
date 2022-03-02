@@ -4,10 +4,11 @@
 
 ### TODO (decreasing priority):
 
+- Add again temporal learning (with documentation)
+- Add again continual learning (with documentation)
 - Add unit test
 - Add integration tests
-- Add again temporal PyDGN (with proper documentation)
-- Add shared dataset functionality to save main memory when parallelizing
+- Add Multi-GPU processing for single experiment
 
 ### Added
 
@@ -23,6 +24,7 @@
 
 - Removed any backward compatibilities with very old versions (<=0.6.2)
 - Substituted Loss and Score classes with a single Metric class, to avoid code redundancy
+- Pre-computed random outer validation splits (extracted from 10% of outer training set) for data splits from "A Fair Comparison on Graph Neural Networks for Graph Classification". Note that this does not impact the test splits.
 
 ## [0.7.3]
 
