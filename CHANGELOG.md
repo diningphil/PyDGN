@@ -4,7 +4,6 @@
 
 ### TODO (decreasing priority):
 
-- Add again temporal learning (with documentation)
 - Add again continual learning (with documentation)
 - Add unit test
 - Add integration tests
