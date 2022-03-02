@@ -22,6 +22,4 @@ conda install jupyter -y
 
 conda install pyg==${PYTORCH_GEOMETRIC_VERSION} -c pyg -c conda-forge -c rusty1s -c conda-forge
 
-echo "Done. Remember to "
-echo " 1) append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command"
-echo "Modify the .bashrc file to make permanent changes."
+echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"
