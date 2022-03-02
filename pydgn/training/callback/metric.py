@@ -156,7 +156,6 @@ class Metric(Module, EventHandler):
         raise NotImplementedError('To be implemented by a subclass')
 
 
-
 class MultiScore(Metric):
     r"""
     This class is used to keep track of multiple additional metrics used as scores, rather than losses.
@@ -337,6 +336,10 @@ class Classification(Metric):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.metric = None
 
+    @property
+    def name(self) -> str:
+        return 'Classification Metric'
+
     def forward(self,
                 targets: torch.Tensor,
                 *outputs: List[torch.Tensor],
@@ -363,6 +366,10 @@ class Regression(Metric):
     def __init__(self, use_as_loss=False, reduction='mean', use_nodes_batch_size=False):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
         self.metric = None
+
+    @property
+    def name(self) -> str:
+        return 'Regression Metric'
 
     def forward(self,
                 targets: torch.Tensor,

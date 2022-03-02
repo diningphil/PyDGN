@@ -1,8 +1,8 @@
 # Dataset and Splits
 data_root: DATA
-dataset_class: pydgn.data.dataset.TUDatasetInterface
+dataset_class: pydgn.data.dataset.PlanetoidDatasetInterface
 dataset_name:  cora
-data_splits_file:  examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits
+data_splits_file:  examples/DATA_SPLITS/cora/cora_outer10_inner1.splits
 
 
 # Hardware

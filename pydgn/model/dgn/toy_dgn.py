@@ -17,9 +17,7 @@ class ToyDGN(ModelInterface):
 
         num_layers = config['num_layers']
         dim_embedding = config['dim_embedding']
-        self.is_link_prediction = config.get('is_link_prediction', False)
         self.aggregation = config['aggregation']  # can be mean or max
-
 
         if self.aggregation == 'max':
             self.fc_max = nn.Linear(dim_embedding, dim_embedding)
@@ -51,7 +49,4 @@ class ToyDGN(ModelInterface):
 
         node_embs = torch.cat(x_all, dim=1)
 
-        if not self.is_link_prediction:
-           return self.readout(node_embs, batch)
-        else:
-            return self.readout(node_embs, batch, **dict(edge_index=edge_index))
+        return self.readout(node_embs, batch, **dict(edge_index=edge_index))
