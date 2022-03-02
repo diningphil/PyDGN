@@ -1,12 +1,16 @@
-# PyDGN
+# PyDGN: a research library for Deep Graph Networks 
 [![Documentation Status](https://readthedocs.org/projects/pydgn/badge/?version=latest)](https://pydgn.readthedocs.io/en/latest/?badge=latest)
 
-## Description
+## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
-![](https://github.com/diningphil/PyDGN/blob/master/images/pydgn-logo.png)
+<p align="center">
+  <img src="https://github.com/diningphil/PyDGN/blob/master/images/pydgn-logo.png"  width="300"/>
+</p>
+
+
 This is a Python library to easily experiment
 with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S0893608020302197) (DGNs). It provides
-automatic management of data splitting, loading and the most common experimental settings. It also handles both model
+automatic management of data splitting, loading and common experimental settings. It also handles both model
 selection and risk assessment procedures, by trying many different configurations in parallel (CPU or GPU). This
 repository is built upon the [Pytorch Geometric Library](https://pytorch-geometric.readthedocs.io/en/latest/) and [Pytorch Geometric Temporal](https://pytorch-geometric-temporal.readthedocs.io/en/latest/modules/root.html), which
 provide support for data management.
