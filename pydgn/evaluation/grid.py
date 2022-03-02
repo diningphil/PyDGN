@@ -141,7 +141,7 @@ class Grid:
         Computes the name of the root folder
 
         Returns:
-             the name of the root folder as made of MODEL-NAME_DATASET-NAME
+             the name of the root folder as made of ``EXP-NAME_DATASET-NAME``
         """
         return f"{self._exp_name}_{self.dataset_name}"
 
