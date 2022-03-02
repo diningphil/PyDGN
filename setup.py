@@ -25,7 +25,7 @@ setuptools.setup(
         "Operating System :: POSIX :: Linux",
     ],
     packages=setuptools.find_packages(),
-    python_requires=">=3.6,<3.10",
+    python_requires=">=3.8,<3.10",
     install_requires=[
         'PyYAML >= 5.4',
         'networkx >= 2.3',
