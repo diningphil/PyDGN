@@ -3,7 +3,7 @@ splitter:
   class_name: pydgn.data.splitter.Splitter
   args:
     n_outer_folds: 10
-    n_inner_folds: 2
+    n_inner_folds: 1
     seed: 42
     stratify: True
     shuffle: True

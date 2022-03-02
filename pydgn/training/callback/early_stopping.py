@@ -43,8 +43,9 @@ class EarlyStopper(EventHandler):
         Args:
             state (:class:`~training.event.state.State`): object holding training information
         """
-        assert self.monitor in state.epoch_results[SCORES] or self.monitor in state.epoch_results[
-            LOSSES], f'{self.monitor} not found in epoch_results'
+        # it is possible that we evaluate every `n` epochs
+        if not (self.monitor in state.epoch_results[SCORES] or self.monitor in state.epoch_results[LOSSES]):
+            return
 
         if self.monitor in state.epoch_results[SCORES]:
             score_or_loss = SCORES
@@ -111,6 +112,10 @@ class PatienceEarlyStopper(EarlyStopper):
         self.patience = patience
 
     def stop(self, state, score_or_loss, metric):
+        # do not start with patience until you have evaluated at least once
+        if not hasattr(state, BEST_EPOCH_RESULTS):
+            return False
+
         best_epoch = state.best_epoch_results[BEST_EPOCH]
         stop_training = (state.epoch - best_epoch) >= self.patience
         return stop_training

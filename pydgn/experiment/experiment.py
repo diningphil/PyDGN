@@ -182,7 +182,7 @@ class Experiment:
                         config: Config,
                         model: ModelInterface,
                         device: str,
-                        log_every: int) -> TrainingEngine:
+                        evaluate_every: int) -> TrainingEngine:
         r"""
         Utility that instantiates the training engine. It looks for pre-defined fields in the configuration file,
         i.e. ``loss``, ``scorer``, ``optimizer``, ``scheduler``, ``gradient_clipper``, ``early_stopper`` and
@@ -192,7 +192,7 @@ class Experiment:
             config (:class:`~pydgn.evaluation.config.Config`): the configuration dictionary
             model: the  model that needs be trained
             device (str): the string with the CUDA device to be used, or ``cpu``
-            log_every: number of epochs after which to log information
+            evaluate_every: number of epochs after which to log information
 
         Returns:
             a :class:`~pydgn.training.engine.TrainingEngine` object
@@ -231,7 +231,7 @@ class Experiment:
         engine = engine_class(engine_callback=engine_callback, model=model, loss=loss,
                                 optimizer=optimizer, scorer=scorer, scheduler=scheduler,
                                 early_stopper=early_stopper, gradient_clipper=grad_clipper,
-                                device=device, plotter=plotter, exp_path=self.exp_path, log_every=log_every,
+                                device=device, plotter=plotter, exp_path=self.exp_path, evaluate_every=evaluate_every,
                                 store_last_checkpoint=store_last_checkpoint)
         return engine
 
@@ -246,8 +246,8 @@ class Experiment:
             a :class:`~pydgn.training.engine.TrainingEngine` object
         """
         device = self.model_config.device
-        log_every = self.model_config.log_every
-        return self._create_engine(self.model_config.supervised_config, model, device, log_every)
+        evaluate_every = self.model_config.evaluate_every
+        return self._create_engine(self.model_config.supervised_config, model, device, evaluate_every)
 
     def create_unsupervised_engine(self, model: ModelInterface) -> TrainingEngine:
         r"""
@@ -260,8 +260,8 @@ class Experiment:
             a :class:`~pydgn.training.engine.TrainingEngine` object
         """
         device = self.model_config.device
-        log_every = self.model_config.log_every
-        return self._create_engine(self.model_config.unsupervised_config, model, device, log_every)
+        evaluate_every = self.model_config.evaluate_every
+        return self._create_engine(self.model_config.unsupervised_config, model, device, evaluate_every)
 
     def create_incremental_engine(self, model: ModelInterface) -> TrainingEngine:
         r"""
@@ -274,8 +274,8 @@ class Experiment:
             a :class:`~pydgn.training.engine.TrainingEngine` object
         """
         device = self.model_config.device
-        log_every = self.model_config.log_every
-        return self._create_engine(self.model_config.layer_config, model, device, log_every)
+        evaluate_every = self.model_config.evaluate_every
+        return self._create_engine(self.model_config.layer_config, model, device, evaluate_every)
 
     def run_valid(self, dataset_getter, logger) -> Tuple[dict, dict]:
         r"""

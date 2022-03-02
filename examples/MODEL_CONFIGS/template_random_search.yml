@@ -31,8 +31,7 @@ result_folder:  # path of the folder where to store results
 exp_name:  # name of the experiment
 experiment:  # dotted path to experiment class
 higher_results_are_better:  # model selection: should we select based on max (True) or min (False) main score?
-log_every:  # log results every `n` epochs
-evaluate_every:  # evaluate on train/val/test every `n` epochs
+evaluate_every:  # evaluate on train/val/test every `n` epochs and log results
 final_training_runs:  # how many final (model assessment) training runs to perform to mitigate bad initializations
 
 

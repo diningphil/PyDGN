@@ -30,7 +30,6 @@ result_folder: RESULTS
 exp_name: link_prediction_grid_search_toy
 experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
-log_every: 1
 evaluate_every: 1
 final_training_runs: 3
 

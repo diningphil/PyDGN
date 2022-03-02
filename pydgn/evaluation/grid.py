@@ -27,7 +27,7 @@ class Grid:
                                                                               return_class_name=True)
         self.experiment = self.configs_dict[EXPERIMENT]
         self.higher_results_are_better = self.configs_dict[HIGHER_RESULTS_ARE_BETTER]
-        self.log_every = self.configs_dict[LOG_EVERY]
+        self.evaluate_every = self.configs_dict[evaluate_every]
         self.device = self.configs_dict[DEVICE]
         self.dataset_getter = self.configs_dict[DATASET_GETTER]
 
@@ -52,7 +52,7 @@ class Grid:
                         DEVICE: self.device,
                         EXPERIMENT: self.experiment,
                         HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
-                        LOG_EVERY: self.log_every})
+                        evaluate_every: self.evaluate_every})
         return configs
 
     def _gen_helper(self, cfgs_dict: dict) -> dict:

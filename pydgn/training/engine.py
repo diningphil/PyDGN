@@ -55,7 +55,7 @@ class TrainingEngine(EventDispatcher):
         device (str): the device on which to train. Default is ``cpu``.
         plotter (:class:`~pydgn.training.callback.plotter.Plotter`): the plotter to be used. Default is ``None``.
         exp_path (str): the path of the experiment folder. Default is ``None`` but it is always instantiated.
-        log_every(int): the frequency of logging epoch results. Default is ``1``.
+        evaluate_every(int): the frequency of logging epoch results. Default is ``1``.
         store_last_checkpoint (bool): whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch. Default is ``False``.
     """
     def __init__(self,
@@ -70,7 +70,7 @@ class TrainingEngine(EventDispatcher):
                  device: str='cpu',
                  plotter: Plotter=None,
                  exp_path: str=None,
-                 log_every: int=1,
+                 evaluate_every: int=1,
                  store_last_checkpoint: bool=False):
         super().__init__()
 
@@ -85,7 +85,7 @@ class TrainingEngine(EventDispatcher):
         self.device = device
         self.plotter = plotter
         self.exp_path = exp_path
-        self.log_every = log_every
+        self.evaluate_every = evaluate_every
         self.store_last_checkpoint = store_last_checkpoint
         self.training = False
 
@@ -395,51 +395,50 @@ class TrainingEngine(EventDispatcher):
                 self.state.update(set=TRAINING)
                 _, _, _ = self._train(train_loader)
 
-
-                # Compute training output (necessary because on_backward has been called)
-                train_loss, train_score, _ = self.infer(train_loader, TRAINING)
-
-                # Compute validation output
-                if validation_loader is not None:
-                    val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
-
-                # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
-                if test_loader is not None:
-                    test_loss, test_score, _ = self.infer(test_loader, TEST)
-
                 # Update state with epoch results
                 epoch_results = {
                     LOSSES: {},
                     SCORES: {}
                 }
 
-                epoch_results[LOSSES].update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
-                epoch_results[SCORES].update({f'{TRAINING}_{k}': v for k, v in train_score.items()})
+                if ((epoch+1) >= self.evaluate_every and (epoch+1) % self.evaluate_every == 0) or epoch == 0:
+                    # Compute training output (necessary because on_backward has been called)
+                    train_loss, train_score, _ = self.infer(train_loader, TRAINING)
 
-                if validation_loader is not None:
-                    epoch_results[LOSSES].update({f'{VALIDATION}_{k}': v for k, v in val_loss.items()})
-                    epoch_results[SCORES].update({f'{VALIDATION}_{k}': v for k, v in val_score.items()})
-                    val_msg_str = f', VL loss: {val_loss} VL score: {val_score}'
-                else:
-                    val_msg_str = ''
+                    # Compute validation output
+                    if validation_loader is not None:
+                        val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
 
-                if test_loader is not None:
-                    epoch_results[LOSSES].update({f'{TEST}_{k}': v for k, v in test_loss.items()})
-                    epoch_results[SCORES].update({f'{TEST}_{k}': v for k, v in test_score.items()})
-                    test_msg_str = f', TE loss: {test_loss} TE score: {test_score}'
-                else:
-                    test_msg_str = ''
+                    # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
+                    if test_loader is not None:
+                        test_loss, test_score, _ = self.infer(test_loader, TEST)
+
+                    epoch_results[LOSSES].update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
+                    epoch_results[SCORES].update({f'{TRAINING}_{k}': v for k, v in train_score.items()})
+
+                    if validation_loader is not None:
+                        epoch_results[LOSSES].update({f'{VALIDATION}_{k}': v for k, v in val_loss.items()})
+                        epoch_results[SCORES].update({f'{VALIDATION}_{k}': v for k, v in val_score.items()})
+                        val_msg_str = f', VL loss: {val_loss} VL score: {val_score}'
+                    else:
+                        val_msg_str = ''
+
+                    if test_loader is not None:
+                        epoch_results[LOSSES].update({f'{TEST}_{k}': v for k, v in test_loss.items()})
+                        epoch_results[SCORES].update({f'{TEST}_{k}': v for k, v in test_score.items()})
+                        test_msg_str = f', TE loss: {test_loss} TE score: {test_score}'
+                    else:
+                        test_msg_str = ''
+
+                    # Log performances
+                    msg = f'Epoch: {epoch + 1}, TR loss: {train_loss} TR score: {train_score}' + val_msg_str + test_msg_str
+                    log(msg, logger)
 
                 # Update state with the result of this epoch
                 self.state.update(epoch_results=epoch_results)
 
                 # We can apply early stopping here
                 self._dispatch(EventHandler.ON_EPOCH_END, self.state)
-
-                # Log performances
-                if epoch % self.log_every == 0 or epoch == 1:
-                    msg = f'Epoch: {epoch + 1}, TR loss: {train_loss} TR score: {train_score}' + val_msg_str + test_msg_str
-                    log(msg, logger)
 
                 if self.state.stop_training:
                     log(f"Stopping at epoch {self.state.epoch}.", logger)
@@ -487,7 +486,7 @@ class TrainingEngine(EventDispatcher):
 
             self.state.update(return_node_embeddings=False)
 
-            log(f'Chosen is TR loss: {train_loss} TR score: {train_score}, VL loss: {val_loss} VL score: {val_score} '
+            log(f'Chosen is Epoch {ber[BEST_EPOCH]+1} TR loss: {train_loss} TR score: {train_score}, VL loss: {val_loss} VL score: {val_score} '
                 f'TE loss: {test_loss} TE score: {test_score}', logger)
 
             self.state.update(set=None)

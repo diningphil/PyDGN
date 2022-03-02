@@ -11,7 +11,7 @@ def get_args_dict():
     return vars(parser.parse_args())
 
 
-if __name__ == "__main__":
+def main():
     args = get_args_dict()
     options = yaml.load(open(args[CONFIG_FILE], "r"), Loader=yaml.FullLoader)
     preprocess_data(options)

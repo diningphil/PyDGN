@@ -95,7 +95,8 @@ def get_args():
     parser.add_argument(DEBUG_CLI_ARGUMENT, action="store_true", dest=DEBUG, default=False)
     return parser.parse_args()
 
-if __name__ == "__main__":
+
+def main():
     options = get_args()
     try:
         evaluation(options)
