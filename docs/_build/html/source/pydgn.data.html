@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pydgn.data package &mdash; PyDGN 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pydgn.evaluation package" href="pydgn.evaluation.html" />
+    <link rel="prev" title="Examples" href="../example.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> PyDGN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Intro and Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../example.html">Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pydgn.data package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.dataset">pydgn.data.dataset module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.provider">pydgn.data.provider module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.sampler">pydgn.data.sampler module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.splitter">pydgn.data.splitter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.transform">pydgn.data.transform module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data.util">pydgn.data.util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-pydgn.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.model.html">pydgn.model package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pydgn.training.html">pydgn.training package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyDGN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>pydgn.data package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/source/pydgn.data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pydgn-data-package">
+<h1>pydgn.data package<a class="headerlink" href="#pydgn-data-package" title="Permalink to this headline"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline"></a></h2>
+</section>
+<section id="module-pydgn.data.dataset">
+<span id="pydgn-data-dataset-module"></span><h2>pydgn.data.dataset module<a class="headerlink" href="#module-pydgn.data.dataset" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.dataset.ConcatFromListDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">ConcatFromListDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch_geometric.data.data.Data</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.ConcatFromListDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.in_memory_dataset.InMemoryDataset</span></code></p>
+<p>Create a dataset from a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.Data</span></code> objects. Inherits from
+<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.InMemoryDataset</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_list</strong> (<em>list</em>) – List of graphs.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.ConcatFromListDataset.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.ConcatFromListDataset.download" title="Permalink to this definition"></a></dt>
+<dd><p>Downloads the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.ConcatFromListDataset.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.ConcatFromListDataset.process" title="Permalink to this definition"></a></dt>
+<dd><p>Processes the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.ConcatFromListDataset.processed_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processed_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pydgn.data.dataset.ConcatFromListDataset.processed_file_names" title="Permalink to this definition"></a></dt>
+<dd><p>The name of the files in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder that
+must be present in order to skip processing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.ConcatFromListDataset.raw_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pydgn.data.dataset.ConcatFromListDataset.raw_file_names" title="Permalink to this definition"></a></dt>
+<dd><p>The name of the files in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder that must
+be present in order to skip downloading.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">DatasetInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.data.dataset.Dataset</span></code></p>
+<p>Class that defines a number of properties essential to all datasets implementations inside PyDGN. These properties
+are used by the training engine and forwarded to the model to be trained. For some datasets, e.g.,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.datasets.TUDataset</span></code>, implementing this interface is straightforward.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.data" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.dim_edge_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_edge_features</span></span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.dim_edge_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.dim_node_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_node_features</span></span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.dim_node_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.dim_target">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_target</span></span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.dim_target" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the dimension of each target vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.download" title="Permalink to this definition"></a></dt>
+<dd><p>Downloads the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">torch_geometric.data.data.Data</span></span></span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.get" title="Permalink to this definition"></a></dt>
+<dd><p>Gets the data object at index <code class="xref py py-obj docutils literal notranslate"><span class="pre">idx</span></code>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.len">
+<span class="sig-name descname"><span class="pre">len</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.len" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the number of graphs stored in the dataset.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.name" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.process" title="Permalink to this definition"></a></dt>
+<dd><p>Processes the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.processed_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processed_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.processed_file_names" title="Permalink to this definition"></a></dt>
+<dd><p>The name of the files in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder that
+must be present in order to skip processing.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.DatasetInterface.raw_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">raw_file_names</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pydgn.data.dataset.DatasetInterface.raw_file_names" title="Permalink to this definition"></a></dt>
+<dd><p>The name of the files in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder that must
+be present in order to skip downloading.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">OGBG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meta_dict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.OGBG" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ogb.graphproppred.dataset_pyg.PygGraphPropPredDataset</span></code>, <a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.dataset.DatasetInterface</span></code></a></p>
+<p>Class that wraps the <code class="xref py py-class docutils literal notranslate"><span class="pre">ogb.graphproppred.PygGraphPropPredDataset</span></code> class to provide aliases of some fields.
+Uses the same interface as</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.dim_edge_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_edge_features</span></span><a class="headerlink" href="#pydgn.data.dataset.OGBG.dim_edge_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.dim_node_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_node_features</span></span><a class="headerlink" href="#pydgn.data.dataset.OGBG.dim_node_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.dim_target">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_target</span></span><a class="headerlink" href="#pydgn.data.dataset.OGBG.dim_target" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the dimension of each target vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.OGBG.download" title="Permalink to this definition"></a></dt>
+<dd><p>Downloads the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.get_idx_split">
+<span class="sig-name descname"><span class="pre">get_idx_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.data.dataset.OGBG.get_idx_split" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.OGBG.process" title="Permalink to this definition"></a></dt>
+<dd><p>Processes the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.OGBG.processed_file_names">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">processed_file_names</span></span><a class="headerlink" href="#pydgn.data.dataset.OGBG.processed_file_names" title="Permalink to this definition"></a></dt>
+<dd><p>The name of the files in the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder that
+must be present in order to skip processing.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.dataset.PlanetoidDatasetInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">PlanetoidDatasetInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'public'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_train_per_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_val</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_test</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.PlanetoidDatasetInterface" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.datasets.planetoid.Planetoid</span></code>, <a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.dataset.DatasetInterface</span></code></a></p>
+<p>Class that wraps the <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.datasets.Planetoid</span></code> class to provide aliases of some fields.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.PlanetoidDatasetInterface.dim_edge_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_edge_features</span></span><a class="headerlink" href="#pydgn.data.dataset.PlanetoidDatasetInterface.dim_edge_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.PlanetoidDatasetInterface.dim_node_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_node_features</span></span><a class="headerlink" href="#pydgn.data.dataset.PlanetoidDatasetInterface.dim_node_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.PlanetoidDatasetInterface.dim_target">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_target</span></span><a class="headerlink" href="#pydgn.data.dataset.PlanetoidDatasetInterface.dim_target" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the dimension of each target vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.PlanetoidDatasetInterface.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.PlanetoidDatasetInterface.download" title="Permalink to this definition"></a></dt>
+<dd><p>Downloads the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.PlanetoidDatasetInterface.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.PlanetoidDatasetInterface.process" title="Permalink to this definition"></a></dt>
+<dd><p>Processes the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.dataset.TUDatasetInterface">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">TUDatasetInterface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_transform</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pre_filter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_node_attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_edge_attr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cleaned</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.TUDatasetInterface" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.datasets.tu_dataset.TUDataset</span></code>, <a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.dataset.DatasetInterface</span></code></a></p>
+<p>Class that wraps the <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.datasets.TUDataset</span></code> class to provide aliases of some fields.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.TUDatasetInterface.dim_edge_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_edge_features</span></span><a class="headerlink" href="#pydgn.data.dataset.TUDatasetInterface.dim_edge_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.TUDatasetInterface.dim_node_features">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_node_features</span></span><a class="headerlink" href="#pydgn.data.dataset.TUDatasetInterface.dim_node_features" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+implemented).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pydgn.data.dataset.TUDatasetInterface.dim_target">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dim_target</span></span><a class="headerlink" href="#pydgn.data.dataset.TUDatasetInterface.dim_target" title="Permalink to this definition"></a></dt>
+<dd><p>Specifies the dimension of each target vector.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.TUDatasetInterface.download">
+<span class="sig-name descname"><span class="pre">download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.TUDatasetInterface.download" title="Permalink to this definition"></a></dt>
+<dd><p>Downloads the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.raw_dir</span></code> folder.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.dataset.TUDatasetInterface.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.TUDatasetInterface.process" title="Permalink to this definition"></a></dt>
+<dd><p>Processes the dataset to the <code class="xref py py-obj docutils literal notranslate"><span class="pre">self.processed_dir</span></code> folder.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.dataset.ZipDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">ZipDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datasets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataset.Dataset</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.dataset.ZipDataset" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.dataset.Dataset</span></code></p>
+<p>This Dataset takes <cite>n</cite> datasets and “zips” them. When asked for the <cite>i</cite>-th element, it returns the <cite>i</cite>-th element of
+all <cite>n</cite> datasets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>datasets</strong> (<em>List</em><em>[</em><em>torch.utils.data.Dataset</em><em>]</em>) – An iterable with PyTorch Datasets</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Precondition:</dt><dd><p>The length of all datasets must be the same</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pydgn.data.provider">
+<span id="pydgn-data-provider-module"></span><h2>pydgn.data.provider module<a class="headerlink" href="#module-pydgn.data.provider" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.provider.</span></span><span class="sig-name descname"><span class="pre">DataProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits_filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.DataProvider" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A DataProvider object retrieves the correct data according to the external and internal data splits.
+It can be additionally used to augment the data, or to create a specific type of data loader. The base class
+does nothing special, but here is where the i-th element of a dataset could be pre-processed before constructing
+the mini-batches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – the path of the root folder in which data is stored</p></li>
+<li><p><strong>splits_root</strong> (<em>str</em>) – the path of the splits folder in which data splits are stored</p></li>
+<li><p><strong>splits_filepath</strong> (<em>str</em>) – the filepath of the splits. with additional metadata</p></li>
+<li><p><strong>dataset_class</strong> (Callable[…,:class:<cite>pydgn.data.dataset.DatasetInterface</cite>]) – the class of the dataset</p></li>
+<li><p><strong>data_loader_class</strong> (Union[Callable[…,:class:<cite>torch.utils.data.DataLoader</cite>],Callable[…,:class:<cite>torch_geometric.loader.DataLoader</cite>]]) – the class of the data loader to use</p></li>
+<li><p><strong>dataset_name</strong> (<em>str</em>) – the name of the dataset</p></li>
+<li><p><strong>outer_folds</strong> (<em>int</em>) – the number of outer folds for risk assessment. 1 means hold-out, &gt;1 means k-fold</p></li>
+<li><p><strong>inner_folds</strong> (<em>int</em>) – the number of outer folds for model selection. 1 means hold-out, &gt;1 means k-fold</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em>) – the number of workers to use in the DataLoader. A value &gt; 0 triggers multiprocessing. Useful to prefetch data from disk to GPU.</p></li>
+<li><p><strong>pin_memory</strong> (<em>bool</em>) – should be True when working on GPU.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_dim_edge_features">
+<span class="sig-name descname"><span class="pre">get_dim_edge_features</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_dim_edge_features" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the number of node features of the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the value of the property <code class="docutils literal notranslate"><span class="pre">dim_edge_features</span></code> in the dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_dim_node_features">
+<span class="sig-name descname"><span class="pre">get_dim_node_features</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_dim_node_features" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the number of node features of the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the value of the property <code class="docutils literal notranslate"><span class="pre">dim_node_features</span></code> in the dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_dim_target">
+<span class="sig-name descname"><span class="pre">get_dim_target</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_dim_target" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the dimension of the target for the task</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>the value of the property <code class="docutils literal notranslate"><span class="pre">dim_target</span></code> in the dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_inner_train">
+<span class="sig-name descname"><span class="pre">get_inner_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_inner_train" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the training set for model selection associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_inner_val">
+<span class="sig-name descname"><span class="pre">get_inner_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_inner_val" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the validation set for model selection associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_outer_test">
+<span class="sig-name descname"><span class="pre">get_outer_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_outer_test" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the test set for risk assessment associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_outer_train">
+<span class="sig-name descname"><span class="pre">get_outer_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_outer_train" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the training set for risk assessment associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.get_outer_val">
+<span class="sig-name descname"><span class="pre">get_outer_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.data.provider.DataProvider.get_outer_val" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the validation set for risk assessment associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.set_exp_seed">
+<span class="sig-name descname"><span class="pre">set_exp_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.DataProvider.set_exp_seed" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the experiment seed to give to the DataLoader. Helps with reproducibility.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seed</strong> (<em>int</em>) – id of the seed</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.set_inner_k">
+<span class="sig-name descname"><span class="pre">set_inner_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.DataProvider.set_inner_k" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the parameter k of the <cite>model selection</cite> procedure. Called by the evaluation modules to load the correct
+subset of the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>k</strong> (<em>int</em>) – the id of the fold, ranging from 0 to K-1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.DataProvider.set_outer_k">
+<span class="sig-name descname"><span class="pre">set_outer_k</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.DataProvider.set_outer_k" title="Permalink to this definition"></a></dt>
+<dd><p>Sets the parameter k of the <cite>risk assessment</cite> procedure. Called by the evaluation modules to load the correct
+subset of the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>k</strong> (<em>int</em>) – the id of the fold, ranging from 0 to K-1.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.provider.LinkPredictionSingleGraphDataProvider">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.provider.</span></span><span class="sig-name descname"><span class="pre">LinkPredictionSingleGraphDataProvider</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">splits_filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_loader_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch.utils.data.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">torch_geometric.loader.dataloader.DataLoader</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pin_memory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.LinkPredictionSingleGraphDataProvider" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.provider.DataProvider</span></code></a></p>
+<p>An extension of the DataProvider class to deal with link prediction on a single graph.
+Designed to work with <a class="reference internal" href="#pydgn.data.splitter.LinkPredictionSingleGraphSplitter" title="pydgn.data.splitter.LinkPredictionSingleGraphSplitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkPredictionSingleGraphSplitter</span></code></a>.
+We also assume the single-graph dataset can fit in memory
+<strong>WARNING</strong>: this class <strong>modifies</strong> the dataset by creating copies. It may not work if a “shared dataset” feature
+is added to PyDGN.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_inner_train">
+<span class="sig-name descname"><span class="pre">get_inner_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_inner_train" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the training set for model selection associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_inner_val">
+<span class="sig-name descname"><span class="pre">get_inner_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_inner_val" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the validation set for model selection associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_outer_test">
+<span class="sig-name descname"><span class="pre">get_outer_test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_outer_test" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the test set for risk assessment associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_outer_train">
+<span class="sig-name descname"><span class="pre">get_outer_train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_outer_train" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the training set for risk assessment associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_outer_val">
+<span class="sig-name descname"><span class="pre">get_outer_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.LinkPredictionSingleGraphDataProvider.get_outer_val" title="Permalink to this definition"></a></dt>
+<dd><p>Returns the validation set for risk assessment associated with specific outer and inner folds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>kwargs</strong> (<em>dict</em>) – a dictionary of additional arguments to be passed to the dataset being loaded.
+Not used in the base version</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a Union[<code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.DataLoader</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">torch_geometric.loader.DataLoader</span></code>] object</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.provider.seed_worker">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.provider.</span></span><span class="sig-name descname"><span class="pre">seed_worker</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exp_seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">worker_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.provider.seed_worker" title="Permalink to this definition"></a></dt>
+<dd><p>Used to set a different, but reproducible, seed for all data-retriever workers. Without this,
+all workers will retrieve the data in the same order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>exp_seed</strong> (<em>int</em>) – base seed to be used for reproducibility</p></li>
+<li><p><strong>worker_id</strong> (<em>int</em>) – id number of the worker</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pydgn.data.sampler">
+<span id="pydgn-data-sampler-module"></span><h2>pydgn.data.sampler module<a class="headerlink" href="#module-pydgn.data.sampler" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.sampler.RandomSampler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.sampler.</span></span><span class="sig-name descname"><span class="pre">RandomSampler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.sampler.RandomSampler" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">torch.utils.data.sampler.RandomSampler</span></code></p>
+<p>This sampler wraps the dataset and saves the random permutation applied to the samples, so that it will be available
+for further use (e.g. for saving graph embeddings in the original order).
+The permutation is saved in the ‘permutation’ attribute.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data_source</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.DatasetInterface</span></code>) – the dataset object</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.data.sampler.RandomSampler.data_source">
+<span class="sig-name descname"><span class="pre">data_source</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Sized</span></em><a class="headerlink" href="#pydgn.data.sampler.RandomSampler.data_source" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pydgn.data.sampler.RandomSampler.replacement">
+<span class="sig-name descname"><span class="pre">replacement</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#pydgn.data.sampler.RandomSampler.replacement" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-pydgn.data.splitter">
+<span id="pydgn-data-splitter-module"></span><h2>pydgn.data.splitter module<a class="headerlink" href="#module-pydgn.data.splitter" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.Fold">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">Fold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Fold" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Simple class that stores training, validation, and test indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>train_idxs</strong> (<em>Union</em><em>[</em><em>list</em><em>, </em><em>tuple</em><em>]</em>) – training indices</p></li>
+<li><p><strong>val_idxs</strong> (<em>Union</em><em>[</em><em>list</em><em>, </em><em>tuple</em><em>]</em>) – validation indices. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>test_idxs</strong> (<em>Union</em><em>[</em><em>list</em><em>, </em><em>tuple</em><em>]</em>) – test indices. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.InnerFold">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">InnerFold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.InnerFold" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.data.splitter.Fold" title="pydgn.data.splitter.Fold"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.splitter.Fold</span></code></a></p>
+<p>Simple extension of the Fold class that returns a dictionary with training and validation indices (model selection).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.InnerFold.todict">
+<span class="sig-name descname"><span class="pre">todict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.data.splitter.InnerFold.todict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a dictionary with the training/validation indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dict with keys <code class="docutils literal notranslate"><span class="pre">['train',</span> <span class="pre">'val']</span></code> associated with the respective indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.LinkPredictionSingleGraphSplitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">LinkPredictionSingleGraphSplitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_val_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_val_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undirected</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_opposite_negative_edges</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_checks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.LinkPredictionSingleGraphSplitter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.data.splitter.Splitter" title="pydgn.data.splitter.Splitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.splitter.Splitter</span></code></a></p>
+<p>Class that inherits from <a class="reference internal" href="#pydgn.data.splitter.Splitter" title="pydgn.data.splitter.Splitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Splitter</span></code></a> and computes link splits for link classification tasks.
+<strong>IMPORTANT:</strong> This class implements <strong>bootstrapping</strong> rather than k-fold cross-validation, so different
+outer test sets may have overlapping indices.</p>
+<p><strong>Does not support edge attributes at the moment.</strong></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_outer_folds</strong> (<em>int</em>) – number of outer folds (risk assessment). 1 means hold-out, &gt;1 means k-fold</p></li>
+<li><p><strong>n_inner_folds</strong> (<em>int</em>) – number of inner folds (model selection). 1 means hold-out, &gt;1 means k-fold</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – random seed for reproducibility (on the same machine)</p></li>
+<li><p><strong>stratify</strong> (<em>bool</em>) – whether to apply stratification or not (should be true for classification tasks)</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em>) – whether to apply shuffle or not</p></li>
+<li><p><strong>inner_val_ratio</strong> (<em>float</em>) – percentage of validation set for hold_out model selection. Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+<li><p><strong>outer_val_ratio</strong> (<em>float</em>) – percentage of validation set for hold_out model assessment (final training runs). Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – percentage of test set for hold_out model assessment. Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+<li><p><strong>undirected</strong> (<em>bool</em>) – whether or not the graph is undirected. Default is <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>avoid_opposite_negative_edges</strong> (<em>bool</em>) – whether or not to <strong>avoid</strong> creating negative edges that are opposite to existing edges Default is <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>run_checks</strong> (<em>bool</em>) – whether or not to run correctness checks. Creates a full adjacency matrix, can be memory intensive.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.LinkPredictionSingleGraphSplitter.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.LinkPredictionSingleGraphSplitter.split" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the splits and stores them in the list fields <code class="docutils literal notranslate"><span class="pre">self.outer_folds</span></code> and <code class="docutils literal notranslate"><span class="pre">self.inner_folds</span></code>.
+Links are selected at random: this means outer test folds will overlap almost surely with if test_ratio is 10% of the total samples.
+The recommended procedure here is to use the outer folds to do bootstrapping rather than k-fold cross-validation.
+Idea taken from: <a class="reference external" href="https://arxiv.org/pdf/1811.05868.pdf">https://arxiv.org/pdf/1811.05868.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>) – the Dataset object</p></li>
+<li><p><strong>targets</strong> (<em>np.ndarray</em><em>]</em>) – targets used for stratification. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.LinkPredictionSingleGraphSplitter.train_val_test_edge_split">
+<span class="sig-name descname"><span class="pre">train_val_test_edge_split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edge_attr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_nodes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.LinkPredictionSingleGraphSplitter.train_val_test_edge_split" title="Permalink to this definition"></a></dt>
+<dd><p>Sample training/validation/test edges at random.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.NoShuffleTrainTestSplit">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">NoShuffleTrainTestSplit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.NoShuffleTrainTestSplit" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that implements a very simple training/test split. Can be used to further split training data into training
+and validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>test_ratio</strong> – percentage of data to use for evaluation.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.NoShuffleTrainTestSplit.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.NoShuffleTrainTestSplit.split" title="Permalink to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.OGBGSplitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">OGBGSplitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_val_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_val_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.OGBGSplitter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.data.splitter.Splitter" title="pydgn.data.splitter.Splitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.splitter.Splitter</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.OGBGSplitter.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.data.dataset.OGBG" title="pydgn.data.dataset.OGBG"><span class="pre">pydgn.data.dataset.OGBG</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.OGBGSplitter.split" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the splits and stores them in the list fields <code class="docutils literal notranslate"><span class="pre">self.outer_folds</span></code> and <code class="docutils literal notranslate"><span class="pre">self.inner_folds</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>) – the Dataset object</p></li>
+<li><p><strong>targets</strong> (<em>np.ndarray</em><em>]</em>) – targets used for stratification. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.OuterFold">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">OuterFold</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_idxs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_idxs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.OuterFold" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pydgn.data.splitter.Fold" title="pydgn.data.splitter.Fold"><code class="xref py py-class docutils literal notranslate"><span class="pre">pydgn.data.splitter.Fold</span></code></a></p>
+<p>Simple extension of the Fold class that returns a dictionary with training and test indices (risk assessment)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.OuterFold.todict">
+<span class="sig-name descname"><span class="pre">todict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.data.splitter.OuterFold.todict" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a dictionary with the training/validation/test indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a dict with keys <code class="docutils literal notranslate"><span class="pre">['train',</span> <span class="pre">'val',</span> <span class="pre">'test']</span></code> associated with the respective indices</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.splitter.Splitter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">Splitter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_outer_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_inner_folds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stratify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shuffle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inner_val_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outer_val_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_ratio</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Splitter" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class that generates and stores the data splits at dataset creation time.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_outer_folds</strong> (<em>int</em>) – number of outer folds (risk assessment). 1 means hold-out, &gt;1 means k-fold</p></li>
+<li><p><strong>n_inner_folds</strong> (<em>int</em>) – number of inner folds (model selection). 1 means hold-out, &gt;1 means k-fold</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – random seed for reproducibility (on the same machine)</p></li>
+<li><p><strong>stratify</strong> (<em>bool</em>) – whether to apply stratification or not (should be true for classification tasks)</p></li>
+<li><p><strong>shuffle</strong> (<em>bool</em>) – whether to apply shuffle or not</p></li>
+<li><p><strong>inner_val_ratio</strong> (<em>float</em>) – percentage of validation set for hold_out model selection. Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+<li><p><strong>outer_val_ratio</strong> (<em>float</em>) – percentage of validation set for hold_out model assessment (final training runs). Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+<li><p><strong>test_ratio</strong> (<em>float</em>) – percentage of test set for hold_out model assessment. Default is <code class="docutils literal notranslate"><span class="pre">0.1</span></code></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.Splitter.get_graph_targets">
+<span class="sig-name descname"><span class="pre">get_graph_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset:</span> <span class="pre">pydgn.data.dataset.DatasetInterface)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'bool'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">&lt;class</span> <span class="pre">'numpy.ndarray'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Splitter.get_graph_targets" title="Permalink to this definition"></a></dt>
+<dd><p>Reads the entire dataset and returns the targets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>dataset</strong> (<a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>) – the dataset</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple of two elements. The first element is a boolean, which is <code class="docutils literal notranslate"><span class="pre">True</span></code> if target values exist or an
+exception has not been thrown. The second value holds the actual targets or <code class="docutils literal notranslate"><span class="pre">None</span></code>, depending on the
+first boolean value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.Splitter.load">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Splitter.load" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the data splits from disk.</p>
+<p>:param : param path: the path of the yaml file with the splits</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>a <a class="reference internal" href="#pydgn.data.splitter.Splitter" title="pydgn.data.splitter.Splitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Splitter</span></code></a> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.Splitter.save">
+<span class="sig-name descname"><span class="pre">save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Splitter.save" title="Permalink to this definition"></a></dt>
+<dd><p>Saves the split as a dictionary into a <code class="docutils literal notranslate"><span class="pre">torch</span></code> file. The arguments of the dictionary are
+* seed (int)
+* splitter_class (str)
+* splitter_args (dict)
+* outer_folds (list of dicts)
+* inner_folds (list of lists of dicts)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – filepath where to save the object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pydgn.data.splitter.Splitter.split">
+<span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.Splitter.split" title="Permalink to this definition"></a></dt>
+<dd><p>Computes the splits and stores them in the list fields <code class="docutils literal notranslate"><span class="pre">self.outer_folds</span></code> and <code class="docutils literal notranslate"><span class="pre">self.inner_folds</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>) – the Dataset object</p></li>
+<li><p><strong>targets</strong> (<em>np.ndarray</em><em>]</em>) – targets used for stratification. Default is <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.splitter.to_lower_triangular">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.splitter.</span></span><span class="sig-name descname"><span class="pre">to_lower_triangular</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">edge_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.splitter.to_lower_triangular" title="Permalink to this definition"></a></dt>
+<dd><p>Transform Pytorch Geometric undirected edge index into its “lower triangular counterpart”</p>
+</dd></dl>
+
+</section>
+<section id="module-pydgn.data.transform">
+<span id="pydgn-data-transform-module"></span><h2>pydgn.data.transform module<a class="headerlink" href="#module-pydgn.data.transform" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.transform.ConstantEdgeIfEmpty">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.transform.</span></span><span class="sig-name descname"><span class="pre">ConstantEdgeIfEmpty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.transform.ConstantEdgeIfEmpty" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Adds a constant value to each edge feature only if edge_attr is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>int</em>) – The value to add. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.transform.ConstantIfEmpty">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.transform.</span></span><span class="sig-name descname"><span class="pre">ConstantIfEmpty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.transform.ConstantIfEmpty" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Adds a constant value to each node feature only if x is None.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>value</strong> (<em>int</em>) – The value to add. Default is <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pydgn.data.transform.Degree">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.data.transform.</span></span><span class="sig-name descname"><span class="pre">Degree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_degree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cat</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.transform.Degree" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Adds the node degree to the node features.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_degree</strong> (<em>bool</em>) – If set to <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>, will compute the in-degree of nodes instead of the out-degree.</p></li>
+<li><p><strong>(</strong><strong>default</strong> (<em>Not relevant if the graph is undirected</em>) – <code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code>).</p></li>
+<li><p><strong>cat</strong> (<em>bool</em>) – Concat node degrees to node features instead of replacing them. (default: <code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pydgn.data.util">
+<span id="pydgn-data-util-module"></span><h2>pydgn.data.util module<a class="headerlink" href="#module-pydgn.data.util" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.util.check_argument">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.util.</span></span><span class="sig-name descname"><span class="pre">check_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pydgn.data.util.check_argument" title="Permalink to this definition"></a></dt>
+<dd><p>Checks whether <code class="docutils literal notranslate"><span class="pre">arg_name</span></code> is in the signature of a method or class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cls</strong> (<em>object</em>) – the class to inspect</p></li>
+<li><p><strong>arg_name</strong> (<em>str</em>) – the name to look for</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">True</span></code> if the name was found, <code class="docutils literal notranslate"><span class="pre">False</span></code> otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.util.filter_adj">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.util.</span></span><span class="sig-name descname"><span class="pre">filter_adj</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">edge_index:</span> <span class="pre">torch.Tensor,</span> <span class="pre">edge_attr:</span> <span class="pre">torch.Tensor,</span> <span class="pre">mask:</span> <span class="pre">torch.Tensor)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'torch.Tensor'&gt;,</span> <span class="pre">typing.Union[torch.Tensor,</span> <span class="pre">NoneType]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.util.filter_adj" title="Permalink to this definition"></a></dt>
+<dd><p>Adapted from <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/dropout.html">https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/dropout.html</a>.
+Does the same thing but with a different signature</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>edge_index</strong> (<em>torch.Tensor</em>) – the usual PyG matrix of edge indices</p></li>
+<li><p><strong>edge_attr</strong> (<em>torch.Tensor</em>) – the usual PyG matrix of edge attributes</p></li>
+<li><p><strong>mask</strong> (<em>torch.Tensor</em>) – boolean tensor with edges to filter</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a tuple (filtered edge index, filtered edge attr or <code class="docutils literal notranslate"><span class="pre">None</span></code> if <code class="docutils literal notranslate"><span class="pre">edge_attr</span></code> is <code class="docutils literal notranslate"><span class="pre">None</span></code>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.util.get_or_create_dir">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.util.</span></span><span class="sig-name descname"><span class="pre">get_or_create_dir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#pydgn.data.util.get_or_create_dir" title="Permalink to this definition"></a></dt>
+<dd><p>Creates directories associated to the specified path if they are missing, and it returns the path string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – the path</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the same path as the given argument</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.util.load_dataset">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.util.</span></span><span class="sig-name descname"><span class="pre">load_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><span class="pre">pydgn.data.dataset.DatasetInterface</span></a></span></span><a class="headerlink" href="#pydgn.data.util.load_dataset" title="Permalink to this definition"></a></dt>
+<dd><p>Loads the dataset using the <code class="docutils literal notranslate"><span class="pre">dataset_kwargs.pt</span></code> file created when parsing the data config file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_root</strong> (<em>str</em>) – path of the folder that contains the dataset folder</p></li>
+<li><p><strong>dataset_name</strong> (<em>str</em>) – name of the dataset (same as the name of the dataset folder that has been already created)</p></li>
+<li><p><strong>dataset_class</strong> (Callable[…, <a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a>]) – the class of the dataset to instantiate with the parameters stored in the <code class="docutils literal notranslate"><span class="pre">dataset_kwargs.pt</span></code> file.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a <a class="reference internal" href="#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a> object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pydgn.data.util.preprocess_data">
+<span class="sig-prename descclassname"><span class="pre">pydgn.data.util.</span></span><span class="sig-name descname"><span class="pre">preprocess_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.data.util.preprocess_data" title="Permalink to this definition"></a></dt>
+<dd><p>One of the main functions of the PyDGN library. Used to create the dataset and its associated files that ensure
+the correct functioning of the data loading steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>options</strong> (<em>dict</em>) – a dictionary of dataset/splitter arguments as defined in the data configuration file used.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-pydgn.data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-pydgn.data" title="Permalink to this headline"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../example.html" class="btn btn-neutral float-left" title="Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pydgn.evaluation.html" class="btn btn-neutral float-right" title="pydgn.evaluation package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Federico Errica.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

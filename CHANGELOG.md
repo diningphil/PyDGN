@@ -1,13 +1,32 @@
 # Changelog
 
-## [0.7.3] 
+## [1.0.0] PyDGN with Documentation
 
-# TODO (decreasing priority):
-- Provide a documentation
-- Add shared dataset functionality to save main memory when parallelizing
-- Temporal: Refactor code by adding a temporal callback to initialize the last hidden state outside train()
-- Temporal: Handle case in which we need to predict a value every K time steps
-- Temporal: Handle case in which we need to use a window of T time steps as input
+### TODO (decreasing priority):
+
+- Add again temporal learning (with documentation)
+- Add again continual learning (with documentation)
+- Add unit test
+- Add integration tests
+- Add Multi-GPU processing for single experiment
+
+### Added
+
+- A documentation (it was about time!!!)
+- Possibility of specifying inner and outer validation ratio
+- We can now use a specific data loader and specify its arguments in the configuration file
+- We can now force a metric to compute node-based or graph-based metrics, rather than looking at the ground truth's shape.
+- Possibility of evaluating on validation (and test) every `n` epochs
+- Use entrypoints to simplify usage of the library
+- All arguments must be now specified in the config file. There is a template one can use in the doc.
+
+### Changed (IMPORTANT!)
+
+- Removed any backward compatibilities with very old versions (<=0.6.2)
+- Substituted Loss and Score classes with a single Metric class, to avoid code redundancy
+- Pre-computed random outer validation splits (extracted from 10% of outer training set) for data splits from "A Fair Comparison on Graph Neural Networks for Graph Classification". Note that this does not impact the test splits.
+
+## [0.7.3]
 
 ### Changed
 
@@ -17,7 +36,7 @@
 
 
 ### Fixed
-- Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the predictor
+- Fixed minor bug in experiment. The function create_unsupervised_model looked for supervised_config, rather than unsupervised_config, when looking for the readout
 - Feature request: loss, score, and additiveloss now take a parameter `use_nodes_batch_size` to force computation w.r.t. input nodes rather than target dimension (the default)
 
 ## [0.7.1] 
@@ -75,7 +94,7 @@
 
 - Changed name from `transforms` to `transform` for data preprocessing config files (backward compatible)
 - Minor fix when handling edge data with incremental models like E-CGMM
-- Fix in graph predictor: forgot to pass arguments to super when inheriting from `GraphPredictor`
+- Fix in graph readout: forgot to pass arguments to super when inheriting from `GraphReadout`
 
 ## [0.5.0] - Pytorch 1.8.1, random search, and many fixes
 
