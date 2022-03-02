@@ -11,7 +11,7 @@ from pydgn.training.callback.metric import Metric
 from pydgn.training.callback.optimizer import Optimizer
 from pydgn.training.callback.plotter import Plotter
 from pydgn.training.callback.scheduler import Scheduler
-from pydgn.training.callback.gradient_clipper import GradientClipper
+from pydgn.training.callback.gradient_clipping import GradientClipper
 from pydgn.training.event.dispatcher import EventDispatcher
 from pydgn.training.event.handler import EventHandler
 from pydgn.training.event.state import State

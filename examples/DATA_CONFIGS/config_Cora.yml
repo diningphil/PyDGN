@@ -1,5 +1,5 @@
 splitter:
-  root: DATA_SPLITS/
+  root: examples/DATA_SPLITS/
   class_name: pydgn.data.splitter.LinkPredictionSingleGraphSplitter  # uses a bootstrapping technique
   args:
     n_outer_folds: 10

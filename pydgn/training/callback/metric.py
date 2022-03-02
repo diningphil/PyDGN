@@ -342,7 +342,11 @@ class Classification(Metric):
                 *outputs: List[torch.Tensor],
                 batch_loss_extra: dict=None) -> dict:
         outputs = outputs[0]
-        metric = self.metric(outputs.squeeze(dim=1), targets.squeeze(dim=1))
+
+        if len(targets.shape) == 2:
+            targets = targets.squeeze(dim=1)
+
+        metric = self.metric(outputs.squeeze(dim=1), targets)
         return metric
 
 
@@ -365,6 +369,7 @@ class Regression(Metric):
                 *outputs: List[torch.Tensor],
                 batch_loss_extra: dict=None) -> dict:
         outputs = outputs[0]
+
         metric = self.metric(outputs.squeeze(dim=1), targets.squeeze(dim=1))
         return metric
 

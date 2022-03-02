@@ -1,12 +1,8 @@
 from copy import deepcopy
-from typing import Callable, List
 
 from pydgn.evaluation.grid import Grid
-
-from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
 from pydgn.static import *
-from pydgn.evaluation.util import return_class_and_args
 
 
 class RandomSearch(Grid):
@@ -17,6 +13,10 @@ class RandomSearch(Grid):
         configs_dict (dict): the configuration dictionary specifying the different configurations to try
     """
     __search_type__ = RANDOM_SEARCH
+
+    def __init__(self, configs_dict: dict):
+        super().__init__(configs_dict)
+        self.num_samples = configs_dict[NUM_SAMPLES]
 
     def _gen_helper(self, cfgs_dict):
         keys = cfgs_dict.keys()

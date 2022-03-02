@@ -1,80 +1,134 @@
-exp_name: semi_supervised_grid_search_toy
-experiment: pydgn.experiment.semi_supervised_task.SemiSupervisedTask
-higher_results_are_better: True
-log_every: 1
+# Dataset and Splits
+data_root: DATA
+dataset_class: pydgn.data.dataset.TUDatasetInterface
+dataset_name:  PROTEINS
+data_splits_file:  examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits
+
+
+# Hardware
+device:  cpu
+max_cpus:  4
+max_gpus: 0
+gpus_per_task:  1
+
+
+# Data Loading
 dataset_getter: pydgn.data.provider.DataProvider
 data_loader:
   class_name: torch_geometric.loader.DataLoader
   args:
-    num_workers : 0  # > 0 only with --debug option and GPU device
-    pin_memory: False  # True only with --debug option and GPU device
-device: cpu
+    num_workers : 0
+    pin_memory: False
+
+
+# Reproducibility
 seed: 42
+
+
+# Experiment
+result_folder: RESULTS
+exp_name: semi_supervised_grid_search_toy
+experiment: pydgn.experiment.semi_supervised_task.SemiSupervisedTask
+higher_results_are_better: True
+log_every: 1
+evaluate_every: 1
+final_training_runs: 3
+
+
 grid:
   unsupervised_config:  # unsupervised config to produce node/graph embeddings
     model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: True
-    batch_size:
-      - 32
-    epochs:
-      - 10
-    dim_embedding:
-      - 5
-      - 10
+    shuffle: True
+    batch_size: 32
+    epochs: 10
+
+    # Model specific arguments #
+
+    dim_embedding: 5
     num_layers:
       - 3
-      - 1
-    aggregation:
-      - mean
+      - 5
+    aggregation: mean
+
+    # ------------------------ #
+
+    # Optimizer (with an example - 3 possible alternatives)
     optimizer:
       - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
           optimizer_class_name: torch.optim.Adam
-          lr: 0.01
+          lr:
+            - 0.01
+            - 0.001
           weight_decay: 0.
-    scheduler:
-      - null
-    loss:
-      - pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy loss
-    scorer:
-      - pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy score
-    readout:
-      - pydgn.model.readout.graph_readout.LinearGraphReadout
-    engine:
-      - pydgn.training.engine.TrainingEngine
-    gradient_clipper:
-      - null
-    early_stopper:
-      - null
-    shuffle:
-      - True
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric (with an example of Additive Loss)
+    loss: pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy loss
+
+    # Score metric (with an example of Multi Score)
+    scorer: pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy score
+
+    # Readout (optional)
+    readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional)
+    early_stopper: null
+
+    # Plotter of metrics
+    plotter: null
+
   supervised_config:  # supervised config to classify/predict values associated with unsup. node/graph embeddings
     model: pydgn.model.dgn.toy_mlp.ToyMLP
     checkpoint: True
-    batch_size:
-      - 32
-    epochs:
-      - 20
-    dim_embedding:
-      - 10
+    shuffle: True
+    batch_size: 32
+    epochs: 10
+
+    # Model specific arguments #
+
+    dim_embedding: 10
+
+    # ------------------------ #
+
+    # Optimizer (with an example - 3 possible alternatives)
     optimizer:
       - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
           optimizer_class_name: torch.optim.Adam
-          lr: 0.01
+          lr:
+            - 0.01
+            - 0.001
           weight_decay: 0.
-    scheduler:
-      - null
-    loss:
-      - pydgn.training.callback.metric.MulticlassClassification
-    scorer:
-      - pydgn.training.callback.metric.MulticlassAccuracy
-    readout:
-      - null
-    engine:
-      - pydgn.training.engine.TrainingEngine
-    gradient_clipper:
-      - null
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric (with an example of Additive Loss)
+    loss: pydgn.training.callback.metric.MulticlassClassification
+
+    # Score metric (with an example of Multi Score)
+    scorer: pydgn.training.callback.metric.MulticlassAccuracy
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional)
     early_stopper:
       - class_name:
           - pydgn.training.callback.early_stopping.PatienceEarlyStopper
@@ -84,7 +138,7 @@ grid:
           monitor: validation_main_score # (train_,validation_)[name_of_the_scorer_or_loss_to_monitor] -> we can use MAIN_LOSS or MAIN_SCORE
           mode: max
           checkpoint: True
-    plotter:
-      - pydgn.training.callback.plotter.Plotter
-    shuffle:
-      - True
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter
+

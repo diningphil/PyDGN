@@ -1,22 +1,21 @@
 splitter:
-  root: DATA_SPLITS/CHEMICAL
+  root: examples/DATA_SPLITS/CHEMICAL
   class_name: pydgn.data.splitter.Splitter
   args:
-    n_outer_folds: 5
-    n_inner_folds: 3
+    n_outer_folds: 10
+    n_inner_folds: 2
     seed: 42
-    stratify: True  # works for graph classification tasks
+    stratify: True
     shuffle: True
-    inner_val_ratio: 0.1  # this will be ignored when the number of inner folds is > than 1
+    inner_val_ratio: 0.1
     outer_val_ratio: 0.1
-    test_ratio: 0.1  # this will be ignored when the number of outer folds is > than 1
+    test_ratio: 0.1
 dataset:
   root: DATA/
   class_name: pydgn.data.dataset.TUDataset
   args:
     root: DATA/
     name: PROTEINS
-  # useful for social datasets with no node features
   transform:
     - class_name: pydgn.data.transform.ConstantIfEmpty
       args:

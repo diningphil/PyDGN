@@ -106,5 +106,4 @@ grid:
           checkpoint: True  # store the best checkpoint
 
     # Plotter of metrics
-    plotter:
-      - pydgn.training.callback.plotter.Plotter
+    plotter: pydgn.training.callback.plotter.Plotter

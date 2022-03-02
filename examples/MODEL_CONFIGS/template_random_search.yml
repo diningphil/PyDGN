@@ -63,6 +63,7 @@ random:
 
     # ------------------------ #
 
+    # Optimizer
     optimizer:
       - class_name: pydgn.training.callback.optimizer.Optimizer
         args:
@@ -74,11 +75,26 @@ random:
               - 0.001  # mu
               - 0.0001  # sigma
 
+    # Scheduler (optional)
     scheduler: null
+
+    # Loss metric
     loss: pydgn.training.callback.metric.MulticlassClassification
+
+    # Score metric
     scorer: pydgn.training.callback.metric.MulticlassAccuracy
+
+    # Readout (optional)
     readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+
+    # Training engine
     engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
     gradient_clipper: null
+
+    # Early stopper (optional, with an example of "patience" early stopping on the validation score)
     early_stopper: null
+
+    # Plotter of metrics
     plotter: null

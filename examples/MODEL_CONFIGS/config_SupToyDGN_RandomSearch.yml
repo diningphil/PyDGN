@@ -1,34 +1,66 @@
-exp_name: supervised_random_search_toy
-experiment: pydgn.experiment.supervised_task.SupervisedTask
-higher_results_are_better: True
-log_every: 1
+# Dataset and Splits
+data_root: DATA
+dataset_class: pydgn.data.dataset.TUDatasetInterface
+dataset_name:  PROTEINS
+data_splits_file:  examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits
+
+
+# Hardware
+device:  cpu
+max_cpus:  4
+max_gpus: 0
+gpus_per_task:  1
+
+
+# Data Loading
 dataset_getter: pydgn.data.provider.DataProvider
 data_loader:
   class_name: torch_geometric.loader.DataLoader
   args:
-    num_workers : 0  # > 0 only with --debug option and GPU device
-    pin_memory: False  # True only with --debug option and GPU device
-device: cpu
+    num_workers : 0
+    pin_memory: False
+
+
+# Reproducibility
 seed: 42
-num_samples: 7  # number of random searches to try
+
+
+# Experiment
+result_folder: RESULTS
+exp_name: supervised_random_search_toy
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: True
+log_every: 1
+evaluate_every: 1
+final_training_runs: 3
+
+
+num_samples: 5  # number of random searches to try
 random:
   supervised_config:
     model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: True
+    shuffle: True
     batch_size:
       sample_method: pydgn.evaluation.util.choice
       args:
         - 32
         - 64
-        - 128
-    epochs: 5
-    dim_embedding: 4
+    epochs: 10
+
+    # Model specific arguments #
+
+    dim_embedding: 5
     num_layers:
       sample_method: pydgn.evaluation.util.randint
       args:
         - 1  # min
         - 5  # max
     aggregation: mean
+
+    # ------------------------ #
+
+    # Optimizer
     optimizer:
       sample_method: pydgn.evaluation.util.choice
       args:
@@ -37,34 +69,31 @@ random:
             optimizer_class_name: torch.optim.Adam
             lr:
               sample_method: pydgn.evaluation.util.normal
+              # sample from normal distribution each time
               args:
-                - 0.001
-                - 0.0001
-            weight_decay: 0.
-        - class_name: pydgn.training.callback.optimizer.Optimizer
-          args:
-            optimizer_class_name: torch.optim.Adamax
-            lr:
-              sample_method: pydgn.evaluation.util.loguniform
-              args:
-                - 0.0001
-                - 0.01
-            weight_decay: 0.
+                - 0.001  # mu
+                - 0.0001  # sigma
+
+    # Scheduler (optional)
     scheduler: null
+
+    # Loss metric
     loss: pydgn.training.callback.metric.MulticlassClassification
-    scorer:
-      class_name: pydgn.training.callback.metric.MulticlassAccuracy
+
+    # Score metric
+    scorer: pydgn.training.callback.metric.MulticlassAccuracy
+
+    # Readout (optional)
     readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+
+    # Training engine
     engine: pydgn.training.engine.TrainingEngine
-    l2: 0.
+
+    # Gradient clipper (optional)
     gradient_clipper: null
-    dropout: 0.
-    early_stopper:
-      class_name: pydgn.training.callback.early_stopping.PatienceEarlyStopper
-      args:
-        patience: 3
-        monitor: validation_main_score # (train_,validation_)[name_of_the_scorer_or_loss_to_monitor] -> we can use MAIN_LOSS or MAIN_SCORE
-        mode: max
-        checkpoint: True
-    plotter: pydgn.training.callback.plotter.Plotter
-    shuffle: True
+
+    # Early stopper (optional, with an example of "patience" early stopping on the validation score)
+    early_stopper: null
+
+    # Plotter of metrics
+    plotter: null

@@ -1,0 +1,24 @@
+splitter:
+  root:  # folder where to store the splits
+  class_name:  # dotted path to splitter class
+  args:
+    n_outer_folds:  # number of outer folds for risk assessment
+    n_inner_folds:  # number of inner folds for model selection
+    seed:
+    stratify:  # target stratification: works for graph classification tasks only
+    shuffle:  # whether to shuffle the indices prior to splitting
+    inner_val_ratio:  # percentage of validation for hold-out model selection. this will be ignored when the number of inner folds is > than 1
+    outer_val_ratio:  # percentage of validation data to extract for risk assessment final runs
+    test_ratio: 0.1  # percentage of test to extract for hold-out risk assessment. this will be ignored when the number of outer folds is > than 1
+dataset:
+  root:  # path to data root folder
+  class_name:  # dotted path to dataset class
+  args:  # arguments to pass to the dataset class
+    arg1:
+    argn:
+  transform: # on the fly transforms: useful for social datasets with no node features (with an example)
+    - class_name: pydgn.data.transform.ConstantIfEmpty
+      args:
+        value: 1
+  # pre_transform:  # transform data and store it at dataset creation time
+  # pre_filter:  # filter data and store it at dataset creation time
