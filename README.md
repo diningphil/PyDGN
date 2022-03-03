@@ -63,6 +63,7 @@ experiments in progress, if any.
 
 - [Contextual Graph Markov Model](https://github.com/diningphil/CGMM)
 - [Extended Contextual Graph Markov Model](https://github.com/diningphil/E-CGMM)
+- [Continual Learning experiments](https://github.com/diningphil/continual_learning_for_graphs)
 
 
 ## Data Splits
