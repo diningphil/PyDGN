@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.0.2"
+__version__ = "1.0.3"
 URL = 'https://pydgn.readthedocs.io/en/latest/'
 
 with open("README.md", "r", encoding="utf-8") as fh:

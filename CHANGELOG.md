@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.3] Minor fix
+
+## Fixed
+
+- Same bug as before but for `pydgn-dataset` =).
+
 ## [1.0.2] Minor fix
 
 ## Fixed

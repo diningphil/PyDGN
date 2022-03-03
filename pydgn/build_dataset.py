@@ -1,3 +1,5 @@
+import os
+import sys
 import argparse
 
 import yaml
@@ -13,6 +15,9 @@ def get_args_dict():
 
 
 def main():
+    # Necessary to locate dotted paths in projects that use PyDGN
+    sys.path.append(os.getcwd())
+
     args = get_args_dict()
     options = yaml.load(open(args[CONFIG_FILE], "r"), Loader=yaml.FullLoader)
     preprocess_data(options)
