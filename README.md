@@ -45,7 +45,7 @@ using `bash` instead of `source`!
 
 #### Train
 
-    pydgn-train  --config-file MODEL_CONFIGS/config_SupToyDGN.yml 
+    pydgn-train  --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml 
 
 And we are up and running!
 
