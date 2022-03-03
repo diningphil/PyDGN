@@ -70,7 +70,7 @@ experiments in progress, if any.
 We provide the data splits taken from
 
 [Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph
-Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning
+Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *8th International Conference on Learning
 Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
 in the `examples/DATA_SPLITS` folder.
