@@ -1,7 +1,7 @@
 import setuptools
 
-__version__ = "1.0.1"
-URL = 'https://github.com/pyg-team/pytorch_geometric'
+__version__ = "1.0.2"
+URL = 'https://pydgn.readthedocs.io/en/latest/'
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
