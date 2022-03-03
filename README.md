@@ -47,7 +47,17 @@ using `bash` instead of `source`!
 
     pydgn-train  --config-file MODEL_CONFIGS/config_SupToyDGN.yml 
 
+And we are up and running!
+
+<p align="center">
+  <img src="https://github.com/diningphil/PyDGN/blob/master/docs/_static/exp_gui.png"  width="600"/>
+</p>
+
 To debug your code you can add `--debug` to the command above, but the "GUI" will be disabled.
+
+To stop the computation, use ``CTRL-C`` to send a ``SIGINT`` signal, and consider using the command ``ray stop`` to stop
+all Ray processes. **Warning:** ``ray stop`` stops **all** ray processes you have launched, including those of other
+experiments in progress, if any.
 
 ## Projects using PyDGN
 

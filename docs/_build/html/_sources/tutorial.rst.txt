@@ -270,12 +270,12 @@ our results:
 
 .. code-block:: yaml
 
-result_folder: RESULTS
-exp_name: supervised_grid_search_toy
-experiment: pydgn.experiment.supervised_task.SupervisedTask
-higher_results_are_better: True
-evaluate_every: 3
-final_training_runs: 3
+    result_folder: RESULTS
+    exp_name: supervised_grid_search_toy
+    experiment: pydgn.experiment.supervised_task.SupervisedTask
+    higher_results_are_better: True
+    evaluate_every: 3
+    final_training_runs: 3
 
 
 Grid Search
@@ -347,3 +347,91 @@ Once our experiment configuration file is ready, we can launch an experiment usi
 .. code-block:: bash
 
     pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
+
+And we are up and running!
+
+.. image:: _static/exp_gui.png
+   :width: 600
+
+To stop the computation, use ``CTRL-C`` to send a ``SIGINT`` signal, and consider using the command ``ray stop`` to stop
+all Ray processes. **Warning:** ``ray stop`` stops **all** ray processes you have launched, including those of other
+experiments in progress, if any.
+
+Some things to notice: because we have chosen a 10-fold CV for risk assessment with a simple hold-out model selection **for
+each** external fold, you can notice in the picture there are ``10*1`` rows with ``Out_*/Inn_*`` written. For each of these,
+we have to perform a model selection with ``4`` possible hyper-parameters' configurations (progress shown on the right handside).
+In addition, there are also some stats about the time required to complete the experiments.
+
+After the 10 model selection are complete (i.e., one "best" model for each outer/external fold), it is time to re-train
+the chosen models on the 10 different train/test splits. Therefore, you can notice ``10`` rows with ``Final run *`` written.
+Since we have specified ``final_training_runs: 3`` in our exp. config file, we will mitigate unlucky random initializations
+of the chosen models by averaging test results (of a single outer fold) over 3 training runs. The final generalization
+performances of the model (a less ambiguous definition would be: the **class of models** you developed) is obtained,
+for this specific case, as the average of the 10 test scores across the external folds. Again, if this does not make sense
+to you, please consider reading `Samy Bengio's lecture (Part 3) <https://bengio.abracadoudou.com/lectures/theory.pdf>`_.
+
+Inspecting Results
+--------------------
+
+According to our configuration file, the results are stored in the ``RESULTS`` folder. The hierarchy of folder is the following:
+
+.. code-block:: yaml
+
+    supervised_grid_search_toy_PROTEINS
+    |__ MODEL_ASSESSMENT
+        |__ assessment_results.json  # contains the risk assessment results (average of the outer fold results)
+        |__ OUTER_FOLD_1
+        ...
+        |__ OUTER_FOLD_5
+            |__ outer_results.json  # contains the aggregated results of the three final runs
+            |__ final_run_1
+            |__ final_run_2
+                |__ tensorboard  # tensorboard folder
+                |__ experiment.log  # log file with profiling information
+                |__ best_checkpoint.pth  # torch dict holding the "best" checkpoint information according to the early stopper used
+                |__ last_checkpoint.pth  # torch dict holding the checkpoint information of the last epoch (top ``checkpoint`` keyword set to true)
+                |__ run_2_results.torch  # torch dict holding the results of the 2nd final run on the 5th outer fold.
+            |__ final_run_3
+            |__ MODEL_SELECTION  # files regarding the model selection inside the 5th outer fold
+                |__ winner_config.json  # contains the "best model" across the inner folds (in this case just 1 inner fold) for the 5th fold to be used in the final training runs
+                |__ config_1
+                |__ config_2
+                |__ config_3
+                    |__ config_results.json  # contains the aggregated results of the K inner model selection folds
+                    |__ INNER_FOLD_1  # first (and only in this case) inner model selection fold
+                        |__ tensorboard
+                        |__ experiment.log  # log file with profiling information
+                        |__ best_checkpoint.pth
+                        |__ last_checkpoint.pth
+                        |__ fold_1_results.torch  # torch dict holding the results of the 1st fold results of the 3rd configuration.
+                |__ config_4
+        ...
+        |__ OUTER_FOLD_10
+
+
+Profiling Information
+-----------------------
+
+Inside each ``experiment.log`` file, you will find training logs and, at the end of each training, the profiling information
+will the per-epoch and total time required by each :class:`~pydgn.training.event.handler.EventHandler`, provided the
+time spent is non-negligible (threshold specified in the log file).
+
+Here's what it looks like:
+
+.. image:: _static/profiler.png
+   :width: 600
+
+Tensorboard
+-----------------------
+
+We can use the generic :class:`~pydgn.training.callback.plotter.Plotter` class to easily visualize the training trend with
+Tensorboard, using the information in the ``tensorboard`` folder:
+
+.. code-block:: bash
+
+    tensorboard --logdir RESULTS/supervised_grid_search_toy_PROTEINS/MODEL_ASSESSMENT/OUTER_FOLD_1/final_run1/tensorboard/
+
+And we get:
+
+.. image:: _static/tensorboard.png
+   :width: 600

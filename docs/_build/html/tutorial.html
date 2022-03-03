@@ -55,6 +55,9 @@
 <li class="toctree-l3"><a class="reference internal" href="#grid-search">Grid Search</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#random-search">Random Search</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#experiment">Experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#inspecting-results">Inspecting Results</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#profiling-information">Profiling Information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tensorboard">Tensorboard</a></li>
 </ul>
 </li>
 </ul>
@@ -337,15 +340,14 @@ given splits, and the <code class="xref py py-class docutils literal notranslate
 <h3>Experiment Details<a class="headerlink" href="#experiment-details" title="Permalink to this headline"></a></h3>
 <p>Here we define the experiment details, including the experiment name and type, and the folder where we want to store
 our results:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">result_folder</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">RESULTS</span><span class="w"></span>
+<span class="nt">exp_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">supervised_grid_search_toy</span><span class="w"></span>
+<span class="nt">experiment</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.experiment.supervised_task.SupervisedTask</span><span class="w"></span>
+<span class="nt">higher_results_are_better</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True</span><span class="w"></span>
+<span class="nt">evaluate_every</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
+<span class="nt">final_training_runs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3</span><span class="w"></span>
 </pre></div>
 </div>
-<p>result_folder: RESULTS
-exp_name: supervised_grid_search_toy
-experiment: pydgn.experiment.supervised_task.SupervisedTask
-higher_results_are_better: True
-evaluate_every: 3
-final_training_runs: 3</p>
 </section>
 <section id="grid-search">
 <h3>Grid Search<a class="headerlink" href="#grid-search" title="Permalink to this headline"></a></h3>
@@ -410,6 +412,76 @@ present:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
 </pre></div>
 </div>
+<p>And we are up and running!</p>
+<a class="reference internal image-reference" href="_images/exp_gui.png"><img alt="_images/exp_gui.png" src="_images/exp_gui.png" style="width: 600px;" /></a>
+<p>To stop the computation, use <code class="docutils literal notranslate"><span class="pre">CTRL-C</span></code> to send a <code class="docutils literal notranslate"><span class="pre">SIGINT</span></code> signal, and consider using the command <code class="docutils literal notranslate"><span class="pre">ray</span> <span class="pre">stop</span></code> to stop
+all Ray processes. <strong>Warning:</strong> <code class="docutils literal notranslate"><span class="pre">ray</span> <span class="pre">stop</span></code> stops <strong>all</strong> ray processes you have launched, including those of other
+experiments in progress, if any.</p>
+<p>Some things to notice: because we have chosen a 10-fold CV for risk assessment with a simple hold-out model selection <strong>for
+each</strong> external fold, you can notice in the picture there are <code class="docutils literal notranslate"><span class="pre">10*1</span></code> rows with <code class="docutils literal notranslate"><span class="pre">Out_*/Inn_*</span></code> written. For each of these,
+we have to perform a model selection with <code class="docutils literal notranslate"><span class="pre">4</span></code> possible hyper-parameters’ configurations (progress shown on the right handside).
+In addition, there are also some stats about the time required to complete the experiments.</p>
+<p>After the 10 model selection are complete (i.e., one “best” model for each outer/external fold), it is time to re-train
+the chosen models on the 10 different train/test splits. Therefore, you can notice <code class="docutils literal notranslate"><span class="pre">10</span></code> rows with <code class="docutils literal notranslate"><span class="pre">Final</span> <span class="pre">run</span> <span class="pre">*</span></code> written.
+Since we have specified <code class="docutils literal notranslate"><span class="pre">final_training_runs:</span> <span class="pre">3</span></code> in our exp. config file, we will mitigate unlucky random initializations
+of the chosen models by averaging test results (of a single outer fold) over 3 training runs. The final generalization
+performances of the model (a less ambiguous definition would be: the <strong>class of models</strong> you developed) is obtained,
+for this specific case, as the average of the 10 test scores across the external folds. Again, if this does not make sense
+to you, please consider reading <a class="reference external" href="https://bengio.abracadoudou.com/lectures/theory.pdf">Samy Bengio’s lecture (Part 3)</a>.</p>
+</section>
+<section id="inspecting-results">
+<h3>Inspecting Results<a class="headerlink" href="#inspecting-results" title="Permalink to this headline"></a></h3>
+<p>According to our configuration file, the results are stored in the <code class="docutils literal notranslate"><span class="pre">RESULTS</span></code> folder. The hierarchy of folder is the following:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>supervised_grid_search_toy_PROTEINS
+|__ MODEL_ASSESSMENT
+    |__ assessment_results.json  # contains the risk assessment results (average of the outer fold results)
+    |__ OUTER_FOLD_1
+    ...
+    |__ OUTER_FOLD_5
+        |__ outer_results.json  # contains the aggregated results of the three final runs
+        |__ final_run_1
+        |__ final_run_2
+            |__ tensorboard  # tensorboard folder
+            |__ experiment.log  # log file with profiling information
+            |__ best_checkpoint.pth  # torch dict holding the &quot;best&quot; checkpoint information according to the early stopper used
+            |__ last_checkpoint.pth  # torch dict holding the checkpoint information of the last epoch (top ``checkpoint`` keyword set to true)
+            |__ run_2_results.torch  # torch dict holding the results of the 2nd final run on the 5th outer fold.
+        |__ final_run_3
+        |__ MODEL_SELECTION  # files regarding the model selection inside the 5th outer fold
+            |__ winner_config.json  # contains the &quot;best model&quot; across the inner folds (in this case just 1 inner fold) for the 5th fold to be used in the final training runs
+            |__ config_1
+            |__ config_2
+            |__ config_3
+                |__ config_results.json  # contains the aggregated results of the K inner model selection folds
+                |__ INNER_FOLD_1  # first (and only in this case) inner model selection fold
+                    |__ tensorboard
+                    |__ experiment.log  # log file with profiling information
+                    |__ best_checkpoint.pth
+                    |__ last_checkpoint.pth
+                    |__ fold_1_results.torch  # torch dict holding the results of the 1st fold results of the 3rd configuration.
+            |__ config_4
+    ...
+    |__ OUTER_FOLD_10
+</pre></div>
+</div>
+</section>
+<section id="profiling-information">
+<h3>Profiling Information<a class="headerlink" href="#profiling-information" title="Permalink to this headline"></a></h3>
+<p>Inside each <code class="docutils literal notranslate"><span class="pre">experiment.log</span></code> file, you will find training logs and, at the end of each training, the profiling information
+will the per-epoch and total time required by each <a class="reference internal" href="source/pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandler</span></code></a>, provided the
+time spent is non-negligible (threshold specified in the log file).</p>
+<p>Here’s what it looks like:</p>
+<a class="reference internal image-reference" href="_images/profiler.png"><img alt="_images/profiler.png" src="_images/profiler.png" style="width: 600px;" /></a>
+</section>
+<section id="tensorboard">
+<h3>Tensorboard<a class="headerlink" href="#tensorboard" title="Permalink to this headline"></a></h3>
+<p>We can use the generic <a class="reference internal" href="source/pydgn.training.callback.html#pydgn.training.callback.plotter.Plotter" title="pydgn.training.callback.plotter.Plotter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Plotter</span></code></a> class to easily visualize the training trend with
+Tensorboard, using the information in the <code class="docutils literal notranslate"><span class="pre">tensorboard</span></code> folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tensorboard --logdir RESULTS/supervised_grid_search_toy_PROTEINS/MODEL_ASSESSMENT/OUTER_FOLD_1/final_run1/tensorboard/
+</pre></div>
+</div>
+<p>And we get:</p>
+<a class="reference internal image-reference" href="_images/tensorboard.png"><img alt="_images/tensorboard.png" src="_images/tensorboard.png" style="width: 600px;" /></a>
 </section>
 </section>
 </section>
