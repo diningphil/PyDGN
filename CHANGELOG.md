@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.2] Minor fix
+
+## Fixed
+
+- Bug that prevented locating classes via dotted paths in external projects.
+
 ## [1.0.0] PyDGN with Documentation
 
 ### TODO (decreasing priority):

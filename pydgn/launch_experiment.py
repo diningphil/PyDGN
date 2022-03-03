@@ -1,4 +1,5 @@
 import os
+import sys
 OMP_NUM_THREADS = 'OMP_NUM_THREADS'
 # TODO do we still need this?
 os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
@@ -95,6 +96,9 @@ def get_args():
 
 
 def main():
+    # Necessary to locate dotted paths in projects that use PyDGN
+    sys.path.append(os.getcwd())
+
     options = get_args()
     try:
         evaluation(options)
