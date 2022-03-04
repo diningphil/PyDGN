@@ -61,9 +61,10 @@ experiments in progress, if any.
 
 ## Projects using PyDGN
 
+- [Graph Mixture Density Networks](https://github.com/diningphil/graph-mixture-density-networks)
 - [Contextual Graph Markov Model](https://github.com/diningphil/CGMM)
 - [Extended Contextual Graph Markov Model](https://github.com/diningphil/E-CGMM)
-- [Continual Learning experiments](https://github.com/diningphil/continual_learning_for_graphs)
+- [Continual Learning Benchmark for Graphs](https://github.com/diningphil/continual_learning_for_graphs)
 
 
 ## Data Splits
