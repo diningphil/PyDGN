@@ -23,8 +23,7 @@ copyright = '2022, Federico Errica'
 author = 'Federico Errica'
 
 # The full version, including alpha/beta/rc tags
-import pydgn
-release = pydgn.__version__
+release = '1.0.4'
 
 
 # -- General configuration ---------------------------------------------------
