@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>callback.early_stopping &mdash; PyDGN 1.0.0 documentation</title>
+  <title>callback.early_stopping &mdash; PyDGN 1.0.4 documentation</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -334,7 +334,7 @@ arguments in the configuration file.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -545,7 +545,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -580,7 +580,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -642,7 +642,7 @@ method, though sometimes more complex implementations are required.</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.callback.metric.Metric.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">targets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">torch.Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">outputs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">torch.Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_loss_extra</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pydgn.training.callback.metric.Metric.forward" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -653,7 +653,7 @@ method, though sometimes more complex implementations are required.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -895,7 +895,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1107,7 +1107,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1179,7 +1179,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1224,7 +1224,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1258,7 +1258,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A dictionary containing associations metric_name - value</p>
+<dd class="field-even"><p>A dictionary containing associations metric_name - value or simply a value</p>
 </dd>
 </dl>
 </dd></dl>

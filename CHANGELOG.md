@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.4] Minor fix
+
+## Fixed
+
+- use of fractions of GPUs for a single task
+- changed signature in forward to allow a dictionary (for MultiScore) or a value (for basic metrics)
+- added squeeze in MulticlassAccuracy when target tensor has shape (?, 1)
+
 ## [1.0.3] Minor fix
 
 ## Fixed

@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial &mdash; PyDGN 1.0.0 documentation</title>
+  <title>Tutorial &mdash; PyDGN 1.0.4 documentation</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -408,8 +408,12 @@ present:</p>
 <span class="nt">plotter</span><span class="p">:</span><span class="w">   </span><span class="c1"># (can be &quot;null&quot;)</span><span class="w"></span>
 </pre></div>
 </div>
-<p>Once our experiment configuration file is ready, we can launch an experiment using (see below for an example)</p>
+<p>Once our experiment configuration file is ready, we can launch an experiment using (see below for a couple of examples)</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SemiSupToyDGN.yml
 </pre></div>
 </div>
 <p>And we are up and running!</p>
@@ -467,8 +471,8 @@ to you, please consider reading <a class="reference external" href="https://beng
 </section>
 <section id="profiling-information">
 <h3>Profiling Information<a class="headerlink" href="#profiling-information" title="Permalink to this headline"></a></h3>
-<p>Inside each <code class="docutils literal notranslate"><span class="pre">experiment.log</span></code> file, you will find training logs and, at the end of each training, the profiling information
-will the per-epoch and total time required by each <a class="reference internal" href="source/pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandler</span></code></a>, provided the
+<p>Inside each <code class="docutils literal notranslate"><span class="pre">experiment.log</span></code> file, you will find training logs and, at the end of each training, the profiler information
+with the per-epoch and total time required by each <a class="reference internal" href="source/pydgn.training.event.html#pydgn.training.event.handler.EventHandler" title="pydgn.training.event.handler.EventHandler"><code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandler</span></code></a>, provided the
 time spent is non-negligible (threshold specified in the log file).</p>
 <p>Here’s what it looks like:</p>
 <a class="reference internal image-reference" href="_images/profiler.png"><img alt="_images/profiler.png" src="_images/profiler.png" style="width: 600px;" /></a>

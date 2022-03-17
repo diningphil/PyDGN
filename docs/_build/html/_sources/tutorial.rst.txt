@@ -342,11 +342,18 @@ present:
     early_stopper:   # (can be "null")
     plotter:   # (can be "null")
 
-Once our experiment configuration file is ready, we can launch an experiment using (see below for an example)
+Once our experiment configuration file is ready, we can launch an experiment using (see below for a couple of examples)
 
 .. code-block:: bash
 
     pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
+
+or
+
+.. code-block:: bash
+
+    pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SemiSupToyDGN.yml
+
 
 And we are up and running!
 
@@ -412,8 +419,8 @@ According to our configuration file, the results are stored in the ``RESULTS`` f
 Profiling Information
 -----------------------
 
-Inside each ``experiment.log`` file, you will find training logs and, at the end of each training, the profiling information
-will the per-epoch and total time required by each :class:`~pydgn.training.event.handler.EventHandler`, provided the
+Inside each ``experiment.log`` file, you will find training logs and, at the end of each training, the profiler information
+with the per-epoch and total time required by each :class:`~pydgn.training.event.handler.EventHandler`, provided the
 time spent is non-negligible (threshold specified in the log file).
 
 Here's what it looks like:

@@ -53,7 +53,7 @@ def evaluation(options):
         set_gpus(max_gpus)
         gpus_per_task = configs_dict[GPUS_PER_TASK]
 
-    os.environ[PYDGN_RAY_NUM_GPUS_PER_TASK] = str(int(gpus_per_task))
+    os.environ[PYDGN_RAY_NUM_GPUS_PER_TASK] = str(float(gpus_per_task))
 
     # You can make PyDGN work on a cluster of machines!
     if os.environ.get('ip_head') is not None:

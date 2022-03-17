@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import torch
 from torch.nn import Module, CrossEntropyLoss, MSELoss
@@ -142,7 +142,7 @@ class Metric(Module, EventHandler):
     def forward(self,
                 targets: torch.Tensor,
                 *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
+                batch_loss_extra: dict=None) -> Union[dict, float]:
         r"""
         Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.
 
@@ -152,7 +152,7 @@ class Metric(Module, EventHandler):
             batch_loss_extra (dict): dictionary of information computed by metrics used as losses
 
         Returns:
-            A dictionary containing associations metric_name - value
+            A dictionary containing associations metric_name - value or simply a value
         """
         raise NotImplementedError('To be implemented by a subclass')
 
@@ -465,6 +465,10 @@ class MulticlassAccuracy(Metric):
                 batch_loss_extra: dict=None) -> dict:
         pred = outputs[0]
         correct = self._get_correct(pred)
+
+        if len(targets.shape) == 2:
+            targets = targets.squeeze(dim=1)
+
         return 100. * (correct == targets).sum().float() / targets.size(0)
 
 
