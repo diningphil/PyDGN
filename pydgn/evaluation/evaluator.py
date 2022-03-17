@@ -28,7 +28,7 @@ from pydgn.static import *
 #    warnings.simplefilter("ignore")
 
 
-@ray.remote(num_cpus=1, num_gpus=int(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)))
+@ray.remote(num_cpus=1, num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)))
 def run_valid(experiment_class: Callable[...,Experiment],
               dataset_getter: Callable[...,DataProvider],
               config: dict,
@@ -64,7 +64,7 @@ def run_valid(experiment_class: Callable[...,Experiment],
     return dataset_getter.outer_k, dataset_getter.inner_k, config_id, elapsed
 
 
-@ray.remote(num_cpus=1, num_gpus=int(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)))
+@ray.remote(num_cpus=1, num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)))
 def run_test(experiment_class: Callable[...,Experiment],
              dataset_getter: Callable[...,DataProvider],
              best_config: dict,
