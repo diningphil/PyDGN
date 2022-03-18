@@ -1,5 +1,14 @@
 # Changelog
 
+### TODO (decreasing priority):
+
+- Add again temporal learning (with documentation)
+- Add unit test
+- Add integration tests
+- Add template to show how we can use PyDGN on a cluster
+- Add Multi-GPU processing for single experiment
+- Add again continual learning (with documentation)
+
 ## [1.0.4] Minor fix
 
 ## Fixed
@@ -21,14 +30,6 @@
 - Bug that prevented locating classes via dotted paths in external projects.
 
 ## [1.0.0] PyDGN with Documentation
-
-### TODO (decreasing priority):
-
-- Add again continual learning (with documentation)
-- Add unit test
-- Add integration tests
-- Add template to show how we can use PyDGN on a cluster
-- Add Multi-GPU processing for single experiment
 
 ### Added
 
