@@ -1,0 +1,12 @@
+name: "🔨 Bug"
+description: "Bug fix request"
+labels: bug
+
+body:
+  - type: textarea
+    attributes:
+      label: 🔨 Describe the bug
+      description: |
+        Describe the bug, the environment used, and help us reproduce it.
+    validations:
+      required: true
