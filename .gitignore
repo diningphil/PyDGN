@@ -18,6 +18,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+docs/_build/
 
 # Unit test / coverage reports
 htmlcov/
