@@ -436,36 +436,36 @@ to you, please consider reading <a class="reference external" href="https://beng
 <section id="inspecting-results">
 <h3>Inspecting Results<a class="headerlink" href="#inspecting-results" title="Permalink to this headline"></a></h3>
 <p>According to our configuration file, the results are stored in the <code class="docutils literal notranslate"><span class="pre">RESULTS</span></code> folder. The hierarchy of folder is the following:</p>
-<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span>supervised_grid_search_toy_PROTEINS
-|__ MODEL_ASSESSMENT
-    |__ assessment_results.json  # contains the risk assessment results (average of the outer fold results)
-    |__ OUTER_FOLD_1
-    ...
-    |__ OUTER_FOLD_5
-        |__ outer_results.json  # contains the aggregated results of the three final runs
-        |__ final_run_1
-        |__ final_run_2
-            |__ tensorboard  # tensorboard folder
-            |__ experiment.log  # log file with profiling information
-            |__ best_checkpoint.pth  # torch dict holding the &quot;best&quot; checkpoint information according to the early stopper used
-            |__ last_checkpoint.pth  # torch dict holding the checkpoint information of the last epoch (top ``checkpoint`` keyword set to true)
-            |__ run_2_results.torch  # torch dict holding the results of the 2nd final run on the 5th outer fold.
-        |__ final_run_3
-        |__ MODEL_SELECTION  # files regarding the model selection inside the 5th outer fold
-            |__ winner_config.json  # contains the &quot;best model&quot; across the inner folds (in this case just 1 inner fold) for the 5th fold to be used in the final training runs
-            |__ config_1
-            |__ config_2
-            |__ config_3
-                |__ config_results.json  # contains the aggregated results of the K inner model selection folds
-                |__ INNER_FOLD_1  # first (and only in this case) inner model selection fold
-                    |__ tensorboard
-                    |__ experiment.log  # log file with profiling information
-                    |__ best_checkpoint.pth
-                    |__ last_checkpoint.pth
-                    |__ fold_1_results.torch  # torch dict holding the results of the 1st fold results of the 3rd configuration.
-            |__ config_4
-    ...
-    |__ OUTER_FOLD_10
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">supervised_grid_search_toy_PROTEINS</span>
+<span class="o">|</span><span class="n">__</span> <span class="n">MODEL_ASSESSMENT</span>
+    <span class="o">|</span><span class="n">__</span> <span class="n">assessment_results</span><span class="o">.</span><span class="n">json</span>  <span class="c1"># contains the risk assessment results (average of the outer fold results)</span>
+    <span class="o">|</span><span class="n">__</span> <span class="n">OUTER_FOLD_1</span>
+    <span class="o">...</span>
+    <span class="o">|</span><span class="n">__</span> <span class="n">OUTER_FOLD_5</span>
+        <span class="o">|</span><span class="n">__</span> <span class="n">outer_results</span><span class="o">.</span><span class="n">json</span>  <span class="c1"># contains the aggregated results of the three final runs</span>
+        <span class="o">|</span><span class="n">__</span> <span class="n">final_run_1</span>
+        <span class="o">|</span><span class="n">__</span> <span class="n">final_run_2</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">tensorboard</span>  <span class="c1"># tensorboard folder</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">experiment</span><span class="o">.</span><span class="n">log</span>  <span class="c1"># log file with profiling information</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">best_checkpoint</span><span class="o">.</span><span class="n">pth</span>  <span class="c1"># torch dict holding the &quot;best&quot; checkpoint information according to the early stopper used</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">last_checkpoint</span><span class="o">.</span><span class="n">pth</span>  <span class="c1"># torch dict holding the checkpoint information of the last epoch (top ``checkpoint`` keyword set to true)</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">run_2_results</span><span class="o">.</span><span class="n">torch</span>  <span class="c1"># torch dict holding the results of the 2nd final run on the 5th outer fold.</span>
+        <span class="o">|</span><span class="n">__</span> <span class="n">final_run_3</span>
+        <span class="o">|</span><span class="n">__</span> <span class="n">MODEL_SELECTION</span>  <span class="c1"># files regarding the model selection inside the 5th outer fold</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">winner_config</span><span class="o">.</span><span class="n">json</span>  <span class="c1"># contains the &quot;best model&quot; across the inner folds (in this case just 1 inner fold) for the 5th fold to be used in the final training runs</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">config_1</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">config_2</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">config_3</span>
+                <span class="o">|</span><span class="n">__</span> <span class="n">config_results</span><span class="o">.</span><span class="n">json</span>  <span class="c1"># contains the aggregated results of the K inner model selection folds</span>
+                <span class="o">|</span><span class="n">__</span> <span class="n">INNER_FOLD_1</span>  <span class="c1"># first (and only in this case) inner model selection fold</span>
+                    <span class="o">|</span><span class="n">__</span> <span class="n">tensorboard</span>
+                    <span class="o">|</span><span class="n">__</span> <span class="n">experiment</span><span class="o">.</span><span class="n">log</span>  <span class="c1"># log file with profiling information</span>
+                    <span class="o">|</span><span class="n">__</span> <span class="n">best_checkpoint</span><span class="o">.</span><span class="n">pth</span>
+                    <span class="o">|</span><span class="n">__</span> <span class="n">last_checkpoint</span><span class="o">.</span><span class="n">pth</span>
+                    <span class="o">|</span><span class="n">__</span> <span class="n">fold_1_results</span><span class="o">.</span><span class="n">torch</span>  <span class="c1"># torch dict holding the results of the 1st fold results of the 3rd configuration.</span>
+            <span class="o">|</span><span class="n">__</span> <span class="n">config_4</span>
+    <span class="o">...</span>
+    <span class="o">|</span><span class="n">__</span> <span class="n">OUTER_FOLD_10</span>
 </pre></div>
 </div>
 </section>

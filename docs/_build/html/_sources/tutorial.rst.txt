@@ -382,7 +382,7 @@ Inspecting Results
 
 According to our configuration file, the results are stored in the ``RESULTS`` folder. The hierarchy of folder is the following:
 
-.. code-block:: yaml
+.. code-block:: 
 
     supervised_grid_search_toy_PROTEINS
     |__ MODEL_ASSESSMENT
