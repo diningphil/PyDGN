@@ -18,7 +18,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="pydgn.data" href="source/pydgn.data.html" />
+    <link rel="next" title="pydgn.evaluation" href="source/pydgn.evaluation.html" />
     <link rel="prev" title="Introduction" href="intro.html" /> 
 </head>
 
@@ -65,7 +65,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="source/pydgn.data.html">pydgn.data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pydgn.evaluation.html">pydgn.evaluation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pydgn.experiment.html">pydgn.experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="source/pydgn.log.html">pydgn.log</a></li>
@@ -134,7 +133,7 @@ the following, with an explanation of each field as a comment:</p>
 </div>
 <section id="data-splitting">
 <h3>Data Splitting<a class="headerlink" href="#data-splitting" title="Permalink to this headline"></a></h3>
-<p>We provide a general <a class="reference internal" href="source/pydgn.data.html#pydgn.data.splitter.Splitter" title="pydgn.data.splitter.Splitter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Splitter</span></code></a> class that is able to split a dataset of multiple graphs. The most important parameters
+<p>We provide a general <code class="xref py py-class docutils literal notranslate"><span class="pre">Splitter</span></code> class that is able to split a dataset of multiple graphs. The most important parameters
 are arguably <code class="docutils literal notranslate"><span class="pre">n_outer_folds</span></code> and <code class="docutils literal notranslate"><span class="pre">n_inner_folds</span></code>, which represent the way in which we want to perform <strong>risk assessment</strong>
 and <strong>model selection</strong>. For instance:</p>
 <blockquote>
@@ -164,9 +163,9 @@ If not, please refer to <a class="reference external" href="https://bengio.abrac
 </section>
 <section id="dataset-creation">
 <h3>Dataset Creation<a class="headerlink" href="#dataset-creation" title="Permalink to this headline"></a></h3>
-<p>To create your own dataset, you should implement the <a class="reference internal" href="source/pydgn.data.html#pydgn.data.dataset.DatasetInterface" title="pydgn.data.dataset.DatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code></a> interface. For
+<p>To create your own dataset, you should implement the <code class="xref py py-class docutils literal notranslate"><span class="pre">DatasetInterface</span></code> interface. For
 instance, we provide a wrapper around the <a class="reference external" href="https://pytorch-geometric.readthedocs.io/en/latest/modules/datasets.html#torch_geometric.datasets.TUDataset">TUDataset</a>
-dataset of Pytorch Geometric in <a class="reference internal" href="source/pydgn.data.html#pydgn.data.dataset.TUDatasetInterface" title="pydgn.data.dataset.TUDatasetInterface"><code class="xref py py-class docutils literal notranslate"><span class="pre">TUDatasetInterface</span></code></a>, which you can check to get an idea.</p>
+dataset of Pytorch Geometric in <code class="xref py py-class docutils literal notranslate"><span class="pre">TUDatasetInterface</span></code>, which you can check to get an idea.</p>
 <p>Here’s an snippet of a potential configuration file that downloads and processes the <code class="docutils literal notranslate"><span class="pre">PROTEINS</span></code> graph classification dataset:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">dataset</span><span class="p">:</span><span class="w"></span>
 <span class="w">  </span><span class="nt">root</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DATA/</span><span class="w"></span>
@@ -324,7 +323,7 @@ explanation of each field as a comment:</p>
 </section>
 <section id="data-loading">
 <h3>Data Loading<a class="headerlink" href="#data-loading" title="Permalink to this headline"></a></h3>
-<p>Here we specify which <a class="reference internal" href="source/pydgn.data.html#pydgn.data.provider.DataProvider" title="pydgn.data.provider.DataProvider"><code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code></a> we want to use to load the data associated with the
+<p>Here we specify which <code class="xref py py-class docutils literal notranslate"><span class="pre">DataProvider</span></code> we want to use to load the data associated with the
 given splits, and the <code class="xref py py-class docutils literal notranslate"><span class="pre">DataLoader</span></code> that needs to handle such data:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="c1"># Data Loading</span><span class="w"></span>
 <span class="nt">dataset_getter</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pydgn.data.provider.DataProvider</span><span class="w"></span>
@@ -495,7 +494,7 @@ Tensorboard, using the information in the <code class="docutils literal notransl
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="source/pydgn.data.html" class="btn btn-neutral float-right" title="pydgn.data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="source/pydgn.evaluation.html" class="btn btn-neutral float-right" title="pydgn.evaluation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

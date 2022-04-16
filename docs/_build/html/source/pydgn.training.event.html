@@ -44,7 +44,6 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Package Reference</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="pydgn.data.html">pydgn.data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pydgn.evaluation.html">pydgn.evaluation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pydgn.experiment.html">pydgn.experiment</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pydgn.log.html">pydgn.log</a></li>
@@ -93,7 +92,7 @@
 <span id="event-dispatcher"></span><h1>event.dispatcher<a class="headerlink" href="#module-pydgn.training.event.dispatcher" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.event.dispatcher.EventDispatcher">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.dispatcher.</span></span><span class="sig-name descname"><span class="pre">EventDispatcher</span></span><a class="headerlink" href="#pydgn.training.event.dispatcher.EventDispatcher" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.dispatcher.</span></span><span class="sig-name descname"><span class="pre">EventDispatcher</span></span><a class="headerlink" href="#pydgn.training.event.dispatcher.EventDispatcher" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class implementing the publisher/subscribe pattern. It is used to register subscribers that implement the
 <code class="xref py py-class docutils literal notranslate"><span class="pre">EventHandler</span></code> interface</p>
@@ -126,7 +125,7 @@
 <span id="event-handler"></span><h1>event.handler<a class="headerlink" href="#module-pydgn.training.event.handler" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.handler.</span></span><span class="sig-name descname"><span class="pre">EventHandler</span></span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.handler.</span></span><span class="sig-name descname"><span class="pre">EventHandler</span></span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Interface that adheres to the publisher/subscribe pattern for training. It defines the main methods
 that a subscriber should implement. Each subscriber can make use of the
@@ -142,87 +141,87 @@ they can help design new training engines with their own publisher/subscriber pa
 of <code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingEngine</span></code> that require special modifications.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_BACKWARD">
-<span class="sig-name descname"><span class="pre">ON_BACKWARD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_backward'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_BACKWARD" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_BACKWARD</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_backward'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_BACKWARD" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_COMPUTE_METRICS">
-<span class="sig-name descname"><span class="pre">ON_COMPUTE_METRICS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_compute_metrics'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_COMPUTE_METRICS" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_COMPUTE_METRICS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_compute_metrics'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_COMPUTE_METRICS" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_EPOCH_END">
-<span class="sig-name descname"><span class="pre">ON_EPOCH_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_epoch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EPOCH_END" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_EPOCH_END</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_epoch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EPOCH_END" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_EPOCH_START">
-<span class="sig-name descname"><span class="pre">ON_EPOCH_START</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_epoch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EPOCH_START" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_EPOCH_START</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_epoch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EPOCH_START" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_EVAL_BATCH_END">
-<span class="sig-name descname"><span class="pre">ON_EVAL_BATCH_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_eval_batch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_BATCH_END" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_EVAL_BATCH_END</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_eval_batch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_BATCH_END" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_EVAL_BATCH_START">
-<span class="sig-name descname"><span class="pre">ON_EVAL_BATCH_START</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_eval_batch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_BATCH_START" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_EVAL_BATCH_START</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_eval_batch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_BATCH_START" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_EVAL_EPOCH_END">
-<span class="sig-name descname"><span class="pre">ON_EVAL_EPOCH_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_eval_epoch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_EPOCH_END" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_EVAL_EPOCH_END</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_eval_epoch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_EPOCH_END" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_EVAL_EPOCH_START">
-<span class="sig-name descname"><span class="pre">ON_EVAL_EPOCH_START</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_eval_epoch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_EPOCH_START" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_EVAL_EPOCH_START</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_eval_epoch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_EVAL_EPOCH_START" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_FETCH_DATA">
-<span class="sig-name descname"><span class="pre">ON_FETCH_DATA</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_fetch_data'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FETCH_DATA" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_FETCH_DATA</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_fetch_data'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FETCH_DATA" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_FIT_END">
-<span class="sig-name descname"><span class="pre">ON_FIT_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_fit_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FIT_END" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_FIT_END</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_fit_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FIT_END" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_FIT_START">
-<span class="sig-name descname"><span class="pre">ON_FIT_START</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_fit_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FIT_START" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_FIT_START</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_fit_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FIT_START" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_FORWARD">
-<span class="sig-name descname"><span class="pre">ON_FORWARD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_forward'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FORWARD" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_FORWARD</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_forward'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_FORWARD" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_TRAINING_BATCH_END">
-<span class="sig-name descname"><span class="pre">ON_TRAINING_BATCH_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_training_batch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_BATCH_END" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_TRAINING_BATCH_END</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_training_batch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_BATCH_END" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_TRAINING_BATCH_START">
-<span class="sig-name descname"><span class="pre">ON_TRAINING_BATCH_START</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_training_batch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_BATCH_START" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_TRAINING_BATCH_START</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_training_batch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_BATCH_START" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_TRAINING_EPOCH_END">
-<span class="sig-name descname"><span class="pre">ON_TRAINING_EPOCH_END</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_training_epoch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_EPOCH_END" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_TRAINING_EPOCH_END</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_training_epoch_end'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_EPOCH_END" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.ON_TRAINING_EPOCH_START">
-<span class="sig-name descname"><span class="pre">ON_TRAINING_EPOCH_START</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'on_training_epoch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_EPOCH_START" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">ON_TRAINING_EPOCH_START</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'on_training_epoch_start'</span></em><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.ON_TRAINING_EPOCH_START" title="Permalink to this definition"></a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_backward">
-<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_backward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_backward" title="Permalink to this definition"></a></dt>
 <dd><p>Updates the parameters of the model using loss information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -242,7 +241,7 @@ of <code class="xref py py-class docutils literal notranslate"><span class="pre"
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_compute_metrics">
-<span class="sig-name descname"><span class="pre">on_compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_compute_metrics" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_compute_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_compute_metrics" title="Permalink to this definition"></a></dt>
 <dd><p>Computes the metrics of interest using the output and ground truth information obtained so far.
 The loss-related subscriber MUST be called before the score-related one</p>
 <dl class="field-list simple">
@@ -274,7 +273,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_epoch_end">
-<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Perform bookkeeping operations at the end of an epoch, e.g., early stopping, plotting, etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -305,7 +304,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_epoch_start">
-<span class="sig-name descname"><span class="pre">on_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_epoch_start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_epoch_start" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state at the start of a training/evaluation epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -324,7 +323,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_eval_batch_end">
-<span class="sig-name descname"><span class="pre">on_eval_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_batch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_eval_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_batch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state after evaluating on a new minibatch of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -350,7 +349,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_eval_batch_start">
-<span class="sig-name descname"><span class="pre">on_eval_batch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_batch_start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_eval_batch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_batch_start" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state before evaluating on a new minibatch of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -375,7 +374,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_eval_epoch_end">
-<span class="sig-name descname"><span class="pre">on_eval_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_eval_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state at the end of an evaluation epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -396,7 +395,7 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_eval_epoch_start">
-<span class="sig-name descname"><span class="pre">on_eval_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_epoch_start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_eval_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_eval_epoch_start" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state at the start of an evaluation epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -416,9 +415,9 @@ The loss-related subscriber MUST be called before the score-related one</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_fetch_data">
-<span class="sig-name descname"><span class="pre">on_fetch_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_fetch_data" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_fetch_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_fetch_data" title="Permalink to this definition"></a></dt>
 <dd><p>Load the next batch of data, possibly applying some kind of additional pre-processing not
-included in the <a class="reference internal" href="pydgn.data.html#module-pydgn.data.transform" title="pydgn.data.transform"><code class="xref py py-mod docutils literal notranslate"><span class="pre">transform</span></code></a> package.</p>
+included in the <code class="xref py py-mod docutils literal notranslate"><span class="pre">transform</span></code> package.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>state</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">State</span></code>) – object holding training information</p>
@@ -435,7 +434,7 @@ in``state.id_batch``</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_fit_end">
-<span class="sig-name descname"><span class="pre">on_fit_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_fit_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_fit_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_fit_end" title="Permalink to this definition"></a></dt>
 <dd><p>Training has ended, free all resources, e.g., close Tensorboard writers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -446,7 +445,7 @@ in``state.id_batch``</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_fit_start">
-<span class="sig-name descname"><span class="pre">on_fit_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_fit_start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_fit_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_fit_start" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize an object at the beginning of the training phase, e.g., the internals of an optimizer,
 using the information contained in <code class="docutils literal notranslate"><span class="pre">state</span></code>.</p>
 <dl class="field-list simple">
@@ -471,7 +470,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_forward">
-<span class="sig-name descname"><span class="pre">on_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_forward" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_forward" title="Permalink to this definition"></a></dt>
 <dd><p>Feed the input data to the model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -499,7 +498,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_training_batch_end">
-<span class="sig-name descname"><span class="pre">on_training_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_batch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_training_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_batch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state after training on a new minibatch of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -525,7 +524,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_training_batch_start">
-<span class="sig-name descname"><span class="pre">on_training_batch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_batch_start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_training_batch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_batch_start" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state before training on a new minibatch of data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -550,7 +549,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_training_epoch_end">
-<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_epoch_end" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_training_epoch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_epoch_end" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state at the end of a training epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -571,7 +570,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.handler.EventHandler.on_training_epoch_start">
-<span class="sig-name descname"><span class="pre">on_training_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_epoch_start" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">on_training_epoch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pydgn.training.event.state.State" title="pydgn.training.event.state.State"><span class="pre">pydgn.training.event.state.State</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.handler.EventHandler.on_training_epoch_start" title="Permalink to this definition"></a></dt>
 <dd><p>Initialize/reset some internal state at the start of a training epoch.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -596,7 +595,7 @@ using the information contained in <code class="docutils literal notranslate"><s
 <span id="event-state"></span><h1>event.state<a class="headerlink" href="#module-pydgn.training.event.state" title="Permalink to this headline"></a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="pydgn.training.event.state.State">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.state.</span></span><span class="sig-name descname"><span class="pre">State</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.state.State" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pydgn.training.event.state.</span></span><span class="sig-name descname"><span class="pre">State</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">device</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.state.State" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Any object of this class contains training information that is handled and modified by a <code class="xref py py-class docutils literal notranslate"><span class="pre">TrainingEngine</span></code>
 as well as by the <cite>EventHandler</cite> objects implementing callbacks</p>
@@ -611,7 +610,7 @@ as well as by the <cite>EventHandler</cite> objects implementing callbacks</p>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="pydgn.training.event.state.State.update">
-<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.state.State.update" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pydgn.training.event.state.State.update" title="Permalink to this definition"></a></dt>
 <dd><p>The method sets new attributes or updates existing ones using the key,value pairs in <code class="docutils literal notranslate"><span class="pre">values</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
