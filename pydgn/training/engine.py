@@ -131,7 +131,7 @@ class TrainingEngine(EventDispatcher):
         y = y.unsqueeze(1) if y.dim() == 1 else y
 
         data_list.append(Data(x=x[:cumulative[0]],
-                              y=y[0].unsqueeze(0) if is_graph_prediction else y[:, cumulative[0]]))
+                              y=y[0].unsqueeze(0) if is_graph_prediction else y[:cumulative[0]]))
         for i in range(1, len(cumulative)):
             g = Data(x=x[cumulative[i - 1]:cumulative[i]],
                      y=y[i].unsqueeze(0) if is_graph_prediction else y[cumulative[i - 1]:cumulative[i]])

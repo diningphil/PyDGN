@@ -23,7 +23,7 @@ copyright = '2022, Federico Errica'
 author = 'Federico Errica'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.4'
+release = '1.0.5'
 
 
 # -- General configuration ---------------------------------------------------

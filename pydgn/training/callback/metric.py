@@ -41,9 +41,11 @@ class Metric(Module, EventHandler):
         """
         return self.name
 
-    def _handle_reduction(self, state: State):
+    def _expand_reduction(self, state: State):
         #
-        # Helper function. it provides the exact value to use when updating the metric's counters
+        # Returns the number of samples to use, conditioned on the type of reduction (e.g., sum, mean) to obtain
+        # the sum of the individual sample scores.
+        # Used to average sample scores across the entire epoch, rather than taking an average of minibatch scores
         #
         if self.reduction == 'mean':
             # Used to recover the "sum" version of the metric
@@ -54,6 +56,11 @@ class Metric(Module, EventHandler):
         else:
             raise NotImplementedError('The only reductions allowed are sum and mean')
 
+    def _update_num_samples(self, state: State):
+        #
+        # Returns the number of samples to use when updating the number of total samples per epoch
+        #
+        return state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
 
     def on_training_epoch_start(self, state: State):
         self.batch_metrics = []
@@ -65,8 +72,8 @@ class Metric(Module, EventHandler):
         else:
             batch_metric = state.batch_score
 
-        self.batch_metrics.append(batch_metric[self.name].item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+        self.batch_metrics.append(batch_metric[self.name].item() * self._expand_reduction(state))
+        self.num_samples += self._update_num_samples(state)
 
     def on_training_epoch_end(self, state: State):
         if self.use_as_loss:
@@ -96,8 +103,8 @@ class Metric(Module, EventHandler):
         else:
             batch_metric = state.batch_score
 
-        self.batch_metrics.append(batch_metric[self.name].item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+        self.batch_metrics.append(batch_metric[self.name].item() * self._expand_reduction(state))
+        self.num_samples += self._update_num_samples(state)
 
     def on_compute_metrics(self, state: State):
         outputs, targets = state.batch_outputs, state.batch_targets
@@ -271,8 +278,8 @@ class AdditiveLoss(Metric):
 
     def on_training_batch_end(self, state: State):
         for k, v in state.batch_loss.items():
-            self.batch_metrics[k].append(v.item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+            self.batch_metrics[k].append(v.item() * self._expand_reduction(state))
+        self.num_samples += self._update_num_samples(state)
 
     def on_training_epoch_end(self, state: State):
         state.update(epoch_loss={l.name: torch.tensor(self.batch_metrics[l.name]).sum() / self.num_samples
@@ -292,8 +299,8 @@ class AdditiveLoss(Metric):
 
     def on_eval_batch_end(self, state: State):
         for k, v in state.batch_loss.items():
-            self.batch_metrics[k].append(v.item() * self._handle_reduction(state))
-        self.num_samples += state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+            self.batch_metrics[k].append(v.item() * self._expand_reduction(state))
+        self.num_samples += self._update_num_samples(state)
 
     def on_compute_metrics(self, state: State):
         outputs, targets = state.batch_outputs, state.batch_targets

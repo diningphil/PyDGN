@@ -120,7 +120,7 @@ def preprocess_data(options: dict):
     assert hasattr(dataset, 'name'), "Dataset instance should have a name attribute!"
 
     # Store dataset additional arguments in a separate file
-    kwargs_folder = osp.join(data_root, dataset.name, 'processed')
+    kwargs_folder = osp.join(data_root, dataset.name)
     kwargs_path = osp.join(kwargs_folder, 'dataset_kwargs.pt')
 
     get_or_create_dir(kwargs_folder)
@@ -162,7 +162,10 @@ def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,D
         a :class:`~pydgn.data.dataset.DatasetInterface` object
     """
     # Load arguments
-    kwargs_path = osp.join(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
+    kwargs_path = osp.join(data_root, dataset_name, 'dataset_kwargs.pt')
+    if not os.path.exists(kwargs_path):  # backward compatibility
+        kwargs_path = osp.join(data_root, dataset_name, 'processed', 'dataset_kwargs.pt')
+
     dataset_args = torch.load(kwargs_path)
 
     # Overwrite original data_root field, which may have changed
