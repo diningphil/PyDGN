@@ -13,6 +13,12 @@
 
 ## Fixed
 
+- to comply with `TUDataset`, we do not override the method `__len__` anymore
+
+## [1.0.5] Minor fix
+
+## Fixed
+
 - `load_dataset` does not assume anymore that there exists a `processed` data folder, but it is backward-compatible with previous versions.
 - fixed an indexing bug on target data for node classification experiments (caused program to crash)
 - Metric: renamed `_handle_reduction` to `_expand_reduction` and created a new helper routine `_update_num_samples` to allow a user to decide how to compute and average scores.

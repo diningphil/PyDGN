@@ -176,9 +176,6 @@ class TUDatasetInterface(TUDataset):
     def process(self):
         super().process()
 
-    def __len__(self) -> int:
-        return len(self.data)
-
 
 class PlanetoidDatasetInterface(Planetoid):
     r"""
