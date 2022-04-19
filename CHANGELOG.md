@@ -9,7 +9,7 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
-## [1.0.5] Minor fix
+## [1.0.7] Minor fix
 
 ## Fixed
 
