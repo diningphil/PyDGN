@@ -2,7 +2,7 @@ splitter:
   root: examples/DATA_SPLITS/CHEMICAL
   class_name: pydgn.data.splitter.Splitter
   args:
-    n_outer_folds: 1
+    n_outer_folds: 10
     n_inner_folds: 1
     seed: 42
     stratify: True
