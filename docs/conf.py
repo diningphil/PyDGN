@@ -23,7 +23,7 @@ copyright = '2022, Federico Errica'
 author = 'Federico Errica'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.7'
+release = '1.0.8'
 
 
 # -- General configuration ---------------------------------------------------
@@ -41,8 +41,9 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
 # -- Options for HTML output -------------------------------------------------
+
+autodoc_mock_imports = ["torch", "torch_geometric", "tqdm", "ray"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -60,3 +61,5 @@ html_theme_options = {
     'logo_only': False,
     'display_version': True,
 }
+
+

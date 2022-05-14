@@ -1,24 +1,49 @@
 import os
 import sys
-OMP_NUM_THREADS = 'OMP_NUM_THREADS'
-# TODO do we still need this?
-os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
+
+import gpustat
+
 import yaml
 import argparse
 
-import ray
-import torch
-
-# TODO do we still need this?
-# Needed to avoid thread spawning, conflicts with multi-processing. You may set a number > 1 but take into account the number of processes on the machine
-torch.set_num_threads(1)
-
 from pydgn.static import *
-from pydgn.experiment.util import s2c
-from pydgn.data.splitter import Splitter
-from pydgn.evaluation.grid import Grid
-from pydgn.evaluation.random_search import RandomSearch
-from pydgn.evaluation.util import set_gpus
+
+
+def set_gpus(num_gpus):
+    """
+    Sets the visible GPUS for the experiments according to the availability in terms of memory. Prioritize GPUs with
+    less memory usage. Sets the ``CUDA_DEVICE_ORDER`` env variable to ``PCI_BUS_ID`` and ``CUDA_VISIBLE_DEVICES``
+    to the ordered list of GPU indices.
+
+    Args:
+        num_gpus: maximum number of GPUs to use when launching experiments in parallel
+    """
+    try:
+        selected = []
+
+        stats = gpustat.GPUStatCollection.new_query()
+
+        for i in range(num_gpus):
+
+            ids_mem = [res for res in map(lambda gpu: (int(gpu.entry['index']),
+                                                       float(gpu.entry['memory.used']) / \
+                                                       float(gpu.entry['memory.total'])),
+                                          stats) if str(res[0]) not in selected]
+
+            if len(ids_mem) == 0:
+                # No more gpus available
+                break
+
+            best = min(ids_mem, key=lambda x: x[1])
+            bestGPU, bestMem = best[0], best[1]
+            # print(f"{i}-th best is {bestGPU} with mem {bestMem}")
+            selected.append(str(bestGPU))
+
+        print("Setting GPUs to: {}".format(",".join(selected)))
+        os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+        os.environ['CUDA_VISIBLE_DEVICES'] = ",".join(selected)
+    except BaseException as e:
+        print("GPU not available: " + str(e))
 
 
 def evaluation(options):
@@ -26,32 +51,55 @@ def evaluation(options):
     debug = kwargs[DEBUG]
     configs_dict = yaml.load(open(kwargs[CONFIG_FILE], "r"), Loader=yaml.FullLoader)
 
+    # Hardware initialization
+    max_cpus = configs_dict[MAX_CPUS]
+
+    device = configs_dict[DEVICE]
+    use_cuda = CUDA in device
+
+    if not use_cuda:
+        max_gpus = 0
+        gpus_per_task = 0
+    else:
+        # We will choose the GPU with least ratio of memory usage
+        max_gpus = configs_dict[MAX_GPUS]
+        # Choose which GPUs to use
+        set_gpus(max_gpus)
+        gpus_per_task = configs_dict[GPUS_PER_TASK]
+
+    # we probably don't need this anymore, but keep it commented in case we're wrong
+    # OMP_NUM_THREADS = 'OMP_NUM_THREADS'
+    # os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
+
+    #
+    # Once CUDA_VISIBLE_DEVICES has been set, we can start importing all the necessary modules
+    #
+    import ray
+    import torch
+
+    # we probably don't need this anymore, but keep it commented in case we're wrong
+    # Needed to avoid thread spawning, conflicts with multi-processing. You may set a number > 1 but take into account the number of processes on the machine
+    # torch.set_num_threads(1)
+
+    from pydgn.experiment.util import s2c
+    from pydgn.data.splitter import Splitter
+    from pydgn.evaluation.grid import Grid
+    from pydgn.evaluation.random_search import RandomSearch
+
     assert GRID_SEARCH in configs_dict or RANDOM_SEARCH in configs_dict
     search_class = (Grid if GRID_SEARCH in configs_dict else RandomSearch)
     search = search_class(configs_dict)
+
+    if use_cuda:
+        # Ensure a generic "cuda" device is set when using more than 1 GPU
+        search.device = CUDA
 
     # Set the random seed
     seed = search.seed if search.seed is not None else 42
     print(f'Base seed set to {seed}.')
     experiment = search.experiment
     experiment_class = s2c(experiment)
-    use_cuda = CUDA in search.device
     exp_path = os.path.join(configs_dict[RESULT_FOLDER], f"{search.exp_name}")
-
-    # Hardware initialization
-    max_cpus = configs_dict[MAX_CPUS]
-
-    if not use_cuda:
-        max_gpus = 0
-        gpus_per_task = 0
-    else:
-        # Ensure a generic "cuda" device is set when using more than 1 GPU
-        # We will choose the GPU with least ratio of memory usage
-        search.device = CUDA
-        max_gpus = configs_dict[MAX_GPUS]
-        # Choose which GPUs to use
-        set_gpus(max_gpus)
-        gpus_per_task = configs_dict[GPUS_PER_TASK]
 
     os.environ[PYDGN_RAY_NUM_GPUS_PER_TASK] = str(float(gpus_per_task))
 

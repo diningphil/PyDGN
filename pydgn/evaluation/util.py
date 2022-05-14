@@ -4,7 +4,6 @@ import os
 import random
 from typing import Tuple, Callable
 
-import gpustat
 import tqdm
 
 from pydgn.experiment.util import s2c
@@ -32,43 +31,6 @@ def return_class_and_args(config: dict, key: str, return_class_name: bool=False)
                config[key]['args'] if 'args' in config[key] else {}
     else:
         raise NotImplementedError('Parameter has not been formatted properly')
-
-
-def set_gpus(num_gpus):
-    """
-    Sets the visible GPUS for the experiments according to the availability in terms of memory. Prioritize GPUs with
-    less memory usage. Sets the ``CUDA_DEVICE_ORDER`` env variable to ``PCI_BUS_ID`` and ``CUDA_VISIBLE_DEVICES``
-    to the ordered list of GPU indices.
-
-    Args:
-        num_gpus: maximum number of GPUs to use when launching experiments in parallel
-    """
-    try:
-        selected = []
-
-        stats = gpustat.GPUStatCollection.new_query()
-
-        for i in range(num_gpus):
-
-            ids_mem = [res for res in map(lambda gpu: (int(gpu.entry['index']),
-                                                       float(gpu.entry['memory.used']) / \
-                                                       float(gpu.entry['memory.total'])),
-                                          stats) if str(res[0]) not in selected]
-
-            if len(ids_mem) == 0:
-                # No more gpus available
-                break
-
-            best = min(ids_mem, key=lambda x: x[1])
-            bestGPU, bestMem = best[0], best[1]
-            # print(f"{i}-th best is {bestGPU} with mem {bestMem}")
-            selected.append(str(bestGPU))
-
-        print("Setting GPUs to: {}".format(",".join(selected)))
-        os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
-        os.environ['CUDA_VISIBLE_DEVICES'] = ",".join(selected)
-    except BaseException as e:
-        print("GPU not available: " + str(e))
 
 
 def clear_screen():

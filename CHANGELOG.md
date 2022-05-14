@@ -9,6 +9,13 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.0.8] Minor changes
+
+## Changed
+
+- (Needs simple test) Setting ``CUDA_VISIBLE_DEVICES`` variable before cuda is initialized, so that in ``--debug`` mode we can use the GPU with the least amount of used memory.
+- Commented a couple of lines which forces OMP_NUM_THREADS to 1 and Pytorch threads to 1 as well. It seems we don't need them anymore.
+
 ## [1.0.7] Minor fix
 
 ## Fixed
