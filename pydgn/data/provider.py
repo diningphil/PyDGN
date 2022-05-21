@@ -1,4 +1,6 @@
+import math
 import random
+import warnings
 from typing import Union, Callable
 
 import numpy as np
@@ -6,6 +8,7 @@ import torch
 import torch_geometric.loader
 from torch.utils.data import Subset
 from torch_geometric.data import Data
+from torch_geometric.loader.dataloader import Collater
 
 import pydgn.data.dataset
 from pydgn.data.dataset import DatasetInterface
@@ -281,6 +284,53 @@ class DataProvider:
 
         """
         return self._get_dataset().dim_target
+
+
+class IterableDataProvider(DataProvider):
+    r"""
+    A DataProvider object that allows to fetch data from an Iterable-style Dataset (see :class:`pydgn.data.dataset.IterableDatasetInterface`).
+    """
+
+    def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+
+        dataset = self._get_dataset(**{'url_indices': indices})
+
+        shuffle = kwargs.pop("shuffle", False)
+
+        if shuffle:
+            dataset.shuffle_samples(True)
+            dataset.shuffle_timesteps(True)
+
+        assert self.exp_seed is not None, "DataLoader's seed has not been specified! Is this a bug?"
+
+        # Define a worker_init_fn that configures each dataset copy differently
+        # this is called only when num_workers is set to a value > 0
+        def worker_init_fn(worker_id):
+            worker_info = torch.utils.data.get_worker_info()
+            num_workers = worker_info.num_workers
+            assert num_workers > 0
+
+            # Set the random seed
+            seed_worker(worker_id, self.exp_seed)
+
+            # Get the dataset and overall length
+            dataset = worker_info.dataset  # the dataset copy in this worker process
+            dataset_length = len(dataset)  # dynamic, already refers to the subset of urls!
+
+            per_worker = int(math.ceil((dataset_length) / float(worker_info.num_workers)))
+
+            start = worker_id * per_worker
+            end = worker_id * per_worker + per_worker
+
+            # configure the dataset to only process the split workload
+            dataset.splice(start, end)
+
+        kwargs.update(self.data_loader_args)
+
+        dataloader = self.data_loader_class(dataset, sampler=None, collate_fn=Collater(None, None),
+                                            worker_init_fn=worker_init_fn, **kwargs)
+        return dataloader
 
 
 class LinkPredictionSingleGraphDataProvider(DataProvider):

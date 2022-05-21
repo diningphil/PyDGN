@@ -1,5 +1,7 @@
 import os
 import shutil
+from pathlib import Path
+from random import shuffle
 from typing import List, Union, Tuple, Optional, Callable
 
 import torch
@@ -144,6 +146,168 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
 
     def __len__(self) -> int:
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
+
+class IterableDatasetInterface(torch.utils.data.IterableDataset):
+    r"""
+    Class that implements the Iterable-style dataset, including multi-process data loading (https://pytorch.org/docs/stable/data.html#iterable-style-datasets).
+    Useful when the dataset is too big and split in chunks of files to be stored on disk. Each chunk can hold a single sample
+    or a set of samples, and there is the chance to shuffle sample-wise or chunk-wise. To get a subset of this dataset, just provide
+    an argument `url_indices` specifying which chunks you want to use. Must be combined with an appropriate :class:`pydgn.data.provider.IterableDataProvider`.
+
+    Args:
+        root (str): root folder where to store the dataset
+        name (str): name of the dataset
+        transform (Optional[Callable]): transformations to apply to each ``Data`` object at run time
+        pre_transform (Optional[Callable]): transformations to apply to each ``Data`` object at dataset creation time
+        url_indices (Optional[List]): list of indices used to extract a portion of the dataset
+    """
+    def __init__(self,
+                 root: str,
+                 name: str,
+                 transform: Optional[Callable]=None,
+                 pre_transform: Optional[Callable]=None,
+                 url_indices: Optional[List]=None):
+        super().__init__()
+        self.root = root
+        self.name = name
+
+        # This is needed to compute the a subset of the entire dataset
+        if url_indices is None:
+            processed_file_names = self.processed_file_names
+        else:
+            processed_file_names = [self.processed_file_names[i] for i in url_indices]
+
+        # This is needed to compute the length of a subset of the entire dataset
+        self.urls = processed_file_names
+        self.shuffled_urls = self.urls
+
+        self.start_index = 0
+        self.end_index = len(self.shuffled_urls)
+
+        # This information allows us to shuffle between urls and sub-patches inside each url
+        self._shuffle_urls = False
+        self._shuffle_subpatches = False
+
+        self.pre_transform = pre_transform
+        self.transform = transform
+
+        for p in self.raw_file_names:
+            assert os.path.exists(os.path.join(self.raw_dir, p)), f'the required dataset file {p} is missing'
+
+        if not os.path.exists(self.processed_dir):
+            os.makedirs(os.path.join(self.processed_dir))
+
+        for p in processed_file_names:
+            if not os.path.exists(os.path.join(self.processed_dir, p)):
+                self.process()
+                break
+
+
+    def shuffle_urls_elements(self, value: bool):
+        r"""
+        Shuffles elements contained in each file (associated with an url).
+        Use this method when a single file stores multiple samples and you want to provide them in shuffled order.
+        IMPORTANT: in this case we assume that each file contains a list of Data objects!
+
+        Args:
+            value (bool): whether or not to shuffle urls
+        """
+        self._shuffle_subpatches = value
+
+
+    def shuffle_urls(self, value: bool):
+        r"""
+        Shuffles urls associated to individual files stored on disk
+
+        Args:
+            value (bool): whether or not to shuffle urls
+        """
+        self._shuffle_urls = value
+
+        # Needed for multiple dataloader workers
+        if self._shuffle_urls:
+            shuffle(self.shuffled_urls)
+
+    def splice(self, start: int, end: int):
+        r"""
+        Use this method to assign portions of the dataset to load to different workers, otherwise
+        they will load the same samples.
+
+        Args:
+            start (int): the index where to start
+            end (int): the index where to stop
+        """
+        self.start_index = start
+        self.end_index = end
+
+    def __iter__(self):
+        r"""
+        Generator that returns individual Data objects. If each files contains a list of data objects, these
+        can be shuffled using the method :func:`shuffle_urls_elements`.
+
+        Returns: a Data object with the next element to process
+        """
+        for url in self.shuffled_urls[self.start_index:self.end_index]:
+            sample = torch.load(url)
+
+            if type(sample) == list:
+                if self._shuffle_subpatches:
+                    shuffle(sample)
+
+                data = [self.transform(d) for d in sample]
+
+            else:
+                data = [self.transform(sample)]
+
+            for i in range(len(data)):
+                yield data[i]
+
+    @property
+    def raw_file_names(self) -> Union[str, List[str], Tuple]:
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    @property
+    def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    def download(self):
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    def process(self):
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    def len(self) -> int:
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    def get(self, idx: int) -> Data:
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    @property
+    def dim_node_features(self):
+        r"""
+        Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    @property
+    def dim_edge_features(self):
+        r"""
+        Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    @property
+    def dim_target(self):
+        r"""
+        Specifies the dimension of each target vector.
+        """
+        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    def __len__(self):
+        return len(self.urls)  # It's important it stays dynamic, because self.urls depends on url_indices
 
 
 class TUDatasetInterface(TUDataset):

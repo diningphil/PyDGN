@@ -9,6 +9,20 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.0.9] Iterable Dataset
+
+## Added
+
+- Implemented an Iterable Dataset inspired by the [WebDataset](https://github.com/webdataset/webdataset) interface
+- Similarly, added ``DataProvider``, ``Engine`` and ``EngineCallback`` classes for the Iterable-style datasets.
+
+## Changed
+
+- Now we can pass additional arguments at runtime to the dataset
+
+## [1.0.7] Minor fix
+
+
 ## [1.0.8] Minor changes
 
 ## Changed
