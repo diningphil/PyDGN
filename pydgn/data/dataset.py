@@ -155,6 +155,12 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
     or a set of samples, and there is the chance to shuffle sample-wise or chunk-wise. To get a subset of this dataset, just provide
     an argument `url_indices` specifying which chunks you want to use. Must be combined with an appropriate :class:`pydgn.data.provider.IterableDataProvider`.
 
+    NOTE 1: We assume the splitter will split the dataset with respect to to the number of files stored on disk, so be sure that
+    the length of your dataset reflects that number. Then, examples will be provided sequentially, so if each file holds
+    more than one sample, we will still be able to create a batch of samples from one or multiple files.
+
+    NOTE 2: NEVER override the __len__() method, as it varies dynamically with the ``url_indices`` argument.
+
     Args:
         root (str): root folder where to store the dataset
         name (str): name of the dataset
@@ -193,7 +199,9 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         self.transform = transform
 
         for p in self.raw_file_names:
-            assert os.path.exists(os.path.join(self.raw_dir, p)), f'the required dataset file {p} is missing'
+            if not os.path.exists(os.path.join(self.raw_dir, p)):
+                self.download()
+                break
 
         if not os.path.exists(self.processed_dir):
             os.makedirs(os.path.join(self.processed_dir))
@@ -202,7 +210,6 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
             if not os.path.exists(os.path.join(self.processed_dir, p)):
                 self.process()
                 break
-
 
     def shuffle_urls_elements(self, value: bool):
         r"""
@@ -248,36 +255,54 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
 
         Returns: a Data object with the next element to process
         """
-        for url in self.shuffled_urls[self.start_index:self.end_index]:
-            sample = torch.load(url)
-
+        end_index = self.end_index if self.end_index <= len(self.shuffled_urls) else len(self.shuffled_urls)
+        for url in self.shuffled_urls[self.start_index:end_index]:
+            sample = torch.load(os.path.join(self.processed_dir, url))
             if type(sample) == list:
                 if self._shuffle_subpatches:
                     shuffle(sample)
 
-                data = [self.transform(d) for d in sample]
-
+                data = [self.transform(d) if self.transform is not None else d for d in sample]
             else:
-                data = [self.transform(sample)]
+                data = [self.transform(sample) if self.transform is not None else sample]
 
             for i in range(len(data)):
                 yield data[i]
 
     @property
-    def raw_file_names(self) -> Union[str, List[str], Tuple]:
+    def raw_file_names(self) -> List[str]:
         raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
 
     @property
-    def processed_file_names(self) -> Union[str, List[str], Tuple]:
+    def raw_dir(self) -> str:
+        return os.path.join(self.root, self.name, 'raw')
+
+    @property
+    def raw_paths(self) -> List[str]:
+        r"""The absolute filepaths that must be present in order to skip
+        downloading."""
+        files = self.raw_file_names
+        return [os.path.join(self.raw_dir, f) for f in files]
+
+    @property
+    def processed_file_names(self) -> List[str]:
         raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+
+    @property
+    def processed_dir(self) -> str:
+        return os.path.join(self.root, self.name, 'processed')
+
+    @property
+    def processed_paths(self) -> List[str]:
+        r"""The absolute filepaths that must be present in order to skip
+        processing."""
+        files = self.processed_file_names
+        return [os.path.join(self.processed_dir, f) for f in files]
 
     def download(self):
         raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
 
     def process(self):
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
-
-    def len(self) -> int:
         raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
 
     def get(self, idx: int) -> Data:
@@ -426,3 +451,58 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
 
     def __len__(self) -> int:
         return len(self.data)
+
+
+class ToyIterableDataset(IterableDatasetInterface):
+    r"""
+    Class that implements the Iterable-style dataset, including multi-process data loading (https://pytorch.org/docs/stable/data.html#iterable-style-datasets).
+    Useful when the dataset is too big and split in chunks of files to be stored on disk. Each chunk can hold a single sample
+    or a set of samples, and there is the chance to shuffle sample-wise or chunk-wise. To get a subset of this dataset, just provide
+    an argument `url_indices` specifying which chunks you want to use. Must be combined with an appropriate :class:`pydgn.data.provider.IterableDataProvider`.
+
+    Args:
+        root (str): root folder where to store the dataset
+        name (str): name of the dataset
+        transform (Optional[Callable]): transformations to apply to each ``Data`` object at run time
+        pre_transform (Optional[Callable]): transformations to apply to each ``Data`` object at dataset creation time
+        url_indices (Optional[List]): list of indices used to extract a portion of the dataset
+    """
+    def __init__(self,
+                 root: str,
+                 name: str,
+                 transform: Optional[Callable]=None,
+                 pre_transform: Optional[Callable]=None,
+                 url_indices: Optional[List]=None):
+        super().__init__(root, name, transform, pre_transform, url_indices)
+
+
+    @property
+    def raw_file_names(self) -> Union[str, List[str], Tuple]:
+        return []
+
+    @property
+    def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        return [f'fake_processed_{i}.pt' for i in range(100)]
+
+    @property
+    def dim_target(self):
+        return 1
+
+    @property
+    def dim_node_features(self):
+        return 5
+
+    @property
+    def dim_edge_features(self):
+        return 0
+
+    def download(self):
+        pass
+
+    def process(self):
+        for i in range(100):
+            fake_graphs = []
+            for g in range(10):
+                fake_graphs.append(Data(x=torch.zeros(20, 5), y=torch.zeros(1,1), edge_index=torch.zeros(2,1).long()))
+
+            torch.save(fake_graphs, self.processed_paths[i])

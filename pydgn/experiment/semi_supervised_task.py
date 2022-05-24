@@ -29,11 +29,13 @@ class SemiSupervisedTask(Experiment):
             if 'shuffle' in unsupervised_config else True
 
         # Instantiate the Dataset
+        train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle)
+        val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle)
+
+        # Call this after the loaders: the datasets may need to be instantiated with additional parameters
         dim_node_features = dataset_getter.get_dim_node_features()
         dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
-        train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle)
-        val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle)
 
         # Change exp path to allow Stop & Resume
         self.exp_path = os.path.join(self.root_exp_path, f'unsupervised_training')
@@ -100,12 +102,14 @@ class SemiSupervisedTask(Experiment):
             if 'shuffle' in unsupervised_config else True
 
         # Instantiate the Dataset
-        dim_node_features = dataset_getter.get_dim_node_features()
-        dim_edge_features = dataset_getter.get_dim_edge_features()
-        dim_target = dataset_getter.get_dim_target()
         train_loader = dataset_getter.get_outer_train(batch_size=batch_size, shuffle=shuffle)
         val_loader = dataset_getter.get_outer_val(batch_size=batch_size, shuffle=shuffle)
         test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle)
+
+        # Call this after the loaders: the datasets may need to be instantiated with additional parameters
+        dim_node_features = dataset_getter.get_dim_node_features()
+        dim_edge_features = dataset_getter.get_dim_edge_features()
+        dim_target = dataset_getter.get_dim_target()
 
         # Change exp path to allow Stop & Resume
         self.exp_path = os.path.join(self.root_exp_path, f'unsupervised_training')
