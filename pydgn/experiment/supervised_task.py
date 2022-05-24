@@ -12,11 +12,12 @@ class SupervisedTask(Experiment):
             if 'shuffle' in self.model_config.supervised_config else True
 
         # Instantiate the Dataset
+        train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle)
+        val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle)
+
         dim_node_features = dataset_getter.get_dim_node_features()
         dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
-        train_loader = dataset_getter.get_inner_train(batch_size=batch_size, shuffle=shuffle)
-        val_loader = dataset_getter.get_inner_val(batch_size=batch_size, shuffle=shuffle)
 
         # Instantiate the Model
         model = self.create_supervised_model(dim_node_features, dim_edge_features, dim_target)
@@ -43,12 +44,14 @@ class SupervisedTask(Experiment):
             if 'shuffle' in self.model_config.supervised_config else True
 
         # Instantiate the Dataset
-        dim_node_features = dataset_getter.get_dim_node_features()
-        dim_edge_features = dataset_getter.get_dim_edge_features()
-        dim_target = dataset_getter.get_dim_target()
         train_loader = dataset_getter.get_outer_train(batch_size=batch_size, shuffle=shuffle)
         val_loader = dataset_getter.get_outer_val(batch_size=batch_size, shuffle=shuffle)
         test_loader = dataset_getter.get_outer_test(batch_size=batch_size, shuffle=shuffle)
+
+        # Call this after the loaders: the datasets may need to be instantiated with additional parameters
+        dim_node_features = dataset_getter.get_dim_node_features()
+        dim_edge_features = dataset_getter.get_dim_edge_features()
+        dim_target = dataset_getter.get_dim_target()
 
         # Instantiate the Model
         model = self.create_supervised_model(dim_node_features, dim_edge_features, dim_target)

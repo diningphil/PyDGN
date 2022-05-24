@@ -211,6 +211,69 @@ class TrainingEngine(EventDispatcher):
         self.model.eval()
         self.training = False
 
+
+    def _loop_helper(self):
+        # Move data to device
+        data = self.state.batch_input
+        if isinstance(data, list):
+            # used by incremental construction
+            data = [d.to(self.device) for d in data]
+            _data = data[0]
+        else:
+            # standard case
+            data = data.to(self.device)
+            _data = data
+        batch_idx, edge_index, targets = _data.batch, _data.edge_index, _data.y
+
+        # Helpful when you need to access again the input batch, e.g for some continual learning strategy
+        self.state.update(batch_input=data)
+        self.state.update(batch_targets=targets)
+
+        num_graphs = _data.num_graphs
+        num_nodes = _data.num_nodes
+        self.state.update(batch_num_graphs=num_graphs)
+        self.state.update(batch_num_nodes=num_nodes)
+
+        # Can we do better? we force the user to use y
+        assert targets is not None, "You must provide a target value, even a dummy one, for the engine to infer whether this is a node or link or graph problem."
+        num_targets = self._num_targets(targets)
+
+        self.state.update(batch_num_targets=num_targets)
+
+        if self.training:
+            self._dispatch(EventHandler.ON_TRAINING_BATCH_START, self.state)
+        else:
+            self._dispatch(EventHandler.ON_EVAL_BATCH_START, self.state)
+
+        self._dispatch(EventHandler.ON_FORWARD, self.state)
+
+        # EngineCallback will store the outputs in state.batch_outputs
+        output = self.state.batch_outputs
+
+        # Change into tuple if not, loss and score expect a tuple
+        # where the first element consists of the model's predictions
+        if not isinstance(output, tuple):
+            output = (output,)
+        else:
+            if len(output) > 1 and self.state.return_node_embeddings:
+                # Embeddings should be in position 2 of the output
+                embeddings = output[1]
+
+                data_list = self._to_list(self.state.epoch_data_list, embeddings,
+                                          batch_idx, edge_index, targets)
+
+                # I am extending the data list, not replacing! Hence the name "epoch" data list
+                self.state.update(epoch_data_list=data_list)
+
+        self._dispatch(EventHandler.ON_COMPUTE_METRICS, self.state)
+
+        if self.training:
+            self._dispatch(EventHandler.ON_BACKWARD, self.state)
+            self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
+        else:
+            self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
+
+
     # loop over all data (i.e. computes an epoch)
     def _loop(self, loader: DataLoader):
         """
@@ -232,65 +295,7 @@ class TrainingEngine(EventDispatcher):
             # EngineCallback will store fetched data in state.batch_input
             self._dispatch(EventHandler.ON_FETCH_DATA, self.state)
 
-            # Move data to device
-            data = self.state.batch_input
-            if isinstance(data, list):
-                # used by incremental construction
-                data = [d.to(self.device) for d in data]
-                _data = data[0]
-            else:
-                # standard case
-                data = data.to(self.device)
-                _data = data
-            batch_idx, edge_index, targets = _data.batch, _data.edge_index, _data.y
-
-            # Helpful when you need to access again the input batch, e.g for some continual learning strategy
-            self.state.update(batch_input=data)
-            self.state.update(batch_targets=targets)
-
-            num_graphs = _data.num_graphs
-            num_nodes = _data.num_nodes
-            self.state.update(batch_num_graphs=num_graphs)
-            self.state.update(batch_num_nodes=num_nodes)
-
-            # Can we do better? we force the user to use y
-            assert targets is not None, "You must provide a target value, even a dummy one, for the engine to infer whether this is a node or link or graph problem."
-            num_targets = self._num_targets(targets)
-
-            self.state.update(batch_num_targets=num_targets)
-
-            if self.training:
-                self._dispatch(EventHandler.ON_TRAINING_BATCH_START, self.state)
-            else:
-                self._dispatch(EventHandler.ON_EVAL_BATCH_START, self.state)
-
-            self._dispatch(EventHandler.ON_FORWARD, self.state)
-
-            # EngineCallback will store the outputs in state.batch_outputs
-            output = self.state.batch_outputs
-
-            # Change into tuple if not, loss and score expect a tuple
-            # where the first element consists of the model's predictions
-            if not isinstance(output, tuple):
-                output = (output,)
-            else:
-                if len(output) > 1 and self.state.return_node_embeddings:
-                    # Embeddings should be in position 2 of the output
-                    embeddings = output[1]
-
-                    data_list = self._to_list(self.state.epoch_data_list, embeddings,
-                                              batch_idx, edge_index, targets)
-
-                    # I am extending the data list, not replacing! Hence the name "epoch" data list
-                    self.state.update(epoch_data_list=data_list)
-
-            self._dispatch(EventHandler.ON_COMPUTE_METRICS, self.state)
-
-            if self.training:
-                self._dispatch(EventHandler.ON_BACKWARD, self.state)
-                self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
-            else:
-                self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
+            self._loop_helper()
 
     def _train(self, loader):
         self.set_training_mode()
@@ -537,6 +542,33 @@ class TrainingEngine(EventDispatcher):
             scheduler_state = ckpt_dict[SCHEDULER_STATE]
             assert scheduler_state is not None
             self.state.update(scheduler_state=scheduler_state)
+
+
+class DataStreamTrainingEngine(TrainingEngine):
+
+    # loop over all data (i.e. computes an epoch)
+    def _loop(self, loader: DataLoader):
+        # Reset epoch state (DO NOT REMOVE)
+        self.state.update(epoch_data_list=None)
+        self.state.update(epoch_loss=None)
+        self.state.update(epoch_score=None)
+        self.state.update(loader_iterable=iter(loader))
+
+        # Loop over data
+        id_batch = 0
+        self.state.update(stop_fetching=False)
+        while not self.state.stop_fetching:
+
+            self.state.update(id_batch=id_batch)
+            id_batch += 1
+
+            # EngineCallback will store fetched data in state.batch_input
+            self._dispatch(EventHandler.ON_FETCH_DATA, self.state)
+
+            if self.state.stop_fetching:
+                return
+
+            self._loop_helper()
 
 
 class LinkPredictionSingleGraphEngine(TrainingEngine):

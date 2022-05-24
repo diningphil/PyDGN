@@ -9,7 +9,7 @@ from pydgn.training.util import atomic_save
 
 
 class EngineCallback(EventHandler):
-    """
+    r"""
     Class responsible for fetching data and handling current-epoch checkpoints at training time.
 
     Args:
@@ -55,3 +55,22 @@ class EngineCallback(EventHandler):
                 STOP_TRAINING: state.stop_training}
             last_ckpt.update(state.epoch_results)
             atomic_save(last_ckpt, Path(state.exp_path, LAST_CHECKPOINT_FILENAME))
+
+
+class IterableEngineCallback(EngineCallback):
+    r"""
+    Class that extends :class:`pydgn.training.callback.EngineCallback` to the processing of Iterable-style datasets.
+    Needs to be used together with the appropriate engine class.
+
+    Args:
+        store_last_checkpoint (bool): if ``True``, keep the model's checkpoint for the last training epoch
+    """
+
+    def on_fetch_data(self, state: State):
+        try:
+            data = next(state.loader_iterable)
+            state.update(batch_input=data)
+        except StopIteration as e:
+            state.update(stop_fetching=True)
+            state.update(batch_input=None)
+

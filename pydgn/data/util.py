@@ -149,7 +149,8 @@ def preprocess_data(options: dict):
         print("Data splits are already present, I will not overwrite them.")
 
 
-def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,DatasetInterface]) -> DatasetInterface:
+def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,DatasetInterface],
+                 **kwargs: dict) -> DatasetInterface:
     r"""
     Loads the dataset using the ``dataset_kwargs.pt`` file created when parsing the data config file.
 
@@ -157,6 +158,7 @@ def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,D
         data_root (str): path of the folder that contains the dataset folder
         dataset_name (str): name of the dataset (same as the name of the dataset folder that has been already created)
         dataset_class (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]): the class of the dataset to instantiate with the parameters stored in the ``dataset_kwargs.pt`` file.
+        kwargs (dict): additional arguments to be passed to the dataset (potentially provided by a DataProvider)
 
     Returns:
         a :class:`~pydgn.data.dataset.DatasetInterface` object
@@ -170,6 +172,9 @@ def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,D
 
     # Overwrite original data_root field, which may have changed
     dataset_args['root'] = data_root
+
+    # pass extra arguments to dataset
+    dataset_args.update(kwargs)
 
     with warnings.catch_warnings():
         # suppress PyG warnings

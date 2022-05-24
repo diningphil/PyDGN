@@ -9,6 +9,26 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.0.9] Iterable Dataset implementation for large datasets stored on disk in chunks of files
+
+We provide an implementation of iterable-style datasets, where the dataset usually doesn't fit into main memory and
+it is stored into different files on disk. If you don't overwrite the ``__iter__`` function, we assume to perform data splitting at
+file level, rather than sample level. Each file can in fact contain a list of ``Data`` objects, which will be streamed
+sequentially. Variations are possible, depending on your application, but you can use this new dataset class as a good starting point.
+If you do, be careful to test it together with the iterable versions of the data provider, engine, and engine callback.
+
+## Added
+
+- Implemented an Iterable Dataset inspired by the [WebDataset](https://github.com/webdataset/webdataset) interface
+- Similarly, added ``DataProvider``, ``Engine`` and ``EngineCallback`` classes for the Iterable-style datasets.
+
+## Changed
+
+- Now we can pass additional arguments at runtime to the dataset
+
+## [1.0.7] Minor fix
+
+
 ## [1.0.8] Minor changes
 
 ## Changed

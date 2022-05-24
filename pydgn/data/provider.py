@@ -1,4 +1,6 @@
+import math
 import random
+import warnings
 from typing import Union, Callable
 
 import numpy as np
@@ -6,6 +8,7 @@ import torch
 import torch_geometric.loader
 from torch.utils.data import Subset
 from torch_geometric.data import Data
+from torch_geometric.loader.dataloader import Collater
 
 import pydgn.data.dataset
 from pydgn.data.dataset import DatasetInterface
@@ -73,7 +76,11 @@ class DataProvider:
 
         self.splits_filepath = splits_filepath
         self.splitter = None
-        self.dataset = None
+        self.dataset = None  # use this to avoid instantiating multiple versions of the same dataset when no run-time specific arguments are needed
+
+        self.dim_node_features = None
+        self.dim_edge_features = None
+        self.dim_target = None
 
 
     def set_exp_seed(self, seed: int):
@@ -126,9 +133,22 @@ class DataProvider:
         Returns:
             a :class:`~pydgn.data.dataset.DatasetInterface` object
         """
-        if self.dataset is None:
-            self.dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class)
-        return self.dataset
+        if kwargs is not None:
+            # we probably need to pass run-time specific parameters, so load the dataset in memory again
+            # an example is the subset of urls in Iterable style datasets
+            dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class, **kwargs)
+        else:
+            if self.dataset is None:
+                dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class)
+                self.dataset = dataset
+            else:
+                dataset = self.dataset
+
+        self.dim_node_features = dataset.dim_node_features
+        self.dim_edge_features = dataset.dim_edge_features
+        self.dim_target = dataset.dim_target
+
+        return dataset
 
     def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
                                                                   torch_geometric.loader.DataLoader]:
@@ -260,7 +280,9 @@ class DataProvider:
             the value of the property ``dim_node_features`` in the dataset
 
         """
-        return self._get_dataset().dim_node_features
+        if self.dim_node_features is None:
+            raise Exception("You should first initialize the dataset by creating a data loader!")
+        return self.dim_node_features
 
     def get_dim_edge_features(self) -> int:
         r"""
@@ -270,7 +292,9 @@ class DataProvider:
             the value of the property ``dim_edge_features`` in the dataset
 
         """
-        return self._get_dataset().dim_edge_features
+        if self.dim_edge_features is None:
+            raise Exception("You should first initialize the dataset by creating a data loader!")
+        return self.dim_edge_features
 
     def get_dim_target(self) -> int:
         r"""
@@ -280,7 +304,56 @@ class DataProvider:
             the value of the property ``dim_target`` in the dataset
 
         """
-        return self._get_dataset().dim_target
+        if self.dim_target is None:
+            raise Exception("You should first initialize the dataset by creating a data loader!")
+        return self.dim_target
+
+
+class IterableDataProvider(DataProvider):
+    r"""
+    A DataProvider object that allows to fetch data from an Iterable-style Dataset (see :class:`pydgn.data.dataset.IterableDatasetInterface`).
+    """
+
+    def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+
+        # we will overwrite the dataset each time the loader is called
+        dataset = self._get_dataset(**{'url_indices': indices})
+        shuffle = kwargs.pop("shuffle", False)
+
+        if shuffle:
+            dataset.shuffle_urls(True)
+            dataset.shuffle_urls_elements(True)
+
+        assert self.exp_seed is not None, "DataLoader's seed has not been specified! Is this a bug?"
+
+        # Define a worker_init_fn that configures each dataset copy differently
+        # this is called only when num_workers is set to a value > 0
+        def worker_init_fn(worker_id):
+            worker_info = torch.utils.data.get_worker_info()
+            num_workers = worker_info.num_workers
+            assert num_workers > 0
+
+            # Set the random seed
+            seed_worker(worker_id, self.exp_seed)
+
+            # Get the dataset and overall length
+            dataset = worker_info.dataset  # the dataset copy in this worker process
+            dataset_length = len(dataset)  # dynamic, already refers to the subset of urls!
+
+            per_worker = int(math.ceil((dataset_length) / float(worker_info.num_workers)))
+
+            start = worker_id * per_worker
+            end = worker_id * per_worker + per_worker
+
+            # configure the dataset to only process the split workload
+            dataset.splice(start, end)
+
+        kwargs.update(self.data_loader_args)
+
+        dataloader = self.data_loader_class(dataset, sampler=None, collate_fn=Collater(None, None),
+                                            worker_init_fn=worker_init_fn, **kwargs)
+        return dataloader
 
 
 class LinkPredictionSingleGraphDataProvider(DataProvider):
@@ -292,9 +365,9 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
     is added to PyDGN.
     """
 
-    # Since we modify the dataset, we need different istances of the same graph
     def _get_dataset(self, **kwargs):
-        return load_dataset(self.data_root, self.dataset_name, self.dataset_class)
+        # Since we modify the dataset, we need different istances of the same graph
+        return load_dataset(self.data_root, self.dataset_name, self.dataset_class, **kwargs)
 
     def _get_splitter(self):
         super()._get_splitter()  # loads splitter into self.splitter
@@ -303,7 +376,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         return self.splitter
 
     def _get_loader(self, indices, **kwargs):
-        dataset = self._get_dataset()  # Custom implementation, we need a copy of the dataset every time
+        dataset = self._get_dataset(**kwargs)  # Custom implementation, we need a copy of the dataset every time
         assert len(dataset) == 1, f"Provider accepts a single-graph dataset only, but I see {len(dataset)} graphs"
         y = dataset.data.y
 
