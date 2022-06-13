@@ -61,10 +61,11 @@ experiments in progress, if any.
 
 ## Projects using PyDGN
 
-- [Graph Mixture Density Networks](https://github.com/diningphil/graph-mixture-density-networks)
-- [Contextual Graph Markov Model](https://github.com/diningphil/CGMM)
-- [Extended Contextual Graph Markov Model](https://github.com/diningphil/E-CGMM)
-- [Continual Learning Benchmark for Graphs](https://github.com/diningphil/continual_learning_for_graphs)
+- [Infinite Contextual Graph Markov Model (ICML 2022)](https://github.com/diningphil/iCGMM)
+- [Graph Mixture Density Networks (ICML 2021)](https://github.com/diningphil/graph-mixture-density-networks)
+- [Contextual Graph Markov Model (ICML 2018, JMLR 2020)](https://github.com/diningphil/CGMM)
+- [Extended Contextual Graph Markov Model (IJCNN 2021)](https://github.com/diningphil/E-CGMM)
+- [Continual Learning Benchmark for Graphs (WWW Workshop 2021, spotlight)](https://github.com/diningphil/continual_learning_for_graphs)
 
 
 ## Data Splits
