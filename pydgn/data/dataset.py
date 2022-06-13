@@ -412,9 +412,6 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
         self.name = name
         self.data.y = self.data.y.squeeze()
 
-    def get_idx_split(self, split_type: str = None) -> dict:
-        return self.dataset.get_idx_split(split_type=split_type)
-
     @property
     def dim_node_features(self):
         return 1
