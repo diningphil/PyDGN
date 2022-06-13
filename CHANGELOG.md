@@ -9,6 +9,13 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.1.0] Minor changes
+
+## Fixed
+
+- removed method from `OGBGDatasetInterface` that broke the data split generation phase. 
+
+
 ## [1.0.9] Iterable Dataset implementation for large datasets stored on disk in chunks of files
 
 We provide an implementation of iterable-style datasets, where the dataset usually doesn't fit into main memory and
