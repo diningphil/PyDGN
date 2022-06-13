@@ -425,7 +425,7 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
 
     @property
     def dim_target(self):
-        return 37
+        return self.data.y.shape[1]
 
     @property
     def processed_file_names(self):
