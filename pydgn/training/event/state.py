@@ -24,8 +24,10 @@ class State:
         self.return_node_embeddings = False
         self.set = None
 
-        # For dynamic graph learning engines
-        self.time_step = 0
+        # For dynamic graph learning
+        self.time_step = None  # used to keep track of the time step
+        self.last_hidden_state = None  # used to store the hidden state to be fed to the model at the next time step
+        self.num_timesteps_per_batch = None
 
     def __getitem__(self, name):
         return getattr(self, name, None)

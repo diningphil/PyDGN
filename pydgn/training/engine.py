@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Callable, List, Union, Tuple
+from typing import Callable, List, Union, Tuple, Optional
 
 import torch
 from torch_geometric.data import Data
@@ -58,6 +58,7 @@ class TrainingEngine(EventDispatcher):
         exp_path (str): the path of the experiment folder. Default is ``None`` but it is always instantiated.
         evaluate_every(int): the frequency of logging epoch results. Default is ``1``.
         store_last_checkpoint (bool): whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch. Default is ``False``.
+        reset_eval_model_hidden_state (bool): [temporal graph learning] Used when we want to reset the state after performing previous inference. It should be ``False`` when we are dealing with a single temporal graph sequence, because we don't want to reset the hidden state after processing the previous [training/validation] time steps.
     """
     def __init__(self,
                  engine_callback: Callable[...,EngineCallback],
@@ -72,7 +73,8 @@ class TrainingEngine(EventDispatcher):
                  plotter: Plotter=None,
                  exp_path: str=None,
                  evaluate_every: int=1,
-                 store_last_checkpoint: bool=False):
+                 store_last_checkpoint: bool=False,
+                 reset_eval_model_hidden_state: bool = True):
         super().__init__()
 
         self.engine_callback = engine_callback
@@ -89,6 +91,9 @@ class TrainingEngine(EventDispatcher):
         self.evaluate_every = evaluate_every
         self.store_last_checkpoint = store_last_checkpoint
         self.training = False
+
+        # For dynamic graph learning
+        self.reset_eval_model_hidden_state = reset_eval_model_hidden_state
 
         self.profiler = Profiler(threshold=1e-5)
 
@@ -109,14 +114,14 @@ class TrainingEngine(EventDispatcher):
         self.state.update(exp_path=self.exp_path)
 
     # TODO in general, there are no guarantees that y will be sufficient to determine the task. This may have to be changed in the future.
-    def _to_data_list(self, x: torch.Tensor, batch: torch.Tensor, y: torch.Tensor) -> List[Data]:
+    def _to_data_list(self, x: torch.Tensor, batch: torch.Tensor, y: Optional[torch.Tensor]) -> List[Data]:
         """
         Converts model outputs back to a list of Data elements. Useful for incremental architectures.
 
         Args:
             x (:class:`torch.Tensor`): tensor holding information of different nodes/graphs embeddings
             batch (:class:`torch.Tensor`): the usual PyG batch tensor. Used to split node/graph embeddings graph-wise.
-            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction
+            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction. Can be ``None``.
 
         Returns:
             a list of PyG Data objects (with only ``x`` and ``y`` attributes)
@@ -126,16 +131,21 @@ class TrainingEngine(EventDispatcher):
         _, counts = torch.unique_consecutive(batch, return_counts=True)
         cumulative = torch.cumsum(counts, dim=0)
 
-        is_graph_prediction = y.shape[0] == len(cumulative)
+        if y is not None:
+            is_graph_prediction = y.shape[0] == len(cumulative)
+            y = y.unsqueeze(1) if y.dim() == 1 else y
 
-        y = y.unsqueeze(1) if y.dim() == 1 else y
-
-        data_list.append(Data(x=x[:cumulative[0]],
-                              y=y[0].unsqueeze(0) if is_graph_prediction else y[:cumulative[0]]))
-        for i in range(1, len(cumulative)):
-            g = Data(x=x[cumulative[i - 1]:cumulative[i]],
-                     y=y[i].unsqueeze(0) if is_graph_prediction else y[cumulative[i - 1]:cumulative[i]])
-            data_list.append(g)
+            data_list.append(Data(x=x[:cumulative[0]],
+                                  y=y[0].unsqueeze(0) if is_graph_prediction else y[:cumulative[0]]))
+            for i in range(1, len(cumulative)):
+                g = Data(x=x[cumulative[i - 1]:cumulative[i]],
+                         y=y[i].unsqueeze(0) if is_graph_prediction else y[cumulative[i - 1]:cumulative[i]])
+                data_list.append(g)
+        else:
+            data_list.append(Data(x=x[:cumulative[0]]))
+            for i in range(1, len(cumulative)):
+                g = Data(x=x[cumulative[i - 1]:cumulative[i]])
+                data_list.append(g)
 
         return data_list
 
@@ -143,7 +153,7 @@ class TrainingEngine(EventDispatcher):
                  embeddings: Union[Tuple[torch.Tensor], torch.Tensor],
                  batch: torch.Tensor,
                  edge_index: torch.Tensor,
-                 y: torch.Tensor) -> List[Data]:
+                 y: Optional[torch.Tensor]) -> List[Data]:
         """
         Extends the ``data_list`` list of PyG Data objects with new samples.
 
@@ -152,7 +162,7 @@ class TrainingEngine(EventDispatcher):
             embeddings (:class:`torch.Tensor`): tensor holding information of different nodes/graphs embeddings
             batch (:class:`torch.Tensor`): the usual PyG batch tensor. Used to split node/graph embeddings graph-wise.
             edge_index:
-            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction
+            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction. Can be ``None``.
 
         Returns:
             a list of PyG Data objects (with only ``x`` and ``y`` attributes)
@@ -234,11 +244,12 @@ class TrainingEngine(EventDispatcher):
         self.state.update(batch_num_graphs=num_graphs)
         self.state.update(batch_num_nodes=num_nodes)
 
-        # Can we do better? we force the user to use y
-        assert targets is not None, "You must provide a target value, even a dummy one, for the engine to infer whether this is a node or link or graph problem."
         num_targets = self._num_targets(targets)
-
         self.state.update(batch_num_targets=num_targets)
+
+        # Reset batch_loss and batch_score states (ow accumulation of batch results breaks for temporal graph learning)
+        self.state.update(batch_loss=None)
+        self.state.update(batch_score=None)
 
         if self.training:
             self._dispatch(EventHandler.ON_TRAINING_BATCH_START, self.state)
@@ -396,6 +407,9 @@ class TrainingEngine(EventDispatcher):
                 self.state.update(epoch=epoch)
                 self.state.update(return_node_embeddings=False)
 
+                # [temporal] Initialize the hidden state of the model for a training epoch
+                self.state.update(last_hidden_state=None)
+
                 self._dispatch(EventHandler.ON_EPOCH_START, self.state)
 
                 self.state.update(set=TRAINING)
@@ -407,13 +421,23 @@ class TrainingEngine(EventDispatcher):
                     SCORES: {}
                 }
 
+                # [temporal] Initialize the hidden state of the model again before inference
+                self.state.update(last_hidden_state=None)
+
                 if ((epoch+1) >= self.evaluate_every and (epoch+1) % self.evaluate_every == 0) or epoch == 0:
+
                     # Compute training output (necessary because on_backward has been called)
                     train_loss, train_score, _ = self.infer(train_loader, TRAINING)
+
+                    if self.reset_eval_state:
+                        self.state.update(last_hidden_state=None)
 
                     # Compute validation output
                     if validation_loader is not None:
                         val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
+
+                    if self.reset_eval_state:
+                        self.state.update(last_hidden_state=None)
 
                     # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
                     if test_loader is not None:
@@ -465,12 +489,18 @@ class TrainingEngine(EventDispatcher):
 
             self.state.update(return_node_embeddings=True)
 
+            # Initialize the state of the model again before the final evaluation
+            self.state.update(last_hidden_state=None)
+
             # Compute training output
             train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING)
             # ber[f'{TRAINING}_loss'] = train_loss
             ber[f'{TRAINING}{EMB_TUPLE_SUBSTR}'] = train_embeddings_tuple
             ber.update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
             ber.update({f'{TRAINING}_{k}': v for k, v in train_score.items()})
+
+            if self.reset_eval_state:
+                self.state.update(last_hidden_state=None)
 
             # Compute validation output
             if validation_loader is not None:
@@ -479,6 +509,9 @@ class TrainingEngine(EventDispatcher):
                 ber[f'{VALIDATION}{EMB_TUPLE_SUBSTR}'] = val_embeddings_tuple
                 ber.update({f'{TRAINING}_{k}': v for k, v in val_loss.items()})
                 ber.update({f'{TRAINING}_{k}': v for k, v in val_score.items()})
+
+            if self.reset_eval_state:
+                self.state.update(last_hidden_state=None)
 
             # Compute test output
             if test_loader is not None:
@@ -567,6 +600,118 @@ class DataStreamTrainingEngine(TrainingEngine):
 
             if self.state.stop_fetching:
                 return
+
+            self._loop_helper()
+
+
+class GraphSequenceTrainingEngine(TrainingEngine):
+    """
+    Assumes that the model can return None predictions (i.e., output[0] below)
+    whenever no values should be predicted according to the mask field in the
+    Data object representing a snapshot
+    """
+
+    def _loop_helper(self):
+
+        # data is a list of snapshots, one per time step
+        data = self.state.batch_input
+
+        # Reset batch_loss and batch_score states (ow accumulation of batch results breaks for temporal graph learning)
+        self.state.update(batch_loss=None)
+        self.state.update(batch_score=None)
+
+        if self.training:
+            self._dispatch(EventHandler.ON_TRAINING_BATCH_START, self.state)
+        else:
+            self._dispatch(EventHandler.ON_EVAL_BATCH_START, self.state)
+
+        for t, snapshot in enumerate(data):
+            self.state.update(time_step=t)
+
+            if isinstance(snapshot, list):
+                # used by incremental construction
+                snapshot = [d.to(self.device) for d in snapshot]
+                _snapshot = snapshot[0]
+            else:
+                # standard case
+                snapshot = snapshot.to(self.device)
+                _snapshot = snapshot
+
+            batch_idx, edge_index, targets = _snapshot.batch, _snapshot.edge_index, _snapshot.y
+
+            # Helpful when you need to access again the input batch, e.g for some continual learning strategy
+            self.state.update(batch_input=_snapshot)
+            self.state.update(batch_targets=targets)
+
+            num_graphs = _snapshot.num_graphs
+            num_nodes = _snapshot.num_nodes
+            self.state.update(batch_num_graphs=num_graphs)
+            self.state.update(batch_num_nodes=num_nodes)
+
+            num_targets = self._num_targets(targets)
+            self.state.update(batch_num_targets=num_targets)
+
+            self._dispatch(EventHandler.ON_FORWARD, self.state)
+
+            # EngineCallback will store the outputs in state.batch_outputs
+            output = self.state.batch_outputs
+
+            # Update previous hidden states
+            self.state.update(last_hidden_state=output[1])
+
+            # Change into tuple if not, loss and score expect a tuple
+            # where the first element consists of the model's predictions
+            if not isinstance(output, tuple):
+                output = (output,)
+            else:
+                if len(output) > 1 and self.state.return_node_embeddings:
+                    # Embeddings should be in position 2 of the output
+                    embeddings = output[1]
+
+                    data_list = self._to_list(self.state.epoch_data_list, embeddings,
+                                              batch_idx, edge_index, targets)
+
+                    # I am extending the data list, not replacing! Hence the name "epoch" data list
+                    self.state.update(epoch_data_list=data_list)
+
+            self._dispatch(EventHandler.ON_COMPUTE_METRICS, self.state)
+
+        if self.training:
+            self._dispatch(EventHandler.ON_BACKWARD, self.state)
+
+            # IMPORTANT: after backward detach the last hidden state
+            last_hidden_state = self.state.last_hidden_state.detach()
+            self.state.update(last_hidden_state=last_hidden_state)
+
+            self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
+        else:
+            self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
+
+
+    # loop over all data (i.e. computes an epoch)
+    def _loop(self, loader: DataLoader):
+        """
+        Main method that computes a pass over the dataset using the data loader provided.
+
+        Args:
+            loader (:class:`torch_geometric.loader.DataLoader`): the loader to be used
+        """
+        # Reset epoch state (DO NOT REMOVE)
+        self.state.update(epoch_data_list=None)
+        self.state.update(epoch_loss=None)
+        self.state.update(epoch_score=None)
+        self.state.update(loader_iterable=iter(loader))
+
+        # This is specific to the single graph sequence scenario
+        num_timesteps_per_batch = len(loader)
+        self.state.update(num_timesteps_per_batch=num_timesteps_per_batch)
+
+        # Loop over data
+        for id_batch in range(len(loader)):
+
+            self.state.update(id_batch=id_batch)
+            # EngineCallback will store fetched data in state.batch_input
+            self._dispatch(EventHandler.ON_FETCH_DATA, self.state)
 
             self._loop_helper()
 

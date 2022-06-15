@@ -19,14 +19,19 @@ class Metric(Module, EventHandler):
         reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
         use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
         the metric's aggregated value for the entire epoch.
+        accumulate_over_time_steps (bool): [temporal graph learning] whether or not we should accumulate results across different time steps.
     """
-    def __init__(self, use_as_loss: bool=False, reduction: str='mean', use_nodes_batch_size: bool=False):
+    def __init__(self, use_as_loss: bool=False, reduction: str='mean',
+                 use_nodes_batch_size: bool=False,
+                 accumulate_over_time_steps: bool=False):
         super().__init__()
         self.batch_metrics = None
         self.num_samples = None
+        self.cumulatime_time_steps_samples = None
         self.use_as_loss = use_as_loss
         self.reduction = reduction
         self.use_nodes_batch_size = use_nodes_batch_size
+        self.accumulate_over_time_steps = accumulate_over_time_steps
 
     @property
     def name(self) -> str:
@@ -49,22 +54,47 @@ class Metric(Module, EventHandler):
         #
         if self.reduction == 'mean':
             # Used to recover the "sum" version of the metric
-            return state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+            return self._update_num_samples(state)
 
         elif self.reduction == 'sum':
             return 1
         else:
             raise NotImplementedError('The only reductions allowed are sum and mean')
 
-    def _update_num_samples(self, state: State):
-        #
-        # Returns the number of samples to use when updating the number of total samples per epoch
-        #
+    def _compute_num_samples(self, state: State) -> int:
+        """
+        Returns the number of samples to consider in a batch when scaling the loss/score.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        Returns:
+            The number of samples to use when scaling the loss/score.
+
+        """
         return state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+
+    def _update_num_samples(self, state: State) -> int:
+        """
+        Gives the number of samples to add to the total samples per epoch.
+        The method takes into account whether we are performing temporal graph learning or not, by looking at the
+        field ``accumulate_over_time_steps``.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        Returns:
+            The number of samples to add to the total samples per epoch.
+        """
+        if not self.accumulate_over_time_steps:
+            return self._compute_num_samples(state)
+        else:
+            return self.cumulative_batch_num_targets
 
     def on_training_epoch_start(self, state: State):
         self.batch_metrics = []
         self.num_samples = 0
+        self.cumulatime_time_steps_samples = 0
 
     def on_training_batch_end(self, state: State):
         if self.use_as_loss:
@@ -83,10 +113,12 @@ class Metric(Module, EventHandler):
 
         self.batch_metrics = None
         self.num_samples = None
+        self.cumulatime_time_steps_samples = None
 
     def on_eval_epoch_start(self, state: State):
         self.batch_metrics = []
         self.num_samples = 0
+        self.cumulatime_time_steps_samples = 0
 
     def on_eval_epoch_end(self, state: State):
         if self.use_as_loss:
@@ -96,6 +128,7 @@ class Metric(Module, EventHandler):
 
         self.batch_metrics = None
         self.num_samples = None
+        self.cumulatime_time_steps_samples = None
 
     def on_eval_batch_end(self, state: State):
         if self.use_as_loss:
@@ -120,6 +153,11 @@ class Metric(Module, EventHandler):
             else:
                 loss = loss_output
 
+            # [temporal graph learning] accumulate, rather than substitute, the losses across multiple snapshots
+            if self.accumulate_over_time_steps and state.batch_loss is not None:
+                old_loss = state.batch_loss
+                loss = old_loss[self.name] + loss
+
             state.update(batch_loss={self.name: loss})
 
         else:
@@ -135,7 +173,17 @@ class Metric(Module, EventHandler):
             # Score is a dictionary with key-value pairs
             # we need to detach each score from the computational graph
             score = {k: v.detach().cpu() for k, v in score.items()}
+
+            # [temporal graph learning] accumulate, rather than substitute, the scores across multiple snapshots
+            if self.accumulate_over_time_steps and state.batch_score is not None:
+                old_score = state.batch_score
+                score = {k: old_score[k] + score[k] for k in score.keys()}
+
             state.update(batch_score=score)
+
+        # [temporal graph learning] accumulate the number of samples of each snapshot for each batch
+        if self.accumulate_over_time_steps:
+            self.cumulative_batch_num_targets += self._compute_num_samples(state)
 
     def on_backward(self, state: State):
         if self.use_as_loss:
@@ -173,11 +221,16 @@ class MultiScore(Metric):
         reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
         use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
         the metric's aggregated value for the entire epoch.
+        accumulate_over_time_steps (bool): [temporal graph learning] whether or not we should accumulate results across different time steps.
+
     """
-    def __init__(self, use_as_loss, reduction='mean', use_nodes_batch_size=False, main_scorer=None, **extra_scorers):
+    def __init__(self, use_as_loss, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False,
+                 main_scorer=None, **extra_scorers):
+
         assert not use_as_loss, "MultiScore cannot be used as loss"
         assert not main_scorer is None, "You have to provide a main scorer"
-        super().__init__(use_as_loss, reduction, use_nodes_batch_size)
+        super().__init__(use_as_loss, reduction, use_nodes_batch_size, accumulate_over_time_steps)
         self.scorers = [self._istantiate_scorer(main_scorer)] + [self._istantiate_scorer(score) for score in
                                                                  extra_scorers.values()]
 
@@ -251,15 +304,18 @@ class AdditiveLoss(Metric):
         use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**
         reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
         use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
+        accumulate_over_time_steps (bool): [temporal graph learning] whether or not we should accumulate results across different time steps.
         the metric's aggregated value for the entire epoch.
         losses (dict): dictionary of metrics to add together
     """
-    def __init__(self, use_as_loss, reduction='mean', use_nodes_batch_size=False, **losses: dict):
+    def __init__(self, use_as_loss, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False, **losses: dict):
         assert use_as_loss, "Additive loss can only be used as a loss"
-        super().__init__(use_as_loss, reduction, use_nodes_batch_size)
+        super().__init__(use_as_loss, reduction, use_nodes_batch_size, accumulate_over_time_steps)
 
         self.losses = [self._instantiate_loss(loss) for loss in losses.values()]
         self.use_nodes_batch_size = use_nodes_batch_size
+        self.accumulate_over_time_steps = accumulate_over_time_steps
 
     @property
     def name(self) -> str:
@@ -275,6 +331,7 @@ class AdditiveLoss(Metric):
     def on_training_epoch_start(self, state: State):
         self.batch_metrics = {l.name: [] for l in [self] + self.losses}
         self.num_samples = 0
+        self.cumulatime_time_steps_samples = 0
 
     def on_training_batch_end(self, state: State):
         for k, v in state.batch_loss.items():
@@ -286,16 +343,20 @@ class AdditiveLoss(Metric):
                                  for l in [self] + self.losses})
         self.batch_metrics = None
         self.num_samples = None
+        self.cumulatime_time_steps_samples = None
 
     def on_eval_epoch_start(self, state: State):
         self.batch_metrics = {l.name: [] for l in [self] + self.losses}
         self.num_samples = 0
+        self.cumulatime_time_steps_samples = 0
 
     def on_eval_epoch_end(self, state: State):
         state.update(epoch_loss={l.name: torch.tensor(self.batch_metrics[l.name]).sum() / self.num_samples
                                  for l in [self] + self.losses})
+
         self.batch_metrics = None
         self.num_samples = None
+        self.cumulatime_time_steps_samples = None
 
     def on_eval_batch_end(self, state: State):
         for k, v in state.batch_loss.items():
@@ -317,10 +378,17 @@ class AdditiveLoss(Metric):
                 state.update(batch_loss_extra=extra)
             else:
                 loss_output = single_loss
+
             loss[l.name] = loss_output
             loss_sum += loss_output
 
         loss[self.name] = loss_sum
+
+        # [temporal graph learning] accumulate, rather than substitute, the losses across multiple snapshots
+        if self.accumulate_over_time_steps and state.batch_loss is not None:
+            old_loss = state.batch_loss
+            loss = {k: old_loss[k] + loss[k] for k in loss.keys()}
+
         state.update(batch_loss=loss)
 
     def forward(self,
@@ -333,15 +401,11 @@ class AdditiveLoss(Metric):
 class Classification(Metric):
     r"""
     Generic metric for classification tasks. Used to maximize code reuse for classical metrics.
-
-    Args:
-        use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**
-        reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
     """
-    def __init__(self, use_as_loss=False, reduction='mean', use_nodes_batch_size=False):
-        super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
+    def __init__(self, use_as_loss=False, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
+                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
         self.metric = None
 
     @property
@@ -364,15 +428,11 @@ class Classification(Metric):
 class Regression(Metric):
     r"""
     Generic metric for regression tasks. Used to maximize code reuse for classical metrics.
-
-    Args:
-        use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**
-        reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
     """
-    def __init__(self, use_as_loss=False, reduction='mean', use_nodes_batch_size=False):
-        super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
+    def __init__(self, use_as_loss=False, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
+                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
         self.metric = None
 
     @property
@@ -392,34 +452,26 @@ class Regression(Metric):
 class MulticlassClassification(Classification):
     r"""
     Wrapper around :class:`torch.nn.CrossEntropyLoss`
-
-    Args:
-        use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**.
-        reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
     """
-    def __init__(self, use_as_loss=False, reduction='mean', use_nodes_batch_size=False):
-        super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
+    def __init__(self, use_as_loss=False, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
+                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
         self.metric = CrossEntropyLoss(reduction=reduction)
 
     @property
     def name(self) -> str:
         return 'Multiclass Classification'
 
+
 class MeanSquareError(Regression):
     r"""
     Wrapper around :class:`torch.nn.MSELoss`
-
-    Args:
-        use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**.
-        reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
     """
-    def __init__(self, use_as_loss=False, reduction='mean', use_nodes_batch_size=False):
-        super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
-        self.metric = MSELoss(reduction=reduction)
+    def __init__(self, use_as_loss=False, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
+                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
 
     @property
     def name(self) -> str:
@@ -480,19 +532,14 @@ class MulticlassAccuracy(Metric):
 
 
 class ToyMetric(Metric):
-    """
+    r"""
     Implements a toy metric.
-
-    Args:
-        use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**.
-        reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
     """
 
-    def __init__(self, use_as_loss=False, reduction='mean', use_nodes_batch_size=False):
-        super().__init__(use_as_loss=use_as_loss, reduction=reduction, use_nodes_batch_size=use_nodes_batch_size)
-
+    def __init__(self, use_as_loss=False, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
+                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
 
     @property
     def name(self) -> str:

@@ -115,9 +115,6 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
     def process(self):
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
-    def len(self) -> int:
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
-
     def get(self, idx: int) -> Data:
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
@@ -145,6 +142,21 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
     def __len__(self) -> int:
+        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
+
+class TemporalDatasetInterface(DatasetInterface):
+
+    def get_mask(self) -> torch.Tensor :
+        """
+        Computes the mask of time steps for which we need to make a prediction
+
+        Returns:
+            A tensor indicating the time-steps at which we expect predictions
+        """
+        raise NotImplementedError("You should subclass DynamicDatasetInterface and implement this method")
+
+    def get(self, idx: int) -> Data:
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
 

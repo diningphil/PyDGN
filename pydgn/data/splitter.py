@@ -10,6 +10,17 @@ from pydgn.data.dataset import OGBGDatasetInterface
 from pydgn.experiment.util import s2c
 
 
+def to_lower_triangular(edge_index: torch.Tensor):
+    r"""
+    Transform Pytorch Geometric undirected edge index into its "lower triangular counterpart"
+    """
+    row, col = edge_index
+    lower_tri_mask = row > col
+    row, col = row[lower_tri_mask], col[lower_tri_mask]
+    lower_tri_edge_index = torch.cat((row.unsqueeze(0), col.unsqueeze(0)), dim=0)
+    return lower_tri_edge_index
+
+
 class Fold:
     r"""
     Simple class that stores training, validation, and test indices.
@@ -51,7 +62,6 @@ class OuterFold(Fold):
             a dict with keys ``['train', 'val', 'test']`` associated with the respective indices
         """
         return {"train": self.train_idxs, "val": self.val_idxs, "test": self.test_idxs}
-
 
 
 class NoShuffleTrainTestSplit:
@@ -305,6 +315,28 @@ class Splitter:
         print("Done.")
 
 
+class TemporalSplitter(Splitter):
+    r"""
+    Reads the entire dataset and returns the targets. In this case, each sample in the dataset represents
+    a temporal graph, so we get the classification value at the last time step. Use this method to stratify a dataset
+    of multiple temporal graphs.
+
+    Args:
+        dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the dataset
+
+    Returns:
+        a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
+        exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
+        first boolean value.
+    """
+    def get_graph_targets(self, dataset):
+        try:
+            targets = np.array([d.targets[-1].item() for d in dataset])
+            return True, targets
+        except Exception:
+            return False, None
+
+
 class OGBGSplitter(Splitter):
 
     def split(self, dataset: OGBGDatasetInterface, targets=None):
@@ -329,15 +361,80 @@ class OGBGSplitter(Splitter):
         self.outer_folds.append(outer_fold)
 
 
-def to_lower_triangular(edge_index: torch.Tensor):
-    r"""
-    Transform Pytorch Geometric undirected edge index into its "lower triangular counterpart"
+class SingleGraphSequenceSplitter(TemporalSplitter):
     """
-    row, col = edge_index
-    lower_tri_mask = row > col
-    row, col = row[lower_tri_mask], col[lower_tri_mask]
-    lower_tri_edge_index = torch.cat((row.unsqueeze(0), col.unsqueeze(0)), dim=0)
-    return lower_tri_edge_index
+    Class for dynamic graphs that generates the splits at dataset creation time. It assumes that there is a single graph
+    sequence, so the split happens on time steps. What is more, `n_inner_folds` here will create an inner K-fold CV
+    split for model selection where, however, the training/validation split will not change (because there is no way
+    to split time steps in a different way). This allows for different initializations of the same model, evaluating
+    the avg performance on the VL set.
+    """
+    def __init__(self,
+                 n_outer_folds: int,
+                 n_inner_folds: int,
+                 seed: int,
+                 stratify: bool,
+                 shuffle: bool,
+                 inner_val_ratio: float=0.1,
+                 outer_val_ratio: float=0.1,
+                 test_ratio: float=0.1):
+        super().__init__(n_outer_folds, n_inner_folds, seed, stratify, shuffle,
+                         inner_val_ratio, outer_val_ratio, test_ratio)
+        assert n_outer_folds == 1, "SingleGraphSequenceSplitter does not allow more than one outer fold, as the graph sequence is unique."
+        assert not shuffle, "SingleGraphSequenceSplitter does not allow to shuffle the time steps of the unique graph sequence."
+        assert not stratify, "You cannot stratify a single graph sequence."
+
+    def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
+        r"""
+        Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
+            targets (np.ndarray]): targets used for stratification. Default is ``None``
+        """
+        idxs = range(len(dataset))
+        print(f'Number of snapshots: {len(dataset)}')
+
+        outer_splitter = self._get_splitter(
+            n_splits=self.n_outer_folds,
+            test_ratio=self.test_ratio)  # This is the true test (outer test)
+
+        outer_idxs = np.array(idxs)
+        train_idxs, test_idxs = outer_splitter.split(outer_idxs, y=targets)[0]
+
+        assert set(train_idxs) == set(outer_idxs[train_idxs])
+        assert set(test_idxs) == set(outer_idxs[test_idxs])
+
+        inner_fold_splits = []
+        inner_idxs = outer_idxs[train_idxs]  # equals train_idxs because outer_idxs was ordered
+
+        inner_splitter = NoShuffleTrainTestSplit(test_ratio=self.inner_val_ratio)
+
+        # Repeat the very same inner split for n_inner_folds, as there is no way to split differently.
+        # This allows for different initializations of the same model, evaluating the avg performance on the VL set.
+        inner_train_idxs, inner_val_idxs =  list(inner_splitter.split(inner_idxs, y=None))[0]
+        for _ in range(self.n_inner_folds):
+            inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(),
+                                   val_idxs=inner_idxs[inner_val_idxs].tolist())
+            inner_fold_splits.append(inner_fold)
+
+        self.inner_folds.append(inner_fold_splits)
+
+        # Obtain outer val from outer train in an holdout fashion
+        outer_val_splitter = NoShuffleTrainTestSplit(test_ratio=self.outer_val_ratio)
+        outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=None))[0]
+
+        # False if empty
+        assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
+        assert not bool(set(inner_idxs[inner_train_idxs]) & set(inner_idxs[inner_val_idxs]) & set(test_idxs))
+        assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+        assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+        assert not bool(set(inner_idxs[outer_train_idxs]) & set(inner_idxs[outer_val_idxs]) & set(test_idxs))
+
+        outer_fold = OuterFold(train_idxs=inner_idxs[outer_train_idxs].tolist(),
+                               val_idxs=inner_idxs[outer_val_idxs].tolist(),
+                               test_idxs=outer_idxs[test_idxs].tolist())
+        self.outer_folds.append(outer_fold)
 
 
 class LinkPredictionSingleGraphSplitter(Splitter):

@@ -7,13 +7,14 @@ import numpy as np
 import torch
 import torch_geometric.loader
 from torch.utils.data import Subset
-from torch_geometric.data import Data
+from torch_geometric.data import Data, Batch
 from torch_geometric.loader.dataloader import Collater
 
 import pydgn.data.dataset
 from pydgn.data.dataset import DatasetInterface
 from pydgn.data.sampler import RandomSampler
 from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
+from pydgn.data.dataset import TemporalDatasetInterface
 from pydgn.data.util import load_dataset
 
 
@@ -353,6 +354,33 @@ class IterableDataProvider(DataProvider):
 
         dataloader = self.data_loader_class(dataset, sampler=None, collate_fn=Collater(None, None),
                                             worker_init_fn=worker_init_fn, **kwargs)
+        return dataloader
+
+
+class SingleGraphSequenceDataProvider(DataProvider):
+    """
+    This class is responsible for building the dynamic dataset at runtime.
+    """
+
+    @classmethod
+    def collate_fn(cls, samples_list):
+        return [Batch(d) for d in samples_list]
+
+    def _get_loader(self, indices, **kwargs):
+        dataset: TemporalDatasetInterface = self._get_dataset(**kwargs)
+        dataset = Subset(dataset, indices)
+
+        assert self.exp_seed is not None, 'DataLoader seed has not been specified! Is this a bug?'
+        kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
+
+        # Using Pytorch default DataLoader instead of PyG, to return list of graphs
+        assert self.data_loader_class == torch.utils.data.DataLoader, "SingleGraphSequenceDataProvider accepts a torch DataLoader only!"
+        dataloader = self.data_loader_class(dataset, num_workers=self.num_workers,
+                                            pin_memory=self.pin_memory,
+                                            collate_fn=SingleGraphSequenceDataProvider.collate_fn,
+                                            **kwargs)
+
+        kwargs.update(self.data_loader_args)
         return dataloader
 
 
