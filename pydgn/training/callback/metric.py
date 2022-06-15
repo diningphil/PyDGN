@@ -1,7 +1,7 @@
 from typing import List, Union
 
 import torch
-from torch.nn import Module, CrossEntropyLoss, MSELoss
+from torch.nn import Module, CrossEntropyLoss, MSELoss, L1Loss
 
 from pydgn.experiment.util import s2c
 from pydgn.static import BATCH_LOSS_EXTRA, ARGS, CLASS_NAME
@@ -472,6 +472,22 @@ class MeanSquareError(Regression):
                  use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
                          use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+        self.metric = MSELoss(reduction=reduction)
+
+    @property
+    def name(self) -> str:
+        return 'Mean Square Error'
+
+
+class MeanAverageError(Regression):
+    r"""
+    Wrapper around :class:`torch.nn.MSELoss`
+    """
+    def __init__(self, use_as_loss=False, reduction='mean',
+                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
+                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+        self.metric = L1Losss(reduction=reduction)
 
     @property
     def name(self) -> str:

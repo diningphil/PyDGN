@@ -397,7 +397,8 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
 
         outer_splitter = self._get_splitter(
             n_splits=self.n_outer_folds,
-            test_ratio=self.test_ratio)  # This is the true test (outer test)
+            stratified=self.stratify,
+            eval_ratio=self.test_ratio)  # This is the true test (outer test)
 
         outer_idxs = np.array(idxs)
         train_idxs, test_idxs = outer_splitter.split(outer_idxs, y=targets)[0]

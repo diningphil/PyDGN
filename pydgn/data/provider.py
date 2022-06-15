@@ -366,7 +366,8 @@ class SingleGraphSequenceDataProvider(DataProvider):
     def collate_fn(cls, samples_list):
         return [Batch(d) for d in samples_list]
 
-    def _get_loader(self, indices, **kwargs):
+    def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
         dataset: TemporalDatasetInterface = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
 
@@ -375,10 +376,7 @@ class SingleGraphSequenceDataProvider(DataProvider):
 
         # Using Pytorch default DataLoader instead of PyG, to return list of graphs
         assert self.data_loader_class == torch.utils.data.DataLoader, "SingleGraphSequenceDataProvider accepts a torch DataLoader only!"
-        dataloader = self.data_loader_class(dataset, num_workers=self.num_workers,
-                                            pin_memory=self.pin_memory,
-                                            collate_fn=SingleGraphSequenceDataProvider.collate_fn,
-                                            **kwargs)
+        dataloader = self.data_loader_class(dataset, collate_fn=SingleGraphSequenceDataProvider.collate_fn, **kwargs)
 
         kwargs.update(self.data_loader_args)
         return dataloader
@@ -526,3 +524,76 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         eval_indices = splitter.outer_folds[self.outer_k].test_idxs
         indices = train_indices, eval_indices
         return self._get_loader(indices, **kwargs)
+
+
+# TBD: taken from old branch
+# class MultipleGraphSequenceDataProvider(DataProvider):
+#     """
+#     IMPORTANT: This provider assumes all graph sequences have the same length!
+#     """
+#
+#     @classmethod
+#     def collate_fn(cls, samples_list):
+#         # Decompose by timestep and graph sequence, then batch graphs belonging
+#         # to the same time step
+#
+#         num_sequences = len(samples_list)
+#         assert num_sequences >= 1
+#
+#         # Search for the maximum sequence length
+#         num_timesteps = 0
+#         for sample in samples_list:
+#             # we should have a list of T edge index tensors, T=num_timesteps
+#             timesteps = len(sample.edge_indices)
+#             num_timesteps = timesteps if timesteps > num_timesteps else num_timesteps
+#         ## num_timesteps = len(samples_list[0].edge_index)
+#
+#         batched_graphs_t = []
+#         for t in range(num_timesteps):
+#             graphs_t = []
+#             for i in range(num_sequences):
+#                 try:
+#                    graph_i = samples_list[i]
+#                    # x = graph_i.x[t]
+#                    # edge_index = graph_i.edge_index[t]
+#                    # edge_attr = graph_i.edge_attr[t]
+#                    # pos = graph_i.pos[t]
+#                    # mask = graph_i.mask[t]
+#                    # graph_it = Data(x=x,edge_index=edge_index,edge_attr=edge_attr,pos=pos,mask=mask)
+#                    # graph_it = Data(**{k:v[t] for k,v in graph_i.to_dict().items() if type(v) in [torch.tensor, list]})
+#                    graphs_t.append(graph_i.__get_item__(t))
+#                 except IndexError:
+#                    pass
+#                    # TODO: do we need to do some sort of padding?
+#                    # e.g.
+#                    # g = Data(edge_index = torch.empty((2,0), dtype=torch.int64),
+#                    #          x = torch.tensor(...),
+#                    #          y = torch.tensor(...),
+#                    #          mask = torch.tensor(...))
+#                    # graphs_t.append(g)
+#             batched_graphs_t.append(Batch.from_data_list(graphs_t))
+#         return batched_graphs_t
+#
+#     def _get_loader(self, indices, **kwargs):
+#         dataset = self._get_dataset(**kwargs)
+#         dataset = Subset(dataset, indices)
+#         shuffle = kwargs.pop("shuffle", False)
+#
+#         assert self.exp_seed is not None, 'DataLoader seed has not been specified! Is this a bug?'
+#         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
+#
+#         if shuffle is True:
+#             sampler = RandomSampler(dataset)
+#             dataloader = DataLoader(dataset, sampler=sampler,
+#                                     num_workers=self.num_workers,
+#                                     pin_memory=self.pin_memory,
+#                                     collate_fn=MultipleGraphSequenceDataProvider.collate_fn,
+#                                     **kwargs)
+#         else:
+#             dataloader = DataLoader(dataset, shuffle=False,
+#                                     num_workers=self.num_workers,
+#                                     pin_memory=self.pin_memory,
+#                                     collate_fn=MultipleGraphSequenceDataProvider.collate_fn,
+#                                     **kwargs)
+#
+#         return

@@ -2,19 +2,28 @@
 
 ### TODO (decreasing priority):
 
-- Add again temporal learning (with documentation)
+- Add temporal learning example configs
 - Add unit test
 - Add integration tests
-- Add template to show how we can use PyDGN on a cluster
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
-## [1.1.0] Minor changes
+## [1.1.0] Temporal PyDGN
+
+## Added
+
+- Temporal learning routines (with documentation)
+- Template to show how we can use PyDGN on a cluster (see `cluster_slurm_example.sh`) - launch using `sbatch cluster_slurm_example.sh`. **Disclaimer**: you must have experience with slurm, the script is not working out of the box and settings must be adjusted to your system.
 
 ## Fixed
 
-- removed method from `OGBGDatasetInterface` that broke the data split generation phase. 
+- removed method from `OGBGDatasetInterface` that broke the data split generation phase.
+- added `**kwargs` to all datasets
 
+## Changed
+
+- Extended behavior of ``TrainingEngine`` to allow for null target values and some temporal bookkeeping (allows a lot of code reuse). 
+- Now ``batch_loss`` and ``batch_score`` in the ``State`` object are initialized to ``None`` before training/evaluation of a new batch starts. This could have been a problem in the temporal setting, where we want to accumulate results for different snapshots.
 
 ## [1.0.9] Iterable Dataset implementation for large datasets stored on disk in chunks of files
 
