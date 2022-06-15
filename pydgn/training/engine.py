@@ -429,14 +429,14 @@ class TrainingEngine(EventDispatcher):
                     # Compute training output (necessary because on_backward has been called)
                     train_loss, train_score, _ = self.infer(train_loader, TRAINING)
 
-                    if self.reset_eval_state:
+                    if self.reset_eval_model_hidden_state:
                         self.state.update(last_hidden_state=None)
 
                     # Compute validation output
                     if validation_loader is not None:
                         val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
 
-                    if self.reset_eval_state:
+                    if self.reset_eval_model_hidden_state:
                         self.state.update(last_hidden_state=None)
 
                     # Compute test output for visualization purposes only (e.g. to debug an incorrect data split for link prediction)
@@ -499,7 +499,7 @@ class TrainingEngine(EventDispatcher):
             ber.update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
             ber.update({f'{TRAINING}_{k}': v for k, v in train_score.items()})
 
-            if self.reset_eval_state:
+            if self.reset_eval_model_hidden_state:
                 self.state.update(last_hidden_state=None)
 
             # Compute validation output
@@ -510,7 +510,7 @@ class TrainingEngine(EventDispatcher):
                 ber.update({f'{TRAINING}_{k}': v for k, v in val_loss.items()})
                 ber.update({f'{TRAINING}_{k}': v for k, v in val_score.items()})
 
-            if self.reset_eval_state:
+            if self.reset_eval_model_hidden_state:
                 self.state.update(last_hidden_state=None)
 
             # Compute test output

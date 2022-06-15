@@ -74,15 +74,12 @@ class ToyDGNTemporal(ModelInterface):
     def forward(self, snapshot, prev_state=None):
         # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
         # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
-        x, edge_index, mask = snapshot.x, snapshot.edge_index, snapshot.mask
+        x, edge_index, mask = snapshot.x, snapshot.edge_index, snapshot.time_prediction_mask
 
         h = self.model(x, edge_index, H=prev_state)
         h = torch.relu(h)
 
         # Node predictors assume the embedding is in field "x"
         out, _ = self.readout(h, snapshot.batch)
-
-        if mask.shape[0] > 1:
-            out = out[mask]
 
         return out, h

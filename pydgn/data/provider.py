@@ -364,7 +364,7 @@ class SingleGraphSequenceDataProvider(DataProvider):
 
     @classmethod
     def collate_fn(cls, samples_list):
-        return [Batch(d) for d in samples_list]
+        return [Batch.from_data_list([d])    for d in samples_list]
 
     def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
                                                                   torch_geometric.loader.DataLoader]:

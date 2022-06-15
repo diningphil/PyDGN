@@ -192,7 +192,7 @@ class Metric(Module, EventHandler):
             except Exception as e:
                 # Here we catch potential multiprocessing related issues
                 # see https://github.com/pytorch/pytorch/wiki/Autograd-and-Fork
-                print(e)
+                    print(e)
 
     def forward(self,
                 targets: torch.Tensor,
@@ -445,7 +445,10 @@ class Regression(Metric):
                 batch_loss_extra: dict=None) -> dict:
         outputs = outputs[0]
 
-        metric = self.metric(outputs.squeeze(dim=1), targets.squeeze(dim=1))
+        if len(targets.shape) == 2:
+            targets = targets.squeeze(dim=1)
+
+        metric = self.metric(outputs.squeeze(dim=1), targets)
         return metric
 
 
@@ -487,11 +490,11 @@ class MeanAverageError(Regression):
                  use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
                          use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
-        self.metric = L1Losss(reduction=reduction)
+        self.metric = L1Loss(reduction=reduction)
 
     @property
     def name(self) -> str:
-        return 'Mean Square Error'
+        return 'Mean Average Error'
 
 
 class DotProductLink(Metric):

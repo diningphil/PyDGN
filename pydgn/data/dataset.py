@@ -98,7 +98,7 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
                  pre_transform: Optional[Callable]=None,
                  pre_filter: Optional[Callable]=None,
                  **kwargs):
-
+        self.root = root
         self.name = name
         super().__init__(root, transform, pre_transform, pre_filter)
 
@@ -142,6 +142,9 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         """
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
+    def len(self) -> int:
+        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
     def __len__(self) -> int:
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
@@ -162,7 +165,7 @@ class TemporalDatasetInterface(DatasetInterface):
 
     def get(self, idx: int) -> Data:
         data = self.dataset[idx]
-        setattr(data, 'time_prediction_mask', self.get_mask(data))
+        data.time_prediction_mask = self.get_mask(data)
         return data
 
 
@@ -525,17 +528,16 @@ class ToyIterableDataset(IterableDatasetInterface):
 
 class ChickenpoxDatasetInterface(TemporalDatasetInterface):
     def __init__(self, root, name, lags=4, **kwargs):
-        self.root = root
-        self.name = name
-        self.lags = lags
+        super().__init__(root, name, **kwargs)
 
+        self.lags = lags
         self.dataset = ChickenpoxDatasetLoader().get_dataset(lags=lags)
 
     def get_mask(self, data):
         # in this case data is a Data object containing a snapshot of a single
         # graph sequence.
         # the task is node classification at each time step
-        mask = torch.ones((1,1)).numpy()  #  time_steps x 1
+        mask = torch.ones((1,1))  #  time_steps x 1
         return mask
 
     @property
@@ -548,15 +550,10 @@ class ChickenpoxDatasetInterface(TemporalDatasetInterface):
 
     @property
     def dim_target(self):
-        # node classification: each time step is a tuple
         return 1
 
-    def __getitem__(self, time_index):
-        # TODO WARNING: __get_item__ is specific of Pytorch Geometric Temporal! This should be addressed in next versions
-        # TODO by replacing it with __getitem__
-        data = self.dataset.__get_item__(time_index)
-        setattr(data, 'time_prediction_mask', self.get_mask(data))
-        return data
+    def len(self):
+        return len(self)
 
     def __len__(self):
         return len(self.dataset.features)  # see DynamicGraphTemporalSignal
