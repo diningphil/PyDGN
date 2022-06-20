@@ -8,8 +8,9 @@ import torch
 import torch_geometric
 from ogb.graphproppred import PygGraphPropPredDataset
 from ogb.utils.url import decide_download, download_url, extract_zip
-from torch_geometric.data import InMemoryDataset, Data
+from torch_geometric.data import InMemoryDataset, Data, Batch
 from torch_geometric.datasets import TUDataset, Planetoid
+from torch_geometric_temporal import ChickenpoxDatasetLoader
 
 
 class ZipDataset(torch.utils.data.Dataset):
@@ -24,7 +25,7 @@ class ZipDataset(torch.utils.data.Dataset):
         The length of all datasets must be the same
 
     """
-    def __init__(self, datasets: List[torch.utils.data.Dataset]):
+    def __init__(self, datasets: List[torch.utils.data.Dataset], **kwargs):
         self.datasets = datasets
         assert len(set(len(d) for d in self.datasets)) == 1
 
@@ -58,7 +59,7 @@ class ConcatFromListDataset(InMemoryDataset):
     Args:
         data_list (list): List of graphs.
     """
-    def __init__(self, data_list: List[Data]):
+    def __init__(self, data_list: List[Data], **kwargs):
         super(ConcatFromListDataset, self).__init__("")
         self.data, self.slices = self.collate(data_list)
 
@@ -75,7 +76,6 @@ class ConcatFromListDataset(InMemoryDataset):
     @property
     def raw_file_names(self) -> Union[str, List[str], Tuple]:
         return []
-
 
 
 class DatasetInterface(torch_geometric.data.dataset.Dataset):
@@ -96,8 +96,9 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
                  name: str,
                  transform: Optional[Callable]=None,
                  pre_transform: Optional[Callable]=None,
-                 pre_filter: Optional[Callable]=None):
-
+                 pre_filter: Optional[Callable]=None,
+                 **kwargs):
+        self.root = root
         self.name = name
         super().__init__(root, transform, pre_transform, pre_filter)
 
@@ -113,9 +114,6 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
     def process(self):
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
-
-    def len(self) -> int:
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
     def get(self, idx: int) -> Data:
@@ -144,8 +142,40 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         """
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
 
+    def len(self) -> int:
+        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
     def __len__(self) -> int:
         raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+
+
+class TemporalDatasetInterface(DatasetInterface):
+
+    def get_mask(self, data: Union[Batch, Data]) -> torch.Tensor :
+        """
+        Computes the mask of time steps for which we need to make a prediction.
+
+        Args:
+            data: the data object
+
+        Returns:
+            A tensor indicating the time-steps at which we expect predictions
+        """
+        raise NotImplementedError("You should subclass TemporalDatasetInterface and implement this method")
+
+    def get(self, idx: int) -> Data:
+        """
+        Gets element ``idx`` from object self.dataset
+
+        Args:
+            idx (int): the sample index
+
+        Returns:
+
+        """
+        data = self.dataset[idx]
+        data.time_prediction_mask = self.get_mask(data)
+        return data
 
 
 class IterableDatasetInterface(torch.utils.data.IterableDataset):
@@ -173,7 +203,8 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
                  name: str,
                  transform: Optional[Callable]=None,
                  pre_transform: Optional[Callable]=None,
-                 url_indices: Optional[List]=None):
+                 url_indices: Optional[List]=None,
+                 **kwargs):
         super().__init__()
         self.root = root
         self.name = name
@@ -344,8 +375,7 @@ class TUDatasetInterface(TUDataset):
         self.name = name
         # Do not call DatasetInterface __init__ method in this case, because otherwise it will break
         super().__init__(root=root, name=name,
-                         transform=transform, pre_transform=pre_transform, pre_filter=pre_filter,
-                         **kwargs)
+                         transform=transform, pre_transform=pre_transform, pre_filter=pre_filter)
 
     @property
     def dim_node_features(self):
@@ -375,8 +405,7 @@ class PlanetoidDatasetInterface(Planetoid):
         self.name = name
         # Do not call DatasetInterface __init__ method in this case, because otherwise it will break
         super().__init__(root=root, name=name,
-                         transform=transform, pre_transform=pre_transform,
-                         **kwargs)
+                         transform=transform, pre_transform=pre_transform)
     @property
     def dim_node_features(self):
         return self.num_node_features
@@ -407,7 +436,7 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
     It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
     def __init__(self, root, name, transform=None,
-                 pre_transform=None, pre_filter=None, meta_dict=None):
+                 pre_transform=None, pre_filter=None, meta_dict=None, **kwargs):
         super().__init__('-'.join(name.split('_')), root, transform, pre_transform, meta_dict)  #
         self.name = name
         self.data.y = self.data.y.squeeze()
@@ -469,8 +498,9 @@ class ToyIterableDataset(IterableDatasetInterface):
                  name: str,
                  transform: Optional[Callable]=None,
                  pre_transform: Optional[Callable]=None,
-                 url_indices: Optional[List]=None):
-        super().__init__(root, name, transform, pre_transform, url_indices)
+                 url_indices: Optional[List]=None,
+                 **kwargs):
+        super().__init__(root, name, transform, pre_transform, url_indices, **kwargs)
 
 
     @property
@@ -503,3 +533,36 @@ class ToyIterableDataset(IterableDatasetInterface):
                 fake_graphs.append(Data(x=torch.zeros(20, 5), y=torch.zeros(1,1), edge_index=torch.zeros(2,1).long()))
 
             torch.save(fake_graphs, self.processed_paths[i])
+
+
+class ChickenpoxDatasetInterface(TemporalDatasetInterface):
+    def __init__(self, root, name, lags=4, **kwargs):
+        super().__init__(root, name, **kwargs)
+
+        self.lags = lags
+        self.dataset = ChickenpoxDatasetLoader().get_dataset(lags=lags)
+
+    def get_mask(self, data):
+        # in this case data is a Data object containing a snapshot of a single
+        # graph sequence.
+        # the task is node classification at each time step
+        mask = torch.ones((1,1))  #  time_steps x 1
+        return mask
+
+    @property
+    def dim_node_features(self):
+        return self.dataset.features[0].shape[1]
+
+    @property
+    def dim_edge_features(self):
+        return 0
+
+    @property
+    def dim_target(self):
+        return 1
+
+    def len(self):
+        return len(self)
+
+    def __len__(self):
+        return len(self.dataset.features)  # see DynamicGraphTemporalSignal

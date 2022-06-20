@@ -27,6 +27,9 @@ class Config:
     def __iter__(self):
         return iter(self.config_dict)
 
+    def get(self, key, default):
+        return self.config_dict.get(key, default)
+
     def keys(self) -> KeysView:
         r"""
         Invokes the `keys()` method of the configuration dictionary

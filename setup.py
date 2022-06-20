@@ -40,6 +40,7 @@ setuptools.setup(
         'gpustat >= 0.6.0',
         'torch >= 1.10.2',
         'torch-geometric >= 2.0.3',
+        'torch-geometric-temporal >= 0.52.0',
     ],
     packages=setuptools.find_packages()
 )

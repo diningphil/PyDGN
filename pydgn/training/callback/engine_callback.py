@@ -61,9 +61,6 @@ class IterableEngineCallback(EngineCallback):
     r"""
     Class that extends :class:`pydgn.training.callback.EngineCallback` to the processing of Iterable-style datasets.
     Needs to be used together with the appropriate engine class.
-
-    Args:
-        store_last_checkpoint (bool): if ``True``, keep the model's checkpoint for the last training epoch
     """
 
     def on_fetch_data(self, state: State):
@@ -74,3 +71,14 @@ class IterableEngineCallback(EngineCallback):
             state.update(stop_fetching=True)
             state.update(batch_input=None)
 
+
+class TemporalEngineCallback(EngineCallback):
+    r"""
+    Class that extends :class:`pydgn.training.callback.EngineCallback` to the processing of temporal datasets.
+    Needs to be used together with the appropriate engine class.
+    """
+
+    def on_forward(self, state):
+        # Forward pass, the last hidden state gets passed as additional argument
+        outputs = state.model.forward(state.batch_input, state.last_hidden_state)
+        state.update(batch_outputs=outputs)
