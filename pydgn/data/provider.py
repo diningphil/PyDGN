@@ -134,7 +134,10 @@ class DataProvider:
         Returns:
             a :class:`~pydgn.data.dataset.DatasetInterface` object
         """
-        if kwargs is not None:
+        assert 'shuffle' not in kwargs, "Your implementation of _get_loader should remove `shuffle` from kwargs before calling _get_dataset"
+        assert 'batch_size' not in kwargs, "Your implementation of _get_loader should remove `batch_size` from kwargs before calling _get_dataset"
+
+        if kwargs is not None and len(kwargs) != 0:
             # we probably need to pass run-time specific parameters, so load the dataset in memory again
             # an example is the subset of urls in Iterable style datasets
             dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class, **kwargs)
@@ -164,9 +167,11 @@ class DataProvider:
         Returns:
             a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
         """
+        shuffle = kwargs.pop("shuffle", False)
+        batch_size = kwargs.pop("batch_size", 1)
+
         dataset: DatasetInterface = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
-        shuffle = kwargs.pop("shuffle", False)
 
         assert self.exp_seed is not None, "DataLoader's seed has not been specified! Is this a bug?"
         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
@@ -174,11 +179,9 @@ class DataProvider:
 
         if shuffle is True:
             sampler = RandomSampler(dataset)
-            dataloader = self.data_loader_class(dataset, sampler=sampler,
-                                                **kwargs)
+            dataloader = self.data_loader_class(dataset, sampler=sampler, batch_size=batch_size, **kwargs)
         else:
-            dataloader = self.data_loader_class(dataset, shuffle=False,
-                                                **kwargs)
+            dataloader = self.data_loader_class(dataset, shuffle=False, batch_size=batch_size, **kwargs)
 
         return dataloader
 
@@ -318,9 +321,11 @@ class IterableDataProvider(DataProvider):
     def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
                                                                   torch_geometric.loader.DataLoader]:
 
+        shuffle = kwargs.pop("shuffle", False)
+        batch_size = kwargs.pop("batch_size", 1)
+
         # we will overwrite the dataset each time the loader is called
         dataset = self._get_dataset(**{'url_indices': indices})
-        shuffle = kwargs.pop("shuffle", False)
 
         if shuffle:
             dataset.shuffle_urls(True)
@@ -353,7 +358,7 @@ class IterableDataProvider(DataProvider):
         kwargs.update(self.data_loader_args)
 
         dataloader = self.data_loader_class(dataset, sampler=None, collate_fn=Collater(None, None),
-                                            worker_init_fn=worker_init_fn, **kwargs)
+                                            worker_init_fn=worker_init_fn, batch_size=batch_size, **kwargs)
         return dataloader
 
 
@@ -364,10 +369,13 @@ class SingleGraphSequenceDataProvider(DataProvider):
 
     @classmethod
     def collate_fn(cls, samples_list):
-        return [Batch.from_data_list([d])    for d in samples_list]
+        return [Batch.from_data_list([d]) for d in samples_list]
 
     def _get_loader(self, indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
                                                                   torch_geometric.loader.DataLoader]:
+        shuffle = kwargs.pop("shuffle", False)
+        batch_size = kwargs.pop("batch_size", 1)
+
         dataset: TemporalDatasetInterface = self._get_dataset(**kwargs)
         dataset = Subset(dataset, indices)
 
@@ -376,7 +384,8 @@ class SingleGraphSequenceDataProvider(DataProvider):
 
         # Using Pytorch default DataLoader instead of PyG, to return list of graphs
         assert self.data_loader_class == torch.utils.data.DataLoader, "SingleGraphSequenceDataProvider accepts a torch DataLoader only!"
-        dataloader = self.data_loader_class(dataset, collate_fn=SingleGraphSequenceDataProvider.collate_fn, **kwargs)
+        dataloader = self.data_loader_class(dataset, collate_fn=SingleGraphSequenceDataProvider.collate_fn,
+                                            shuffle=shuffle, batch_size=batch_size, **kwargs)
 
         kwargs.update(self.data_loader_args)
         return dataloader
@@ -392,6 +401,9 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
     """
 
     def _get_dataset(self, **kwargs):
+        assert 'shuffle' not in kwargs, "Your implementation of _get_loader should remove `shuffle` from kwargs before calling _get_dataset"
+        assert 'batch_size' not in kwargs, "Your implementation of _get_loader should remove `batch_size` from kwargs before calling _get_dataset"
+
         # Since we modify the dataset, we need different istances of the same graph
         return load_dataset(self.data_root, self.dataset_name, self.dataset_class, **kwargs)
 
@@ -402,6 +414,13 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         return self.splitter
 
     def _get_loader(self, indices, **kwargs):
+        # We may want to shuffle the edges of our single graph and take edge batches
+        # NOTE: EVAL edges can be TRAINING/VAL/TEST. It is on "eval" edges
+        # that we compute the loss (and eventually do training)
+        # changing names may be good
+        shuffle = kwargs.pop("shuffle", False)
+        batch_size = kwargs.pop("batch_size", 1)
+
         dataset = self._get_dataset(**kwargs)  # Custom implementation, we need a copy of the dataset every time
         assert len(dataset) == 1, f"Provider accepts a single-graph dataset only, but I see {len(dataset)} graphs"
         y = dataset.data.y
@@ -424,19 +443,12 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         # Eval can be training/val/test
         dataset.data.y = (y, pos_eval_edges, neg_eval_edges)
 
-        # We may want to shuffle the edges of our single graph and take edge batches
-        # NOTE: EVAL edges can be TRAINING/VAL/TEST. It is on "eval" edges
-        # that we compute the loss (and eventually do training)
-        # changing names may be good
-        shuffle = kwargs.pop("shuffle")
         if shuffle is True:
             pos_edge_indices = torch.randperm(pos_eval_edges.shape[1])
             neg_edge_indices = torch.randperm(neg_eval_edges.shape[1])
         else:
             pos_edge_indices = torch.arange(pos_eval_edges.shape[1])
             neg_edge_indices = torch.arange(neg_eval_edges.shape[1])
-
-        batch_size = kwargs.pop("batch_size")
 
         # create batch of edges here, leaving other fields as is
         batched_edge_dataset = []
@@ -575,9 +587,11 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
 #         return batched_graphs_t
 #
 #     def _get_loader(self, indices, **kwargs):
+#         shuffle = kwargs.pop("shuffle", False)
+#         batch_size = kwargs.pop("batch_size", 1)
+#
 #         dataset = self._get_dataset(**kwargs)
 #         dataset = Subset(dataset, indices)
-#         shuffle = kwargs.pop("shuffle", False)
 #
 #         assert self.exp_seed is not None, 'DataLoader seed has not been specified! Is this a bug?'
 #         kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
@@ -587,12 +601,14 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
 #             dataloader = DataLoader(dataset, sampler=sampler,
 #                                     num_workers=self.num_workers,
 #                                     pin_memory=self.pin_memory,
+#                                     batch_size=batch_size,
 #                                     collate_fn=MultipleGraphSequenceDataProvider.collate_fn,
 #                                     **kwargs)
 #         else:
 #             dataloader = DataLoader(dataset, shuffle=False,
 #                                     num_workers=self.num_workers,
 #                                     pin_memory=self.pin_memory,
+#                                     batch_size=batch_size,
 #                                     collate_fn=MultipleGraphSequenceDataProvider.collate_fn,
 #                                     **kwargs)
 #

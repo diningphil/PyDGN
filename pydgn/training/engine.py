@@ -702,10 +702,6 @@ class GraphSequenceTrainingEngine(TrainingEngine):
         self.state.update(epoch_score=None)
         self.state.update(loader_iterable=iter(loader))
 
-        # This is specific to the single graph sequence scenario
-        num_timesteps_per_batch = len(loader)
-        self.state.update(num_timesteps_per_batch=num_timesteps_per_batch)
-
         # Loop over data
         for id_batch in range(len(loader)):
 

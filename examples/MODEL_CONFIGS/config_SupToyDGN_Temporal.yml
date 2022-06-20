@@ -34,6 +34,11 @@ evaluate_every: 1
 final_training_runs: 3
 
 
+# Temporal info
+reset_eval_model_hidden_state: False  # do not reset hidden state of model between training/validation/test inference. Can be useful works for single graph sequence.
+# If set to true, consider training/validation/test sequence as independent.
+
+
 grid:
   supervised_config:
     model: pydgn.model.dgn.toy_dgn.ToyDGNTemporal

@@ -8,11 +8,11 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
-## [1.1.0] Temporal PyDGN
+## [1.1.0] Temporal PyDGN for single graph sequences
 
 ## Added
 
-- Temporal learning routines (with documentation)
+- Temporal learning routines (with documentation), works with single graphs sequences
 - Template to show how we can use PyDGN on a cluster (see `cluster_slurm_example.sh`) - launch using `sbatch cluster_slurm_example.sh`. **Disclaimer**: you must have experience with slurm, the script is not working out of the box and settings must be adjusted to your system.
 
 ## Fixed

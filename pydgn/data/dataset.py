@@ -161,9 +161,18 @@ class TemporalDatasetInterface(DatasetInterface):
         Returns:
             A tensor indicating the time-steps at which we expect predictions
         """
-        raise NotImplementedError("You should subclass DynamicDatasetInterface and implement this method")
+        raise NotImplementedError("You should subclass TemporalDatasetInterface and implement this method")
 
     def get(self, idx: int) -> Data:
+        """
+        Gets element ``idx`` from object self.dataset
+
+        Args:
+            idx (int): the sample index
+
+        Returns:
+
+        """
         data = self.dataset[idx]
         data.time_prediction_mask = self.get_mask(data)
         return data
