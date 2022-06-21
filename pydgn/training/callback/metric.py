@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import torch
 from torch.nn import Module, CrossEntropyLoss, MSELoss, L1Loss
@@ -17,21 +17,25 @@ class Metric(Module, EventHandler):
     Args:
         use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**
         reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
-        accumulate_over_time_steps (bool): [temporal graph learning] whether or not we should accumulate results across different time steps in a batch.
+        accumulate_over_epoch (bool): Whether or not to display the epoch-wise metric rather than an average of per-batch metrics.
+                                      If true, it keep a list of predictions and target values across the entire epoch.
+                                      Use it especially with batch-sensitive metrics, such as micro AP/F1 scores. Default is ``True``.
+        force_cpu (bool): Whether or not to move all predictions to cpu before computing the epoch-wise loss/score. Default is ``True``.
     """
     def __init__(self, use_as_loss: bool=False, reduction: str='mean',
-                 use_nodes_batch_size: bool=False,
-                 accumulate_over_time_steps: bool=False):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True):
         super().__init__()
         self.batch_metrics = None
-        self.num_samples = None
-        self.cumulative_batch_num_samples = None
         self.use_as_loss = use_as_loss
         self.reduction = reduction
-        self.use_nodes_batch_size = use_nodes_batch_size
-        self.accumulate_over_time_steps = accumulate_over_time_steps
+        self.accumulate_over_epoch = accumulate_over_epoch
+        self.force_cpu = force_cpu
+        self.y_pred, self.y_true = None, None
+
+        # Keeps track of how many times on_compute_metrics has been called in the same batch.
+        # Useful for temporal graph learning, for static graph learning it will be always 1
+        self.timesteps_in_batch = None
+
 
     @property
     def name(self) -> str:
@@ -46,57 +50,42 @@ class Metric(Module, EventHandler):
         """
         return self.name
 
-    def _expand_reduction(self, state: State):
-        #
-        # Returns the number of samples to use, conditioned on the type of reduction (e.g., sum, mean) to obtain
-        # the sum of the individual sample scores.
-        # Used to average sample scores across the entire epoch, rather than taking an average of minibatch scores
-        #
-        if self.reduction == 'mean':
-            # Used to recover the "sum" version of the metric
-            return self._update_num_samples(state)
-
-        elif self.reduction == 'sum':
-            return 1
-        else:
-            raise NotImplementedError('The only reductions allowed are sum and mean')
-
-    def _compute_num_samples(self, state: State) -> int:
-        """
-        Returns the number of samples to consider in a batch when scaling the loss/score.
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
+        r"""
+        Returns predictions and target tensors to be accumulated for a given metric
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
 
         Returns:
-            The number of samples to use when scaling the loss/score.
-
+            A tuple of tensors (predicted_values, target_values)
         """
-        return state.batch_num_targets if not self.use_nodes_batch_size else state.batch_num_nodes
+        raise NotImplementedError("You should subclass Metric and implement this method!")
 
-    def _update_num_samples(self, state: State) -> int:
-        """
-        Gives the number of samples to add to the total samples per epoch.
-        The method takes into account whether we are performing temporal graph learning or not, by looking at the
-        field ``accumulate_over_time_steps``.
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        r"""
+        Computes the metric for a given set of targets and predictions
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
 
         Returns:
-            The number of samples to add to the total samples per epoch.
+            A tensor with the metric value
         """
-        if not self.accumulate_over_time_steps:
-            return self._compute_num_samples(state)
-        else:
-            return self.cumulative_batch_num_samples
+        raise NotImplementedError("You should subclass Metric and implement this method!")
 
     def on_training_epoch_start(self, state: State):
         self.batch_metrics = []
-        self.num_samples = 0
+        self.y_pred, self.y_true = {self.name: []}, {self.name: []}
 
     def on_training_batch_start(self, state: State):
-        self.cumulative_batch_num_samples = 0
+        self.timesteps_in_batch = 0.
 
     def on_training_batch_end(self, state: State):
         if self.use_as_loss:
@@ -104,34 +93,32 @@ class Metric(Module, EventHandler):
         else:
             batch_metric = state.batch_score
 
-        self.batch_metrics.append(batch_metric[self.name].item() * self._expand_reduction(state))
-        self.num_samples += self._update_num_samples(state)
-        self.cumulative_batch_num_samples = None
+        if not self.accumulate_over_epoch:
+            self.batch_metrics.append(batch_metric[self.name].item() / self.timesteps_in_batch)
+
+        self.timesteps_in_batch = None
 
     def on_training_epoch_end(self, state: State):
-        if self.use_as_loss:
-            state.update(epoch_loss={self.name: torch.tensor(self.batch_metrics).sum() / self.num_samples})
+        if not self.accumulate_over_epoch:
+            epoch_res = {self.name: torch.tensor(self.batch_metrics).sum() / len(self.batch_metrics)}
         else:
-            state.update(epoch_score={self.name: torch.tensor(self.batch_metrics).sum() / self.num_samples})
+            epoch_res = {self.name: self.compute_metric(torch.cat(self.y_true[self.name], dim=0),
+                                                        torch.cat(self.y_pred[self.name], dim=0))}
+
+        if self.use_as_loss:
+            state.update(epoch_loss=epoch_res)
+        else:
+            state.update(epoch_score=epoch_res)
 
         self.batch_metrics = None
-        self.num_samples = None
-
-    def on_eval_batch_start(self, state: State):
-        self.cumulative_batch_num_samples = 0
+        self.y_pred, self.y_true = None, None
 
     def on_eval_epoch_start(self, state: State):
         self.batch_metrics = []
-        self.num_samples = 0
+        self.y_pred, self.y_true = {self.name: []}, {self.name: []}
 
-    def on_eval_epoch_end(self, state: State):
-        if self.use_as_loss:
-            state.update(epoch_loss={self.name: torch.tensor(self.batch_metrics).sum() / self.num_samples})
-        else:
-            state.update(epoch_score={self.name: torch.tensor(self.batch_metrics).sum() / self.num_samples})
-
-        self.batch_metrics = None
-        self.num_samples = None
+    def on_eval_batch_start(self, state: State):
+        self.timesteps_in_batch = 0.
 
     def on_eval_batch_end(self, state: State):
         if self.use_as_loss:
@@ -139,55 +126,78 @@ class Metric(Module, EventHandler):
         else:
             batch_metric = state.batch_score
 
-        self.batch_metrics.append(batch_metric[self.name].item() * self._expand_reduction(state))
-        self.num_samples += self._update_num_samples(state)
-        self.cumulative_batch_num_samples = None
+        if not self.accumulate_over_epoch:
+            self.batch_metrics.append(batch_metric[self.name].item() / self.timesteps_in_batch)
 
-    def on_compute_metrics(self, state: State):
-        outputs, targets = state.batch_outputs, state.batch_targets
+        self.timesteps_in_batch = None
+
+    def on_eval_epoch_end(self, state: State):
+        if not self.accumulate_over_epoch:
+            epoch_res = {self.name: torch.tensor(self.batch_metrics).sum() / len(self.batch_metrics)}
+        else:
+            epoch_res = {self.name: self.compute_metric(torch.cat(self.y_true[self.name], dim=0),
+                                                        torch.cat(self.y_pred[self.name], dim=0))}
 
         if self.use_as_loss:
-            loss_output = self.forward(targets, *outputs)
+            state.update(epoch_loss=epoch_res)
+        else:
+            state.update(epoch_score=epoch_res)
 
-            if isinstance(loss_output, tuple):
-                # Allow loss to produce intermediate results that speed up
-                # Score computation. This loss callback MUST occur before the score one.
-                loss, extra = loss_output
-                state.update(batch_loss_extra={self.name: extra})
-            else:
-                loss = loss_output
+        self.batch_metrics = None
+        self.y_pred, self.y_true = None, None
+
+    def accumulate_predictions_and_targets(self,
+                                           targets: torch.Tensor,
+                                           *outputs: List[torch.Tensor]) -> None:
+        """
+        Used to specify how to accumulate predictions and targets. This can be customized by subclasses like
+        AdditiveLoss and MultiScore to accumulate predictions and targets for different losses/scores.
+
+        Args:
+            targets: target tensor
+            *outputs: outputs of the model
+        """
+        y_pred_batch, y_true_batch = self.get_predictions_and_targets(targets, *outputs)
+        metric_name = self.name
+
+        self.y_pred[metric_name].append(y_pred_batch.detach().cpu() if self.force_cpu else y_pred_batch.detach())
+        self.y_true[metric_name].append(y_true_batch.detach().cpu() if self.force_cpu else y_true_batch.detach())
+
+    def on_compute_metrics(self, state: State):
+        self.timesteps_in_batch += 1.
+
+        outputs, targets = state.batch_outputs, state.batch_targets
+
+        # Loss case
+        if self.use_as_loss:
+            loss = self.forward(targets, *outputs)
 
             # [temporal graph learning] accumulate, rather than substitute, the losses across multiple snapshots
-            if self.accumulate_over_time_steps and state.batch_loss is not None:
+            # these are reset accordingly by the Training Engine!
+            if state.batch_loss is not None:
                 old_loss = state.batch_loss
-                loss = old_loss[self.name] + loss
+                loss = {k: old_loss[k] + loss[k] for k in loss.keys()}
 
-            state.update(batch_loss={self.name: loss})
+            # this has to be updated per-batch no matter what
+            state.update(batch_loss=loss)
 
+        # Score case
         else:
-            score = self.forward(targets,
-                                 *outputs,
-                                 batch_loss_extra=getattr(state, BATCH_LOSS_EXTRA, None))
+            if not self.accumulate_over_epoch:
+                score = self.forward(targets, *outputs)
+                score = {k: score[k].detach().cpu() if self.force_cpu else score[k].detach() for k in score.keys()}
 
-            # Handle base case: forward returns a score
-            # This is used to work with implementations that return multiple scores, such as MultiScore
-            if type(score) is not dict:
-                score = {self.name: score}
+                # [temporal graph learning] accumulate, rather than substitute, the scores across multiple snapshots
+                # these are reset accordingly by the Training Engine!
+                if state.batch_score is not None:
+                    old_score = state.batch_score
+                    score = {k: old_score[k] + score[k] for k in score.keys()}
 
-            # Score is a dictionary with key-value pairs
-            # we need to detach each score from the computational graph
-            score = {k: v.detach().cpu() for k, v in score.items()}
+                # mean of batches
+                state.update(batch_score=score)
 
-            # [temporal graph learning] accumulate, rather than substitute, the scores across multiple snapshots
-            if self.accumulate_over_time_steps and state.batch_score is not None:
-                old_score = state.batch_score
-                score = {k: old_score[k] + score[k] for k in score.keys()}
-
-            state.update(batch_score=score)
-
-        # [temporal graph learning] accumulate the number of samples of each snapshot for each batch
-        if self.accumulate_over_time_steps:
-            self.cumulative_batch_num_samples += self._compute_num_samples(state)
+        if self.accumulate_over_epoch:
+            self.accumulate_predictions_and_targets(targets, *outputs)
 
     def on_backward(self, state: State):
         if self.use_as_loss:
@@ -196,12 +206,11 @@ class Metric(Module, EventHandler):
             except Exception as e:
                 # Here we catch potential multiprocessing related issues
                 # see https://github.com/pytorch/pytorch/wiki/Autograd-and-Fork
-                    print(e)
+                raise(e)
 
     def forward(self,
                 targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> Union[dict, float]:
+                *outputs: List[torch.Tensor]) -> dict:
         r"""
         Computes the metric value. Optionally, and only for scores used as losses, some extra information can be also returned.
 
@@ -211,9 +220,10 @@ class Metric(Module, EventHandler):
             batch_loss_extra (dict): dictionary of information computed by metrics used as losses
 
         Returns:
-            A dictionary containing associations metric_name - value or simply a value
+            A dictionary containing associations metric_name - value
         """
-        raise NotImplementedError('To be implemented by a subclass')
+        y_pred_batch, y_true_batch = self.get_predictions_and_targets(targets, *outputs)
+        return {self.name: self.compute_metric(y_true_batch, y_pred_batch)}
 
 
 class MultiScore(Metric):
@@ -223,20 +233,21 @@ class MultiScore(Metric):
     Args:
         use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**
         reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        the metric's aggregated value for the entire epoch.
-        accumulate_over_time_steps (bool): [temporal graph learning] whether or not we should accumulate results across different time steps.
+        accumulate_over_epoch (bool): Whether or not to display the epoch-wise metric rather than an average of per-batch metrics.
+                                      If true, it keep a list of predictions and target values across the entire epoch.
+                                      Use it especially with batch-sensitive metrics, such as micro AP/F1 scores. Default is ``True``.
+        force_cpu (bool): Whether or not to move all predictions to cpu before computing the epoch-wise loss/score. Default is ``True``.
 
     """
     def __init__(self, use_as_loss, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False,
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True,
                  main_scorer=None, **extra_scorers):
 
         assert not use_as_loss, "MultiScore cannot be used as loss"
         assert not main_scorer is None, "You have to provide a main scorer"
-        super().__init__(use_as_loss, reduction, use_nodes_batch_size, accumulate_over_time_steps)
-        self.scorers = [self._istantiate_scorer(main_scorer)] + [self._istantiate_scorer(score) for score in
-                                                                 extra_scorers.values()]
+        super().__init__(use_as_loss, reduction, accumulate_over_epoch, force_cpu)
+        self.scores = [self._istantiate_scorer(main_scorer)] + [self._istantiate_scorer(score) for score in
+                                                                extra_scorers.values()]
 
     @property
     def name(self) -> str:
@@ -250,53 +261,77 @@ class MultiScore(Metric):
             return s2c(scorer)(use_as_loss=False)
 
     def get_main_metric_name(self):
-        return self.scorers[0].get_main_metric_name()
+        return self.scores[0].get_main_metric_name()
 
     def on_training_epoch_start(self, state: State):
-        self.batch_metrics = {s.name: [] for s in self.scorers}
-        for scorer in self.scorers:
-            scorer.on_training_epoch_start(state)
+        self.batch_metrics = {s.name: [] for s in self.scores}
+        self.y_pred = {s.name: [] for s in self.scores}
+        self.y_true = {s.name: [] for s in self.scores}
 
     def on_training_batch_end(self, state: State):
-        for scorer in self.scorers:
-            scorer.on_training_batch_end(state)
+        if not self.accumulate_over_epoch:
+            for k, v in state.batch_score.items():
+                self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
+
+        self.timesteps_in_batch = None
 
     def on_training_epoch_end(self, state: State):
-        epoch_score = {}
-        for scorer in self.scorers:
-            # This will update the epoch_score variable in State
-            scorer.on_training_epoch_end(state)
-            epoch_score.update(state.epoch_score)
-        state.update(epoch_score=epoch_score)
+        if not self.accumulate_over_epoch:
+            epoch_res = {s.name: torch.tensor(self.batch_metrics[s.name]).sum() / len(self.batch_metrics[s.name])
+                         for s in self.scores}
+        else:
+            epoch_res = {s.name: s.compute_metric(torch.cat(self.y_true[s.name], dim=0),
+                                                  torch.cat(self.y_pred[s.name], dim=0))
+                         for s in self.scores}
+
+        state.update(epoch_score=epoch_res)
+
+        self.batch_metrics = None
+        self.y_pred, self.y_true = None, None
 
     def on_eval_epoch_start(self, state: State):
-        for scorer in self.scorers:
-            scorer.on_eval_epoch_start(state)
+        self.batch_metrics = {s.name: [] for s in self.scores}
+        self.y_pred = {s.name: [] for s in self.scores}
+        self.y_true = {s.name: [] for s in self.scores}
 
     def on_eval_batch_end(self, state: State):
-        for scorer in self.scorers:
-            scorer.on_eval_batch_end(state)
+        if not self.accumulate_over_epoch:
+            for k, v in state.batch_score.items():
+                self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
+
+        self.timesteps_in_batch = None
 
     def on_eval_epoch_end(self, state: State):
-        epoch_score = {}
-        for scorer in self.scorers:
-            # This will update the epoch_score variable in State
-            scorer.on_training_epoch_end(state)
-            epoch_score.update(state.epoch_score)
-        state.update(epoch_score=epoch_score)
+        if not self.accumulate_over_epoch:
+            epoch_res = {s.name: torch.tensor(self.batch_metrics[s.name]).sum() / len(self.batch_metrics[s.name])
+                         for s in self.scores}
+        else:
+            epoch_res = {s.name: s.compute_metric(torch.cat(self.y_true[s.name], dim=0),
+                                                  torch.cat(self.y_pred[s.name], dim=0))
+                         for s in self.scores}
 
-    def on_compute_metrics(self, state: State):
-        super().on_compute_metrics(state)
+        state.update(epoch_score=epoch_res)
+
+        self.batch_metrics = None
+        self.y_pred, self.y_true = None, None
+
+    def accumulate_predictions_and_targets(self,
+                                           targets: torch.Tensor,
+                                           *outputs: List[torch.Tensor]) -> None:
+        for s in self.scores:
+            y_pred_batch, y_true_batch = s.get_predictions_and_targets(targets, *outputs)
+            metric_name = s.name
+
+            self.y_pred[metric_name].append(y_pred_batch.detach().cpu() if self.force_cpu else y_pred_batch.detach())
+            self.y_true[metric_name].append(y_true_batch.detach().cpu() if self.force_cpu else y_true_batch.detach())
 
     def forward(self,
                 targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
+                *outputs: List[torch.Tensor]) -> Union[dict, float]:
         res = {}
-        for scorer in self.scorers:
-            # each scorer __call__ method returns a dict
-            res.update({scorer.name: scorer.forward(targets, *outputs, batch_loss_extra=batch_loss_extra)})
-
+        for s in self.scores:
+            y_pred_batch, y_true_batch = s.get_predictions_and_targets(targets, *outputs)
+            res.update({s.name: s.compute_metric(y_true_batch, y_pred_batch)})
         return res
 
 
@@ -307,19 +342,17 @@ class AdditiveLoss(Metric):
     Args:
         use_as_loss (bool): whether this metric should act as a loss (i.e., it should act when :func:`on_backward` is called). **Used by PyDGN, no need to care about this.**
         reduction (str): the type of reduction to apply across samples of the mini-batch. Supports ``mean`` and ``sum``. Default is ``mean``.
-        use_nodes_batch_size (bool): whether or not to use the # of nodes in the batch, rather than the number of graphs, to compute
-        accumulate_over_time_steps (bool): [temporal graph learning] whether or not we should accumulate results across different time steps.
-        the metric's aggregated value for the entire epoch.
+        accumulate_over_epoch (bool): Whether or not to display the epoch-wise metric rather than an average of per-batch metrics.
+                                      If true, it keep a list of predictions and target values across the entire epoch.
+                                      Use it especially with batch-sensitive metrics, such as micro AP/F1 scores. Default is ``True``.
+        force_cpu (bool): Whether or not to move all predictions to cpu before computing the epoch-wise loss/score. Default is ``True``.
         losses (dict): dictionary of metrics to add together
     """
     def __init__(self, use_as_loss, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False, **losses: dict):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True, **losses: dict):
         assert use_as_loss, "Additive loss can only be used as a loss"
-        super().__init__(use_as_loss, reduction, use_nodes_batch_size, accumulate_over_time_steps)
-
+        super().__init__(use_as_loss, reduction, accumulate_over_epoch, force_cpu)
         self.losses = [self._instantiate_loss(loss) for loss in losses.values()]
-        self.use_nodes_batch_size = use_nodes_batch_size
-        self.accumulate_over_time_steps = accumulate_over_time_steps
 
     @property
     def name(self) -> str:
@@ -334,103 +367,130 @@ class AdditiveLoss(Metric):
 
     def on_training_epoch_start(self, state: State):
         self.batch_metrics = {l.name: [] for l in [self] + self.losses}
-        self.num_samples = 0
-        self.cumulatime_time_steps_samples = 0
+        self.y_pred = {l.name: [] for l in [self] + self.losses}
+        self.y_true = {l.name: [] for l in [self] + self.losses}
 
     def on_training_batch_end(self, state: State):
-        for k, v in state.batch_loss.items():
-            self.batch_metrics[k].append(v.item() * self._expand_reduction(state))
-        self.num_samples += self._update_num_samples(state)
-        self.cumulative_batch_num_samples = None
+        if not self.accumulate_over_epoch:
+            for k, v in state.batch_loss.items():
+                self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
 
+        self.timesteps_in_batch = None
 
     def on_training_epoch_end(self, state: State):
-        state.update(epoch_loss={l.name: torch.tensor(self.batch_metrics[l.name]).sum() / self.num_samples
-                                 for l in [self] + self.losses})
+        if not self.accumulate_over_epoch:
+            epoch_res = {l.name: torch.tensor(self.batch_metrics[l.name]).sum() / len(self.batch_metrics[l.name])
+                                 for l in [self] + self.losses}
+        else:
+            epoch_res = {l.name: l.compute_metric(torch.cat(self.y_true[l.name], dim=0),
+                                                  torch.cat(self.y_pred[l.name], dim=0))
+                         for l in self.losses}
+            additive_epoch_loss = 0.
+            for l in self.losses:
+                additive_epoch_loss += epoch_res[l.name]
+            epoch_res[self.name] = additive_epoch_loss
+
+        state.update(epoch_loss=epoch_res)
+
         self.batch_metrics = None
-        self.num_samples = None
+        self.y_pred, self.y_true = None, None
 
     def on_eval_epoch_start(self, state: State):
         self.batch_metrics = {l.name: [] for l in [self] + self.losses}
-        self.num_samples = 0
-        self.cumulatime_time_steps_samples = 0
+        self.y_pred = {l.name: [] for l in [self] + self.losses}
+        self.y_true = {l.name: [] for l in [self] + self.losses}
 
     def on_eval_epoch_end(self, state: State):
-        state.update(epoch_loss={l.name: torch.tensor(self.batch_metrics[l.name]).sum() / self.num_samples
-                                 for l in [self] + self.losses})
+        if not self.accumulate_over_epoch:
+            epoch_res = {l.name: torch.tensor(self.batch_metrics[l.name]).sum() / len(self.batch_metrics[l.name])
+                                 for l in [self] + self.losses}
+        else:
+            epoch_res = {l.name: l.compute_metric(torch.cat(self.y_true[l.name], dim=0),
+                                                  torch.cat(self.y_pred[l.name], dim=0))
+                         for l in self.losses}
+            additive_epoch_loss = 0.
+            for l in self.losses:
+                additive_epoch_loss += epoch_res[l.name]
+            epoch_res[self.name] = additive_epoch_loss
+
+        state.update(epoch_loss=epoch_res)
 
         self.batch_metrics = None
-        self.num_samples = None
+        self.y_pred, self.y_true = None, None
 
     def on_eval_batch_end(self, state: State):
-        for k, v in state.batch_loss.items():
-            self.batch_metrics[k].append(v.item() * self._expand_reduction(state))
-        self.num_samples += self._update_num_samples(state)
-        self.cumulative_batch_num_samples = None
+        if not self.accumulate_over_epoch:
+            for k, v in state.batch_loss.items():
+                self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
+
+        self.timesteps_in_batch = None
 
 
-    def on_compute_metrics(self, state: State):
-        outputs, targets = state.batch_outputs, state.batch_targets
-        loss = {}
-        extra = {}
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
         loss_sum = 0.
         for l in self.losses:
-            single_loss = l.forward(targets, *outputs)
-            if isinstance(single_loss, tuple):
-                # Allow loss to produce intermediate results that speed up
-                # Score computation. Loss callback MUST occur before the score one.
-                loss_output, loss_extra = single_loss
-                extra[l.name] = loss_extra
-                state.update(batch_loss_extra=extra)
-            else:
-                loss_output = single_loss
+            single_loss = l.compute_metric(targets, predictions)
+            loss_sum += single_loss
+        return loss_sum
 
-            loss[l.name] = loss_output
-            loss_sum += loss_output
+    def accumulate_predictions_and_targets(self,
+                                           targets: torch.Tensor,
+                                           *outputs: List[torch.Tensor]) -> None:
+        for l in self.losses:
+            y_pred_batch, y_true_batch = l.get_predictions_and_targets(targets, *outputs)
+            metric_name = l.name
 
-        loss[self.name] = loss_sum
-
-        # [temporal graph learning] accumulate, rather than substitute, the losses across multiple snapshots
-        if self.accumulate_over_time_steps and state.batch_loss is not None:
-            old_loss = state.batch_loss
-            loss = {k: old_loss[k] + loss[k] for k in loss.keys()}
-
-            # [temporal graph learning] accumulate the number of samples of each snapshot for each batch
-            self.cumulative_batch_num_samples += self._compute_num_samples(state)
-
-        state.update(batch_loss=loss)
+            self.y_pred[metric_name].append(y_pred_batch.detach().cpu() if self.force_cpu else y_pred_batch.detach())
+            self.y_true[metric_name].append(y_true_batch.detach().cpu() if self.force_cpu else y_true_batch.detach())
 
     def forward(self,
                 targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
-        pass
-    
+                *outputs: List[torch.Tensor]) -> dict:
+        res = {}
+        loss_sum = 0.
+
+        for l in self.losses:
+            y_pred_batch, y_true_batch = l.get_predictions_and_targets(targets, *outputs)
+            single_loss = l.compute_metric(y_true_batch, y_pred_batch)
+
+            res[l.name] = single_loss
+            loss_sum += single_loss
+
+        res[self.name] = loss_sum
+        return res
+
 
 class Classification(Metric):
     r"""
     Generic metric for classification tasks. Used to maximize code reuse for classical metrics.
     """
     def __init__(self, use_as_loss=False, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
-                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+                         accumulate_over_epoch=accumulate_over_epoch, force_cpu=force_cpu)
         self.metric = None
 
     @property
     def name(self) -> str:
         return 'Classification Metric'
 
-    def forward(self,
-                targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
-        outputs = outputs[0]
+
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
+        outputs = outputs[0].squeeze(dim=1)
 
         if len(targets.shape) == 2:
             targets = targets.squeeze(dim=1)
 
-        metric = self.metric(outputs.squeeze(dim=1), targets)
+        return outputs, targets
+
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        metric = self.metric(predictions, targets)
         return metric
 
 
@@ -439,25 +499,29 @@ class Regression(Metric):
     Generic metric for regression tasks. Used to maximize code reuse for classical metrics.
     """
     def __init__(self, use_as_loss=False, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
-                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+                         accumulate_over_epoch=accumulate_over_epoch, force_cpu=force_cpu)
         self.metric = None
 
     @property
     def name(self) -> str:
         return 'Regression Metric'
 
-    def forward(self,
-                targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
-        outputs = outputs[0]
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
+        outputs = outputs[0].squeeze(dim=1)
 
         if len(targets.shape) == 2:
             targets = targets.squeeze(dim=1)
 
-        metric = self.metric(outputs.squeeze(dim=1), targets)
+        return outputs, targets
+
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        metric = self.metric(predictions, targets)
         return metric
 
 
@@ -466,9 +530,9 @@ class MulticlassClassification(Classification):
     Wrapper around :class:`torch.nn.CrossEntropyLoss`
     """
     def __init__(self, use_as_loss=False, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
-                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+                         accumulate_over_epoch=accumulate_over_epoch, force_cpu=force_cpu)
         self.metric = CrossEntropyLoss(reduction=reduction)
 
     @property
@@ -481,9 +545,9 @@ class MeanSquareError(Regression):
     Wrapper around :class:`torch.nn.MSELoss`
     """
     def __init__(self, use_as_loss=False, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
-                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+                         accumulate_over_epoch=accumulate_over_epoch, force_cpu=force_cpu)
         self.metric = MSELoss(reduction=reduction)
 
     @property
@@ -496,9 +560,9 @@ class MeanAverageError(Regression):
     Wrapper around :class:`torch.nn.MSELoss`
     """
     def __init__(self, use_as_loss=False, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
+                 accumulate_over_epoch: bool=True, force_cpu: bool=True):
         super().__init__(use_as_loss=use_as_loss, reduction=reduction,
-                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
+                         accumulate_over_epoch=accumulate_over_epoch, force_cpu=force_cpu)
         self.metric = L1Loss(reduction=reduction)
 
     @property
@@ -514,10 +578,9 @@ class DotProductLink(Metric):
     def name(self) -> str:
         return 'Dot Product Link Prediction'
 
-    def forward(self,
-                targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
         node_embs = outputs[1]
         _, pos_edges, neg_edges = targets
 
@@ -529,8 +592,14 @@ class DotProductLink(Metric):
         x_j = torch.index_select(node_embs, 0, loss_edge_index[0])
         x_i = torch.index_select(node_embs, 0, loss_edge_index[1])
         link_logits = torch.einsum("ef,ef->e", x_i, x_j)
-        loss = torch.nn.functional.binary_cross_entropy_with_logits(link_logits, loss_target.to(link_logits.device))
-        return loss
+
+        return link_logits, loss_target.to(link_logits.device)
+
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        metric = torch.nn.functional.binary_cross_entropy_with_logits(predictions, targets)
+        return metric
 
 
 class MulticlassAccuracy(Metric):
@@ -546,29 +615,28 @@ class MulticlassAccuracy(Metric):
     def _get_correct(output):
         return torch.argmax(output, dim=1)
 
-    def forward(self,
-                targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
         pred = outputs[0]
         correct = self._get_correct(pred)
 
         if len(targets.shape) == 2:
             targets = targets.squeeze(dim=1)
 
-        return 100. * (correct == targets).sum().float() / targets.size(0)
+        return correct, targets
+
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        metric = 100. * (predictions == targets).sum().float() / targets.size(0)
+        return metric
 
 
 class ToyMetric(Metric):
     r"""
     Implements a toy metric.
     """
-
-    def __init__(self, use_as_loss=False, reduction='mean',
-                 use_nodes_batch_size=False, accumulate_over_time_steps: bool=False):
-        super().__init__(use_as_loss=use_as_loss, reduction=reduction,
-                         use_nodes_batch_size=use_nodes_batch_size, accumulate_over_time_steps=accumulate_over_time_steps)
-
     @property
     def name(self) -> str:
         return 'Toy Metric'
@@ -577,11 +645,16 @@ class ToyMetric(Metric):
     def _get_correct(output):
         return torch.argmax(output, dim=1)
 
-    def forward(self,
-                targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict=None) -> dict:
-        return 100. * torch.ones(1)
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
+        return outputs[0], targets
+
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        metric = 100. * torch.ones(1)
+        return metric
 
 
 class ToyUnsupervisedMetric(Metric):
@@ -590,8 +663,13 @@ class ToyUnsupervisedMetric(Metric):
     def name(self) -> str:
         return 'Toy Unsupervised Metric'
 
-    def forward(self,
-                targets: torch.Tensor,
-                *outputs: List[torch.Tensor],
-                batch_loss_extra: dict = None) -> dict:
-        return (outputs[0]*0.).mean()
+    def get_predictions_and_targets(self,
+                                    targets: torch.Tensor,
+                                    *outputs: List[torch.Tensor]) -> Tuple[torch.Tensor, torch.Tensor]:
+        return outputs[0], targets
+
+    def compute_metric(self,
+                       targets: torch.Tensor,
+                       predictions: torch.Tensor) -> torch.tensor:
+        metric = (predictions*0.).mean()
+        return metric

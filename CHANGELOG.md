@@ -8,19 +8,27 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.2.0] Simplified Metric usage
+
+### Changed
+
+- Simplified metrics to either take the mean score over batches or to compute epoch-wise scores (default behavior).
+  In the former case, the result may be affected by batch size, especially in cases like micro-AP and similar scores. 
+  Use it only in case it is too expensive (RAM/GPU memory) to compute the scores in a single shot.
+
 ## [1.1.0] Temporal PyDGN for single graph sequences
 
-## Added
+### Added
 
 - Temporal learning routines (with documentation), works with single graphs sequences
 - Template to show how we can use PyDGN on a cluster (see `cluster_slurm_example.sh`) - launch using `sbatch cluster_slurm_example.sh`. **Disclaimer**: you must have experience with slurm, the script is not working out of the box and settings must be adjusted to your system.
 
-## Fixed
+### Fixed
 
 - removed method from `OGBGDatasetInterface` that broke the data split generation phase.
 - added `**kwargs` to all datasets
 
-## Changed
+### Changed
 
 - Extended behavior of ``TrainingEngine`` to allow for null target values and some temporal bookkeeping (allows a lot of code reuse). 
 - Now ``batch_loss`` and ``batch_score`` in the ``State`` object are initialized to ``None`` before training/evaluation of a new batch starts. This could have been a problem in the temporal setting, where we want to accumulate results for different snapshots.
@@ -33,12 +41,12 @@ file level, rather than sample level. Each file can in fact contain a list of ``
 sequentially. Variations are possible, depending on your application, but you can use this new dataset class as a good starting point.
 If you do, be careful to test it together with the iterable versions of the data provider, engine, and engine callback.
 
-## Added
+### Added
 
 - Implemented an Iterable Dataset inspired by the [WebDataset](https://github.com/webdataset/webdataset) interface
 - Similarly, added ``DataProvider``, ``Engine`` and ``EngineCallback`` classes for the Iterable-style datasets.
 
-## Changed
+### Changed
 
 - Now we can pass additional arguments at runtime to the dataset
 
@@ -47,20 +55,20 @@ If you do, be careful to test it together with the iterable versions of the data
 
 ## [1.0.8] Minor changes
 
-## Changed
+### Changed
 
 - (Needs simple test) Setting ``CUDA_VISIBLE_DEVICES`` variable before cuda is initialized, so that in ``--debug`` mode we can use the GPU with the least amount of used memory.
 - Commented a couple of lines which forces OMP_NUM_THREADS to 1 and Pytorch threads to 1 as well. It seems we don't need them anymore.
 
 ## [1.0.7] Minor fix
 
-## Fixed
+### Fixed
 
 - to comply with `TUDataset`, we do not override the method `__len__` anymore
 
 ## [1.0.5] Minor fix
 
-## Fixed
+### Fixed
 
 - `load_dataset` does not assume anymore that there exists a `processed` data folder, but it is backward-compatible with previous versions.
 - fixed an indexing bug on target data for node classification experiments (caused program to crash)
@@ -68,7 +76,7 @@ If you do, be careful to test it together with the iterable versions of the data
 
 ## [1.0.4] Minor fix
 
-## Fixed
+### Fixed
 
 - use of fractions of GPUs for a single task
 - changed signature in forward to allow a dictionary (for MultiScore) or a value (for basic metrics)
@@ -76,13 +84,13 @@ If you do, be careful to test it together with the iterable versions of the data
 
 ## [1.0.3] Minor fix
 
-## Fixed
+### Fixed
 
 - Same bug as before but for `pydgn-dataset` =).
 
 ## [1.0.2] Minor fix
 
-## Fixed
+### Fixed
 
 - Bug that prevented locating classes via dotted paths in external projects.
 
