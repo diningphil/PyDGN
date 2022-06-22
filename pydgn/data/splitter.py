@@ -377,7 +377,7 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
         assert not stratify, "You cannot stratify a single graph sequence."
 
 
-    def get_graph_targets(self, dataset: pydgn.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
+    def get_graph_targets(self, dataset: pydgn.data.dataset.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
         try:
             targets = np.array([d.targets[-1].item() for d in dataset])
             return True, targets
