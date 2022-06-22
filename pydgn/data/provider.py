@@ -21,7 +21,7 @@ from pydgn.data.util import load_dataset
 def seed_worker(exp_seed, worker_id):
     r"""
     Used to set a different, but reproducible, seed for all data-retriever workers. Without this,
-    all workers will retrieve the data in the same order.
+    all workers will retrieve the data in the same order (important for Iterable-style datasets).
 
     Args:
         exp_seed (int): base seed to be used for reproducibility
@@ -29,7 +29,8 @@ def seed_worker(exp_seed, worker_id):
     """
     np.random.seed(exp_seed + worker_id)
     random.seed(exp_seed + worker_id)
-
+    torch.manual_seed(exp_seed + worker_id)
+    torch.cuda.manual_seed(exp_seed + worker_id)
 
 class DataProvider:
     r"""

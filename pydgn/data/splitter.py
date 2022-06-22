@@ -1,4 +1,5 @@
 import random
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -7,18 +8,8 @@ from torch_geometric.utils import negative_sampling, to_undirected, to_dense_adj
 
 import pydgn.data.dataset
 from pydgn.data.dataset import OGBGDatasetInterface
+from pydgn.data.util import to_lower_triangular
 from pydgn.experiment.util import s2c
-
-
-def to_lower_triangular(edge_index: torch.Tensor):
-    r"""
-    Transform Pytorch Geometric undirected edge index into its "lower triangular counterpart"
-    """
-    row, col = edge_index
-    lower_tri_mask = row > col
-    row, col = row[lower_tri_mask], col[lower_tri_mask]
-    lower_tri_edge_index = torch.cat((row.unsqueeze(0), col.unsqueeze(0)), dim=0)
-    return lower_tri_edge_index
 
 
 class Fold:
@@ -120,6 +111,11 @@ class Splitter:
         self.inner_val_ratio = inner_val_ratio
         self.outer_val_ratio = outer_val_ratio
         self.test_ratio = test_ratio
+
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
 
     def get_graph_targets(self, dataset: pydgn.data.dataset.DatasetInterface) -> (bool, np.ndarray):
         r"""
@@ -329,12 +325,8 @@ class TemporalSplitter(Splitter):
         exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
         first boolean value.
     """
-    def get_graph_targets(self, dataset):
-        try:
-            targets = np.array([d.targets[-1].item() for d in dataset])
-            return True, targets
-        except Exception:
-            return False, None
+    def get_graph_targets(self, dataset: pydgn.data.dataset.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
+        raise NotImplementedError("You should subclass TemporalSplitter and implement this function!")
 
 
 class OGBGSplitter(Splitter):
@@ -384,6 +376,15 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
         assert not shuffle, "SingleGraphSequenceSplitter does not allow to shuffle the time steps of the unique graph sequence."
         assert not stratify, "You cannot stratify a single graph sequence."
 
+
+    def get_graph_targets(self, dataset: pydgn.data.dataset.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
+        try:
+            targets = np.array([d.targets[-1].item() for d in dataset])
+            return True, targets
+        except Exception:
+            return False, None
+
+
     def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
         r"""
         Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
@@ -413,7 +414,7 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
 
         # Repeat the very same inner split for n_inner_folds, as there is no way to split differently.
         # This allows for different initializations of the same model, evaluating the avg performance on the VL set.
-        inner_train_idxs, inner_val_idxs =  list(inner_splitter.split(inner_idxs, y=None))[0]
+        inner_train_idxs, inner_val_idxs =  inner_splitter.split(inner_idxs, y=None)[0]
         for _ in range(self.n_inner_folds):
             inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(),
                                    val_idxs=inner_idxs[inner_val_idxs].tolist())
@@ -423,7 +424,7 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
 
         # Obtain outer val from outer train in an holdout fashion
         outer_val_splitter = NoShuffleTrainTestSplit(test_ratio=self.outer_val_ratio)
-        outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=None))[0]
+        outer_train_idxs, outer_val_idxs = outer_val_splitter.split(inner_idxs, y=None)[0]
 
         # False if empty
         assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))

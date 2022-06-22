@@ -72,6 +72,7 @@ grid:
           loss_1: pydgn.training.callback.metric.MulticlassClassification
           loss_2: pydgn.training.callback.metric.MulticlassClassification
 
+
     # Score metric (with an example of Multi Score)
     scorer:
       - class_name: pydgn.training.callback.metric.MultiScore
