@@ -182,3 +182,14 @@ def load_dataset(data_root: str, dataset_name:str, dataset_class: Callable[...,D
         dataset = dataset_class(**dataset_args)
 
     return dataset
+
+
+def to_lower_triangular(edge_index: torch.Tensor):
+    r"""
+    Transform Pytorch Geometric undirected edge index into its "lower triangular counterpart"
+    """
+    row, col = edge_index
+    lower_tri_mask = row > col
+    row, col = row[lower_tri_mask], col[lower_tri_mask]
+    lower_tri_edge_index = torch.cat((row.unsqueeze(0), col.unsqueeze(0)), dim=0)
+    return lower_tri_edge_index
