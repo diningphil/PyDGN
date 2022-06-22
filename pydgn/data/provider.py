@@ -29,7 +29,8 @@ def seed_worker(exp_seed, worker_id):
     """
     np.random.seed(exp_seed + worker_id)
     random.seed(exp_seed + worker_id)
-
+    torch.manual_seed(exp_seed + worker_id)
+    torch.cuda.manual_seed(exp_seed + worker_id)
 
 class DataProvider:
     r"""

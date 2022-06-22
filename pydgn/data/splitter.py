@@ -1,4 +1,5 @@
 import random
+from typing import Tuple
 
 import numpy as np
 import torch
@@ -334,12 +335,8 @@ class TemporalSplitter(Splitter):
         exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
         first boolean value.
     """
-    def get_graph_targets(self, dataset):
-        try:
-            targets = np.array([d.targets[-1].item() for d in dataset])
-            return True, targets
-        except Exception:
-            return False, None
+    def get_graph_targets(self, dataset: pydgn.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
+        raise NotImplementedError("You should subclass TemporalSplitter and implement this function!")
 
 
 class OGBGSplitter(Splitter):
@@ -389,6 +386,15 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
         assert not shuffle, "SingleGraphSequenceSplitter does not allow to shuffle the time steps of the unique graph sequence."
         assert not stratify, "You cannot stratify a single graph sequence."
 
+
+    def get_graph_targets(self, dataset: pydgn.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
+        try:
+            targets = np.array([d.targets[-1].item() for d in dataset])
+            return True, targets
+        except Exception:
+            return False, None
+
+
     def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
         r"""
         Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
@@ -418,7 +424,7 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
 
         # Repeat the very same inner split for n_inner_folds, as there is no way to split differently.
         # This allows for different initializations of the same model, evaluating the avg performance on the VL set.
-        inner_train_idxs, inner_val_idxs =  list(inner_splitter.split(inner_idxs, y=None))[0]
+        inner_train_idxs, inner_val_idxs =  inner_splitter.split(inner_idxs, y=None)[0]
         for _ in range(self.n_inner_folds):
             inner_fold = InnerFold(train_idxs=inner_idxs[inner_train_idxs].tolist(),
                                    val_idxs=inner_idxs[inner_val_idxs].tolist())
@@ -428,7 +434,7 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
 
         # Obtain outer val from outer train in an holdout fashion
         outer_val_splitter = NoShuffleTrainTestSplit(test_ratio=self.outer_val_ratio)
-        outer_train_idxs, outer_val_idxs = list(outer_val_splitter.split(inner_idxs, y=None))[0]
+        outer_train_idxs, outer_val_idxs = outer_val_splitter.split(inner_idxs, y=None)[0]
 
         # False if empty
         assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))

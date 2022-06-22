@@ -19,7 +19,7 @@
 ### Fixed
 
 - Bug in splitter, the seed was not set properly and different executions led to different results. This is not a problem whenever the splits are publicly released after the experiments (which is always the case).
-
+- Minor in data loader workers for iterable datasets
 
 ## [1.1.0] Temporal PyDGN for single graph sequences
 
