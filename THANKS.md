@@ -10,6 +10,6 @@ Many thanks to **Daniele Castellana** ([Github](https://github.com/danielecastel
 for his help on reproducibility through seeds.
 
 Many thanks to **Alessio Gravina** ([Github](https://github.com/gravins)
-/[Homepage](http://pages.di.unipi.it/gravina/)) for his invaluable help on the temporal graph implementation (to be done for >=1.0.0).
+/[Homepage](http://pages.di.unipi.it/gravina/)) for his invaluable help on the temporal graph implementation.
 
 Many thanks to **Francesco Landolfi** ([Github](https://github.com/flandolfi)) for the suggestions on how to make this library more user-friendly!
