@@ -21,7 +21,7 @@ from pydgn.data.util import load_dataset
 def seed_worker(exp_seed, worker_id):
     r"""
     Used to set a different, but reproducible, seed for all data-retriever workers. Without this,
-    all workers will retrieve the data in the same order.
+    all workers will retrieve the data in the same order (important for Iterable-style datasets).
 
     Args:
         exp_seed (int): base seed to be used for reproducibility
