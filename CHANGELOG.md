@@ -16,6 +16,11 @@
   In the former case, the result may be affected by batch size, especially in cases like micro-AP and similar scores. 
   Use it only in case it is too expensive (RAM/GPU memory) to compute the scores in a single shot.
 
+### Fixed
+
+- Bug in splitter, the seed was not set properly and different executions led to different results. This is not a problem whenever the splits are publicly released after the experiments (which is always the case).
+
+
 ## [1.1.0] Temporal PyDGN for single graph sequences
 
 ### Added

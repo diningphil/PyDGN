@@ -121,6 +121,11 @@ class Splitter:
         self.outer_val_ratio = outer_val_ratio
         self.test_ratio = test_ratio
 
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
+
     def get_graph_targets(self, dataset: pydgn.data.dataset.DatasetInterface) -> (bool, np.ndarray):
         r"""
         Reads the entire dataset and returns the targets.
