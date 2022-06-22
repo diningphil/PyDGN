@@ -325,7 +325,7 @@ class TemporalSplitter(Splitter):
         exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
         first boolean value.
     """
-    def get_graph_targets(self, dataset: pydgn.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
+    def get_graph_targets(self, dataset: pydgn.data.dataset.TemporalDatasetInterface) -> Tuple[bool, np.ndarray]:
         raise NotImplementedError("You should subclass TemporalSplitter and implement this function!")
 
 
