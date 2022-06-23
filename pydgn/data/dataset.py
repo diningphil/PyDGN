@@ -476,7 +476,7 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
         super().process()
 
     def __len__(self) -> int:
-        return len(self.data)
+        return self.data.y.shape[0]
 
 
 class ToyIterableDataset(IterableDatasetInterface):
