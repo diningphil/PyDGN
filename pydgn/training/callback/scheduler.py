@@ -34,7 +34,7 @@ class EpochScheduler(Scheduler):
     Implements a scheduler which uses epochs to modify the step size
     """
     def on_training_epoch_end(self, state: State):
-        self.scheduler.step(state.epoch)
+        self.scheduler.step()
 
 
 class MetricScheduler(Scheduler):
