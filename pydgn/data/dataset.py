@@ -443,7 +443,7 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
 
     @property
     def dim_node_features(self):
-        return 1
+        return self.data.x.shape[1]
 
     @property
     def dim_edge_features(self):

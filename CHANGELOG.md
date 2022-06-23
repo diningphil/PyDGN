@@ -8,6 +8,13 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.2.1] Minor fixes
+
+### Fixed
+
+- minor in num_features of OGBGDatasetInterface
+
+
 ## [1.2.0] Simplified Metric usage
 
 ### Changed
