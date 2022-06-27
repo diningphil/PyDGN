@@ -69,3 +69,54 @@ class Plotter(EventHandler):
 
     def on_fit_end(self, state: State):
         self.writer.close()
+
+class WandbPlotter(Plotter):
+    r"""
+    Plotter subclass for logging to Weights & Biases
+
+    Args:
+        wandb_project (str): Project Name for W&B
+        wandb_entity (str): Entity Name for W&B
+    """
+
+    def __init__(self, wandb_project, wandb_entity):
+        try:
+            import wandb
+            self._wandb = wandb
+        except ImportError:
+            raise ImportError(
+                "To use the Weights and Biases Logger please install wandb."
+                "Run `pip install wandb` to install it."
+            )
+
+        # Initialize a W&B run 
+        if self._wandb.run is None:
+            self._wandb.init(
+                project=wandb_project,
+                entity=wandb_entity
+            )
+
+    def on_epoch_end(self, state: State):
+
+        for k, v in state.epoch_results[LOSSES].items():
+            # Remove training/validation/test prefix (coupling with Engine)
+            loss_name = ' '.join(k.split('_')[1:])
+            if TRAINING in k:
+                self._wandb.log({f"Train/{loss_name}" : v})
+            elif VALIDATION in k:
+                self._wandb.log({f"Valid/{loss_name}" : v})
+            elif TEST in k:
+                self._wandb.log({f"Test/{loss_name}" : v})
+
+        for k, v in state.epoch_results[SCORES].items():
+            # Remove training/validation/test prefix (coupling with Engine)
+            score_name = ' '.join(k.split('_')[1:])
+            if TRAINING in k:
+                self._wandb.log({f"Train/{score_name}" : v})
+            elif VALIDATION in k:
+                self._wandb.log({f"Valid/{score_name}" : v})
+            elif TEST in k:
+                self._wandb.log({f"Test/{score_name}" : v})
+
+    def on_fit_end(self, state: State):
+        self._wandb.finish()
