@@ -56,19 +56,25 @@ class Plotter(EventHandler):
     def on_fit_end(self, state: State):
         self.writer.close()
 
-class WandbPlotter(Plotter):
+class WandbPlotter(EventHandler):
     r"""
-    Plotter subclass for logging to Weights & Biases
+    EventHandler subclass for logging to Weights & Biases
 
     Args:
         wandb_project (str): Project Name for W&B
         wandb_entity (str): Entity Name for W&B
+        kwargs (dict): additional arguments that may depend on the plotter
     """
 
-    def __init__(self, wandb_project, wandb_entity):
+    def __init__(self, exp_path: str, wandb_project, wandb_entity, **kwargs: dict):
+        super().__init__()
+        self.exp_path = exp_path
+
         try:
             import wandb
             self._wandb = wandb
+            self._wandb.require(experiment="service")
+            self._wandb.setup()
         except ImportError:
             raise ImportError(
                 "To use the Weights and Biases Logger please install wandb."
@@ -78,6 +84,7 @@ class WandbPlotter(Plotter):
         # Initialize a W&B run 
         if self._wandb.run is None:
             self._wandb.init(
+                name = self.exp_path,
                 project=wandb_project,
                 entity=wandb_entity
             )
