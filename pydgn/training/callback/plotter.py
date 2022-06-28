@@ -14,7 +14,6 @@ class Plotter(EventHandler):
 
     Args:
         exp_path (str): path where to store the Tensorboard logs
-        use_wandb (bool): whether to upload tensorboard to wandb
         kwargs (dict): additional arguments that may depend on the plotter
     """
     def __init__(self, exp_path: str, **kwargs: dict):
