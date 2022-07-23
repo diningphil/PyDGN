@@ -14,7 +14,7 @@ class Plotter(EventHandler):
 
     Args:
         exp_path (str): path where to store the Tensorboard logs
-        keargs (dict): additional arguments that may depend on the plotter
+        kwargs (dict): additional arguments that may depend on the plotter
     """
     def __init__(self, exp_path: str, **kwargs: dict):
         super().__init__()
@@ -23,6 +23,7 @@ class Plotter(EventHandler):
         if not os.path.exists(Path(self.exp_path, TENSORBOARD)):
             os.makedirs(Path(self.exp_path, TENSORBOARD))
         self.writer = SummaryWriter(log_dir=Path(self.exp_path, 'tensorboard'))
+
 
     def on_epoch_end(self, state: State):
 
@@ -54,3 +55,61 @@ class Plotter(EventHandler):
 
     def on_fit_end(self, state: State):
         self.writer.close()
+
+class WandbPlotter(EventHandler):
+    r"""
+    EventHandler subclass for logging to Weights & Biases
+
+    Args:
+        wandb_project (str): Project Name for W&B
+        wandb_entity (str): Entity Name for W&B
+        kwargs (dict): additional arguments that may depend on the plotter
+    """
+
+    def __init__(self, exp_path: str, wandb_project, wandb_entity, **kwargs: dict):
+        super().__init__()
+        self.exp_path = exp_path
+
+        try:
+            import wandb
+            self._wandb = wandb
+            self._wandb.require(experiment="service")
+            self._wandb.setup()
+        except ImportError:
+            raise ImportError(
+                "To use the Weights and Biases Logger please install wandb."
+                "Run `pip install wandb` to install it."
+            )
+
+        # Initialize a W&B run 
+        if self._wandb.run is None:
+            self._wandb.init(
+                name = self.exp_path,
+                project=wandb_project,
+                entity=wandb_entity
+            )
+
+    def on_epoch_end(self, state: State):
+
+        for k, v in state.epoch_results[LOSSES].items():
+            # Remove training/validation/test prefix (coupling with Engine)
+            loss_name = ' '.join(k.split('_')[1:])
+            if TRAINING in k:
+                self._wandb.log({f"Train/{loss_name}" : v})
+            elif VALIDATION in k:
+                self._wandb.log({f"Valid/{loss_name}" : v})
+            elif TEST in k:
+                self._wandb.log({f"Test/{loss_name}" : v})
+
+        for k, v in state.epoch_results[SCORES].items():
+            # Remove training/validation/test prefix (coupling with Engine)
+            score_name = ' '.join(k.split('_')[1:])
+            if TRAINING in k:
+                self._wandb.log({f"Train/{score_name}" : v})
+            elif VALIDATION in k:
+                self._wandb.log({f"Valid/{score_name}" : v})
+            elif TEST in k:
+                self._wandb.log({f"Test/{score_name}" : v})
+
+    def on_fit_end(self, state: State):
+        self._wandb.finish()

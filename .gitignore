@@ -59,5 +59,7 @@ DATA/**
 DATA_SPLITS/**
 *RESULTS*/**
 
+# Weights & Biases
+wandb/
 
 
