@@ -43,16 +43,32 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 
-autodoc_mock_imports = ["torch",
-                        "torch-scatter",
-                        "torch-cluster",
-                        "torch-sparse",
-                        "torch_geometric",
-                        "torch_geometric_temporal",
-                        "tqdm",
-                        "ray",
-                        "pandas",
-                        "wandb"]
+autodoc_mock_imports = [
+    "PyYAML",
+    "networkx",
+    "requests",
+    "matplotlib",
+    "seaborn",
+    "tensorboard",
+    "tqdm",
+    "ogb",
+    "aioredis",
+    "ray",
+    "gpustat",
+    "torch",
+    "torch-scatter",
+    "torch-sparse",
+    "torch-cluster",
+    "torch-spline-conv",
+    "torch-scatter",
+    "torch-cluster",
+    "torch-sparse",
+    "torch_geometric",
+    "torch_geometric_temporal",
+    "tqdm",
+    "ray",
+    "pandas",
+    "wandb"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
