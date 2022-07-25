@@ -14,4 +14,9 @@ ray == 1.5.2
 gpustat == 0.6.0
 torch == 1.10.2
 wandb == 0.12.15
-
+--find-links https://data.pyg.org/whl/torch-1.10.0+cpu.html
+torch-scatter
+torch-sparse
+torch-cluster
+torch-spline-conv
+torch-geometric == 2.0.3
