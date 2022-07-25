@@ -43,7 +43,16 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # -- Options for HTML output -------------------------------------------------
 
-autodoc_mock_imports = ["torch", "torch_geometric", "torch_geometric_temporal", "tqdm", "ray", "wandb"]
+autodoc_mock_imports = ["torch",
+                        "torch-scatter",
+                        "torch-cluster",
+                        "torch-sparse",
+                        "torch_geometric",
+                        "torch_geometric_temporal",
+                        "tqdm",
+                        "ray",
+                        "pandas",
+                        "wandb"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
