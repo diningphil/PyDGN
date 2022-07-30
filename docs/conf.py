@@ -68,6 +68,7 @@ autodoc_mock_imports = [
     "tqdm",
     "ray",
     "pandas",
+    "numpy",
     "wandb"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
