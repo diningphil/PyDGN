@@ -8,12 +8,12 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
-## [1.2.1] Minor fixes
+## [1.2.1] Splitter Fix after 1.2.0 changes, deprecating 1.2.0
 
 ### Fixed
 
+- the changed introduced in splitter causes seed to be resetted when splits were loaded during each experiment. Now it has been fixed by setting the seed only when split() is called.
 - minor in num_features of OGBGDatasetInterface
-
 
 ## [1.2.0] Simplified Metric usage
 
@@ -61,9 +61,6 @@ If you do, be careful to test it together with the iterable versions of the data
 ### Changed
 
 - Now we can pass additional arguments at runtime to the dataset
-
-## [1.0.7] Minor fix
-
 
 ## [1.0.8] Minor changes
 

@@ -112,11 +112,6 @@ class Splitter:
         self.outer_val_ratio = outer_val_ratio
         self.test_ratio = test_ratio
 
-        np.random.seed(self.seed)
-        torch.manual_seed(self.seed)
-        torch.cuda.manual_seed(self.seed)
-        random.seed(self.seed)
-
     def get_graph_targets(self, dataset: pydgn.data.dataset.DatasetInterface) -> (bool, np.ndarray):
         r"""
         Reads the entire dataset and returns the targets.
@@ -203,11 +198,17 @@ class Splitter:
     def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
         r"""
         Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
 
         Args:
             dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
             targets (np.ndarray]): targets used for stratification. Default is ``None``
         """
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
+
         idxs = range(len(dataset))
 
         stratified = self.stratify
@@ -332,6 +333,11 @@ class TemporalSplitter(Splitter):
 class OGBGSplitter(Splitter):
 
     def split(self, dataset: OGBGDatasetInterface, targets=None):
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
+
         assert self.n_outer_folds == 1 and self.n_inner_folds == 1, "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
         original_splits = dataset.get_idx_split()
 
@@ -388,11 +394,17 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
     def split(self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray=None):
         r"""
         Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
 
         Args:
             dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
             targets (np.ndarray]): targets used for stratification. Default is ``None``
         """
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
+
         idxs = range(len(dataset))
         print(f'Number of snapshots: {len(dataset)}')
 
@@ -557,12 +569,17 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         Links are selected at random: this means outer test folds will overlap almost surely with if test_ratio is 10% of the total samples.
         The recommended procedure here is to use the outer folds to do bootstrapping rather than k-fold cross-validation.
         Idea taken from: https://arxiv.org/pdf/1811.05868.pdf
+        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
 
         Args:
             dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
             targets (np.ndarray]): targets used for stratification. Default is ``None``
         """
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
         random.seed(self.seed)
+
         assert len(dataset) == 1, f"LinkPredictionSingleGraphSplitter works on single graph dataset only! Here we have {len(dataset)}"
         edge_index = dataset.data.edge_index
         edge_attr = dataset.data.edge_attr

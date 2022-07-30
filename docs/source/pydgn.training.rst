@@ -16,7 +16,7 @@ training.event
 .. toctree::
    :maxdepth: 4
 
- pydgn.training.event
+   pydgn.training.event
 
 
 training.engine
