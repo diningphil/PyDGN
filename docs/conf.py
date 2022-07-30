@@ -69,6 +69,7 @@ autodoc_mock_imports = [
     "ray",
     "pandas",
     "numpy",
+    "sklearn",
     "wandb"]
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
