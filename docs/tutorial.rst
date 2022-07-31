@@ -377,6 +377,7 @@ performances of the model (a less ambiguous definition would be: the **class of 
 for this specific case, as the average of the 10 test scores across the external folds. Again, if this does not make sense
 to you, please consider reading `Samy Bengio's lecture (Part 3) <https://bengio.abracadoudou.com/lectures/theory.pdf>`_.
 
+
 Inspecting Results
 --------------------
 
@@ -428,6 +429,7 @@ Here's what it looks like:
 .. image:: _static/profiler.png
    :width: 600
 
+
 Tensorboard
 -----------------------
 
@@ -442,3 +444,28 @@ And we get:
 
 .. image:: _static/tensorboard.png
    :width: 600
+
+Telegram Bot
+-----------------------
+
+Once you have a Telegram bot token and chat id, it is super easy to set up automatic reporting of the main results!
+Create a file ``telegram_config.yml`` in the main project folder, and set it up like this:
+
+.. code-block:: yaml
+
+    bot_token: [YOUR TOKEN]
+    bot_chat_ID: [YOUR CHAT ID]
+
+    log_model_selection: True  # logs the best config for each outer fold (validation score)
+    log_final_runs: True  # logs the outcome of the final runs for each outer fold (test score)
+
+Inside your experiment configuration file (see example in ``examples/MODEL_CONFIGS/config_SupToyDGN.yml``), it is sufficient
+to specify your telegram configuration file by adding:
+
+.. code-block:: yaml
+
+    # Telegram Bot
+    telegram_config_file: telegram_config.yml
+
+And that's all you have to do to start receiving messages when the model selection/final runs for a specific fold end!
+You will also receive a message when the experiment terminates with the test score.
