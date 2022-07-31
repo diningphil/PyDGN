@@ -9,6 +9,7 @@ from typing import Tuple, Callable, Union
 
 import numpy as np
 import ray
+import requests
 import torch
 
 from pydgn.data.provider import DataProvider
@@ -22,10 +23,11 @@ from pydgn.log.logger import Logger
 from pydgn.static import *
 
 
-# Ignore warnings
-# if not sys.warnoptions:
-#    import warnings
-#    warnings.simplefilter("ignore")
+def send_telegram_update(bot_token, bot_chat_ID, bot_message):
+   send_text = 'https://api.telegram.org/bot' + str(bot_token) + '/sendMessage?chat_id=' + str(bot_chat_ID) + \
+               '&parse_mode=Markdown&text=' + str(bot_message)
+   response = requests.get(send_text)
+   return response.json()
 
 
 @ray.remote(num_cpus=1, num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)))
@@ -179,6 +181,13 @@ class RiskAssesser:
         self.outer_folds_job_list = []
         self.final_runs_job_list = []
 
+        # telegram config
+        tc = model_configs.telegram_config
+        self.telegram_bot_token = tc[TELEGRAM_BOT_TOKEN] if tc is not None else None
+        self.telegram_bot_chat_ID = tc[TELEGRAM_BOT_CHAT_ID] if tc is not None else None
+        self.log_model_selection = tc[LOG_MODEL_SELECTION] if tc is not None else None
+        self.log_final_runs = tc[LOG_FINAL_RUNS] if tc is not None else None
+
     def risk_assessment(self, debug: bool):
         r"""
         Performs risk assessment to evaluate the performances of a model.
@@ -288,7 +297,7 @@ class RiskAssesser:
                     # if model selection is complete, launch final runs
                     outer_completed[outer_k] += 1
                     if outer_completed[outer_k] == n_inner_runs:  # outer fold completed - schedule final runs
-                        self.process_inner_results(ms_exp_path, len(self.model_configs))
+                        self.process_inner_results(ms_exp_path, outer_k, len(self.model_configs))
                         self.run_final_model(outer_k, False)
 
                         # Append the NEW jobs to the waiting list
@@ -386,7 +395,7 @@ class RiskAssesser:
                 if debug:
                     self.process_config(config_folder, deepcopy(config))
             if debug:
-                self.process_inner_results(model_selection_folder, len(self.model_configs))
+                self.process_inner_results(model_selection_folder, outer_k, len(self.model_configs))
         else:
             # Performing model selection for a single configuration is useless
             with open(osp.join(model_selection_folder, self._WINNER_CONFIG), 'w') as fp:
@@ -520,12 +529,13 @@ class RiskAssesser:
         with open(config_filename, 'w') as fp:
             json.dump(k_fold_dict, fp, sort_keys=False, indent=4)
 
-    def process_inner_results(self, folder: str, no_configurations: int):
+    def process_inner_results(self, folder: str, outer_k: int, no_configurations: int):
         r"""
         Chooses the best hyper-parameters configuration using the HIGHEST validation mean score.
 
         Args:
             folder (str): a folder which holds all configurations results after K INNER folds
+            outer_k (int): the current outer fold to consider
             no_configurations (int): number of possible configurations
         """
         best_avg_vl = -float('inf') if self.higher_is_better else float('inf')
@@ -543,7 +553,17 @@ class RiskAssesser:
                 if self.operator(avg_vl, best_avg_vl) or (best_avg_vl == avg_vl and best_std_vl > std_vl):
                     best_i = i
                     best_avg_vl = avg_vl
+                    best_std_vl = std_vl
                     best_config = config_dict
+
+        # Send telegram update
+        if self.model_configs.telegram_config is not None and self.log_model_selection:
+            exp_name = os.path.basename(self.exp_path)
+            telegram_msg = f'Exp *{exp_name}* \n' \
+                           f'Model Sel. ended for outer fold *{outer_k+1}* \n' \
+                           f'Best config id: *{best_i}* \n' \
+                           f'Main score: avg *{best_avg_vl:.4f}* / std *{best_std_vl:.4f}*'
+            send_telegram_update(self.telegram_bot_token, self.telegram_bot_chat_ID, telegram_msg)
 
         with open(osp.join(folder, self._WINNER_CONFIG), 'w') as fp:
             json.dump(dict(best_config_id=best_i, **best_config), fp, sort_keys=False, indent=4)
@@ -592,12 +612,21 @@ class RiskAssesser:
 
                 # this block may be unindented, set_score used only to retrieve keys
                 for res_type, res in [(LOSS, losses), (SCORE, scores)]:
-                    for set_score, set_dict, set_scores in res:
-                        for key in set_score.keys():
+                    for set_res_type, set_dict, set_results in res:
+                        for key in set_res_type.keys():
                             suffix = f'_{res_type}' if (key != MAIN_LOSS and key != MAIN_SCORE) else ''
-                            set_dict[key + suffix] = np.mean([float(set_run[key]) for set_run in set_scores])
+                            set_dict[key + suffix] = np.mean([float(set_run[key]) for set_run in set_results])
                             set_dict[key + f'{suffix}_{STD}'] = np.std([float(set_run[key])
-                                                                        for set_run in set_scores])
+                                                                        for set_run in set_results])
+
+        # Send telegram update
+        if self.model_configs.telegram_config is not None and self.log_final_runs:
+            exp_name = os.path.basename(self.exp_path)
+            telegram_msg = f'Exp *{exp_name}* \n' \
+                           f'Final runs ended for outer fold *{outer_k+1}* \n' \
+                           f'Main test score: avg *{scores[2][1][MAIN_SCORE]:.4f}* ' \
+                           f'/ std *{scores[2][1][f"{MAIN_SCORE}_{STD}"]:.4f}*'
+            send_telegram_update(self.telegram_bot_token, self.telegram_bot_chat_ID, telegram_msg)
 
         with open(osp.join(outer_folder, self._OUTER_RESULTS_FILENAME), 'w') as fp:
 
@@ -644,6 +673,15 @@ class RiskAssesser:
                         set_results = np.array([res[k] for res in results])
                         assessment_results[f'{AVG}_{set}_{k}'] = set_results.mean()
                         assessment_results[f'{STD}_{set}_{k}'] = set_results.std()
+
+        # Send telegram update
+        if self.model_configs.telegram_config is not None:
+            exp_name = os.path.basename(self.exp_path)
+            telegram_msg = f'Exp *{exp_name}* \n' \
+                           f'Experiment has finished \n' \
+                           f'Test score: avg *{assessment_results[f"{AVG}_{TEST}_{MAIN_SCORE}"]:.4f}* ' \
+                           f'/ std *{assessment_results[f"{STD}_{TEST}_{MAIN_SCORE}"]:.4f}*'
+            send_telegram_update(self.telegram_bot_token, self.telegram_bot_chat_ID, telegram_msg)
 
         with open(osp.join(self._ASSESSMENT_FOLDER, self._ASSESSMENT_FILENAME), 'w') as fp:
             json.dump(assessment_results, fp, sort_keys=False, indent=4)

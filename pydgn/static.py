@@ -95,3 +95,10 @@ MAX_CPUS = 'max_cpus'
 MAX_GPUS = 'max_gpus'
 MODEL = 'model'
 RESULT_FOLDER = 'result_folder'
+
+# TELEGRAM BOT
+TELEGRAM_CONFIG_FILE = 'telegram_config_file'
+TELEGRAM_BOT_TOKEN = 'bot_token'
+TELEGRAM_BOT_CHAT_ID = 'bot_chat_ID'
+LOG_MODEL_SELECTION = 'log_model_selection'
+LOG_FINAL_RUNS = 'log_final_runs'

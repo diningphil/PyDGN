@@ -8,6 +8,12 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.2.2] Telegram Bot Support!
+
+### Added
+
+- Telegram bot support. Just specify a telegram configuration in a YAML file and let the framework do the rest! Just remember not to push your telegram config file in your repo!
+
 ## [1.2.1] Splitter Fix after 1.2.0 changes, deprecating 1.2.0
 
 ### Fixed

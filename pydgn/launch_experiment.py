@@ -51,6 +51,13 @@ def evaluation(options):
     debug = kwargs[DEBUG]
     configs_dict = yaml.load(open(kwargs[CONFIG_FILE], "r"), Loader=yaml.FullLoader)
 
+    # Telegram bot settings
+    telegram_config_file = configs_dict.get(TELEGRAM_CONFIG_FILE, None)
+    if telegram_config_file is not None:
+        telegram_config = yaml.load(open(telegram_config_file, "r"), Loader=yaml.FullLoader)
+    else:
+        telegram_config = None
+
     # Hardware initialization
     max_cpus = configs_dict[MAX_CPUS]
 
@@ -93,6 +100,9 @@ def evaluation(options):
     if use_cuda:
         # Ensure a generic "cuda" device is set when using more than 1 GPU
         search.device = CUDA
+
+    # Set the bot token, chat_id configuration
+    search.telegram_config = telegram_config
 
     # Set the random seed
     seed = search.seed if search.seed is not None else 42

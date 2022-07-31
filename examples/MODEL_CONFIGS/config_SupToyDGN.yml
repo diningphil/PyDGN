@@ -1,3 +1,6 @@
+# Telegram Bot
+# telegram_config_file: telegram_config.yml
+
 # Dataset and Splits
 data_root: DATA
 dataset_class: pydgn.data.dataset.TUDatasetInterface
@@ -40,7 +43,7 @@ grid:
     checkpoint: True
     shuffle: True
     batch_size: 32
-    epochs: 100
+    epochs: 3
 
     # Model specific arguments #
 

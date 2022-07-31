@@ -62,4 +62,5 @@ DATA_SPLITS/**
 # Weights & Biases
 wandb/
 
-
+# Telegram config file
+telegram_config.yml
