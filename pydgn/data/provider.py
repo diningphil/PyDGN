@@ -1,6 +1,5 @@
 import math
 import random
-import warnings
 from typing import Union, Callable
 
 import numpy as np
@@ -13,7 +12,7 @@ from torch_geometric.loader.dataloader import Collater
 import pydgn.data.dataset
 from pydgn.data.dataset import DatasetInterface
 from pydgn.data.sampler import RandomSampler
-from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter
+from pydgn.data.splitter import Splitter, LinkPredictionSingleGraphSplitter, SingleGraphSplitter
 from pydgn.data.dataset import TemporalDatasetInterface
 from pydgn.data.util import load_dataset
 
@@ -390,6 +389,128 @@ class SingleGraphSequenceDataProvider(DataProvider):
 
         kwargs.update(self.data_loader_args)
         return dataloader
+
+
+class SingleGraphDataProvider(DataProvider):
+    r"""
+    A DataProvider subclass that only works with :class:`pydgn.data.splitter.SingleGraphSplitter`. It adds to the
+    unique DataBatch object a
+
+    Args:
+        data_root (str): the path of the root folder in which data is stored
+        splits_filepath (str): the filepath of the splits. with additional metadata
+        dataset_class (Callable[...,:class:`pydgn.data.dataset.DatasetInterface`]): the class of the dataset
+        data_loader_class (Union[Callable[...,:class:`torch.utils.data.DataLoader`], Callable[...,:class:`torch_geometric.loader.DataLoader`]]): the class of the data loader to use
+        data_loader_args (dict): the arguments of the data loader
+        dataset_name (str): the name of the dataset
+        outer_folds (int): the number of outer folds for risk assessment. 1 means hold-out, >1 means k-fold
+        inner_folds (int): the number of outer folds for model selection. 1 means hold-out, >1 means k-fold
+
+    """
+    def _get_splitter(self):
+        super()._get_splitter()  # loads splitter into self.splitter
+        assert isinstance(
+            self.splitter, SingleGraphSplitter
+        ), "This class only works with a SingleGraphNodeSplitter splitter."
+        return self.splitter
+
+    def _get_dataset(self, **kwargs: dict) -> DatasetInterface:
+        """
+        Compared to superclass method, this always returns a new instance of the dataset.
+
+        Args:
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset. Not used in the base version
+
+        Returns:
+            a :class:`~pydgn.data.dataset.DatasetInterface` object
+        """
+        assert 'shuffle' not in kwargs, "Your implementation of _get_loader should remove `shuffle` from kwargs before calling _get_dataset"
+        assert 'batch_size' not in kwargs, "Your implementation of _get_loader should remove `batch_size` from kwargs before calling _get_dataset"
+
+        # we probably need to pass run-time specific parameters, so load the dataset in memory again
+        # an example is the subset of urls in Iterable style datasets
+        dataset = load_dataset(self.data_root, self.dataset_name, self.dataset_class, **kwargs)
+
+        self.dim_node_features = dataset.dim_node_features
+        self.dim_edge_features = dataset.dim_edge_features
+        self.dim_target = dataset.dim_target
+
+        return dataset
+
+    def _get_loader(self, eval_indices: list, training_indices: list, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                                          torch_geometric.loader.DataLoader]:
+        r"""
+        Compared to superclass method, returns the only graph augmented with additional fields. These are
+         `training_indices` with the indices that refer to training nodes (usually always available) and `eval_indices`,
+         which specify which are the indices on which to evaluate (can be validation or test).
+
+        Args:
+            indices (sequence): Indices in the whole set selected for subset
+            eval_set (bool): whether or not indices refer to eval set (validation or test) or to training
+            kwargs (dict): a dictionary of additional arguments to be passed to the dataset being loaded.
+                           Not used in the base version
+        Returns:
+            a Union[:class:`torch.utils.data.DataLoader`, :class:`torch_geometric.loader.DataLoader`] object
+        """
+        shuffle = kwargs.pop("shuffle", False)
+        batch_size = kwargs.pop("batch_size", 1)
+
+        dataset: DatasetInterface = self._get_dataset(**kwargs)
+
+        dataset.data.training_indices = torch.tensor(training_indices)
+        dataset.data.eval_indices = torch.tensor(eval_indices)
+
+        assert self.exp_seed is not None, "DataLoader's seed has not been specified! Is this a bug?"
+        kwargs['worker_init_fn'] = lambda worker_id: seed_worker(worker_id, self.exp_seed)
+        kwargs.update(self.data_loader_args)
+
+        if shuffle is True:
+            sampler = RandomSampler(dataset)
+            dataloader = self.data_loader_class(dataset, sampler=sampler, batch_size=batch_size, **kwargs)
+        else:
+            dataloader = self.data_loader_class(dataset, shuffle=False, batch_size=batch_size, **kwargs)
+
+        return dataloader
+
+    def get_inner_train(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                 torch_geometric.loader.DataLoader]:
+        assert self.outer_k is not None and self.inner_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.inner_folds[self.outer_k][self.inner_k].train_idxs
+        return self._get_loader(train_indices, training_indices=train_indices, **kwargs)
+
+    def get_inner_val(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                torch_geometric.loader.DataLoader]:
+        assert self.outer_k is not None and self.inner_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.inner_folds[self.outer_k][self.inner_k].train_idxs
+        val_indices = splitter.inner_folds[self.outer_k][self.inner_k].val_idxs
+        return self._get_loader(val_indices, training_indices=train_indices, **kwargs)
+
+    def get_outer_train(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+        assert self.outer_k is not None
+        splitter = self._get_splitter()
+
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+        return self._get_loader(train_indices, training_indices=train_indices, **kwargs)
+
+    def get_outer_val(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                                  torch_geometric.loader.DataLoader]:
+        assert self.outer_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+        val_indices = splitter.outer_folds[self.outer_k].val_idxs
+        return self._get_loader(val_indices, training_indices=train_indices, **kwargs)
+
+    def get_outer_test(self, **kwargs: dict) -> Union[torch.utils.data.DataLoader,
+                                                torch_geometric.loader.DataLoader]:
+        assert self.outer_k is not None
+        splitter = self._get_splitter()
+        train_indices = splitter.outer_folds[self.outer_k].train_idxs
+        test_indices = splitter.outer_folds[self.outer_k].test_idxs
+        return self._get_loader(test_indices, training_indices=train_indices, **kwargs)
+
 
 
 class LinkPredictionSingleGraphDataProvider(DataProvider):

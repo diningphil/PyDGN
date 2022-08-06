@@ -8,6 +8,20 @@
 - Add Multi-GPU processing for single experiment
 - Add dynamic graph learning (with documentation)
 
+## [1.2.3] Added support for single graph tasks
+
+At the moment, the entire graph must fit in CPU/GPU memory. `DataProvider` extensions to partition the graph using PyG should not be difficult.
+
+### Added
+
+- New splitter, `SingleGraphSplitter`, which randomly splits nodes in a single graph (with optional stratification)
+- New provider, ``, which adds mask fields to the single DataBatch object (representing the graph)
+
+### Changed
+
+- renamed method `get_graph_targets` of `Splitter` to `get_targets`, and modified it to make it more general
+
+
 ## [1.2.2] Telegram Bot Support!
 
 ### Added

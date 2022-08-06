@@ -141,7 +141,7 @@ def preprocess_data(options: dict):
                            f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits")
 
     if not os.path.exists(splits_path):
-        has_targets, targets = splitter.get_graph_targets(dataset)
+        has_targets, targets = splitter.get_targets(dataset)
         # The splitter is in charge of eventual stratifications
         splitter.split(dataset, targets=targets if has_targets else None)
         splitter.save(splits_path)
