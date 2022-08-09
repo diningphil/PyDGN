@@ -3,9 +3,11 @@
 </p>
 
 # PyDGN: a research library for Deep Graph Networks 
+[![License](https://img.shields.io/badge/License-BSD_3--Clause-gray.svg)](https://opensource.org/licenses/BSD-3-Clause)
 [![Documentation Status](https://readthedocs.org/projects/pydgn/badge/?version=latest)](https://pydgn.readthedocs.io/en/latest/?badge=latest)
-[![Coverage Status](https://coveralls.io/repos/github/diningphil/PyDGN/badge.svg?branch=master)](https://coveralls.io/github/diningphil/PyDGN?branch=master)
+[![PyPI version](https://badge.fury.io/py/pydgn.svg)](https://badge.fury.io/py/pydgn)
 [![Downloads](https://static.pepy.tech/personalized-badge/pydgn?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pydgn)
+[![Coverage Status](https://coveralls.io/repos/github/diningphil/PyDGN/badge.svg?branch=master)](https://coveralls.io/github/diningphil/PyDGN?branch=master)
 #### Read the [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
 This is a Python library to easily experiment
