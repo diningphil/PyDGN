@@ -22,6 +22,7 @@ class Profiler:
         Istantiate a profiler, and then register an event_handler with the syntax profiler(event_handler), which returns
         another object implementing the :class:`~pydgn.training.event.handler.EventHandler` interface
     """
+
     def __init__(self, threshold: float):
         # we filter out computation that takes a negligible amount of time from the report (< threshold)
         self.threshold = threshold
@@ -71,7 +72,9 @@ class Profiler:
         # not use the overridden __getattr__
         class getattribute(type):
             def __getattr__(self, name):
-                return clock(getattr(event_handler, name)) #  needed to implement callback calls with generic names
+                return clock(
+                    getattr(event_handler, name)
+                )  #  needed to implement callback calls with generic names
 
         # Relies on closures
         class ClockedCallback(metaclass=getattribute):
@@ -86,9 +89,9 @@ class Profiler:
         Returns:
             a string containing the report
         """
-        total_time_experiment = 0.
+        total_time_experiment = 0.0
         profile_str = f'{"*" * 25} Profiler {"*" * 25} \n \n'
-        profile_str += f'Threshold: {self.threshold} \n \n'
+        profile_str += f"Threshold: {self.threshold} \n \n"
 
         for class_name, v in self.callback_elapsed.items():
 
@@ -109,13 +112,15 @@ class Profiler:
             # Release resources
             v.clear()
 
-            profile_str += f'{class_name} \n \n'
+            profile_str += f"{class_name} \n \n"
 
-            for (avg_elapsed, total_elapsed, callback_name) in reversed(sorted_avg_elapsed):
+            for (avg_elapsed, total_elapsed, callback_name) in reversed(
+                sorted_avg_elapsed
+            ):
                 total_time_experiment += total_elapsed
-                profile_str += f'\t {callback_name} --> Avg: {avg_elapsed} s, Total: {str(datetime.timedelta(seconds=total_elapsed))} \n'
-            profile_str += '\n'
+                profile_str += f"\t {callback_name} --> Avg: {avg_elapsed} s, Total: {str(datetime.timedelta(seconds=total_elapsed))} \n"
+            profile_str += "\n"
 
-        profile_str += f'Total time of the experiment: {str(datetime.timedelta(seconds=total_time_experiment))} \n \n'
+        profile_str += f"Total time of the experiment: {str(datetime.timedelta(seconds=total_time_experiment))} \n \n"
         profile_str += f'{"*" * 60}'
         return profile_str

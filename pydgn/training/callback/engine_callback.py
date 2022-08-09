@@ -15,6 +15,7 @@ class EngineCallback(EventHandler):
     Args:
         store_last_checkpoint (bool): if ``True``, keep the model's checkpoint for the last training epoch
     """
+
     def __init__(self, store_last_checkpoint: bool):
         super().__init__()
         self.store_last_checkpoint = store_last_checkpoint
@@ -52,7 +53,8 @@ class EngineCallback(EventHandler):
                 MODEL_STATE: copy.deepcopy(state.model.state_dict()),
                 OPTIMIZER_STATE: getattr(state, OPTIMIZER_STATE, None),
                 SCHEDULER_STATE: getattr(state, SCHEDULER_STATE, None),
-                STOP_TRAINING: state.stop_training}
+                STOP_TRAINING: state.stop_training,
+            }
             last_ckpt.update(state.epoch_results)
             atomic_save(last_ckpt, Path(state.exp_path, LAST_CHECKPOINT_FILENAME))
 

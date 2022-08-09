@@ -13,6 +13,7 @@ class RandomSampler(sampler.RandomSampler):
     Args:
         data_source (:class:`pydgn.data.DatasetInterface`): the dataset object
     """
+
     def __init__(self, data_source: DatasetInterface):
         super().__init__(data_source)
         self.permutation = None

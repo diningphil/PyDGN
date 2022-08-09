@@ -22,8 +22,9 @@ class Grid:
         self.data_root = self.configs_dict[DATA_ROOT]
         self.dataset_class = self.configs_dict[DATASET_CLASS]
         self.dataset_name = self.configs_dict[DATASET_NAME]
-        self.data_loader_class, self.data_loader_args = return_class_and_args(self.configs_dict, DATA_LOADER,
-                                                                              return_class_name=True)
+        self.data_loader_class, self.data_loader_args = return_class_and_args(
+            self.configs_dict, DATA_LOADER, return_class_name=True
+        )
         self.experiment = self.configs_dict[EXPERIMENT]
         self.higher_results_are_better = self.configs_dict[HIGHER_RESULTS_ARE_BETTER]
         self.evaluate_every = self.configs_dict[evaluate_every]
@@ -40,18 +41,24 @@ class Grid:
         Returns:
             A list of al possible configurations in the form of dictionaries
         """
-        configs = [cfg for cfg in self._gen_helper(self.configs_dict[self.__search_type__])]
+        configs = [
+            cfg for cfg in self._gen_helper(self.configs_dict[self.__search_type__])
+        ]
         for cfg in configs:
-            cfg.update({DATASET: self.dataset_name,
-                        DATASET_GETTER: self.dataset_getter,
-                        DATA_LOADER: self.data_loader_class,
-                        DATA_LOADER_ARGS: self.data_loader_args,
-                        DATASET_CLASS: self.dataset_class,
-                        DATA_ROOT: self.data_root,
-                        DEVICE: self.device,
-                        EXPERIMENT: self.experiment,
-                        HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
-                        evaluate_every: self.evaluate_every})
+            cfg.update(
+                {
+                    DATASET: self.dataset_name,
+                    DATASET_GETTER: self.dataset_getter,
+                    DATA_LOADER: self.data_loader_class,
+                    DATA_LOADER_ARGS: self.data_loader_args,
+                    DATASET_CLASS: self.dataset_class,
+                    DATA_ROOT: self.data_root,
+                    DEVICE: self.device,
+                    EXPERIMENT: self.experiment,
+                    HIGHER_RESULTS_ARE_BETTER: self.higher_results_are_better,
+                    evaluate_every: self.evaluate_every,
+                }
+            )
         return configs
 
     def _gen_helper(self, cfgs_dict: dict) -> dict:
@@ -70,8 +77,13 @@ class Grid:
             first_key_values = cfgs_dict[param]
 
             # BASE CASE: key is associated to an atomic value
-            if type(first_key_values) == str or type(first_key_values) == int or type(
-                    first_key_values) == float or type(first_key_values) == bool or first_key_values is None:
+            if (
+                type(first_key_values) == str
+                or type(first_key_values) == int
+                or type(first_key_values) == float
+                or type(first_key_values) == bool
+                or first_key_values is None
+            ):
                 # print(f'FIRST loop {first_key_values}')
                 result[param] = first_key_values
 
@@ -116,7 +128,13 @@ class Grid:
 
     def _list_helper(self, values: object) -> object:
         for value in values:
-            if type(value) == str or type(value) == int or type(value) == float or type(value) == bool or value is None:
+            if (
+                type(value) == str
+                or type(value) == int
+                or type(value) == float
+                or type(value) == bool
+                or value is None
+            ):
                 yield value
             elif type(value) == dict:
                 for cfg in self._gen_helper(value):

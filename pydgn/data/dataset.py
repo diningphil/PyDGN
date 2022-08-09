@@ -25,6 +25,7 @@ class ZipDataset(torch.utils.data.Dataset):
         The length of all datasets must be the same
 
     """
+
     def __init__(self, datasets: List[torch.utils.data.Dataset], **kwargs):
         self.datasets = datasets
         assert len(set(len(d) for d in self.datasets)) == 1
@@ -59,6 +60,7 @@ class ConcatFromListDataset(InMemoryDataset):
     Args:
         data_list (list): List of graphs.
     """
+
     def __init__(self, data_list: List[Data], **kwargs):
         super(ConcatFromListDataset, self).__init__("")
         self.data, self.slices = self.collate(data_list)
@@ -91,33 +93,46 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         pre_transform (Optional[Callable]): transformations to apply to each ``Data`` object at dataset creation time
         pre_filter (Optional[Callable]): sample filtering to apply to each ``Data`` object at dataset creation time
     """
-    def __init__(self,
-                 root: str,
-                 name: str,
-                 transform: Optional[Callable]=None,
-                 pre_transform: Optional[Callable]=None,
-                 pre_filter: Optional[Callable]=None,
-                 **kwargs):
+
+    def __init__(
+        self,
+        root: str,
+        name: str,
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+        pre_filter: Optional[Callable] = None,
+        **kwargs,
+    ):
         self.root = root
         self.name = name
         super().__init__(root, transform, pre_transform, pre_filter)
 
     @property
     def raw_file_names(self) -> Union[str, List[str], Tuple]:
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     @property
     def processed_file_names(self) -> Union[str, List[str], Tuple]:
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     def download(self):
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     def process(self):
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     def get(self, idx: int) -> Data:
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     @property
     def dim_node_features(self):
@@ -125,7 +140,9 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
         implemented).
         """
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     @property
     def dim_edge_features(self):
@@ -133,25 +150,32 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
         implemented).
         """
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     @property
     def dim_target(self):
         r"""
         Specifies the dimension of each target vector.
         """
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     def len(self) -> int:
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
     def __len__(self) -> int:
-        raise NotImplementedError("You should subclass DatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass DatasetInterface and implement this method"
+        )
 
 
 class TemporalDatasetInterface(DatasetInterface):
-
-    def get_mask(self, data: Union[Batch, Data]) -> torch.Tensor :
+    def get_mask(self, data: Union[Batch, Data]) -> torch.Tensor:
         """
         Computes the mask of time steps for which we need to make a prediction.
 
@@ -161,7 +185,9 @@ class TemporalDatasetInterface(DatasetInterface):
         Returns:
             A tensor indicating the time-steps at which we expect predictions
         """
-        raise NotImplementedError("You should subclass TemporalDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass TemporalDatasetInterface and implement this method"
+        )
 
     def get(self, idx: int) -> Data:
         """
@@ -198,13 +224,16 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         pre_transform (Optional[Callable]): transformations to apply to each ``Data`` object at dataset creation time
         url_indices (Optional[List]): list of indices used to extract a portion of the dataset
     """
-    def __init__(self,
-                 root: str,
-                 name: str,
-                 transform: Optional[Callable]=None,
-                 pre_transform: Optional[Callable]=None,
-                 url_indices: Optional[List]=None,
-                 **kwargs):
+
+    def __init__(
+        self,
+        root: str,
+        name: str,
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+        url_indices: Optional[List] = None,
+        **kwargs,
+    ):
         super().__init__()
         self.root = root
         self.name = name
@@ -253,7 +282,6 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         """
         self._shuffle_subpatches = value
 
-
     def shuffle_urls(self, value: bool):
         r"""
         Shuffles urls associated to individual files stored on disk
@@ -286,27 +314,38 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
 
         Returns: a Data object with the next element to process
         """
-        end_index = self.end_index if self.end_index <= len(self.shuffled_urls) else len(self.shuffled_urls)
-        for url in self.shuffled_urls[self.start_index:end_index]:
+        end_index = (
+            self.end_index
+            if self.end_index <= len(self.shuffled_urls)
+            else len(self.shuffled_urls)
+        )
+        for url in self.shuffled_urls[self.start_index : end_index]:
             sample = torch.load(os.path.join(self.processed_dir, url))
             if type(sample) == list:
                 if self._shuffle_subpatches:
                     shuffle(sample)
 
-                data = [self.transform(d) if self.transform is not None else d for d in sample]
+                data = [
+                    self.transform(d) if self.transform is not None else d
+                    for d in sample
+                ]
             else:
-                data = [self.transform(sample) if self.transform is not None else sample]
+                data = [
+                    self.transform(sample) if self.transform is not None else sample
+                ]
 
             for i in range(len(data)):
                 yield data[i]
 
     @property
     def raw_file_names(self) -> List[str]:
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     @property
     def raw_dir(self) -> str:
-        return os.path.join(self.root, self.name, 'raw')
+        return os.path.join(self.root, self.name, "raw")
 
     @property
     def raw_paths(self) -> List[str]:
@@ -317,11 +356,13 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
 
     @property
     def processed_file_names(self) -> List[str]:
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     @property
     def processed_dir(self) -> str:
-        return os.path.join(self.root, self.name, 'processed')
+        return os.path.join(self.root, self.name, "processed")
 
     @property
     def processed_paths(self) -> List[str]:
@@ -331,13 +372,19 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         return [os.path.join(self.processed_dir, f) for f in files]
 
     def download(self):
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     def process(self):
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     def get(self, idx: int) -> Data:
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     @property
     def dim_node_features(self):
@@ -345,7 +392,9 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
         implemented).
         """
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     @property
     def dim_edge_features(self):
@@ -353,17 +402,23 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
         implemented).
         """
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     @property
     def dim_target(self):
         r"""
         Specifies the dimension of each target vector.
         """
-        raise NotImplementedError("You should subclass IterableDatasetInterface and implement this method")
+        raise NotImplementedError(
+            "You should subclass IterableDatasetInterface and implement this method"
+        )
 
     def __len__(self):
-        return len(self.urls)  # It's important it stays dynamic, because self.urls depends on url_indices
+        return len(
+            self.urls
+        )  # It's important it stays dynamic, because self.urls depends on url_indices
 
 
 class TUDatasetInterface(TUDataset):
@@ -371,11 +426,19 @@ class TUDatasetInterface(TUDataset):
     Class that wraps the :class:`torch_geometric.datasets.TUDataset` class to provide aliases of some fields.
     It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
-    def __init__(self, root, name, transform=None, pre_transform=None, pre_filter=None, **kwargs):
+
+    def __init__(
+        self, root, name, transform=None, pre_transform=None, pre_filter=None, **kwargs
+    ):
         self.name = name
         # Do not call DatasetInterface __init__ method in this case, because otherwise it will break
-        super().__init__(root=root, name=name,
-                         transform=transform, pre_transform=pre_transform, pre_filter=pre_filter)
+        super().__init__(
+            root=root,
+            name=name,
+            transform=transform,
+            pre_transform=pre_transform,
+            pre_filter=pre_filter,
+        )
 
     @property
     def dim_node_features(self):
@@ -401,11 +464,16 @@ class PlanetoidDatasetInterface(Planetoid):
     Class that wraps the :class:`torch_geometric.datasets.Planetoid` class to provide aliases of some fields.
     It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
-    def __init__(self, root, name, transform=None, pre_transform=None, pre_filter=None, **kwargs):
+
+    def __init__(
+        self, root, name, transform=None, pre_transform=None, pre_filter=None, **kwargs
+    ):
         self.name = name
         # Do not call DatasetInterface __init__ method in this case, because otherwise it will break
-        super().__init__(root=root, name=name,
-                         transform=transform, pre_transform=pre_transform)
+        super().__init__(
+            root=root, name=name, transform=transform, pre_transform=pre_transform
+        )
+
     @property
     def dim_node_features(self):
         return self.num_node_features
@@ -435,9 +503,20 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
     Class that wraps the :class:`ogb.graphproppred.PygGraphPropPredDataset` class to provide aliases of some fields.
     It implements the interface ``DatasetInterface`` but does not extend directly to avoid clashes of ``__init__`` methods
     """
-    def __init__(self, root, name, transform=None,
-                 pre_transform=None, pre_filter=None, meta_dict=None, **kwargs):
-        super().__init__('-'.join(name.split('_')), root, transform, pre_transform, meta_dict)  #
+
+    def __init__(
+        self,
+        root,
+        name,
+        transform=None,
+        pre_transform=None,
+        pre_filter=None,
+        meta_dict=None,
+        **kwargs,
+    ):
+        super().__init__(
+            "-".join(name.split("_")), root, transform, pre_transform, meta_dict
+        )  #
         self.name = name
         self.data.y = self.data.y.squeeze()
 
@@ -458,18 +537,20 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
 
     @property
     def processed_file_names(self):
-        return ['data.pt']
+        return ["data.pt"]
 
     def download(self):
-        url = self.meta_info['url']
+        url = self.meta_info["url"]
         if decide_download(url):
             path = download_url(url, self.original_root)
             extract_zip(path, self.original_root)
-            print(f'Removing {path}')
+            print(f"Removing {path}")
             os.unlink(path)
-            print(f'Removing {self.root}')
+            print(f"Removing {self.root}")
             shutil.rmtree(self.root)
-            print(f'Moving {os.path.join(self.original_root, self.download_name)} to {self.root}')
+            print(
+                f"Moving {os.path.join(self.original_root, self.download_name)} to {self.root}"
+            )
             shutil.move(os.path.join(self.original_root, self.download_name), self.root)
 
     def process(self):
@@ -493,15 +574,17 @@ class ToyIterableDataset(IterableDatasetInterface):
         pre_transform (Optional[Callable]): transformations to apply to each ``Data`` object at dataset creation time
         url_indices (Optional[List]): list of indices used to extract a portion of the dataset
     """
-    def __init__(self,
-                 root: str,
-                 name: str,
-                 transform: Optional[Callable]=None,
-                 pre_transform: Optional[Callable]=None,
-                 url_indices: Optional[List]=None,
-                 **kwargs):
-        super().__init__(root, name, transform, pre_transform, url_indices, **kwargs)
 
+    def __init__(
+        self,
+        root: str,
+        name: str,
+        transform: Optional[Callable] = None,
+        pre_transform: Optional[Callable] = None,
+        url_indices: Optional[List] = None,
+        **kwargs,
+    ):
+        super().__init__(root, name, transform, pre_transform, url_indices, **kwargs)
 
     @property
     def raw_file_names(self) -> Union[str, List[str], Tuple]:
@@ -509,7 +592,7 @@ class ToyIterableDataset(IterableDatasetInterface):
 
     @property
     def processed_file_names(self) -> Union[str, List[str], Tuple]:
-        return [f'fake_processed_{i}.pt' for i in range(100)]
+        return [f"fake_processed_{i}.pt" for i in range(100)]
 
     @property
     def dim_target(self):
@@ -530,7 +613,13 @@ class ToyIterableDataset(IterableDatasetInterface):
         for i in range(100):
             fake_graphs = []
             for g in range(10):
-                fake_graphs.append(Data(x=torch.zeros(20, 5), y=torch.zeros(1,1), edge_index=torch.zeros(2,1).long()))
+                fake_graphs.append(
+                    Data(
+                        x=torch.zeros(20, 5),
+                        y=torch.zeros(1, 1),
+                        edge_index=torch.zeros(2, 1).long(),
+                    )
+                )
 
             torch.save(fake_graphs, self.processed_paths[i])
 
@@ -546,7 +635,7 @@ class ChickenpoxDatasetInterface(TemporalDatasetInterface):
         # in this case data is a Data object containing a snapshot of a single
         # graph sequence.
         # the task is node classification at each time step
-        mask = torch.ones((1,1))  #  time_steps x 1
+        mask = torch.ones((1, 1))  #  time_steps x 1
         return mask
 
     @property

@@ -21,5 +21,3 @@ def atomic_save(data: dict, filepath: str):
     except Exception as e:
         os.remove(tmp_path)
         raise e
-
-

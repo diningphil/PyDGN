@@ -16,11 +16,14 @@ class Optimizer(EventHandler):
         accumulate_gradients (bool): if ``True``, accumulate mini-batch gradients to perform a batch gradient update without loading the entire batch in memory
         kwargs (dict): additional parameters for the specific optimizer
     """
-    def __init__(self,
-                 model: ModelInterface,
-                 optimizer_class_name: str,
-                 accumulate_gradients: bool=False,
-                 **kwargs: dict):
+
+    def __init__(
+        self,
+        model: ModelInterface,
+        optimizer_class_name: str,
+        accumulate_gradients: bool = False,
+        **kwargs: dict
+    ):
         super().__init__()
         self.optimizer = s2c(optimizer_class_name)(model.parameters(), **kwargs)
         self.accumulate_gradients = accumulate_gradients

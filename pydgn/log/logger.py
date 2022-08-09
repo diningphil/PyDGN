@@ -12,14 +12,15 @@ class Logger:
         debug (bool): whether to print con screen (``True``)or to actually log on file (``False``)
 
     """
+
     def __init__(self, filepath, mode, debug):
         self.debug = debug
         self.filepath = Path(filepath)
         if not os.path.exists(self.filepath.parent):
             os.makedirs(self.filepath.parent)
 
-        if mode not in ['w', 'a']:
-            assert False, 'Mode must be one of w, r or a'
+        if mode not in ["w", "a"]:
+            assert False, "Mode must be one of w, r or a"
         else:
             self.mode = mode
 
@@ -34,6 +35,6 @@ class Logger:
             print(content)
         try:
             with open(self.filepath, self.mode) as f:
-                f.write(content + '\n')
+                f.write(content + "\n")
         except Exception as e:
             print(e)

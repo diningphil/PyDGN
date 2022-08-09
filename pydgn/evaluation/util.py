@@ -10,7 +10,9 @@ from pydgn.experiment.util import s2c
 from pydgn.static import *
 
 
-def return_class_and_args(config: dict, key: str, return_class_name: bool=False) -> Tuple[Callable[..., object], dict]:
+def return_class_and_args(
+    config: dict, key: str, return_class_name: bool = False
+) -> Tuple[Callable[..., object], dict]:
     r"""
     Returns the class and arguments associated to a specific key in the configuration file.
 
@@ -27,10 +29,14 @@ def return_class_and_args(config: dict, key: str, return_class_name: bool=False)
     elif isinstance(config[key], str):
         return s2c(config[key]), {}
     elif isinstance(config[key], dict):
-        return s2c(config[key]['class_name']) if not return_class_name else config[key]['class_name'],\
-               config[key]['args'] if 'args' in config[key] else {}
+        return (
+            s2c(config[key]["class_name"])
+            if not return_class_name
+            else config[key]["class_name"],
+            config[key]["args"] if "args" in config[key] else {},
+        )
     else:
-        raise NotImplementedError('Parameter has not been formatted properly')
+        raise NotImplementedError("Parameter has not been formatted properly")
 
 
 def clear_screen():
@@ -38,10 +44,10 @@ def clear_screen():
     Clears the CLI interface.
     """
     try:
-        os.system('clear')
+        os.system("clear")
     except Exception as e:
         try:
-            os.system('cls')
+            os.system("cls")
         except Exception:
             pass
 
@@ -92,35 +98,46 @@ class ProgressManager:
 
     def _init_selection_pbar(self, i, j):
         position = i * self.inner_folds + j
-        pbar = tqdm.tqdm(total=self.no_configs, ncols=self.ncols, ascii=True,
-                         position=position, unit="config",
-                         bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
-        pbar.set_description(f'Out_{i + 1}/Inn_{j + 1}')
+        pbar = tqdm.tqdm(
+            total=self.no_configs,
+            ncols=self.ncols,
+            ascii=True,
+            position=position,
+            unit="config",
+            bar_format=" {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}",
+        )
+        pbar.set_description(f"Out_{i + 1}/Inn_{j + 1}")
         mean = str(datetime.timedelta(seconds=0))
-        pbar.set_postfix_str(f'(1 cfg every {mean})')
+        pbar.set_postfix_str(f"(1 cfg every {mean})")
         return pbar
 
     def _init_assessment_pbar(self, i):
         position = self.outer_folds * self.inner_folds + i
-        pbar = tqdm.tqdm(total=self.final_runs, ncols=self.ncols, ascii=True,
-                         position=position, unit="config",
-                         bar_format=' {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}')
-        pbar.set_description(f'Final run {i + 1}')
+        pbar = tqdm.tqdm(
+            total=self.final_runs,
+            ncols=self.ncols,
+            ascii=True,
+            position=position,
+            unit="config",
+            bar_format=" {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}",
+        )
+        pbar.set_description(f"Final run {i + 1}")
         mean = str(datetime.timedelta(seconds=0))
-        pbar.set_postfix_str(f'(1 run every {mean})')
+        pbar.set_postfix_str(f"(1 run every {mean})")
         return pbar
 
     def show_header(self):
         """
         Prints the header of the progress bar
         """
-        '''
+        """
         \033[F --> move cursor to the beginning of the previous line
         \033[A --> move cursor up one line
         \033[<N>A --> move cursor up N lines
-        '''
+        """
         print(
-            f'\033[F\033[A{"*" * ((self.ncols - 21) // 2 + 1)} Experiment Progress {"*" * ((self.ncols - 21) // 2)}\n')
+            f'\033[F\033[A{"*" * ((self.ncols - 21) // 2 + 1)} Experiment Progress {"*" * ((self.ncols - 21) // 2)}\n'
+        )
 
     def show_footer(self):
         pass  # need to work how how to print after tqdm
@@ -134,7 +151,11 @@ class ProgressManager:
         for i, pbar in enumerate(self.pbars):
 
             # When resuming, do not consider completed exp. (delta approx. < 1)
-            completion_times = [delta for k, (delta, completed) in self.times[i].items() if completed and delta > 1]
+            completion_times = [
+                delta
+                for k, (delta, completed) in self.times[i].items()
+                if completed and delta > 1
+            ]
 
             if len(completion_times) > 0:
                 min_seconds = min(completion_times)
@@ -145,10 +166,10 @@ class ProgressManager:
                 max_seconds = 0
                 mean_seconds = 0
 
-            mean_time = str(datetime.timedelta(seconds=mean_seconds)).split('.')[0]
-            min_time = str(datetime.timedelta(seconds=min_seconds)).split('.')[0]
-            max_time = str(datetime.timedelta(seconds=max_seconds)).split('.')[0]
-            pbar.set_postfix_str(f'min:{min_time}|avg:{mean_time}|max:{max_time}')
+            mean_time = str(datetime.timedelta(seconds=mean_seconds)).split(".")[0]
+            min_time = str(datetime.timedelta(seconds=min_seconds)).split(".")[0]
+            max_time = str(datetime.timedelta(seconds=max_seconds)).split(".")[0]
+            pbar.set_postfix_str(f"min:{min_time}|avg:{mean_time}|max:{max_time}")
 
             pbar.refresh()
         self.show_footer()
@@ -165,7 +186,7 @@ class ProgressManager:
             return
 
         try:
-            type = msg.get('type')
+            type = msg.get("type")
 
             if type == END_CONFIG:
                 outer_fold = msg.get(OUTER_FOLD)
@@ -175,7 +196,10 @@ class ProgressManager:
                 elapsed = msg.get(ELAPSED)
                 configs_times = self.times[position]
                 # Compute delta t for a specific config
-                configs_times[config_id] = (elapsed, True)  # (time.time() - configs_times[config_id][0], True)
+                configs_times[config_id] = (
+                    elapsed,
+                    True,
+                )  # (time.time() - configs_times[config_id][0], True)
                 # Update progress bar
                 self.pbars[position].update()
                 self.refresh()
@@ -186,7 +210,10 @@ class ProgressManager:
                 elapsed = msg.get(ELAPSED)
                 configs_times = self.times[position]
                 # Compute delta t for a specific config
-                configs_times[run_id] = (elapsed, True)  # (time.time() - configs_times[run_id][0], True)
+                configs_times[run_id] = (
+                    elapsed,
+                    True,
+                )  # (time.time() - configs_times[run_id][0], True)
                 # Update progress bar
                 self.pbars[position].update()
                 self.refresh()
@@ -205,13 +232,14 @@ class ProgressManager:
             pbar.close()
 
 
-'''
+"""
 Various options for random search model selection
-'''
+"""
 choice = lambda *args: random.choice(args)
 uniform = lambda *args: random.uniform(*args)
 normal = lambda *args: random.normalvariate(*args)
 randint = lambda *args: random.randint(*args)
+
 
 def loguniform(*args):
     """

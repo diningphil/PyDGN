@@ -32,7 +32,7 @@ class EventHandler:
     ON_TRAINING_BATCH_END = "on_training_batch_end"
     ON_EVAL_BATCH_START = "on_eval_batch_start"
     ON_EVAL_BATCH_END = "on_eval_batch_end"
-    ON_FORWARD = 'on_forward'
+    ON_FORWARD = "on_forward"
     ON_BACKWARD = "on_backward"
     ON_COMPUTE_METRICS = "on_compute_metrics"
 

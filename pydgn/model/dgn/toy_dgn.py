@@ -13,19 +13,27 @@ class ToyDGN(ModelInterface):
     """
     A toy Deep Graph Network used to test the library
     """
-    def __init__(self, dim_node_features, dim_edge_features, dim_target, readout_class, config):
-        super().__init__(dim_node_features, dim_edge_features, dim_target, readout_class, config)
 
-        num_layers = config['num_layers']
-        dim_embedding = config['dim_embedding']
-        self.aggregation = config['aggregation']  # can be mean or max
+    def __init__(
+        self, dim_node_features, dim_edge_features, dim_target, readout_class, config
+    ):
+        super().__init__(
+            dim_node_features, dim_edge_features, dim_target, readout_class, config
+        )
 
-        if self.aggregation == 'max':
+        num_layers = config["num_layers"]
+        dim_embedding = config["dim_embedding"]
+        self.aggregation = config["aggregation"]  # can be mean or max
+
+        if self.aggregation == "max":
             self.fc_max = nn.Linear(dim_embedding, dim_embedding)
 
-        self.readout = readout_class(dim_node_features=dim_embedding * num_layers,
-                                         dim_edge_features=dim_edge_features,
-                                         dim_target=dim_target, config=config)
+        self.readout = readout_class(
+            dim_node_features=dim_embedding * num_layers,
+            dim_edge_features=dim_edge_features,
+            dim_target=dim_target,
+            config=config,
+        )
 
         self.layers = nn.ModuleList([])
         for i in range(num_layers):
@@ -37,14 +45,16 @@ class ToyDGN(ModelInterface):
 
             self.layers.append(conv)
 
-    def forward(self, data: Batch) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
+    def forward(
+        self, data: Batch
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
         x_all = []
 
         for i, layer in enumerate(self.layers):
             x = layer(x, edge_index)
-            if self.aggregation == 'max':
+            if self.aggregation == "max":
                 x = torch.relu(self.fc_max(x))
             x_all.append(x)
 
@@ -58,8 +68,12 @@ class ToyDGNTemporal(ModelInterface):
     Simple Temporal Deep Graph Network that can be used to test the library
     """
 
-    def __init__(self, dim_node_features, dim_edge_features, dim_target, readout_class, config):
-        super().__init__(dim_node_features, dim_edge_features, dim_target, readout_class, config)
+    def __init__(
+        self, dim_node_features, dim_edge_features, dim_target, readout_class, config
+    ):
+        super().__init__(
+            dim_node_features, dim_edge_features, dim_target, readout_class, config
+        )
 
         self.dim_embedding = 32
         filter_size = 1
@@ -67,14 +81,21 @@ class ToyDGNTemporal(ModelInterface):
         self.model = DCRNN(dim_node_features, self.dim_embedding, filter_size)
         self.linear = nn.Linear(self.dim_embedding, self.dim_embedding)
 
-        self.readout = readout_class(dim_node_features=self.dim_embedding,
-                                     dim_edge_features=dim_edge_features,
-                                     dim_target=dim_target, config=config)
+        self.readout = readout_class(
+            dim_node_features=self.dim_embedding,
+            dim_edge_features=dim_edge_features,
+            dim_target=dim_target,
+            config=config,
+        )
 
     def forward(self, snapshot, prev_state=None):
         # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
         # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
-        x, edge_index, mask = snapshot.x, snapshot.edge_index, snapshot.time_prediction_mask
+        x, edge_index, mask = (
+            snapshot.x,
+            snapshot.edge_index,
+            snapshot.time_prediction_mask,
+        )
 
         h = self.model(x, edge_index, H=prev_state)
         h = torch.relu(h)

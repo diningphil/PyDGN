@@ -4,7 +4,7 @@ from pydgn.training.event.state import State
 class EventDispatcher:
     """
     Class implementing the publisher/subscribe pattern. It is used to register subscribers that implement the
-    :class:`~training.event.handler.EventHandler` interface """
+    :class:`~training.event.handler.EventHandler` interface"""
 
     def __init__(self):
         self._event_handlers = []

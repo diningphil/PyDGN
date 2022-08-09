@@ -20,7 +20,7 @@ class ConstantIfEmpty:
         return data
 
     def __repr__(self):
-        return '{}(value={})'.format(self.__class__.__name__, self.value)
+        return "{}(value={})".format(self.__class__.__name__, self.value)
 
 
 class ConstantEdgeIfEmpty:
@@ -41,7 +41,7 @@ class ConstantEdgeIfEmpty:
         return data
 
     def __repr__(self):
-        return '{}(value={})'.format(self.__class__.__name__, self.value)
+        return "{}(value={})".format(self.__class__.__name__, self.value)
 
 
 class Degree:
@@ -53,7 +53,8 @@ class Degree:
         Not relevant if the graph is undirected (default: :obj:`False`).
         cat (bool): Concat node degrees to node features instead of replacing them. (default: :obj:`True`)
     """
-    def __init__(self, in_degree: bool=False, cat: bool=True):
+
+    def __init__(self, in_degree: bool = False, cat: bool = True):
         self.in_degree = in_degree
         self.cat = cat
 
@@ -69,4 +70,4 @@ class Degree:
         return data
 
     def __repr__(self):
-        return '{}'.format(self.__class__.__name__)
+        return "{}".format(self.__class__.__name__)

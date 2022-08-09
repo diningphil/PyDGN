@@ -33,6 +33,7 @@ class EpochScheduler(Scheduler):
     """
     Implements a scheduler which uses epochs to modify the step size
     """
+
     def on_training_epoch_end(self, state: State):
         self.scheduler.step()
 
@@ -49,14 +50,24 @@ class MetricScheduler(Scheduler):
         optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer to use. **This is automatically recovered by PyDGN when providing an optimizer**
         kwargs: additional parameters for the specific scheduler to be used
     """
-    def __init__(self, scheduler_class_name: str, use_loss: bool, monitor: str, optimizer: Optimizer, **kwargs: dict):
+
+    def __init__(
+        self,
+        scheduler_class_name: str,
+        use_loss: bool,
+        monitor: str,
+        optimizer: Optimizer,
+        **kwargs: dict,
+    ):
         self.scheduler = s2c(scheduler_class_name)(optimizer, **kwargs)
         self.use_loss = use_loss
         self.monitor = monitor
 
     def on_epoch_end(self, state: State):
         monitor_main_key = LOSSES if self.use_loss else SCORES
-        assert self.monitor in state.epoch_results[monitor_main_key], f'{self.monitor} not found in epoch_results'
+        assert (
+            self.monitor in state.epoch_results[monitor_main_key]
+        ), f"{self.monitor} not found in epoch_results"
         metric = state.epoch_results[monitor_main_key][self.monitor]
         self.scheduler.step(metric)
 

@@ -19,7 +19,8 @@ class EarlyStopper(EventHandler):
         mode (str): can be ``MIN`` or ``MAX`` (as defined in ``pydgn.static``)
         checkpoint (bool): whether we are interested in the checkpoint of the "best" epoch or not
     """
-    def __init__(self, monitor: str, mode: str, checkpoint: bool=False):
+
+    def __init__(self, monitor: str, mode: str, checkpoint: bool = False):
         super().__init__()
         self.monitor = monitor
         self.best_metric = None
@@ -30,7 +31,7 @@ class EarlyStopper(EventHandler):
         elif MAX in mode:
             self.operator = operator.ge
         else:
-            raise NotImplementedError('Mode not understood by early stopper.')
+            raise NotImplementedError("Mode not understood by early stopper.")
 
         assert TEST not in monitor, "Do not apply early stopping to the test set!"
 
@@ -44,7 +45,10 @@ class EarlyStopper(EventHandler):
             state (:class:`~training.event.state.State`): object holding training information
         """
         # it is possible that we evaluate every `n` epochs
-        if not (self.monitor in state.epoch_results[SCORES] or self.monitor in state.epoch_results[LOSSES]):
+        if not (
+            self.monitor in state.epoch_results[SCORES]
+            or self.monitor in state.epoch_results[LOSSES]
+        ):
             return
 
         if self.monitor in state.epoch_results[SCORES]:
@@ -56,24 +60,46 @@ class EarlyStopper(EventHandler):
         if not hasattr(state, BEST_EPOCH_RESULTS):
             state.update(best_epoch_results=state.epoch_results)
             state.best_epoch_results[BEST_EPOCH] = state.epoch
-            state.best_epoch_results[score_or_loss][self.monitor] = state.epoch_results[score_or_loss][self.monitor]
-            state.best_epoch_results[MODEL_STATE] = copy.deepcopy(state.model.state_dict())
-            state.best_epoch_results[OPTIMIZER_STATE] = state[OPTIMIZER_STATE]  # computed by optimizer
-            state.best_epoch_results[SCHEDULER_STATE] = state[SCHEDULER_STATE]  # computed by scheduler
+            state.best_epoch_results[score_or_loss][self.monitor] = state.epoch_results[
+                score_or_loss
+            ][self.monitor]
+            state.best_epoch_results[MODEL_STATE] = copy.deepcopy(
+                state.model.state_dict()
+            )
+            state.best_epoch_results[OPTIMIZER_STATE] = state[
+                OPTIMIZER_STATE
+            ]  # computed by optimizer
+            state.best_epoch_results[SCHEDULER_STATE] = state[
+                SCHEDULER_STATE
+            ]  # computed by scheduler
             if self.checkpoint:
-                atomic_save(state.best_epoch_results, Path(state.exp_path, BEST_CHECKPOINT_FILENAME))
+                atomic_save(
+                    state.best_epoch_results,
+                    Path(state.exp_path, BEST_CHECKPOINT_FILENAME),
+                )
         else:
             best_metric = state.best_epoch_results[score_or_loss][self.monitor]
 
             if self.operator(metric_to_compare, best_metric):
                 state.update(best_epoch_results=state.epoch_results)
                 state.best_epoch_results[BEST_EPOCH] = state.epoch
-                state.best_epoch_results[score_or_loss][self.monitor] = metric_to_compare
-                state.best_epoch_results[MODEL_STATE] = copy.deepcopy(state.model.state_dict())
-                state.best_epoch_results[OPTIMIZER_STATE] = state[OPTIMIZER_STATE]  # computed by optimizer
-                state.best_epoch_results[SCHEDULER_STATE] = state[SCHEDULER_STATE]  # computed by scheduler
+                state.best_epoch_results[score_or_loss][
+                    self.monitor
+                ] = metric_to_compare
+                state.best_epoch_results[MODEL_STATE] = copy.deepcopy(
+                    state.model.state_dict()
+                )
+                state.best_epoch_results[OPTIMIZER_STATE] = state[
+                    OPTIMIZER_STATE
+                ]  # computed by optimizer
+                state.best_epoch_results[SCHEDULER_STATE] = state[
+                    SCHEDULER_STATE
+                ]  # computed by scheduler
                 if self.checkpoint:
-                    atomic_save(state.best_epoch_results, Path(state.exp_path, BEST_CHECKPOINT_FILENAME))
+                    atomic_save(
+                        state.best_epoch_results,
+                        Path(state.exp_path, BEST_CHECKPOINT_FILENAME),
+                    )
 
         # Regarless of improvement or not
         stop_training = self.stop(state, score_or_loss, metric_to_compare)
@@ -92,7 +118,7 @@ class EarlyStopper(EventHandler):
         Returns:
             a boolean specifying whether training should be stopped or not
         """
-        raise NotImplementedError('Sublass EarlyStopper and implement this method!')
+        raise NotImplementedError("Sublass EarlyStopper and implement this method!")
 
 
 class PatienceEarlyStopper(EarlyStopper):

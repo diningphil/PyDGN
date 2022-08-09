@@ -15,12 +15,15 @@ class ModelInterface(torch.nn.Module):
         readout_class (Callable[...,:class:`torch.nn.Module`]): class of the module implementing the readout. This is optional, but useful to put different readouts to try in the config file
         config (dict): config dictionary containing all the necessary hyper-parameters plus additional information (if needed)
     """
-    def __init__(self,
-                 dim_node_features: int,
-                 dim_edge_features: int,
-                 dim_target: int,
-                 readout_class: Callable[...,torch.nn.Module],
-                 config: dict):
+
+    def __init__(
+        self,
+        dim_node_features: int,
+        dim_edge_features: int,
+        dim_target: int,
+        readout_class: Callable[..., torch.nn.Module],
+        config: dict,
+    ):
         super().__init__()
         self.dim_node_features = dim_node_features
         self.dim_edge_features = dim_edge_features
@@ -28,7 +31,9 @@ class ModelInterface(torch.nn.Module):
         self.readout_class = readout_class
         self.config = config
 
-    def forward(self, data: Batch) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
+    def forward(
+        self, data: Batch
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
         r"""
         Performs a forward pass over a batch of graphs
 
@@ -38,7 +43,7 @@ class ModelInterface(torch.nn.Module):
         Returns:
             a tuple (model's output, [optional] node embeddings, [optional] additional outputs
         """
-        raise NotImplementedError('You need to implement this method!')
+        raise NotImplementedError("You need to implement this method!")
 
 
 class ReadoutInterface(torch.nn.Module):
@@ -51,21 +56,23 @@ class ReadoutInterface(torch.nn.Module):
         dim_target (int): dimension of the target (according to the :class:`~pydgn.data.dataset.DatasetInterface` property)
         config (dict): config dictionary containing all the necessary hyper-parameters plus additional information (if needed)
     """
-    def __init__(self,
-                 dim_node_features: int,
-                 dim_edge_features: int,
-                 dim_target: int,
-                 config: dict):
+
+    def __init__(
+        self,
+        dim_node_features: int,
+        dim_edge_features: int,
+        dim_target: int,
+        config: dict,
+    ):
         super().__init__()
         self.dim_node_features = dim_node_features
         self.dim_edge_features = dim_edge_features
         self.dim_target = dim_target
         self.config = config
 
-    def forward(self,
-                node_embeddings: torch.tensor,
-                batch: torch.Tensor,
-                **kwargs) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
+    def forward(
+        self, node_embeddings: torch.tensor, batch: torch.Tensor, **kwargs
+    ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
         r"""
         Performs a forward pass over a batch of graphs
 
@@ -77,4 +84,4 @@ class ReadoutInterface(torch.nn.Module):
         Returns:
             a tuple (model's output, [optional] node embeddings, [optional] additional outputs
         """
-        raise NotImplementedError('You need to implement this method!')
+        raise NotImplementedError("You need to implement this method!")

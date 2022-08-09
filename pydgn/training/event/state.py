@@ -11,6 +11,7 @@ class State:
         optimizer (training.callback.optimizer.Optimizer): the optimizer
         device (str): the device on which to run computations
     """
+
     def __init__(self, model, optimizer, device):
         self.initial_epoch = 0
         self.epoch = self.initial_epoch

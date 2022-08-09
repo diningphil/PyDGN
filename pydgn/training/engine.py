@@ -60,21 +60,24 @@ class TrainingEngine(EventDispatcher):
         store_last_checkpoint (bool): whether to store a checkpoint at the end of each epoch. Allows to resume training from last epoch. Default is ``False``.
         reset_eval_model_hidden_state (bool): [temporal graph learning] Used when we want to reset the state after performing previous inference. It should be ``False`` when we are dealing with a single temporal graph sequence, because we don't want to reset the hidden state after processing the previous [training/validation] time steps.
     """
-    def __init__(self,
-                 engine_callback: Callable[...,EngineCallback],
-                 model: ModelInterface,
-                 loss: Metric,
-                 optimizer: Optimizer,
-                 scorer: Metric,
-                 scheduler: Scheduler=None,
-                 early_stopper: EarlyStopper=None,
-                 gradient_clipper: GradientClipper=None,
-                 device: str='cpu',
-                 plotter: Plotter=None,
-                 exp_path: str=None,
-                 evaluate_every: int=1,
-                 store_last_checkpoint: bool=False,
-                 reset_eval_model_hidden_state: bool = True):
+
+    def __init__(
+        self,
+        engine_callback: Callable[..., EngineCallback],
+        model: ModelInterface,
+        loss: Metric,
+        optimizer: Optimizer,
+        scorer: Metric,
+        scheduler: Scheduler = None,
+        early_stopper: EarlyStopper = None,
+        gradient_clipper: GradientClipper = None,
+        device: str = "cpu",
+        plotter: Plotter = None,
+        exp_path: str = None,
+        evaluate_every: int = 1,
+        store_last_checkpoint: bool = False,
+        reset_eval_model_hidden_state: bool = True,
+    ):
         super().__init__()
 
         self.engine_callback = engine_callback
@@ -99,22 +102,39 @@ class TrainingEngine(EventDispatcher):
 
         # Now register the callbacks (IN THIS ORDER, WHICH IS KNOWN TO THE USER)
         # Decorate with a profiler
-        self.callbacks = [self.profiler(c) for c in [self.loss_fun, self.score_fun,
-                                                     self.gradient_clipper, self.optimizer,
-                                                     self.early_stopper, self.scheduler, self.plotter] if
-                          c is not None]  # filter None callbacks
+        self.callbacks = [
+            self.profiler(c)
+            for c in [
+                self.loss_fun,
+                self.score_fun,
+                self.gradient_clipper,
+                self.optimizer,
+                self.early_stopper,
+                self.scheduler,
+                self.plotter,
+            ]
+            if c is not None
+        ]  # filter None callbacks
 
         # Add an Engine specific callback to profile different passages of _loop
-        self.callbacks.append(self.profiler(self.engine_callback(store_last_checkpoint=self.store_last_checkpoint)))
+        self.callbacks.append(
+            self.profiler(
+                self.engine_callback(store_last_checkpoint=self.store_last_checkpoint)
+            )
+        )
 
         for c in self.callbacks:
             self.register(c)
 
-        self.state = State(self.model, self.optimizer, self.device)  # Initialize the state
+        self.state = State(
+            self.model, self.optimizer, self.device
+        )  # Initialize the state
         self.state.update(exp_path=self.exp_path)
 
     # TODO in general, there are no guarantees that y will be sufficient to determine the task. This may have to be changed in the future.
-    def _to_data_list(self, x: torch.Tensor, batch: torch.Tensor, y: Optional[torch.Tensor]) -> List[Data]:
+    def _to_data_list(
+        self, x: torch.Tensor, batch: torch.Tensor, y: Optional[torch.Tensor]
+    ) -> List[Data]:
         """
         Converts model outputs back to a list of Data elements. Useful for incremental architectures.
 
@@ -135,25 +155,36 @@ class TrainingEngine(EventDispatcher):
             is_graph_prediction = y.shape[0] == len(cumulative)
             y = y.unsqueeze(1) if y.dim() == 1 else y
 
-            data_list.append(Data(x=x[:cumulative[0]],
-                                  y=y[0].unsqueeze(0) if is_graph_prediction else y[:cumulative[0]]))
+            data_list.append(
+                Data(
+                    x=x[: cumulative[0]],
+                    y=y[0].unsqueeze(0) if is_graph_prediction else y[: cumulative[0]],
+                )
+            )
             for i in range(1, len(cumulative)):
-                g = Data(x=x[cumulative[i - 1]:cumulative[i]],
-                         y=y[i].unsqueeze(0) if is_graph_prediction else y[cumulative[i - 1]:cumulative[i]])
+                g = Data(
+                    x=x[cumulative[i - 1] : cumulative[i]],
+                    y=y[i].unsqueeze(0)
+                    if is_graph_prediction
+                    else y[cumulative[i - 1] : cumulative[i]],
+                )
                 data_list.append(g)
         else:
-            data_list.append(Data(x=x[:cumulative[0]]))
+            data_list.append(Data(x=x[: cumulative[0]]))
             for i in range(1, len(cumulative)):
-                g = Data(x=x[cumulative[i - 1]:cumulative[i]])
+                g = Data(x=x[cumulative[i - 1] : cumulative[i]])
                 data_list.append(g)
 
         return data_list
 
-    def _to_list(self, data_list: List[Data],
-                 embeddings: Union[Tuple[torch.Tensor], torch.Tensor],
-                 batch: torch.Tensor,
-                 edge_index: torch.Tensor,
-                 y: Optional[torch.Tensor]) -> List[Data]:
+    def _to_list(
+        self,
+        data_list: List[Data],
+        embeddings: Union[Tuple[torch.Tensor], torch.Tensor],
+        batch: torch.Tensor,
+        edge_index: torch.Tensor,
+        y: Optional[torch.Tensor],
+    ) -> List[Data]:
         """
         Extends the ``data_list`` list of PyG Data objects with new samples.
 
@@ -169,11 +200,15 @@ class TrainingEngine(EventDispatcher):
         """
         # Crucial: Detach the embeddings to free the computation graph!!
         if isinstance(embeddings, tuple):
-            embeddings = tuple([e.detach().cpu() if e is not None else None for e in embeddings])
+            embeddings = tuple(
+                [e.detach().cpu() if e is not None else None for e in embeddings]
+            )
         elif isinstance(embeddings, torch.Tensor):
             embeddings = embeddings.detach().cpu()
         else:
-            raise NotImplementedError('Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor')
+            raise NotImplementedError(
+                "Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor"
+            )
 
         # Convert embeddings back to a list of torch_geometric Data objects
         # Needs also y information to (possibly) use them as a tensor dataset
@@ -220,7 +255,6 @@ class TrainingEngine(EventDispatcher):
         """
         self.model.eval()
         self.training = False
-
 
     def _loop_helper(self):
         # Move data to device
@@ -270,8 +304,13 @@ class TrainingEngine(EventDispatcher):
                 # Embeddings should be in position 2 of the output
                 embeddings = output[1]
 
-                data_list = self._to_list(self.state.epoch_data_list, embeddings,
-                                          batch_idx, edge_index, targets)
+                data_list = self._to_list(
+                    self.state.epoch_data_list,
+                    embeddings,
+                    batch_idx,
+                    edge_index,
+                    targets,
+                )
 
                 # I am extending the data list, not replacing! Hence the name "epoch" data list
                 self.state.update(epoch_data_list=data_list)
@@ -283,7 +322,6 @@ class TrainingEngine(EventDispatcher):
             self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
         else:
             self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
-
 
     # loop over all data (i.e. computes an epoch)
     def _loop(self, loader: DataLoader):
@@ -344,7 +382,11 @@ class TrainingEngine(EventDispatcher):
         self._dispatch(EventHandler.ON_EVAL_EPOCH_END, self.state)
 
         assert self.state.epoch_loss is not None
-        loss, score, data_list = self.state.epoch_loss, self.state.epoch_score, self.state.epoch_data_list
+        loss, score, data_list = (
+            self.state.epoch_loss,
+            self.state.epoch_score,
+            self.state.epoch_data_list,
+        )
 
         # Add the main loss we want to return as a special key
         main_loss_name = self.loss_fun.get_main_metric_name()
@@ -357,13 +399,15 @@ class TrainingEngine(EventDispatcher):
 
         return loss, score, data_list
 
-    def train(self,
-              train_loader: DataLoader,
-              validation_loader: DataLoader=None,
-              test_loader: DataLoader=None,
-              max_epochs: int=100,
-              zero_epoch: bool=False,
-              logger: Logger=None) -> Tuple[dict, dict, List[Data], dict, dict, List[Data], dict, dict, List[Data]]:
+    def train(
+        self,
+        train_loader: DataLoader,
+        validation_loader: DataLoader = None,
+        test_loader: DataLoader = None,
+        max_epochs: int = 100,
+        zero_epoch: bool = False,
+        logger: Logger = None,
+    ) -> Tuple[dict, dict, List[Data], dict, dict, List[Data], dict, dict, List[Data]]:
         """
         Trains the model and regularly evaluates on validation and test data (if given).
         May perform early stopping and checkpointing.
@@ -390,12 +434,20 @@ class TrainingEngine(EventDispatcher):
             # Restore training from last checkpoint if possible!
             ckpt_filename = Path(self.exp_path, LAST_CHECKPOINT_FILENAME)
             best_ckpt_filename = Path(self.exp_path, BEST_CHECKPOINT_FILENAME)
-            is_early_stopper_ckpt = self.early_stopper.checkpoint if self.early_stopper is not None else False
+            is_early_stopper_ckpt = (
+                self.early_stopper.checkpoint
+                if self.early_stopper is not None
+                else False
+            )
             # If one changes the options in the config file, the existence of a checkpoint is not enough to
             # decide whether to resume training or not!
-            if os.path.exists(ckpt_filename) and (self.store_last_checkpoint or is_early_stopper_ckpt):
-                self._restore_checkpoint_and_best_results(ckpt_filename, best_ckpt_filename, zero_epoch)
-                log(f'START AGAIN FROM EPOCH {self.state.initial_epoch}', logger)
+            if os.path.exists(ckpt_filename) and (
+                self.store_last_checkpoint or is_early_stopper_ckpt
+            ):
+                self._restore_checkpoint_and_best_results(
+                    ckpt_filename, best_ckpt_filename, zero_epoch
+                )
+                log(f"START AGAIN FROM EPOCH {self.state.initial_epoch}", logger)
 
             self._dispatch(EventHandler.ON_FIT_START, self.state)
 
@@ -416,15 +468,15 @@ class TrainingEngine(EventDispatcher):
                 _, _, _ = self._train(train_loader)
 
                 # Update state with epoch results
-                epoch_results = {
-                    LOSSES: {},
-                    SCORES: {}
-                }
+                epoch_results = {LOSSES: {}, SCORES: {}}
 
                 # [temporal] Initialize the hidden state of the model again before inference
                 self.state.update(last_hidden_state=None)
 
-                if ((epoch+1) >= self.evaluate_every and (epoch+1) % self.evaluate_every == 0) or epoch == 0:
+                if (
+                    (epoch + 1) >= self.evaluate_every
+                    and (epoch + 1) % self.evaluate_every == 0
+                ) or epoch == 0:
 
                     # Compute training output (necessary because on_backward has been called)
                     train_loss, train_score, _ = self.infer(train_loader, TRAINING)
@@ -434,7 +486,9 @@ class TrainingEngine(EventDispatcher):
 
                     # Compute validation output
                     if validation_loader is not None:
-                        val_loss, val_score, _ = self.infer(validation_loader, VALIDATION)
+                        val_loss, val_score, _ = self.infer(
+                            validation_loader, VALIDATION
+                        )
 
                     if self.reset_eval_model_hidden_state:
                         self.state.update(last_hidden_state=None)
@@ -443,25 +497,41 @@ class TrainingEngine(EventDispatcher):
                     if test_loader is not None:
                         test_loss, test_score, _ = self.infer(test_loader, TEST)
 
-                    epoch_results[LOSSES].update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
-                    epoch_results[SCORES].update({f'{TRAINING}_{k}': v for k, v in train_score.items()})
+                    epoch_results[LOSSES].update(
+                        {f"{TRAINING}_{k}": v for k, v in train_loss.items()}
+                    )
+                    epoch_results[SCORES].update(
+                        {f"{TRAINING}_{k}": v for k, v in train_score.items()}
+                    )
 
                     if validation_loader is not None:
-                        epoch_results[LOSSES].update({f'{VALIDATION}_{k}': v for k, v in val_loss.items()})
-                        epoch_results[SCORES].update({f'{VALIDATION}_{k}': v for k, v in val_score.items()})
-                        val_msg_str = f', VL loss: {val_loss} VL score: {val_score}'
+                        epoch_results[LOSSES].update(
+                            {f"{VALIDATION}_{k}": v for k, v in val_loss.items()}
+                        )
+                        epoch_results[SCORES].update(
+                            {f"{VALIDATION}_{k}": v for k, v in val_score.items()}
+                        )
+                        val_msg_str = f", VL loss: {val_loss} VL score: {val_score}"
                     else:
-                        val_msg_str = ''
+                        val_msg_str = ""
 
                     if test_loader is not None:
-                        epoch_results[LOSSES].update({f'{TEST}_{k}': v for k, v in test_loss.items()})
-                        epoch_results[SCORES].update({f'{TEST}_{k}': v for k, v in test_score.items()})
-                        test_msg_str = f', TE loss: {test_loss} TE score: {test_score}'
+                        epoch_results[LOSSES].update(
+                            {f"{TEST}_{k}": v for k, v in test_loss.items()}
+                        )
+                        epoch_results[SCORES].update(
+                            {f"{TEST}_{k}": v for k, v in test_score.items()}
+                        )
+                        test_msg_str = f", TE loss: {test_loss} TE score: {test_score}"
                     else:
-                        test_msg_str = ''
+                        test_msg_str = ""
 
                     # Log performances
-                    msg = f'Epoch: {epoch + 1}, TR loss: {train_loss} TR score: {train_score}' + val_msg_str + test_msg_str
+                    msg = (
+                        f"Epoch: {epoch + 1}, TR loss: {train_loss} TR score: {train_score}"
+                        + val_msg_str
+                        + test_msg_str
+                    )
                     log(msg, logger)
 
                 # Update state with the result of this epoch
@@ -493,40 +563,49 @@ class TrainingEngine(EventDispatcher):
             self.state.update(last_hidden_state=None)
 
             # Compute training output
-            train_loss, train_score, train_embeddings_tuple = self.infer(train_loader, TRAINING)
+            train_loss, train_score, train_embeddings_tuple = self.infer(
+                train_loader, TRAINING
+            )
             # ber[f'{TRAINING}_loss'] = train_loss
-            ber[f'{TRAINING}{EMB_TUPLE_SUBSTR}'] = train_embeddings_tuple
-            ber.update({f'{TRAINING}_{k}': v for k, v in train_loss.items()})
-            ber.update({f'{TRAINING}_{k}': v for k, v in train_score.items()})
+            ber[f"{TRAINING}{EMB_TUPLE_SUBSTR}"] = train_embeddings_tuple
+            ber.update({f"{TRAINING}_{k}": v for k, v in train_loss.items()})
+            ber.update({f"{TRAINING}_{k}": v for k, v in train_score.items()})
 
             if self.reset_eval_model_hidden_state:
                 self.state.update(last_hidden_state=None)
 
             # Compute validation output
             if validation_loader is not None:
-                val_loss, val_score, val_embeddings_tuple = self.infer(validation_loader, VALIDATION)
+                val_loss, val_score, val_embeddings_tuple = self.infer(
+                    validation_loader, VALIDATION
+                )
                 # ber[f'{VALIDATION}_loss'] = val_loss
-                ber[f'{VALIDATION}{EMB_TUPLE_SUBSTR}'] = val_embeddings_tuple
-                ber.update({f'{TRAINING}_{k}': v for k, v in val_loss.items()})
-                ber.update({f'{TRAINING}_{k}': v for k, v in val_score.items()})
+                ber[f"{VALIDATION}{EMB_TUPLE_SUBSTR}"] = val_embeddings_tuple
+                ber.update({f"{TRAINING}_{k}": v for k, v in val_loss.items()})
+                ber.update({f"{TRAINING}_{k}": v for k, v in val_score.items()})
 
             if self.reset_eval_model_hidden_state:
                 self.state.update(last_hidden_state=None)
 
             # Compute test output
             if test_loader is not None:
-                test_loss, test_score, test_embeddings_tuple = self.infer(test_loader, TEST)
+                test_loss, test_score, test_embeddings_tuple = self.infer(
+                    test_loader, TEST
+                )
                 # ber[f'{TEST}_loss'] = test_loss
-                ber[f'{TEST}{EMB_TUPLE_SUBSTR}'] = test_embeddings_tuple
-                ber.update({f'{TEST}_{k}': v for k, v in test_loss.items()})
-                ber.update({f'{TEST}_{k}': v for k, v in test_score.items()})
+                ber[f"{TEST}{EMB_TUPLE_SUBSTR}"] = test_embeddings_tuple
+                ber.update({f"{TEST}_{k}": v for k, v in test_loss.items()})
+                ber.update({f"{TEST}_{k}": v for k, v in test_score.items()})
 
             self._dispatch(EventHandler.ON_FIT_END, self.state)
 
             self.state.update(return_node_embeddings=False)
 
-            log(f'Chosen is Epoch {ber[BEST_EPOCH]+1} TR loss: {train_loss} TR score: {train_score}, VL loss: {val_loss} VL score: {val_score} '
-                f'TE loss: {test_loss} TE score: {test_score}', logger)
+            log(
+                f"Chosen is Epoch {ber[BEST_EPOCH]+1} TR loss: {train_loss} TR score: {train_score}, VL loss: {val_loss} VL score: {val_score} "
+                f"TE loss: {test_loss} TE score: {test_score}",
+                logger,
+            )
 
             self.state.update(set=None)
 
@@ -542,17 +621,31 @@ class TrainingEngine(EventDispatcher):
         report = self.profiler.report()
         log(report, logger)
 
-        return train_loss, train_score, train_embeddings_tuple, \
-               val_loss, val_score, val_embeddings_tuple, \
-               test_loss, test_score, test_embeddings_tuple
+        return (
+            train_loss,
+            train_score,
+            train_embeddings_tuple,
+            val_loss,
+            val_score,
+            val_embeddings_tuple,
+            test_loss,
+            test_score,
+            test_embeddings_tuple,
+        )
 
-    def _restore_checkpoint_and_best_results(self, ckpt_filename, best_ckpt_filename, zero_epoch):
+    def _restore_checkpoint_and_best_results(
+        self, ckpt_filename, best_ckpt_filename, zero_epoch
+    ):
         # When changing exp config from cuda to cpu, cuda will not be available to pytorch (due to Ray management
         # of resources). Hence, we need to specify explicitly the map location as cpu.
         # The other way around (cpu to cuda) poses no problem since GPUs are visible.
-        ckpt_dict = torch.load(ckpt_filename, map_location='cpu' if self.device =='cpu' else None)
+        ckpt_dict = torch.load(
+            ckpt_filename, map_location="cpu" if self.device == "cpu" else None
+        )
 
-        self.state.update(initial_epoch=int(ckpt_dict[EPOCH]) + 1 if not zero_epoch else 0)
+        self.state.update(
+            initial_epoch=int(ckpt_dict[EPOCH]) + 1 if not zero_epoch else 0
+        )
         self.state.update(stop_training=ckpt_dict[STOP_TRAINING])
 
         model_state = ckpt_dict[MODEL_STATE]
@@ -568,7 +661,9 @@ class TrainingEngine(EventDispatcher):
             self.state.update(optimizer_state=optimizer_state)
 
         if os.path.exists(best_ckpt_filename):
-            best_ckpt_dict = torch.load(best_ckpt_filename, map_location='cpu' if self.device =='cpu' else None)
+            best_ckpt_dict = torch.load(
+                best_ckpt_filename, map_location="cpu" if self.device == "cpu" else None
+            )
             self.state.update(best_epoch_results=best_ckpt_dict)
 
         if self.scheduler is not None and not zero_epoch:
@@ -637,7 +732,11 @@ class GraphSequenceTrainingEngine(TrainingEngine):
                 snapshot = snapshot.to(self.device)
                 _snapshot = snapshot
 
-            batch_idx, edge_index, targets = _snapshot.batch, _snapshot.edge_index, _snapshot.y
+            batch_idx, edge_index, targets = (
+                _snapshot.batch,
+                _snapshot.edge_index,
+                _snapshot.y,
+            )
 
             # Helpful when you need to access again the input batch, e.g for some continual learning strategy
             self.state.update(batch_input=_snapshot)
@@ -668,8 +767,13 @@ class GraphSequenceTrainingEngine(TrainingEngine):
                     # Embeddings should be in position 2 of the output
                     embeddings = output[1]
 
-                    data_list = self._to_list(self.state.epoch_data_list, embeddings,
-                                              batch_idx, edge_index, targets)
+                    data_list = self._to_list(
+                        self.state.epoch_data_list,
+                        embeddings,
+                        batch_idx,
+                        edge_index,
+                        targets,
+                    )
 
                     # I am extending the data list, not replacing! Hence the name "epoch" data list
                     self.state.update(epoch_data_list=data_list)
@@ -686,7 +790,6 @@ class GraphSequenceTrainingEngine(TrainingEngine):
             self._dispatch(EventHandler.ON_TRAINING_BATCH_END, self.state)
         else:
             self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
-
 
     # loop over all data (i.e. computes an epoch)
     def _loop(self, loader: DataLoader):
@@ -717,6 +820,7 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
     Specific engine for link prediction tasks. Here, we expect target values in the form of tuples: ``(_, pos_edges, neg_edges)``,
     where ``pos_edges`` and ``neg_edges`` have been generated by the splitter and provided by the data provider.
     """
+
     def _to_data_list(self, x, batch, y):
         data_list = []
         # Return node embeddings and their original class, if any (or dumb value which is required nonetheless)
@@ -729,11 +833,15 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
 
         # Crucial: Detach the embeddings to free the computation graph!!
         if isinstance(embeddings, tuple):
-            embeddings = tuple([e.detach().cpu() if e is not None else None for e in embeddings])
+            embeddings = tuple(
+                [e.detach().cpu() if e is not None else None for e in embeddings]
+            )
         elif isinstance(embeddings, torch.Tensor):
             embeddings = embeddings.detach().cpu()
         else:
-            raise NotImplementedError('Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor')
+            raise NotImplementedError(
+                "Embeddings not understood, should be torch.Tensor or Tuple of torch.Tensor"
+            )
 
         # Convert embeddings back to a list of torch_geometric Data objects
         # Needs also y information to (possibly) use them as a tensor dataset
@@ -744,11 +852,10 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
         return data_list
 
     def _num_targets(self, targets):
-        assert isinstance(targets, list), "Expecting a list of (_, pos_edges, neg_edges)"
+        assert isinstance(
+            targets, list
+        ), "Expecting a list of (_, pos_edges, neg_edges)"
         # positive links + negative links provided separately
         num_targets = targets[1].shape[1] + targets[2].shape[1]
         # Just a single graph for link prediction
         return num_targets
-
-
-

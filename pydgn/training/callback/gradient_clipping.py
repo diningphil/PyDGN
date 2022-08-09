@@ -12,6 +12,7 @@ class GradientClipper(EventHandler):
         gradient_clipper_class_name (str): the dotted path to the gradient clipper class name
         kwargs (dict): additional arguments
     """
+
     def __init__(self, gradient_clipper_class_name: str, **kwargs: dict):
         self.gradient_clipper = s2c(gradient_clipper_class_name)(**kwargs)
 

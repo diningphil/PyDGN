@@ -9,6 +9,7 @@ class Config:
     Args:
         config_dict (dict): the configuration dictionary
     """
+
     def __init__(self, config_dict: dict):
         self.config_dict = config_dict
 
