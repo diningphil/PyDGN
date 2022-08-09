@@ -9,7 +9,7 @@
 [![PyPI version](https://badge.fury.io/py/pydgn.svg)](https://badge.fury.io/py/pydgn)
 [![Downloads](https://static.pepy.tech/personalized-badge/pydgn?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pydgn)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Coverage Status](https://coveralls.io/repos/github/diningphil/PyDGN/badge.svg?branch=master)](https://coveralls.io/github/diningphil/PyDGN?branch=master)
+
 #### Read the [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
 This is a Python library to easily experiment
