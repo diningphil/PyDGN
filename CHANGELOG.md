@@ -15,7 +15,7 @@ At the moment, the entire graph must fit in CPU/GPU memory. `DataProvider` exten
 ### Added
 
 - New splitter, `SingleGraphSplitter`, which randomly splits nodes in a single graph (with optional stratification)
-- New provider, ``, which adds mask fields to the single DataBatch object (representing the graph)
+- New provider, `SingleGraphDataProvider`, which adds mask fields to the single DataBatch object (representing the graph)
 
 ### Changed
 
