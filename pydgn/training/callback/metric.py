@@ -44,6 +44,9 @@ class Metric(Module, EventHandler):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         raise NotImplementedError(
             "You should subclass Metric and implement this method!"
         )
@@ -293,6 +296,9 @@ class MultiScore(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Multi Score"
 
     def _istantiate_scorer(self, scorer):
@@ -427,6 +433,9 @@ class AdditiveLoss(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Additive Loss"
 
     def _instantiate_loss(self, loss):
@@ -574,6 +583,9 @@ class Classification(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Classification Metric"
 
     def get_predictions_and_targets(
@@ -615,6 +627,9 @@ class Regression(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Regression Metric"
 
     def get_predictions_and_targets(
@@ -656,6 +671,9 @@ class MulticlassClassification(Classification):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Multiclass Classification"
 
 
@@ -681,6 +699,9 @@ class MeanSquareError(Regression):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Mean Square Error"
 
 
@@ -706,6 +727,9 @@ class MeanAverageError(Regression):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Mean Average Error"
 
 
@@ -716,6 +740,9 @@ class DotProductLink(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Dot Product Link Prediction"
 
     def get_predictions_and_targets(
@@ -752,10 +779,16 @@ class MulticlassAccuracy(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Multiclass Accuracy"
 
     @staticmethod
     def _get_correct(output):
+        """
+        Returns the argmax of the output alongside dimension 1.
+        """
         return torch.argmax(output, dim=1)
 
     def get_predictions_and_targets(
@@ -783,10 +816,16 @@ class ToyMetric(Metric):
 
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Toy Metric"
 
     @staticmethod
     def _get_correct(output):
+        """
+        Returns the argmax of the output alongside dimension 1.
+        """
         return torch.argmax(output, dim=1)
 
     def get_predictions_and_targets(
@@ -804,6 +843,9 @@ class ToyMetric(Metric):
 class ToyUnsupervisedMetric(Metric):
     @property
     def name(self) -> str:
+        """
+        The name of the loss to be used in configuration files and displayed on Tensorboard
+        """
         return "Toy Unsupervised Metric"
 
     def get_predictions_and_targets(
