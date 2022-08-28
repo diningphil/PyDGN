@@ -138,6 +138,18 @@ class PatienceEarlyStopper(EarlyStopper):
         self.patience = patience
 
     def stop(self, state, score_or_loss, metric):
+        """
+        Returns true when the number of epochs without improvement is greater than our patience parameter.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+            score_or_loss (str): whether to monitor scores or losses
+            metric (str): the metric to consider. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+                          ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+
+        Returns:
+            a boolean specifying whether training should be stopped or not
+        """
         # do not start with patience until you have evaluated at least once
         if not hasattr(state, BEST_EPOCH_RESULTS):
             return False

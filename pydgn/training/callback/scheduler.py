@@ -22,10 +22,22 @@ class Scheduler(EventHandler):
         self.scheduler = s2c(scheduler_class_name)(optimizer, **kwargs)
 
     def on_fit_start(self, state: State):
+        """
+        Loads the scheduler state if already present in the state_dict of a checkpoint
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if self.scheduler and state.scheduler_state is not None:
             self.scheduler.load_state_dict(state.scheduler_state)
 
     def on_epoch_end(self, state: State):
+        """
+        Updates the scheduler state with the current one for checkpointing
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         state.update(scheduler_state=self.scheduler.state_dict())
 
 
@@ -64,6 +76,14 @@ class MetricScheduler(Scheduler):
         self.monitor = monitor
 
     def on_epoch_end(self, state: State):
+        """
+        Updates the state of the scheduler according to a metric to monitor at each epoch.
+        Finally, loads the scheduler state if already present in the state_dict of a checkpoint
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
+
         monitor_main_key = LOSSES if self.use_loss else SCORES
         assert (
             self.monitor in state.epoch_results[monitor_main_key]

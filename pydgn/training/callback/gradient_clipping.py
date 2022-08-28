@@ -17,4 +17,10 @@ class GradientClipper(EventHandler):
         self.gradient_clipper = s2c(gradient_clipper_class_name)(**kwargs)
 
     def on_backward(self, state: State):
+        """
+        Clips the gradients of the model before the weights are updated.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.gradient_clipper.clip_gradients(state.model.parameters())

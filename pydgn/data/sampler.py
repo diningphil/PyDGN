@@ -19,6 +19,13 @@ class RandomSampler(sampler.RandomSampler):
         self.permutation = None
 
     def __iter__(self):
+        """
+        Iterates over the samples according to a pre-determined permutation.
+
+        Returns:
+             An iterable with permuted indices.
+
+        """
         n = len(self.data_source)
         self.permutation = torch.randperm(n).tolist()
         return iter(self.permutation)

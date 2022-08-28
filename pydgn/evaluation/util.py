@@ -96,7 +96,14 @@ class ProgressManager:
 
         self.times = [{} for _ in range(len(self.pbars))]
 
-    def _init_selection_pbar(self, i, j):
+    def _init_selection_pbar(self, i: int, j: int):
+        """
+        Initializes the progress bar for model selection
+
+        Args:
+            i (int): the id of the outer fold (from 0 to outer folds - 1)
+            j (int): the id of the inner fold (from 0 to inner folds - 1)
+        """
         position = i * self.inner_folds + j
         pbar = tqdm.tqdm(
             total=self.no_configs,
@@ -111,7 +118,13 @@ class ProgressManager:
         pbar.set_postfix_str(f"(1 cfg every {mean})")
         return pbar
 
-    def _init_assessment_pbar(self, i):
+    def _init_assessment_pbar(self, i: int):
+        """
+        Initializes the progress bar for risk assessment
+
+        Args:
+            i (int): the id of the outer fold (from 0 to outer folds - 1)
+        """
         position = self.outer_folds * self.inner_folds + i
         pbar = tqdm.tqdm(
             total=self.final_runs,
@@ -140,6 +153,9 @@ class ProgressManager:
         )
 
     def show_footer(self):
+        """
+        Prints the footer of the progress bar
+        """
         pass  # need to work how how to print after tqdm
 
     def refresh(self):
@@ -225,9 +241,15 @@ class ProgressManager:
             return
 
     def __enter__(self):
+        """
+        Needed when Progress Manager is used as context manager. Does nothing besides returning self.
+        """
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
+        """
+        Needed when Progress Manager is used as context manager. Closes the progress bar.
+        """
         for pbar in self.pbars:
             pbar.close()
 

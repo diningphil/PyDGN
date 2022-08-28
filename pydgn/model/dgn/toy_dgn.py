@@ -1,8 +1,8 @@
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 import torch
 from torch import nn
-from torch_geometric.data import Batch
+from torch_geometric.data import Batch, Data
 from torch_geometric.nn import SAGEConv
 from torch_geometric_temporal import DCRNN
 
@@ -48,6 +48,15 @@ class ToyDGN(ModelInterface):
     def forward(
         self, data: Batch
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
+        """
+        Implements an Toy DGN with some SAGE graph convolutional layers.
+
+        Args:
+            data (torch_geometric.data.Batch): a batch of graphs
+
+        Returns:
+            the output depends on the readout passed to the model as argument.
+        """
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
         x_all = []
@@ -88,7 +97,17 @@ class ToyDGNTemporal(ModelInterface):
             config=config,
         )
 
-    def forward(self, snapshot, prev_state=None):
+    def forward(self, snapshot: Union[Data, Batch], prev_state=None):
+        """
+        Implements an Toy Temporal DGN with some DCRNN graph convolutional layers.
+
+        Args:
+            snapshot (`Union[Data, Batch]`): a graph or batch of graphs at timestep t
+            prev_state (`torch.Tensor`): hidden state of the model (previous time step)
+
+        Returns:
+            the output depends on the readout passed to the model as argument.
+        """
         # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
         # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
         x, edge_index, mask = (

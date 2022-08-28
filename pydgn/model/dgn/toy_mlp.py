@@ -26,6 +26,15 @@ class ToyMLP(ModelInterface):
     def forward(
         self, data: Batch
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
+        """
+        Implements an MLP (structure agnostic baseline)
+
+        Args:
+            data (torch_geometric.data.Batch): a batch of graphs
+
+        Returns:
+            a tuple (output, node_embedddings)
+        """
         x, batch = data.x, data.batch
 
         hg = global_add_pool(x, batch)

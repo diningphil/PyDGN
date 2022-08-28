@@ -82,6 +82,16 @@ class NoShuffleTrainTestSplit:
 
     # Leave the arguments as they are. The parameter `y` is needed to implement the same interface as sklearn
     def split(self, idxs, y=None):
+        """
+        Splits the data.
+
+        Args:
+            idxs: the indices to split according to the `test_ratio` parameter
+            y: Unused argument
+
+        Returns:
+            a list of a single tuple (train indices, test/eval indices)
+        """
         n_samples = len(idxs)
         n_test = int(n_samples * self.test_ratio)
         n_train = n_samples - n_test
@@ -402,20 +412,44 @@ class TemporalSplitter(Splitter):
     def get_targets(
         self, dataset: pydgn.data.dataset.TemporalDatasetInterface
     ) -> Tuple[bool, np.ndarray]:
+        r"""
+        Reads the entire dataset and returns the targets.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.TemporalDatasetInterface`): the temporal dataset
+
+        Returns:
+            a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
+            exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
+            first boolean value.
+        """
         raise NotImplementedError(
             "You should subclass TemporalSplitter and implement this function!"
         )
 
 
 class OGBGSplitter(Splitter):
+    """
+    Splitter specific to OGBG Datasets, reuses the already given splits (hence it works only in hold-out mode).
+    """
+
     def split(self, dataset: OGBGDatasetInterface, targets=None):
+        r"""
+        Computes the OGBG splits according to those already provided by the authors of the datasets
+        and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.OGBGDatasetInterface`): the Dataset object
+            targets (np.ndarray]): targets used for stratification. Default is ``None``
+        """
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
         torch.cuda.manual_seed(self.seed)
         random.seed(self.seed)
 
         assert (
-            self.n_outer_folds == 1 and self.n_inner_folds == 1
+                self.n_outer_folds == 1 and self.n_inner_folds == 1
         ), "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
         original_splits = dataset.get_idx_split()
 
@@ -483,6 +517,17 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
     def get_targets(
         self, dataset: pydgn.data.dataset.TemporalDatasetInterface
     ) -> Tuple[bool, np.ndarray]:
+        r"""
+        Reads the entire dataset and returns the targets.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the dataset
+
+        Returns:
+            a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
+            exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
+            first boolean value.
+        """
         try:
             targets = np.array([d.targets[-1].item() for d in dataset])
             return True, targets
@@ -735,6 +780,9 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         pos_test_edges,
         neg_test_edges,
     ):
+        """
+        Runs additional memory-intensive checks to ensure the edge split is ok and does not contain overlaps.
+        """
         print(
             f"Inner splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {pos_val_edges.shape}, {neg_val_edges.shape}"
         )
@@ -1037,6 +1085,12 @@ class LinkPredictionSingleGraphSplitter(Splitter):
             self.outer_folds.append(outer_fold)
 
     def _splitter_args(self):
+        r"""
+        Compared to the superclass version, adds two boolean arguments `undirected` and `avoid_opposite_negative_edges`.
+
+        Returns:
+            a dict containing all splitter's arguments.
+        """
         splitter_args = super()._splitter_args()
         splitter_args.update(
             {

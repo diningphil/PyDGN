@@ -19,6 +19,12 @@ class RandomSearch(Grid):
         super().__init__(configs_dict)
 
     def _gen_helper(self, cfgs_dict):
+        r"""
+        Takes a dictionary of key:list pairs and computes all possible combinations.
+
+        Returns:
+            A list of al possible configurations in the form of dictionaries
+        """
         keys = cfgs_dict.keys()
         param = list(keys)[0]
 
@@ -35,6 +41,12 @@ class RandomSearch(Grid):
             yield deepcopy(result)
 
     def _dict_helper(self, configs):
+        r"""
+        Recursively parses a dictionary
+
+        Returns:
+            A dictionary
+        """
         if SAMPLE_METHOD in configs:
             return self._sampler_helper(configs)
 
@@ -45,6 +57,12 @@ class RandomSearch(Grid):
         return configs
 
     def _sampler_helper(self, configs):
+        r"""
+        Samples possible hyperparameter(s) and returns it (them, in this case as a dict)
+
+         Returns:
+             A dictionary
+         """
         method, args = configs[SAMPLE_METHOD], configs[ARGS]
         sampler = s2c(method)
         sample = sampler(*args)
@@ -55,16 +73,25 @@ class RandomSearch(Grid):
         return sample
 
     def __iter__(self):
+        """
+        Iterates over all hyper-parameter configurations (generated just once)
+        """
         if self.hparams is None:
             self.hparams = self._gen_configs()
         return iter(self.hparams)
 
     def __len__(self):
+        """
+        Computes the number of hyper-parameter configurations to try
+        """
         if self.hparams is None:
             self.hparams = self._gen_configs()
         return len(self.hparams)
 
     def __getitem__(self, index):
+        """
+        Gets a specific configuration indexed by an id
+        """
         if self.hparams is None:
             self.hparams = self._gen_configs()
         return self.hparams[index]

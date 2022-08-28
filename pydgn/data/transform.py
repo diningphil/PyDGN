@@ -14,12 +14,18 @@ class ConstantIfEmpty:
         self.value = value
 
     def __call__(self, data):
+        """
+        Transforms the data object by adding a constant value as the sole node feature (if none are present).
+        """
         if data.x is None:
             c = torch.full((data.num_nodes, 1), self.value, dtype=torch.float)
             data.x = c
         return data
 
     def __repr__(self):
+        """
+        String representation of the transform.
+        """
         return "{}(value={})".format(self.__class__.__name__, self.value)
 
 
@@ -35,12 +41,18 @@ class ConstantEdgeIfEmpty:
         self.value = value
 
     def __call__(self, data):
+        """
+        Transforms the data object by adding a constant value as the sole edge feature (if none are present).
+        """
         if data.edge_attr is None:
             c = torch.full((data.edge_index.shape[1], 1), self.value, dtype=torch.float)
             data.edge_attr = c
         return data
 
     def __repr__(self):
+        """
+        String representation of the transform.
+        """
         return "{}(value={})".format(self.__class__.__name__, self.value)
 
 
@@ -59,6 +71,9 @@ class Degree:
         self.cat = cat
 
     def __call__(self, data):
+        """
+        Transforms the data object by adding the in or out-degree of each node as a feature.
+        """
         idx, x = data.edge_index[1 if self.in_degree else 0], data.x
         deg = degree(idx, data.num_nodes, dtype=torch.float).view(-1, 1)
 
@@ -70,4 +85,7 @@ class Degree:
         return data
 
     def __repr__(self):
+        """
+        String representation of the transform.
+        """
         return "{}".format(self.__class__.__name__)

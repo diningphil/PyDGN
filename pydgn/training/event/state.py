@@ -31,9 +31,15 @@ class State:
         self.num_timesteps_per_batch = None
 
     def __getitem__(self, name):
+        """
+        Returns the value associated with argument `name`, otherwise returns :obj:`None`
+        """
         return getattr(self, name, None)
 
     def __contains__(self, name):
+        """
+        Returns true if state contains the field `name`, and False otherwise
+        """
         return name in self.__dict__
 
     def update(self, **values: dict):

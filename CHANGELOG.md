@@ -2,11 +2,15 @@
 
 ### TODO (decreasing priority):
 
-- Add temporal learning example configs
+
 - Add unit test
 - Add integration tests
+- Improve handling of `len()` method in datasets
+- Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
-- Add dynamic graph learning (with documentation)
+
+## [1.2.4]
+
 
 ## [1.2.3] Added support for single graph tasks
 

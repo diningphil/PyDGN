@@ -60,23 +60,34 @@ class ConcatFromListDataset(InMemoryDataset):
     Args:
         data_list (list): List of graphs.
     """
-
     def __init__(self, data_list: List[Data], **kwargs):
         super(ConcatFromListDataset, self).__init__("")
         self.data, self.slices = self.collate(data_list)
 
     def download(self):
+        r"""
+        Does nothing, the data list is already provided
+        """
         pass
 
     def process(self):
+        r"""
+        Does nothing, the data list is already provided
+        """
         pass
 
     @property
     def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        Does nothing, the data list is already provided
+        """
         return []
 
     @property
     def raw_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        Does nothing, the data list is already provided
+        """
         return []
 
 
@@ -109,33 +120,50 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
 
     @property
     def raw_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        The name of the files in the :obj:`self.raw_dir` folder that must
+        be present in order to skip downloading.
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
     @property
     def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        The name of the files in the :obj:`self.processed_dir` folder that
+        must be present in order to skip processing.
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
     def download(self):
+        r"""
+        Downloads the dataset to the :obj:`self.raw_dir` folder.
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
     def process(self):
+        r"""
+        Processes the dataset to the :obj:`self.processed_dir` folder.
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
     def get(self, idx: int) -> Data:
+        r"""
+        Gets the data object at index :obj:`idx`.
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
     @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
         r"""
         Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
         implemented).
@@ -145,7 +173,7 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         )
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
         r"""
         Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
         implemented).
@@ -155,7 +183,7 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         )
 
     @property
-    def dim_target(self):
+    def dim_target(self) -> int:
         r"""
         Specifies the dimension of each target vector.
         """
@@ -164,17 +192,29 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         )
 
     def len(self) -> int:
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
     def __len__(self) -> int:
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         raise NotImplementedError(
             "You should subclass DatasetInterface and implement this method"
         )
 
 
 class TemporalDatasetInterface(DatasetInterface):
+    """
+    Extension of DatasetInterface to the temporal scenario.
+    """
+
     def get_mask(self, data: Union[Batch, Data]) -> torch.Tensor:
         """
         Computes the mask of time steps for which we need to make a prediction.
@@ -338,56 +378,83 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
                 yield data[i]
 
     @property
-    def raw_file_names(self) -> List[str]:
+    def raw_file_names(self) -> List[str, Path]:
+        r"""
+        The name of the files in the :obj:`self.raw_dir` folder that must
+        be present in order to skip downloading.
+        """
         raise NotImplementedError(
             "You should subclass IterableDatasetInterface and implement this method"
         )
 
     @property
-    def raw_dir(self) -> str:
+    def raw_dir(self) -> Union[str,Path]:
+        r"""
+        The path where the raw data should be downloaded
+        :return: a string
+        """
         return os.path.join(self.root, self.name, "raw")
 
     @property
-    def raw_paths(self) -> List[str]:
-        r"""The absolute filepaths that must be present in order to skip
-        downloading."""
+    def raw_paths(self) -> List[Union[str,Path]]:
+        r"""
+        The absolute filepaths that must be present in order to skip
+        downloading.
+        """
         files = self.raw_file_names
         return [os.path.join(self.raw_dir, f) for f in files]
 
     @property
-    def processed_file_names(self) -> List[str]:
+    def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        The list of file names that must be present in order to skip
+        downloading.
+        """
         raise NotImplementedError(
             "You should subclass IterableDatasetInterface and implement this method"
         )
 
     @property
-    def processed_dir(self) -> str:
+    def processed_dir(self) -> Union[str,Path]:
+        r"""
+        The folder where to store processed data files.
+        """
         return os.path.join(self.root, self.name, "processed")
 
     @property
-    def processed_paths(self) -> List[str]:
-        r"""The absolute filepaths that must be present in order to skip
-        processing."""
+    def processed_paths(self) -> List[Union[str,Path]]:
+        r"""
+        The absolute filepaths that must be present in order to skip
+        processing.
+        """
         files = self.processed_file_names
         return [os.path.join(self.processed_dir, f) for f in files]
 
     def download(self):
+        r"""
+        Downloads the dataset to the :obj:`self.raw_dir` folder."""
         raise NotImplementedError(
             "You should subclass IterableDatasetInterface and implement this method"
         )
 
     def process(self):
+        r"""
+        Processes the dataset to the :obj:`self.processed_dir` folder.
+        """
         raise NotImplementedError(
             "You should subclass IterableDatasetInterface and implement this method"
         )
 
     def get(self, idx: int) -> Data:
+        r"""
+        Gets the data object at index :obj:`idx`.
+        """
         raise NotImplementedError(
             "You should subclass IterableDatasetInterface and implement this method"
         )
 
     @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
         r"""
         Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
         implemented).
@@ -397,7 +464,7 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         )
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
         r"""
         Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
         implemented).
@@ -407,7 +474,7 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         )
 
     @property
-    def dim_target(self):
+    def dim_target(self) -> int:
         r"""
         Specifies the dimension of each target vector.
         """
@@ -416,6 +483,10 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         )
 
     def __len__(self):
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         return len(
             self.urls
         )  # It's important it stays dynamic, because self.urls depends on url_indices
@@ -441,21 +512,37 @@ class TUDatasetInterface(TUDataset):
         )
 
     @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
+        r"""
+        Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return self.num_node_features
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
+        r"""
+        Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return self.num_edge_features
 
     @property
-    def dim_target(self):
+    def dim_target(self) -> int:
+        r"""
+        Specifies the dimension of each target vector.
+        """
         return self.num_classes
 
     def download(self):
+        r"""
+        Downloads the TUDataset dataset to the :obj:`self.raw_dir` folder."""
         super().download()
 
     def process(self):
+        r"""
+        Processes the TUDataset dataset to the :obj:`self.processed_dir` folder.
+        """
         super().process()
 
 
@@ -475,24 +562,44 @@ class PlanetoidDatasetInterface(Planetoid):
         )
 
     @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
+        r"""
+        Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return self.num_node_features
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
+        r"""
+        Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return self.num_edge_features
 
     @property
-    def dim_target(self):
+    def dim_target(self) -> int:
+        r"""
+        Specifies the dimension of each target vector.
+        """
         return self.num_classes
 
     def download(self):
+        r"""
+        Downloads the Planetoid dataset to the :obj:`self.raw_dir` folder."""
         super().download()
 
     def process(self):
+        r"""
+        Processes the Planetoid dataset to the :obj:`self.processed_dir` folder.
+        """
         super().process()
 
     def __len__(self) -> int:
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         if isinstance(self.data, Data):
             return 1
         return len(self.data)
@@ -521,25 +628,43 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
         self.data.y = self.data.y.squeeze()
 
     @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
+        r"""
+        Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return self.data.x.shape[1]
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
+        r"""
+        Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         if self.data.edge_attr is not None:
             return self.data.edge_attr.shape[1]
         else:
             return 0
 
     @property
-    def dim_target(self):
+    def dim_target(self) -> int:
+        r"""
+        Specifies the dimension of each target vector.
+        """
         return self.data.y.shape[1]
 
     @property
-    def processed_file_names(self):
+    def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        The list of file names that must be present in order to skip
+        downloading.
+        """
         return ["data.pt"]
 
     def download(self):
+        r"""
+        Downloads the OGB dataset to the :obj:`self.raw_dir` folder.
+        """
         url = self.meta_info["url"]
         if decide_download(url):
             path = download_url(url, self.original_root)
@@ -554,9 +679,16 @@ class OGBGDatasetInterface(PygGraphPropPredDataset):
             shutil.move(os.path.join(self.original_root, self.download_name), self.root)
 
     def process(self):
+        r"""
+        Processes the OGB dataset to the :obj:`self.processed_dir` folder.
+        """
         super().process()
 
     def __len__(self) -> int:
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         return self.data.y.shape[0]
 
 
@@ -588,28 +720,54 @@ class ToyIterableDataset(IterableDatasetInterface):
 
     @property
     def raw_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        The name of the files in the :obj:`self.raw_dir` folder that must
+        be present in order to skip downloading.
+        """
         return []
 
     @property
     def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        r"""
+        The list of file names that must be present in order to skip
+        downloading.
+        """
         return [f"fake_processed_{i}.pt" for i in range(100)]
 
     @property
-    def dim_target(self):
-        return 1
-
-    @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
+        r"""
+        Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return 5
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
+        r"""
+        Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return 0
 
+    @property
+    def dim_target(self) -> int:
+        r"""
+        Specifies the dimension of each target vector.
+        """
+        return 1
+
     def download(self):
+        r"""
+        Does nothing, the data list is already provided
+        """
         pass
 
     def process(self):
+        r"""
+        Creates a fake dataset and stores it to the :obj:`self.processed_dir` folder.
+        Each file will contain a list of 10 fake graphs.
+        """
         for i in range(100):
             fake_graphs = []
             for g in range(10):
@@ -620,11 +778,19 @@ class ToyIterableDataset(IterableDatasetInterface):
                         edge_index=torch.zeros(2, 1).long(),
                     )
                 )
-
             torch.save(fake_graphs, self.processed_paths[i])
 
 
 class ChickenpoxDatasetInterface(TemporalDatasetInterface):
+    r"""
+    Class that acts as wrapper to Pytorch Geometric Temporal Chickenpox dataset.
+
+    Args:
+        root (Union[str,Path]): root data folder
+        name (str): name of the dataset
+        lags: (how many original timesteps to aggregate into a single time step)
+        kwargs: optional additional parameters to `ChickenpoxDatasetLoader` (from PyG Temporal)
+    """
     def __init__(self, root, name, lags=4, **kwargs):
         super().__init__(root, name, **kwargs)
 
@@ -632,26 +798,53 @@ class ChickenpoxDatasetInterface(TemporalDatasetInterface):
         self.dataset = ChickenpoxDatasetLoader().get_dataset(lags=lags)
 
     def get_mask(self, data):
-        # in this case data is a Data object containing a snapshot of a single
-        # graph sequence.
-        # the task is node classification at each time step
+        """
+        Computes the mask of time steps for which we need to make a prediction.
+        In this case data is a Data object containing a snapshot of a single graph sequence,
+        and the task is node classification at each time step
+
+        Args:
+            data: the data object
+
+        Returns:
+            A tensor indicating the time-steps at which we expect predictions
+        """
         mask = torch.ones((1, 1))  #  time_steps x 1
         return mask
 
     @property
-    def dim_node_features(self):
+    def dim_node_features(self) -> int:
+        r"""
+        Specifies the number of node features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return self.dataset.features[0].shape[1]
 
     @property
-    def dim_edge_features(self):
+    def dim_edge_features(self) -> int:
+        r"""
+        Specifies the number of edge features (after pre-processing, but in the end it depends on the model that is
+        implemented).
+        """
         return 0
 
     @property
-    def dim_target(self):
+    def dim_target(self) -> int:
+        r"""
+        Specifies the dimension of each target vector.
+        """
         return 1
 
     def len(self):
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         return len(self)
 
     def __len__(self):
+        r"""
+        Returns the number of graphs stored in the dataset.
+        Note: we need to implement both `len` and `__len__` to comply with PyG interface
+        """
         return len(self.dataset.features)  # see DynamicGraphTemporalSignal

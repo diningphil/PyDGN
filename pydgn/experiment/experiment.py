@@ -382,7 +382,8 @@ class Experiment:
 
     def run_valid(self, dataset_getter, logger) -> Tuple[dict, dict]:
         r"""
-        This function returns the training and validation results for a `model selection run`. **Do not attempt to load the set inside this method!**
+        This function returns the training and validation results for a `model selection run`.
+        **Do not attempt to load the test set inside this method!**
         **If possible, rely on already available subclasses of this class**.
 
         Args:
@@ -403,7 +404,8 @@ class Experiment:
         self, dataset_getter: DataProvider, logger: Logger
     ) -> Tuple[dict, dict, dict]:
         """
-        This function returns the training, validation and test results for a `final run`. **Do not use the test to train the model nor for early stopping reasons!**
+        This function returns the training, validation and test results for a `final run`.
+        **Do not use the test to train the model nor for early stopping reasons!**
         **If possible, rely on already available subclasses of this class**.
 
         Args:

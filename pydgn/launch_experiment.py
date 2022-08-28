@@ -54,7 +54,15 @@ def set_gpus(num_gpus):
         print("GPU not available: " + str(e))
 
 
-def evaluation(options):
+def evaluation(options: argparse.Namespace):
+    """
+    Takes the CLI arguments and launches the evaluation procedure. The method takes care of instantiating the Ray
+    process and setting up the amount of resources available. Then it instantiates a :obj:`RiskAssesser` object to
+    carry out the experiments.
+
+    Args:
+        :param options (argparse.Namespace):
+    """
     kwargs = vars(options)
     debug = kwargs[DEBUG]
     configs_dict = yaml.load(open(kwargs[CONFIG_FILE], "r"), Loader=yaml.FullLoader)
@@ -164,7 +172,13 @@ def evaluation(options):
     risk_assesser.risk_assessment(debug=debug)
 
 
-def get_args():
+def get_args() -> argparse.Namespace:
+    """
+    Processes CLI arguments (i.e., the config file location and debug option) and returns a namespace.
+
+    Returns:
+        a namespace with the arguments
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(CONFIG_FILE_CLI_ARGUMENT, dest=CONFIG_FILE)
     parser.add_argument(
@@ -174,6 +188,9 @@ def get_args():
 
 
 def main():
+    """
+    Launches the experiment.
+    """
     # Necessary to locate dotted paths in projects that use PyDGN
     sys.path.append(os.getcwd())
 

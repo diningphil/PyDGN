@@ -23,7 +23,15 @@ from pydgn.log.logger import Logger
 from pydgn.static import *
 
 
-def send_telegram_update(bot_token, bot_chat_ID, bot_message):
+def send_telegram_update(bot_token: str, bot_chat_ID: str, bot_message: str):
+    """
+    Sends a message using Telegram APIs. Markdown can be used.
+
+    Args:
+        bot_token (str): token of the user's bot
+        bot_chat_ID (str): identifier of the chat where to write the message
+        bot_message (str): the message to be sent
+    """
     send_text = (
         "https://api.telegram.org/bot"
         + str(bot_token)

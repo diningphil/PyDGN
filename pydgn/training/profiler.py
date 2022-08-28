@@ -45,7 +45,14 @@ class Profiler:
         self.callback_calls[event_handler.__class__.__name__] = {}
 
         def clock(func):
+            """
+            Decorator that takes a function and "clocks" it, by taking the time needed to execute it and updating
+            statistics of the :obj:`Profiler` instance.
+            """
             def clocked(*args, **kwargs):
+                """
+                Monitors the time to execute a callback function of some 'obj':`EventHandler`.
+                """
                 class_name = event_handler.__class__.__name__
                 callback_name = func.__name__
                 t0 = time.time()
@@ -64,20 +71,29 @@ class Profiler:
 
             return clocked
 
-        # Taken from: https://stackoverflow.com/questions/3155436/getattr-for-static-class-variables-in-python
-        # We need to do this to invoke __getattr__ on a class
-        # https://stackoverflow.com/questions/100003/what-are-metaclasses-in-python
-        # TLDR We want the class ClockedCallback (which is an object itself) to have a method __getattr__
-        # if we specify __getattr__ inside ClockedCallback, rather than in its metaclass, the class ClockedCallback will
-        # not use the overridden __getattr__
         class getattribute(type):
+            """
+            Taken from: https://stackoverflow.com/questions/3155436/getattr-for-static-class-variables-in-python
+            We need to do this to invoke __getattr__ on a class
+            https://stackoverflow.com/questions/100003/what-are-metaclasses-in-python
+            TLDR We want the class ClockedCallback (which is an object itself) to have a method __getattr__
+            if we specify __getattr__ inside ClockedCallback, rather than in its metaclass, the class ClockedCallback will
+            not use the overridden __getattr__
+            """
             def __getattr__(self, name):
+                """
+                See also class description. The method clocks the callback function whenever a specific attribute
+                has to be retrieved.
+                """
                 return clock(
                     getattr(event_handler, name)
                 )  #  needed to implement callback calls with generic names
 
         # Relies on closures
         class ClockedCallback(metaclass=getattribute):
+            """
+            Dummy class to override method `__getattr__`
+            """
             pass
 
         return ClockedCallback

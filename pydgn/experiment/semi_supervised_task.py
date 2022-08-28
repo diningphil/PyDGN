@@ -22,6 +22,28 @@ class SemiSupervisedTask(Experiment):
         self.root_exp_path = exp_path  # to distinguish unsup. and sup. exp paths
 
     def run_valid(self, dataset_getter, logger):
+        r"""
+        This function returns the training and validation results for a `model selection run`.
+        **Do not attempt to load the test set inside this method!**
+        **If possible, rely on already available subclasses of this class**.
+
+        It implements a semi-supervised training scheme where first a model is trained (possibly with unsupervised loss,
+        hence the name semi-supervised) and a list of Data objects are produced according to the training engine used.
+        Then a second training is carried out where the data list is used as new dataset. The result of this second
+        training is used for the model selection procedure.
+
+        Args:
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            logger (:class:`~pydgn.log.logger.Logger`): the logger
+
+        Returns:
+            a tuple of training and test dictionaries. Each dictionary has two keys:
+
+            * ``LOSS`` (as defined in ``pydgn.static``)
+            * ``SCORE`` (as defined in ``pydgn.static``)
+
+            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
+        """
         unsupervised_config = self.model_config.unsupervised_config
         supervised_config = self.model_config.supervised_config
 
@@ -128,6 +150,28 @@ class SemiSupervisedTask(Experiment):
         return train_res, val_res
 
     def run_test(self, dataset_getter, logger):
+        """
+        This function returns the training, validation and test results for a `final run`.
+        **Do not use the test to train the model nor for early stopping reasons!**
+        **If possible, rely on already available subclasses of this class**.
+
+        It implements a semi-supervised training scheme where first a model is trained (possibly with unsupervised loss,
+        hence the name semi-supervised) and a list of Data objects are produced according to the training engine used.
+        Then a second training is carried out where the data list is used as new dataset. The result of this second
+        training is used for the risk assessment procedure.
+
+        Args:
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            logger (:class:`~pydgn.log.logger.Logger`): the logger
+
+        Returns:
+            a tuple of training,validation,test dictionaries. Each dictionary has two keys:
+
+            * ``LOSS`` (as defined in ``pydgn.static``)
+            * ``SCORE`` (as defined in ``pydgn.static``)
+
+            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
+        """
         unsupervised_config = self.model_config.unsupervised_config
         supervised_config = self.model_config.supervised_config
 

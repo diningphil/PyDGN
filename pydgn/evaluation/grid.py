@@ -62,6 +62,9 @@ class Grid:
         return configs
 
     def _gen_helper(self, cfgs_dict: dict) -> dict:
+        """
+        Helper generator that yields one possible configuration at a time.
+        """
         keys = cfgs_dict.keys()
         result = {}
 
@@ -127,6 +130,9 @@ class Grid:
                             yield deepcopy(result)
 
     def _list_helper(self, values: object) -> object:
+        """
+        Recursively parses lists of possible options for a given hyper-parameter.
+        """
         for value in values:
             if (
                 type(value) == str
@@ -144,12 +150,21 @@ class Grid:
                     yield cfg
 
     def __iter__(self):
+        """
+        Iterates over all hyper-parameter configurations
+        """
         return iter(self.hparams)
 
     def __len__(self):
+        """
+        Computes the number of hyper-parameter configurations to try
+        """
         return len(self.hparams)
 
     def __getitem__(self, index):
+        """
+        Gets a specific configuration indexed by an id
+        """
         return self.hparams[index]
 
     @property
