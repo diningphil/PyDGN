@@ -378,7 +378,7 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
                 yield data[i]
 
     @property
-    def raw_file_names(self) -> List[str, Path]:
+    def raw_file_names(self) -> List[Union[str, Path]]:
         r"""
         The name of the files in the :obj:`self.raw_dir` folder that must
         be present in order to skip downloading.
