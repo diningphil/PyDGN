@@ -23,6 +23,9 @@ from pydgn.training.profiler import Profiler
 
 
 def log(msg, logger: Logger):
+    """
+    Logs a message using a logger
+    """
     if logger is not None:
         logger.log(msg)
 
@@ -257,6 +260,9 @@ class TrainingEngine(EventDispatcher):
         self.training = False
 
     def _loop_helper(self):
+        """
+        Helper function that loops over the data.
+        """
         # Move data to device
         data = self.state.batch_input
         if isinstance(data, list):
@@ -347,6 +353,9 @@ class TrainingEngine(EventDispatcher):
             self._loop_helper()
 
     def _train(self, loader):
+        """
+        Implements a loop over the data in training mode
+        """
         self.set_training_mode()
 
         self._dispatch(EventHandler.ON_TRAINING_EPOCH_START, self.state)
@@ -636,6 +645,10 @@ class TrainingEngine(EventDispatcher):
     def _restore_checkpoint_and_best_results(
         self, ckpt_filename, best_ckpt_filename, zero_epoch
     ):
+        """
+        Restores the (best or last) checkpoint from a given file, and loads the best results so far into the
+        state if any.
+        """
         # When changing exp config from cuda to cpu, cuda will not be available to pytorch (due to Ray management
         # of resources). Hence, we need to specify explicitly the map location as cpu.
         # The other way around (cpu to cuda) poses no problem since GPUs are visible.
@@ -673,9 +686,16 @@ class TrainingEngine(EventDispatcher):
 
 
 class DataStreamTrainingEngine(TrainingEngine):
+    """
+    Class that handles a stream of graphs that could end at any moment.
+    """
 
     # loop over all data (i.e. computes an epoch)
     def _loop(self, loader: DataLoader):
+        """
+        Compared to superclass version, handles the issue of a stream of data that could end at any moment. This is done
+        using an additional boolean state variable.
+        """
         # Reset epoch state (DO NOT REMOVE)
         self.state.update(epoch_data_list=None)
         self.state.update(epoch_loss=None)
@@ -707,7 +727,10 @@ class GraphSequenceTrainingEngine(TrainingEngine):
     """
 
     def _loop_helper(self):
-
+        """
+        Compared to superclass version, aas the batch is composed of a list of snapshots, where each snapshot is a
+        graph object, we add an inner loop to pass one snapshot at a time.
+        """
         # data is a list of snapshots, one per time step
         data = self.state.batch_input
 
@@ -791,29 +814,6 @@ class GraphSequenceTrainingEngine(TrainingEngine):
         else:
             self._dispatch(EventHandler.ON_EVAL_BATCH_END, self.state)
 
-    # loop over all data (i.e. computes an epoch)
-    def _loop(self, loader: DataLoader):
-        """
-        Main method that computes a pass over the dataset using the data loader provided.
-
-        Args:
-            loader (:class:`torch_geometric.loader.DataLoader`): the loader to be used
-        """
-        # Reset epoch state (DO NOT REMOVE)
-        self.state.update(epoch_data_list=None)
-        self.state.update(epoch_loss=None)
-        self.state.update(epoch_score=None)
-        self.state.update(loader_iterable=iter(loader))
-
-        # Loop over data
-        for id_batch in range(len(loader)):
-
-            self.state.update(id_batch=id_batch)
-            # EngineCallback will store fetched data in state.batch_input
-            self._dispatch(EventHandler.ON_FETCH_DATA, self.state)
-
-            self._loop_helper()
-
 
 class LinkPredictionSingleGraphEngine(TrainingEngine):
     """
@@ -822,6 +822,17 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
     """
 
     def _to_data_list(self, x, batch, y):
+        """
+        Converts model outputs back to a list of Data elements. Useful for incremental architectures.
+
+        Args:
+            x (:class:`torch.Tensor`): tensor holding information of different nodes/graphs embeddings
+            batch (:class:`torch.Tensor`): the usual PyG batch tensor. Used to split node/graph embeddings graph-wise.
+            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction. Can be ``None``.
+
+        Returns:
+            a list of PyG Data objects (with only ``x`` and ``y`` attributes)
+        """
         data_list = []
         # Return node embeddings and their original class, if any (or dumb value which is required nonetheless)
         y = y[0]
@@ -829,6 +840,19 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
         return data_list
 
     def _to_list(self, data_list, embeddings, batch, edge_index, y):
+        """
+        Extends the ``data_list`` list of PyG Data objects with new samples.
+
+        Args:
+            data_list: a list of PyG Data objects (with only ``x`` and ``y`` attributes)
+            embeddings (:class:`torch.Tensor`): tensor holding information of different nodes/graphs embeddings
+            batch (:class:`torch.Tensor`): the usual PyG batch tensor. Used to split node/graph embeddings graph-wise.
+            edge_index:
+            y (:class:`torch.Tensor`): target labels, used to determine whether the task is graph prediction or node prediction. Can be ``None``.
+
+        Returns:
+            a list of PyG Data objects (with only ``x`` and ``y`` attributes)
+        """
         assert isinstance(y, list), "Expecting a list of (_, pos_edges, neg_edges)"
 
         # Crucial: Detach the embeddings to free the computation graph!!
@@ -852,6 +876,9 @@ class LinkPredictionSingleGraphEngine(TrainingEngine):
         return data_list
 
     def _num_targets(self, targets):
+        """
+        Computes the number of targets as the positive links + negative links
+        """
         assert isinstance(
             targets, list
         ), "Expecting a list of (_, pos_edges, neg_edges)"

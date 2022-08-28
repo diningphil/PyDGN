@@ -22,10 +22,21 @@ class EngineCallback(EventHandler):
 
     # Allows to profile data loading
     def on_fetch_data(self, state: State):
+        """
+        Fetches next batch of data from loader and updates the `batch_input` field of the state
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         data = state.loader_iterable.next()
         state.update(batch_input=data)
 
     def on_forward(self, state: State):
+        """
+        Calls the forward method of the model and stores the outputs in the `batch_outputs` field of the state.
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         # Forward pass
         outputs = state.model.forward(state.batch_input)
         state.update(batch_outputs=outputs)
@@ -66,6 +77,13 @@ class IterableEngineCallback(EngineCallback):
     """
 
     def on_fetch_data(self, state: State):
+        """
+         Fetches next batch of data from loader (if any, as data comes from a stream of unknown length)
+         and updates the `batch_input` field of the state
+
+         Args:
+             state (:class:`~training.event.state.State`): object holding training information
+         """
         try:
             data = next(state.loader_iterable)
             state.update(batch_input=data)
@@ -81,6 +99,13 @@ class TemporalEngineCallback(EngineCallback):
     """
 
     def on_forward(self, state):
+        """
+        Calls the forward method of the model and stores the outputs in the `batch_outputs` field of the state.
+        In addition to the input, passes to the model the hidden state computed at the previous time step.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         # Forward pass, the last hidden state gets passed as additional argument
         outputs = state.model.forward(state.batch_input, state.last_hidden_state)
         state.update(batch_outputs=outputs)

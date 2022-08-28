@@ -47,6 +47,12 @@ class EpochScheduler(Scheduler):
     """
 
     def on_training_epoch_end(self, state: State):
+        """
+        Performs a scheduler's step at the end of the training epoch.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.scheduler.step()
 
 
