@@ -26,7 +26,12 @@ class Plotter(EventHandler):
         self.writer = SummaryWriter(log_dir=Path(self.exp_path, "tensorboard"))
 
     def on_epoch_end(self, state: State):
+        """
+        Writes Training, Validation and (if any) Test metrics to Tensorboard
 
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         for k, v in state.epoch_results[LOSSES].items():
             loss_scalars = {}
             # Remove training/validation/test prefix (coupling with Engine)
@@ -54,6 +59,12 @@ class Plotter(EventHandler):
             self.writer.add_scalars(score_name, score_scalars, state.epoch)
 
     def on_fit_end(self, state: State):
+        """
+        Frees resources by closing the Tensorboard writer
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.writer.close()
 
 
@@ -90,6 +101,12 @@ class WandbPlotter(EventHandler):
             )
 
     def on_epoch_end(self, state: State):
+        """
+        Writes Training, Validation and (if any) Test metrics to WandB
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
 
         for k, v in state.epoch_results[LOSSES].items():
             # Remove training/validation/test prefix (coupling with Engine)
@@ -112,4 +129,10 @@ class WandbPlotter(EventHandler):
                 self._wandb.log({f"Test/{score_name}": v})
 
     def on_fit_end(self, state: State):
+        """
+        Frees resources by closing the WandB writer
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self._wandb.finish()
