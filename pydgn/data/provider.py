@@ -738,7 +738,8 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         ), "This class only work with a LinkPredictionSingleGraphSplitter splitter."
         return self.splitter
 
-    def _get_loader(self, indices: list, **kwargs: dict
+    def _get_loader(
+        self, indices: list, **kwargs: dict
     ) -> Union[torch.utils.data.DataLoader, torch_geometric.loader.DataLoader]:
         r"""
         This method returns a data loader for a **single** graph augmented with additional fields. The `y` field becomes

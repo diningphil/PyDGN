@@ -11,7 +11,8 @@ class DotProductLinkReadout(ReadoutInterface):
     Class that implements a simple readout mapping for link prediction via dot product
     """
 
-    def forward(self, node_embeddings: torch.tensor, batch: torch.Tensor, **kwargs
+    def forward(
+        self, node_embeddings: torch.tensor, batch: torch.Tensor, **kwargs
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
         """
         Implements a dot product scorer for link prediction
@@ -39,6 +40,5 @@ class DotProductLinkReadout(ReadoutInterface):
         return (
             None,
             node_embeddings,
-            [torch.sigmoid(torch.matmul(z, z.transpose(1, 2))),
-            adj],
+            [torch.sigmoid(torch.matmul(z, z.transpose(1, 2))), adj],
         )

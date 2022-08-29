@@ -449,7 +449,7 @@ class OGBGSplitter(Splitter):
         random.seed(self.seed)
 
         assert (
-                self.n_outer_folds == 1 and self.n_inner_folds == 1
+            self.n_outer_folds == 1 and self.n_inner_folds == 1
         ), "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
         original_splits = dataset.get_idx_split()
 

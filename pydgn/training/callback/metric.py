@@ -448,10 +448,10 @@ class MultiScore(Metric):
 
     def on_eval_epoch_start(self, state: State):
         """
-       Compared to superclass version, initializes a dictionary for each score to track rather than single lists
+        Compared to superclass version, initializes a dictionary for each score to track rather than single lists
 
-        Args:
-            state (:class:`~training.event.state.State`): object holding training information
+         Args:
+             state (:class:`~training.event.state.State`): object holding training information
         """
         self.batch_metrics = {s.name: [] for s in self.scores}
         self.y_pred = {s.name: [] for s in self.scores}

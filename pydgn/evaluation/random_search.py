@@ -62,7 +62,7 @@ class RandomSearch(Grid):
 
          Returns:
              A dictionary
-         """
+        """
         method, args = configs[SAMPLE_METHOD], configs[ARGS]
         sampler = s2c(method)
         sample = sampler(*args)

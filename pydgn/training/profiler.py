@@ -49,6 +49,7 @@ class Profiler:
             Decorator that takes a function and "clocks" it, by taking the time needed to execute it and updating
             statistics of the :obj:`Profiler` instance.
             """
+
             def clocked(*args, **kwargs):
                 """
                 Monitors the time to execute a callback function of some 'obj':`EventHandler`.
@@ -80,6 +81,7 @@ class Profiler:
             if we specify __getattr__ inside ClockedCallback, rather than in its metaclass, the class ClockedCallback will
             not use the overridden __getattr__
             """
+
             def __getattr__(self, name):
                 """
                 See also class description. The method clocks the callback function whenever a specific attribute
@@ -94,6 +96,7 @@ class Profiler:
             """
             Dummy class to override method `__getattr__`
             """
+
             pass
 
         return ClockedCallback

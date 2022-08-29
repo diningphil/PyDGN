@@ -78,12 +78,12 @@ class IterableEngineCallback(EngineCallback):
 
     def on_fetch_data(self, state: State):
         """
-         Fetches next batch of data from loader (if any, as data comes from a stream of unknown length)
-         and updates the `batch_input` field of the state
+        Fetches next batch of data from loader (if any, as data comes from a stream of unknown length)
+        and updates the `batch_input` field of the state
 
-         Args:
-             state (:class:`~training.event.state.State`): object holding training information
-         """
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         try:
             data = next(state.loader_iterable)
             state.update(batch_input=data)

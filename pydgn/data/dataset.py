@@ -60,6 +60,7 @@ class ConcatFromListDataset(InMemoryDataset):
     Args:
         data_list (list): List of graphs.
     """
+
     def __init__(self, data_list: List[Data], **kwargs):
         super(ConcatFromListDataset, self).__init__("")
         self.data, self.slices = self.collate(data_list)
@@ -388,7 +389,7 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         )
 
     @property
-    def raw_dir(self) -> Union[str,Path]:
+    def raw_dir(self) -> Union[str, Path]:
         r"""
         The path where the raw data should be downloaded
         :return: a string
@@ -396,7 +397,7 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         return os.path.join(self.root, self.name, "raw")
 
     @property
-    def raw_paths(self) -> List[Union[str,Path]]:
+    def raw_paths(self) -> List[Union[str, Path]]:
         r"""
         The absolute filepaths that must be present in order to skip
         downloading.
@@ -415,14 +416,14 @@ class IterableDatasetInterface(torch.utils.data.IterableDataset):
         )
 
     @property
-    def processed_dir(self) -> Union[str,Path]:
+    def processed_dir(self) -> Union[str, Path]:
         r"""
         The folder where to store processed data files.
         """
         return os.path.join(self.root, self.name, "processed")
 
     @property
-    def processed_paths(self) -> List[Union[str,Path]]:
+    def processed_paths(self) -> List[Union[str, Path]]:
         r"""
         The absolute filepaths that must be present in order to skip
         processing.
@@ -791,6 +792,7 @@ class ChickenpoxDatasetInterface(TemporalDatasetInterface):
         lags: (how many original timesteps to aggregate into a single time step)
         kwargs: optional additional parameters to `ChickenpoxDatasetLoader` (from PyG Temporal)
     """
+
     def __init__(self, root, name, lags=4, **kwargs):
         super().__init__(root, name, **kwargs)
 

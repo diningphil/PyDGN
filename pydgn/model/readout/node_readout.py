@@ -15,7 +15,8 @@ class LinearNodeReadout(ReadoutInterface):
         super().__init__(dim_node_features, dim_edge_features, dim_target, config)
         self.W = nn.Linear(dim_node_features, dim_target, bias=True)
 
-    def forward(self, node_embeddings: torch.tensor, batch: torch.Tensor, **kwargs
+    def forward(
+        self, node_embeddings: torch.tensor, batch: torch.Tensor, **kwargs
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[List[object]]]:
         """
         Implements a linear readout of node embeddings
