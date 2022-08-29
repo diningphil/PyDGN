@@ -95,13 +95,35 @@ class Metric(Module, EventHandler):
         )
 
     def on_training_epoch_start(self, state: State):
+        """
+        Initialize list of batch metrics as well as the list of batch predictions and targets for the metric
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         self.batch_metrics = []
         self.y_pred, self.y_true = {self.name: []}, {self.name: []}
 
     def on_training_batch_start(self, state: State):
+        """
+        Initializes the number of potential time steps in a batch (for temporal learning)
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         self.timesteps_in_batch = 0.0
 
     def on_training_batch_end(self, state: State):
+        """
+        If we do not computed aggregated metric values over the entire epoch, populate the batch metrics list
+        with the new loss/score. Divide by the number of timesteps in the batch (default is 1 for static datasets)
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         if self.use_as_loss:
             batch_metric = state.batch_loss
         else:
@@ -115,6 +137,14 @@ class Metric(Module, EventHandler):
         self.timesteps_in_batch = None
 
     def on_training_epoch_end(self, state: State):
+        """
+        Computes the mean of batch metrics or an aggregated score over all epoch depending on the `accumulate_over_epoch`
+        parameter. Updates `epoch_loss` and `epoch_score` fields in the state and resets the basic fields used.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         if not self.accumulate_over_epoch:
             epoch_res = {
                 self.name: torch.tensor(self.batch_metrics).sum()
@@ -137,13 +167,35 @@ class Metric(Module, EventHandler):
         self.y_pred, self.y_true = None, None
 
     def on_eval_epoch_start(self, state: State):
+        """
+        Initialize list of batch metrics as well as the list of batch predictions and targets for the metric
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         self.batch_metrics = []
         self.y_pred, self.y_true = {self.name: []}, {self.name: []}
 
     def on_eval_batch_start(self, state: State):
+        """
+        Initializes the number of potential time steps in a batch (for temporal learning)
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         self.timesteps_in_batch = 0.0
 
     def on_eval_batch_end(self, state: State):
+        """
+        If we do not computed aggregated metric values over the entire epoch, populate the batch metrics list
+        with the new loss/score. Divide by the number of timesteps in the batch (default is 1 for static datasets)
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         if self.use_as_loss:
             batch_metric = state.batch_loss
         else:
@@ -157,6 +209,14 @@ class Metric(Module, EventHandler):
         self.timesteps_in_batch = None
 
     def on_eval_epoch_end(self, state: State):
+        """
+        Computes the mean of batch metrics or an aggregated score over all epoch depending on the `accumulate_over_epoch`
+        parameter. Updates `epoch_loss` and `epoch_score` fields in the state and resets the basic fields used.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         if not self.accumulate_over_epoch:
             epoch_res = {
                 self.name: torch.tensor(self.batch_metrics).sum()
@@ -200,6 +260,15 @@ class Metric(Module, EventHandler):
         )
 
     def on_compute_metrics(self, state: State):
+        """
+        Computes the loss/score depending on the metric, updating the `batch_loss` or `batch_score` field in the state.
+        In temporal graph learning, this method is computed more than once before the batch ends, so we accumulate
+        the loss or scores across timesteps of a single batch.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         self.timesteps_in_batch += 1.0
 
         outputs, targets = state.batch_outputs, state.batch_targets
@@ -239,6 +308,13 @@ class Metric(Module, EventHandler):
             self.accumulate_predictions_and_targets(targets, *outputs)
 
     def on_backward(self, state: State):
+        """
+        Calls backward on the loss if the metric is a loss.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         if self.use_as_loss:
             try:
                 state.batch_loss[self.name].backward()
@@ -302,6 +378,9 @@ class MultiScore(Metric):
         return "Multi Score"
 
     def _istantiate_scorer(self, scorer):
+        """
+        Istantiate a scorer with its own arguments (if any are given)
+        """
         if isinstance(scorer, dict):
             args = scorer[ARGS]
             return s2c(scorer[CLASS_NAME])(use_as_loss=False, **args)
@@ -309,14 +388,31 @@ class MultiScore(Metric):
             return s2c(scorer)(use_as_loss=False)
 
     def get_main_metric_name(self):
+        """
+        Returns the name of the first scorer that is passed to this class via the `__init__` method.
+        """
         return self.scores[0].get_main_metric_name()
 
     def on_training_epoch_start(self, state: State):
+        """
+        Compared to superclass version, initializes a dictionary for each score to track rather than single lists
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.batch_metrics = {s.name: [] for s in self.scores}
         self.y_pred = {s.name: [] for s in self.scores}
         self.y_true = {s.name: [] for s in self.scores}
 
     def on_training_batch_end(self, state: State):
+        """
+        For each scorer, computes the average metric in the batch wrt the number of timesteps (default is 1 for static
+        datasets) unless statistics are accumulated over the entire epoch
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+
+        """
         if not self.accumulate_over_epoch:
             for k, v in state.batch_score.items():
                 self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
@@ -324,6 +420,12 @@ class MultiScore(Metric):
         self.timesteps_in_batch = None
 
     def on_training_epoch_end(self, state: State):
+        """
+        For each score, computes the epoch scores using the same logic as the superclass
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             epoch_res = {
                 s.name: torch.tensor(self.batch_metrics[s.name]).sum()
@@ -345,11 +447,24 @@ class MultiScore(Metric):
         self.y_pred, self.y_true = None, None
 
     def on_eval_epoch_start(self, state: State):
+        """
+       Compared to superclass version, initializes a dictionary for each score to track rather than single lists
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.batch_metrics = {s.name: [] for s in self.scores}
         self.y_pred = {s.name: [] for s in self.scores}
         self.y_true = {s.name: [] for s in self.scores}
 
     def on_eval_batch_end(self, state: State):
+        """
+        For each scorer, computes the average metric in the batch wrt the number of timesteps (default is 1 for static
+        datasets) unless statistics are accumulated over the entire epoch
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             for k, v in state.batch_score.items():
                 self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
@@ -357,6 +472,12 @@ class MultiScore(Metric):
         self.timesteps_in_batch = None
 
     def on_eval_epoch_end(self, state: State):
+        """
+        For each score, computes the epoch scores using the same logic as the superclass
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             epoch_res = {
                 s.name: torch.tensor(self.batch_metrics[s.name]).sum()
@@ -380,6 +501,13 @@ class MultiScore(Metric):
     def accumulate_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> None:
+        """
+        Accumulates predictions and targets of the batch into a list for each scorer, so as to compute aggregated
+        statistics at the end of an epoch.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         for s in self.scores:
             y_pred_batch, y_true_batch = s.get_predictions_and_targets(
                 targets, *outputs
@@ -396,6 +524,12 @@ class MultiScore(Metric):
     def forward(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Union[dict, float]:
+        """
+        For each scorer, it computes a score and returns them into a dictionary.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         res = {}
         for s in self.scores:
             y_pred_batch, y_true_batch = s.get_predictions_and_targets(
@@ -439,6 +573,9 @@ class AdditiveLoss(Metric):
         return "Additive Loss"
 
     def _instantiate_loss(self, loss):
+        """
+        Istantiate a loss with its own arguments (if any are given)
+        """
         if isinstance(loss, dict):
             args = loss[ARGS]
             return s2c(loss[CLASS_NAME])(use_as_loss=True, **args)
@@ -446,11 +583,24 @@ class AdditiveLoss(Metric):
             return s2c(loss)(use_as_loss=True)
 
     def on_training_epoch_start(self, state: State):
+        """
+        Instantiates a dictionary with one list per loss (including itself, representing the sum of all losses)
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.batch_metrics = {l.name: [] for l in [self] + self.losses}
         self.y_pred = {l.name: [] for l in [self] + self.losses}
         self.y_true = {l.name: [] for l in [self] + self.losses}
 
     def on_training_batch_end(self, state: State):
+        """
+        For each loss, computes the average metric in the batch wrt the number of timesteps (default is 1 for static
+        datasets) unless statistics are accumulated over the entire epoch
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             for k, v in state.batch_loss.items():
                 self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
@@ -458,6 +608,13 @@ class AdditiveLoss(Metric):
         self.timesteps_in_batch = None
 
     def on_training_epoch_end(self, state: State):
+        """
+        Computes an averaged or aggregated loss across the entire epoch, including itself as the main loss. Updates the
+        field `epoch_loss` in state.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             epoch_res = {
                 l.name: torch.tensor(self.batch_metrics[l.name]).sum()
@@ -483,11 +640,24 @@ class AdditiveLoss(Metric):
         self.y_pred, self.y_true = None, None
 
     def on_eval_epoch_start(self, state: State):
+        """
+        Instantiates a dictionary with one list per loss (including itself, representing the sum of all losses)
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         self.batch_metrics = {l.name: [] for l in [self] + self.losses}
         self.y_pred = {l.name: [] for l in [self] + self.losses}
         self.y_true = {l.name: [] for l in [self] + self.losses}
 
     def on_eval_epoch_end(self, state: State):
+        """
+        Computes an averaged or aggregated loss across the entire epoch, including itself as the main loss. Updates the
+        field `epoch_loss` in state.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             epoch_res = {
                 l.name: torch.tensor(self.batch_metrics[l.name]).sum()
@@ -513,6 +683,13 @@ class AdditiveLoss(Metric):
         self.y_pred, self.y_true = None, None
 
     def on_eval_batch_end(self, state: State):
+        """
+        For each loss, computes the average metric in the batch wrt the number of timesteps (default is 1 for static
+        datasets) unless statistics are accumulated over the entire epoch
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         if not self.accumulate_over_epoch:
             for k, v in state.batch_loss.items():
                 self.batch_metrics[k].append(v.item() / self.timesteps_in_batch)
@@ -522,6 +699,16 @@ class AdditiveLoss(Metric):
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Sums the value of all different losses into one
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         loss_sum = 0.0
         for l in self.losses:
             single_loss = l.compute_metric(targets, predictions)
@@ -531,6 +718,13 @@ class AdditiveLoss(Metric):
     def accumulate_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> None:
+        """
+        Accumulates predictions and targets of the batch into a list for each loss, so as to compute aggregated
+        statistics at the end of an epoch.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         for l in self.losses:
             y_pred_batch, y_true_batch = l.get_predictions_and_targets(
                 targets, *outputs
@@ -545,6 +739,12 @@ class AdditiveLoss(Metric):
             )
 
     def forward(self, targets: torch.Tensor, *outputs: List[torch.Tensor]) -> dict:
+        """
+        For each scorer, it computes a loss and returns them into a dictionary, alongside the sum of all losses.
+
+        Args:
+            state (:class:`~training.event.state.State`): object holding training information
+        """
         res = {}
         loss_sum = 0.0
 
@@ -591,6 +791,17 @@ class Classification(Metric):
     def get_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns output[0] as predictions and dataset targets. Squeezes the first dimension of output and targets to get
+        single vectors.
+
+        Args:
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
+
+        Returns:
+            A tuple of tensors (predicted_values, target_values)
+        """
         outputs = outputs[0].squeeze(dim=1)
 
         if len(targets.shape) == 2:
@@ -601,6 +812,16 @@ class Classification(Metric):
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Applies a classification metric (to be subclassed as it is None in this class)
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         metric = self.metric(predictions, targets)
         return metric
 
@@ -635,6 +856,17 @@ class Regression(Metric):
     def get_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns output[0] as predictions and dataset targets. Squeezes the first dimension of output and targets to get
+        single vectors.
+
+        Args:
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
+
+        Returns:
+            A tuple of tensors (predicted_values, target_values)
+        """
         outputs = outputs[0].squeeze(dim=1)
 
         if len(targets.shape) == 2:
@@ -645,6 +877,16 @@ class Regression(Metric):
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Applies a regression metric (to be subclassed as it is None in this class)
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         metric = self.metric(predictions, targets)
         return metric
 
@@ -748,6 +990,18 @@ class DotProductLink(Metric):
     def get_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Uses node embeddings (outputs[1]) aand positive/negative edges (contained in targets by means of
+        e.g.n a :obj:`~pydgn.data.provider.LinkPredictionSingleGraphDataProvider`) to return logits and target labels
+        of an edge classification task.
+
+        Args:
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
+
+        Returns:
+            A tuple of tensors (predicted_values, target_values)
+        """
         node_embs = outputs[1]
         _, pos_edges, neg_edges = targets
 
@@ -766,6 +1020,16 @@ class DotProductLink(Metric):
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Applies BCEWithLogits to link logits and targets.
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         metric = torch.nn.functional.binary_cross_entropy_with_logits(
             predictions, targets
         )
@@ -794,6 +1058,17 @@ class MulticlassAccuracy(Metric):
     def get_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Takes output[0] as predictions and computes a discrete class using argmax. Returns standard dataset targets as
+        well. Squeezes the first dimension of output and targets to get single vectors.
+
+        Args:
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
+
+        Returns:
+            A tuple of tensors (predicted_values, target_values)
+        """
         pred = outputs[0]
         correct = self._get_correct(pred)
 
@@ -805,6 +1080,17 @@ class MulticlassAccuracy(Metric):
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Takes output[0] as predictions and computes a discrete class using argmax. Returns standard dataset targets as
+        well. Squeezes the first dimension of output and targets to get single vectors.
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         metric = 100.0 * (predictions == targets).sum().float() / targets.size(0)
         return metric
 
@@ -831,16 +1117,40 @@ class ToyMetric(Metric):
     def get_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns output[0] and dataset targets
+
+        Args:
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
+
+        Returns:
+            A tuple of tensors (predicted_values, target_values)
+        """
         return outputs[0], targets
 
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Computes a dummy score
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         metric = 100.0 * torch.ones(1)
         return metric
 
 
 class ToyUnsupervisedMetric(Metric):
+    r"""
+    Implements a toy metric.
+    """
+
     @property
     def name(self) -> str:
         """
@@ -851,10 +1161,30 @@ class ToyUnsupervisedMetric(Metric):
     def get_predictions_and_targets(
         self, targets: torch.Tensor, *outputs: List[torch.Tensor]
     ) -> Tuple[torch.Tensor, torch.Tensor]:
+        """
+        Returns output[0] and dataset targets
+
+        Args:
+            targets (:class:`torch.Tensor`): ground truth
+            outputs (List[:class:`torch.Tensor`]): outputs of the model
+
+        Returns:
+            A tuple of tensors (predicted_values, target_values)
+        """
         return outputs[0], targets
 
     def compute_metric(
         self, targets: torch.Tensor, predictions: torch.Tensor
     ) -> torch.tensor:
+        """
+        Computes a dummy score
+
+        Args:
+            targets (:class:`torch.Tensor`): tensor of ground truth values
+            predictions (:class:`torch.Tensor`): tensor of predictions of the model
+
+        Returns:
+            A tensor with the metric value
+        """
         metric = (predictions * 0.0).mean()
         return metric
