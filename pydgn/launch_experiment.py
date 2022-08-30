@@ -1,22 +1,23 @@
+import argparse
 import os
 import sys
 
 import gpustat
-
 import yaml
-import argparse
 
 from pydgn.static import *
 
 
 def set_gpus(num_gpus):
     """
-    Sets the visible GPUS for the experiments according to the availability in terms of memory. Prioritize GPUs with
-    less memory usage. Sets the ``CUDA_DEVICE_ORDER`` env variable to ``PCI_BUS_ID`` and ``CUDA_VISIBLE_DEVICES``
-    to the ordered list of GPU indices.
+    Sets the visible GPUS for the experiments according to the availability
+    in terms of memory. Prioritize GPUs with less memory usage.
+    Sets the ``CUDA_DEVICE_ORDER`` env variable to ``PCI_BUS_ID``
+    and ``CUDA_VISIBLE_DEVICES`` to the ordered list of GPU indices.
 
     Args:
-        num_gpus: maximum number of GPUs to use when launching experiments in parallel
+        num_gpus: maximum number of GPUs to use when
+            launching experiments in parallel
     """
     try:
         selected = []
@@ -56,16 +57,19 @@ def set_gpus(num_gpus):
 
 def evaluation(options: argparse.Namespace):
     """
-    Takes the CLI arguments and launches the evaluation procedure. The method takes care of instantiating the Ray
-    process and setting up the amount of resources available. Then it instantiates a :obj:`RiskAssesser` object to
-    carry out the experiments.
+    Takes the CLI arguments and launches the evaluation procedure.
+    The method takes care of instantiating the Ray process and setting up
+    the amount of resources available. Then it instantiates a
+    :obj:`RiskAssesser` object to carry out the experiments.
 
     Args:
         :param options (argparse.Namespace):
     """
     kwargs = vars(options)
     debug = kwargs[DEBUG]
-    configs_dict = yaml.load(open(kwargs[CONFIG_FILE], "r"), Loader=yaml.FullLoader)
+    configs_dict = yaml.load(
+        open(kwargs[CONFIG_FILE], "r"), Loader=yaml.FullLoader
+    )
 
     # Telegram bot settings
     telegram_config_file = configs_dict.get(TELEGRAM_CONFIG_FILE, None)
@@ -92,18 +96,21 @@ def evaluation(options: argparse.Namespace):
         set_gpus(max_gpus)
         gpus_per_task = configs_dict[GPUS_PER_TASK]
 
-    # we probably don't need this anymore, but keep it commented in case we're wrong
+    # we probably don't need this anymore, but keep it commented in case
     # OMP_NUM_THREADS = 'OMP_NUM_THREADS'
-    # os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid bottlenecks when running experiments in parallel. DO NOT REMOVE IT
+    # os.environ[OMP_NUM_THREADS] = "1"  # This is CRUCIAL to avoid
+    # bottlenecks when running experiments in parallel. DO NOT REMOVE IT
 
     #
-    # Once CUDA_VISIBLE_DEVICES has been set, we can start importing all the necessary modules
+    # Once CUDA_VISIBLE_DEVICES has been set, we can start importing
+    # all the necessary modules
     #
     import ray
-    import torch
 
-    # we probably don't need this anymore, but keep it commented in case we're wrong
-    # Needed to avoid thread spawning, conflicts with multi-processing. You may set a number > 1 but take into account the number of processes on the machine
+    # we probably don't need this anymore, but keep it commented in case
+    # Needed to avoid thread spawning, conflicts with multi-processing.
+    # You may set a number > 1 but take into account the
+    # number of processes on the machine
     # torch.set_num_threads(1)
 
     from pydgn.experiment.util import s2c
@@ -150,7 +157,8 @@ def evaluation(options: argparse.Namespace):
     splitter = Splitter.load(data_splits_file)
     inner_folds, outer_folds = splitter.n_inner_folds, splitter.n_outer_folds
     print(
-        f"Data splits loaded, outer folds are {outer_folds} and inner folds are {inner_folds}"
+        f"Data splits loaded, outer folds are {outer_folds} "
+        f"and inner folds are {inner_folds}"
     )
 
     # WARNING: leave the import here, it reads env variables set before
@@ -174,7 +182,8 @@ def evaluation(options: argparse.Namespace):
 
 def get_args() -> argparse.Namespace:
     """
-    Processes CLI arguments (i.e., the config file location and debug option) and returns a namespace.
+    Processes CLI arguments (i.e., the config file location and debug option)
+    and returns a namespace.
 
     Returns:
         a namespace with the arguments

@@ -10,10 +10,12 @@ from pydgn.training.util import atomic_save
 
 class EngineCallback(EventHandler):
     r"""
-    Class responsible for fetching data and handling current-epoch checkpoints at training time.
+    Class responsible for fetching data and handling current-epoch checkpoints
+     at training time.
 
     Args:
-        store_last_checkpoint (bool): if ``True``, keep the model's checkpoint for the last training epoch
+        store_last_checkpoint (bool): if ``True``, keep the model's
+            checkpoint for the last training epoch
     """
 
     def __init__(self, store_last_checkpoint: bool):
@@ -23,19 +25,24 @@ class EngineCallback(EventHandler):
     # Allows to profile data loading
     def on_fetch_data(self, state: State):
         """
-        Fetches next batch of data from loader and updates the `batch_input` field of the state
+        Fetches next batch of data from loader and updates the `batch_input`
+        field of the state
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`): object holding
+                training information
         """
         data = state.loader_iterable.next()
         state.update(batch_input=data)
 
     def on_forward(self, state: State):
         """
-        Calls the forward method of the model and stores the outputs in the `batch_outputs` field of the state.
+        Calls the forward method of the model and stores the outputs in the
+        `batch_outputs` field of the state.
+
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         # Forward pass
         outputs = state.model.forward(state.batch_input)
@@ -52,7 +59,8 @@ class EngineCallback(EventHandler):
         * ``STOP_TRAINING`` (as defined in ``pydgn.static``)
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         # Save last checkpoint
         if self.store_last_checkpoint:
@@ -67,22 +75,27 @@ class EngineCallback(EventHandler):
                 STOP_TRAINING: state.stop_training,
             }
             last_ckpt.update(state.epoch_results)
-            atomic_save(last_ckpt, Path(state.exp_path, LAST_CHECKPOINT_FILENAME))
+            atomic_save(
+                last_ckpt, Path(state.exp_path, LAST_CHECKPOINT_FILENAME)
+            )
 
 
 class IterableEngineCallback(EngineCallback):
     r"""
-    Class that extends :class:`pydgn.training.callback.EngineCallback` to the processing of Iterable-style datasets.
+    Class that extends :class:`pydgn.training.callback.EngineCallback`
+    to the processing of Iterable-style datasets.
     Needs to be used together with the appropriate engine class.
     """
 
     def on_fetch_data(self, state: State):
         """
-        Fetches next batch of data from loader (if any, as data comes from a stream of unknown length)
+        Fetches next batch of data from loader (if any, as data comes
+        from a stream of unknown length)
         and updates the `batch_input` field of the state
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         try:
             data = next(state.loader_iterable)
@@ -94,18 +107,24 @@ class IterableEngineCallback(EngineCallback):
 
 class TemporalEngineCallback(EngineCallback):
     r"""
-    Class that extends :class:`pydgn.training.callback.EngineCallback` to the processing of temporal datasets.
+    Class that extends :class:`pydgn.training.callback.EngineCallback`
+    to the processing of temporal datasets.
     Needs to be used together with the appropriate engine class.
     """
 
     def on_forward(self, state):
         """
-        Calls the forward method of the model and stores the outputs in the `batch_outputs` field of the state.
-        In addition to the input, passes to the model the hidden state computed at the previous time step.
+        Calls the forward method of the model and stores the outputs in the
+        `batch_outputs` field of the state. In addition to the input, passes
+        to the model the hidden state computed at the previous time step.
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
-        # Forward pass, the last hidden state gets passed as additional argument
-        outputs = state.model.forward(state.batch_input, state.last_hidden_state)
+        # Forward pass, the last hidden state gets passed as additional
+        # argument
+        outputs = state.model.forward(
+            state.batch_input, state.last_hidden_state
+        )
         state.update(batch_outputs=outputs)

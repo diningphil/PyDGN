@@ -5,11 +5,13 @@ from pydgn.training.event.state import State
 
 class GradientClipper(EventHandler):
     r"""
-    GradientClipper is the main event handler for gradient clippers. Just pass a PyTorch scheduler together with its
+    GradientClipper is the main event handler for gradient clippers.
+    Just pass a PyTorch scheduler together with its
     arguments in the configuration file.
 
     Args:
-        gradient_clipper_class_name (str): the dotted path to the gradient clipper class name
+        gradient_clipper_class_name (str): the dotted path to the gradient
+            clipper class name
         kwargs (dict): additional arguments
     """
 
@@ -21,6 +23,7 @@ class GradientClipper(EventHandler):
         Clips the gradients of the model before the weights are updated.
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         self.gradient_clipper.clip_gradients(state.model.parameters())

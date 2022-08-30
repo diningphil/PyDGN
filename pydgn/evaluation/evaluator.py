@@ -45,7 +45,8 @@ def send_telegram_update(bot_token: str, bot_chat_ID: str, bot_message: str):
 
 
 @ray.remote(
-    num_cpus=1, num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1))
+    num_cpus=1,
+    num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)),
 )
 def run_valid(
     experiment_class: Callable[..., Experiment],
@@ -58,17 +59,24 @@ def run_valid(
     logger: Logger,
 ) -> Tuple[int, int, int, float]:
     r"""
-    Ray job that performs a model selection run and returns bookkeeping information for the progress manager.
+    Ray job that performs a model selection run and returns bookkeeping
+    information for the progress manager.
 
     Args:
-        experiment_class (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]): the class of the experiment to instantiate
-        dataset_getter (Callable[..., :class:`~pydgn.data.provider.DataProvider`]): the class of the data provider to instantiate
+        experiment_class
+            (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]):
+            the class of the experiment to instantiate
+        dataset_getter
+            (Callable[..., :class:`~pydgn.data.provider.DataProvider`]):
+            the class of the data provider to instantiate
         config (dict): the configuration of this specific experiment
         config_id (int): the id of the configuration (for bookkeeping reasons)
         fold_exp_folder (str): path of the experiment root folder
-        fold_results_torch_path (str): path where to store the results of the experiment
+        fold_results_torch_path (str): path where to store the
+            results of the experiment
         exp_seed (int): seed of the experiment
-        logger (:class:`~pydgn.log.logger.Logger`): a logger to log information in the appropriate file
+        logger (:class:`~pydgn.log.logger.Logger`): a logger to log
+            information in the appropriate file
 
     Returns:
         a tuple with outer fold id, inner fold id, config id, and time elapsed
@@ -85,7 +93,8 @@ def run_valid(
 
 
 @ray.remote(
-    num_cpus=1, num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1))
+    num_cpus=1,
+    num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)),
 )
 def run_test(
     experiment_class: Callable[..., Experiment],
@@ -99,29 +108,41 @@ def run_test(
     logger: Logger,
 ) -> Tuple[int, int, float]:
     r"""
-    Ray job that performs a risk assessment run and returns bookkeeping information for the progress manager.
+    Ray job that performs a risk assessment run and returns bookkeeping
+    information for the progress manager.
 
     Args:
-        experiment_class (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]): the class of the experiment to instantiate
-        dataset_getter (Callable[..., :class:`~pydgn.data.provider.DataProvider`]): the class of the data provider to instantiate
-        best_config (dict): the best configuration to use for this specific outer fold
+        experiment_class
+            (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]):
+            the class of the experiment to instantiate
+        dataset_getter
+            (Callable[..., :class:`~pydgn.data.provider.DataProvider`]):
+            the class of the data provider to instantiate
+        best_config (dict): the best configuration to use for this
+            specific outer fold
         i (int): the id of the final run (for bookkeeping reasons)
         final_run_exp_path (str): path of the experiment root folder
-        final_run_torch_path (str): path where to store the results of the experiment
+        final_run_torch_path (str): path where to store the results
+            of the experiment
         exp_seed (int): seed of the experiment
-        logger (:class:`~pydgn.log.logger.Logger`): a logger to log information in the appropriate file
+        logger (:class:`~pydgn.log.logger.Logger`): a logger to log
+            information in the appropriate file
 
     Returns:
         a tuple with outer fold id, final run id, and time elapsed
     """
     if not osp.exists(final_run_torch_path):
         start = time.time()
-        experiment = experiment_class(best_config[CONFIG], final_run_exp_path, exp_seed)
+        experiment = experiment_class(
+            best_config[CONFIG], final_run_exp_path, exp_seed
+        )
         res = experiment.run_test(dataset_getter, logger)
         elapsed = time.time() - start
 
         train_res, val_res, test_res = res
-        torch.save((train_res, val_res, test_res, elapsed), final_run_torch_path)
+        torch.save(
+            (train_res, val_res, test_res, elapsed), final_run_torch_path
+        )
     else:
         res = torch.load(final_run_torch_path)
         elapsed = res[-1]
@@ -130,20 +151,36 @@ def run_test(
 
 class RiskAssesser:
     r"""
-    Class implementing a K-Fold technique to do Risk Assessment  (estimate of the true generalization performances)
-    and K-Fold Model Selection (select the best hyper-parameters for **each** external fold
+    Class implementing a K-Fold technique to do Risk Assessment
+    (estimate of the true generalization performances)
+    and K-Fold Model Selection (select the best hyper-parameters
+    for **each** external fold
 
     Args:
-        outer_folds (int): The number K of outer TEST folds. You should have generated the splits accordingly
-        outer_folds (int): The number K of inner VALIDATION folds. You should have generated the splits accordingly
-        experiment_class (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]): the experiment class to be instantiated
+        outer_folds (int): The number K of outer TEST folds.
+            You should have generated the splits accordingly
+        outer_folds (int): The number K of inner VALIDATION folds.
+            You should have generated the splits accordingly
+        experiment_class
+            (Callable[..., :class:`~pydgn.experiment.experiment.Experiment`]):
+            the experiment class to be instantiated
         exp_path (str): The folder in which to store **all** results
-        splits_filepath (str): The splits filepath with additional meta information
-        model_configs (Union[:class:`~pydgn.evaluation.grid.Grid`, :class:`~pydgn.evaluation.random_search.RandomSearch`]): an object storing all possible model configurations, e.g. config.base.Grid
-        final_training_runs (int): no of final training runs to mitigate bad initializations
-        higher_is_better (bool): whether or not the best model for each external fold should be selected by higher or lower score values
-        gpus_per_task (float): Number of gpus to assign to each experiment. Can be < ``1``.
-        base_seed (int): Seed used to generate experiments seeds. Used to replicate results. Default is ``42``
+        splits_filepath (str): The splits filepath with additional
+            meta information
+        model_configs
+            (Union[:class:`~pydgn.evaluation.grid.Grid`,
+            :class:`~pydgn.evaluation.random_search.RandomSearch`]):
+            an object storing all possible model configurations,
+            e.g., config.base.Grid
+        final_training_runs (int): no of final training runs to mitigate
+            bad initializations
+        higher_is_better (bool): whether or not the best model
+            for each external fold should be selected by higher
+            or lower score values
+        gpus_per_task (float): Number of gpus to assign to each
+            experiment. Can be < ``1``.
+        base_seed (int): Seed used to generate experiments seeds.
+            Used to replicate results. Default is ``42``
     """
 
     def __init__(
@@ -160,7 +197,8 @@ class RiskAssesser:
         base_seed: int = 42,
     ):
 
-        # REPRODUCIBILITY: https://pytorch.org/docs/stable/notes/randomness.html
+        # REPRODUCIBILITY:
+        # https://pytorch.org/docs/stable/notes/randomness.html
         self.base_seed = base_seed
         # Impost the manual seed from the start
         np.random.seed(self.base_seed)
@@ -207,9 +245,15 @@ class RiskAssesser:
 
         # telegram config
         tc = model_configs.telegram_config
-        self.telegram_bot_token = tc[TELEGRAM_BOT_TOKEN] if tc is not None else None
-        self.telegram_bot_chat_ID = tc[TELEGRAM_BOT_CHAT_ID] if tc is not None else None
-        self.log_model_selection = tc[LOG_MODEL_SELECTION] if tc is not None else None
+        self.telegram_bot_token = (
+            tc[TELEGRAM_BOT_TOKEN] if tc is not None else None
+        )
+        self.telegram_bot_chat_ID = (
+            tc[TELEGRAM_BOT_CHAT_ID] if tc is not None else None
+        )
+        self.log_model_selection = (
+            tc[LOG_MODEL_SELECTION] if tc is not None else None
+        )
         self.log_final_runs = tc[LOG_FINAL_RUNS] if tc is not None else None
 
     def risk_assessment(self, debug: bool):
@@ -217,7 +261,8 @@ class RiskAssesser:
         Performs risk assessment to evaluate the performances of a model.
 
         Args:
-            debug: if ``True``, sequential execution is performed and logs are printed to screen
+            debug: if ``True``, sequential execution is performed and logs are
+                printed to screen
         """
         if not osp.exists(self._ASSESSMENT_FOLDER):
             os.makedirs(self._ASSESSMENT_FOLDER)
@@ -233,30 +278,39 @@ class RiskAssesser:
             self.progress_manager = progress_manager
 
             # NOTE: Pre-computing seeds in advance simplifies the code
-            # Pre-compute in advance the seeds for model selection to aid replicability
+            # Pre-compute in advance the seeds for model selection to aid
+            # replicability
             self.model_selection_seeds = [
                 [
-                    [random.randrange(2**32 - 1) for _ in range(self.inner_folds)]
+                    [
+                        random.randrange(2**32 - 1)
+                        for _ in range(self.inner_folds)
+                    ]
                     for _ in range(len(self.model_configs))
                 ]
                 for _ in range(self.outer_folds)
             ]
-            # Pre-compute in advance the seeds for the final runs to aid replicability
+            # Pre-compute in advance the seeds for the final runs to aid
+            # replicability
             self.final_runs_seeds = [
-                [random.randrange(2**32 - 1) for _ in range(self.final_training_runs)]
+                [
+                    random.randrange(2**32 - 1)
+                    for _ in range(self.final_training_runs)
+                ]
                 for _ in range(self.outer_folds)
             ]
 
             for outer_k in range(self.outer_folds):
                 # Create a separate folder for each experiment
                 kfold_folder = osp.join(
-                    self._ASSESSMENT_FOLDER, self._OUTER_FOLD_BASE + str(outer_k + 1)
+                    self._ASSESSMENT_FOLDER,
+                    self._OUTER_FOLD_BASE + str(outer_k + 1),
                 )
                 if not osp.exists(kfold_folder):
                     os.makedirs(kfold_folder)
 
-                # Perform model selection. This determines a best config FOR EACH
-                # of the k outer folds
+                # Perform model selection. This determines a best config
+                # FOR EACH of the k outer folds
                 self.model_selection(kfold_folder, outer_k, debug)
 
                 # Must stay separate from Ray distributed computing logic
@@ -265,9 +319,9 @@ class RiskAssesser:
 
             # We launched all model selection jobs, now it is time to wait
             if not debug:
-                # This will also launch the final runs jobs once the model selection
-                # for a specific outer folds is completed. It returns when
-                # everything has completed
+                # This will also launch the final runs jobs once the model
+                # selection for a specific outer folds is completed.
+                # It returns when everything has completed
                 self.wait_configs()
 
             # Produces the self._ASSESSMENT_FILENAME file
@@ -275,7 +329,8 @@ class RiskAssesser:
 
     def wait_configs(self):
         r"""
-        Waits for configurations to terminate and updates the state of the progress manager
+        Waits for configurations to terminate and updates the state of the
+        progress manager
         """
         no_model_configs = len(self.model_configs)
         skip_model_selection = no_model_configs == 1
@@ -292,7 +347,8 @@ class RiskAssesser:
         outer_completed = [0 for _ in range(self.outer_folds)]
         # keeps track of the jobs completed for each inner fold
         inner_completed = [
-            [0 for _ in range(no_model_configs)] for _ in range(self.outer_folds)
+            [0 for _ in range(no_model_configs)]
+            for _ in range(self.outer_folds)
         ]
 
         # keeps track of the final run jobs completed for each outer fold
@@ -304,7 +360,9 @@ class RiskAssesser:
                 self.run_final_model(outer_k, False)
 
                 # Append the NEW jobs to the waiting list
-                waiting.extend(self.final_runs_job_list[-self.final_training_runs :])
+                waiting.extend(
+                    self.final_runs_job_list[-self.final_training_runs :]
+                )
 
         while waiting:
             completed, waiting = ray.wait(waiting)
@@ -337,7 +395,8 @@ class RiskAssesser:
                     inner_completed[outer_k][config_id] += 1
                     if inner_completed[outer_k][config_id] == self.inner_folds:
                         self.process_config(
-                            config_folder, deepcopy(self.model_configs[config_id])
+                            config_folder,
+                            deepcopy(self.model_configs[config_id]),
                         )
 
                     # if model selection is complete, launch final runs
@@ -352,10 +411,14 @@ class RiskAssesser:
 
                         # Append the NEW jobs to the waiting list
                         waiting.extend(
-                            self.final_runs_job_list[-self.final_training_runs :]
+                            self.final_runs_job_list[
+                                -self.final_training_runs :
+                            ]
                         )
 
-                elif future in self.final_runs_job_list:  # Risk ass. final runs
+                elif (
+                    future in self.final_runs_job_list
+                ):  # Risk ass. final runs
                     outer_k, run_id, elapsed = ray.get(future)
                     self.progress_manager.update_state(
                         dict(
@@ -367,7 +430,10 @@ class RiskAssesser:
                     )
 
                     final_runs_completed[outer_k] += 1
-                    if final_runs_completed[outer_k] == self.final_training_runs:
+                    if (
+                        final_runs_completed[outer_k]
+                        == self.final_training_runs
+                    ):
                         # Time to produce self._OUTER_RESULTS_FILENAME
                         self.process_final_runs(outer_k)
 
@@ -378,7 +444,8 @@ class RiskAssesser:
         Args:
             kfold_folder: The root folder for model selection
             outer_k: the current outer fold to consider
-            debug: if ``True``, sequential execution is performed and logs are printed to screen
+            debug: if ``True``, sequential execution is performed and logs are
+                printed to screen
         """
         model_selection_folder = osp.join(kfold_folder, self._SELECTION_FOLDER)
 
@@ -409,7 +476,8 @@ class RiskAssesser:
             for config_id, config in enumerate(self.model_configs):
                 # Create a separate folder for each configuration
                 config_folder = osp.join(
-                    model_selection_folder, self._CONFIG_BASE + str(config_id + 1)
+                    model_selection_folder,
+                    self._CONFIG_BASE + str(config_id + 1),
                 )
                 if not osp.exists(config_folder):
                     os.makedirs(config_folder)
@@ -424,7 +492,9 @@ class RiskAssesser:
                     )
 
                     # Use pre-computed random seed for the experiment
-                    exp_seed = self.model_selection_seeds[outer_k][config_id][k]
+                    exp_seed = self.model_selection_seeds[outer_k][config_id][
+                        k
+                    ]
                     dataset_getter.set_exp_seed(exp_seed)
 
                     # Tell the data provider to take data relative
@@ -467,9 +537,10 @@ class RiskAssesser:
                             experiment = self.experiment_class(
                                 config, fold_exp_folder, exp_seed
                             )
-                            training_score, validation_score = experiment.run_valid(
-                                dataset_getter, logger
-                            )
+                            (
+                                training_score,
+                                validation_score,
+                            ) = experiment.run_valid(dataset_getter, logger)
                             elapsed = time.time() - start
                             torch.save(
                                 (training_score, validation_score, elapsed),
@@ -487,7 +558,9 @@ class RiskAssesser:
                 )
         else:
             # Performing model selection for a single configuration is useless
-            with open(osp.join(model_selection_folder, self._WINNER_CONFIG), "w") as fp:
+            with open(
+                osp.join(model_selection_folder, self._WINNER_CONFIG), "w"
+            ) as fp:
                 json.dump(
                     dict(best_config_id=0, config=self.model_configs[0]),
                     fp,
@@ -497,11 +570,13 @@ class RiskAssesser:
 
     def run_final_model(self, outer_k: int, debug: bool):
         r"""
-        Performs the final runs once the best model for outer fold ``outer_k`` has been chosen.
+        Performs the final runs once the best model for outer fold ``outer_k``
+        has been chosen.
 
         Args:
             outer_k (int): the current outer fold to consider
-            debug (bool): if ``True``, sequential execution is performed and logs are printed to screen
+            debug (bool): if ``True``, sequential execution is performed and
+                logs are printed to screen
         """
         outer_folder = osp.join(
             self._ASSESSMENT_FOLDER, self._OUTER_FOLD_BASE + str(outer_k + 1)
@@ -544,7 +619,9 @@ class RiskAssesser:
             # Retrain with the best configuration and test
             # Set up a log file for this experiment (run in a separate process)
             logger = Logger(
-                osp.join(final_run_exp_path, "experiment.log"), mode="a", debug=debug
+                osp.join(final_run_exp_path, "experiment.log"),
+                mode="a",
+                debug=debug,
             )
             logger.log(
                 json.dumps(
@@ -584,7 +661,8 @@ class RiskAssesser:
 
                     training_res, val_res, test_res = res
                     torch.save(
-                        (training_res, val_res, test_res, elapsed), final_run_torch_path
+                        (training_res, val_res, test_res, elapsed),
+                        final_run_torch_path,
                     )
                 # else:
                 #     res = torch.load(final_run_torch_path)
@@ -594,11 +672,13 @@ class RiskAssesser:
 
     def process_config(self, config_folder: str, config: Config):
         r"""
-        Computes the best configuration for each external fold and stores it into a file.
+        Computes the best configuration for each external fold and stores
+        it into a file.
 
         Args:
             config_folder (str):
-            config (:class:`~pydgn.evaluation.config.Config`): the configuration object
+            config (:class:`~pydgn.evaluation.config.Config`): the
+                configuration object
         """
         config_filename = osp.join(config_folder, self._CONFIG_RESULTS)
         k_fold_dict = {
@@ -616,9 +696,14 @@ class RiskAssesser:
                 fold_exp_folder, f"fold_{str(k + 1)}_results.torch"
             )
 
-            training_res, validation_res, _ = torch.load(fold_results_torch_path)
+            training_res, validation_res, _ = torch.load(
+                fold_results_torch_path
+            )
 
-            training_loss, validation_loss = training_res[LOSS], validation_res[LOSS]
+            training_loss, validation_loss = (
+                training_res[LOSS],
+                validation_res[LOSS],
+            )
             training_score, validation_score = (
                 training_res[SCORE],
                 validation_res[SCORE],
@@ -633,19 +718,24 @@ class RiskAssesser:
                 for key in res.keys():
                     if main_res_type in key:
                         continue
-                    k_fold_dict[FOLDS][k][f"{mode}_{key}_{res_type}"] = float(res[key])
+                    k_fold_dict[FOLDS][k][f"{mode}_{key}_{res_type}"] = float(
+                        res[key]
+                    )
 
             # Rename main loss key for aesthetic
             k_fold_dict[FOLDS][k][TR_LOSS] = float(training_loss[MAIN_LOSS])
             k_fold_dict[FOLDS][k][VL_LOSS] = float(validation_loss[MAIN_LOSS])
             k_fold_dict[FOLDS][k][TR_SCORE] = float(training_score[MAIN_SCORE])
-            k_fold_dict[FOLDS][k][VL_SCORE] = float(validation_score[MAIN_SCORE])
+            k_fold_dict[FOLDS][k][VL_SCORE] = float(
+                validation_score[MAIN_SCORE]
+            )
             del training_loss[MAIN_LOSS]
             del validation_loss[MAIN_LOSS]
             del training_score[MAIN_SCORE]
             del validation_score[MAIN_SCORE]
 
-        # Note that training/validation loss/score will be used only to extract the proper keys
+        # Note that training/validation loss/score will be used only to extract
+        # the proper keys
         for key_dict, set_type, res_type in [
             (training_loss, TRAINING, LOSS),
             (validation_loss, VALIDATION, LOSS),
@@ -660,18 +750,26 @@ class RiskAssesser:
                         for i in range(self.inner_folds)
                     ]
                 )
-                k_fold_dict[f"{AVG}_{set_type}_{key}{suffix}"] = float(set_res.mean())
-                k_fold_dict[f"{STD}_{set_type}_{key}{suffix}"] = float(set_res.std())
+                k_fold_dict[f"{AVG}_{set_type}_{key}{suffix}"] = float(
+                    set_res.mean()
+                )
+                k_fold_dict[f"{STD}_{set_type}_{key}{suffix}"] = float(
+                    set_res.std()
+                )
 
         with open(config_filename, "w") as fp:
             json.dump(k_fold_dict, fp, sort_keys=False, indent=4)
 
-    def process_inner_results(self, folder: str, outer_k: int, no_configurations: int):
+    def process_inner_results(
+        self, folder: str, outer_k: int, no_configurations: int
+    ):
         r"""
-        Chooses the best hyper-parameters configuration using the HIGHEST validation mean score.
+        Chooses the best hyper-parameters configuration using the HIGHEST
+        validation mean score.
 
         Args:
-            folder (str): a folder which holds all configurations results after K INNER folds
+            folder (str): a folder which holds all configurations results
+                after K INNER folds
             outer_k (int): the current outer fold to consider
             no_configurations (int): number of possible configurations
         """
@@ -698,16 +796,22 @@ class RiskAssesser:
                     best_config = config_dict
 
         # Send telegram update
-        if self.model_configs.telegram_config is not None and self.log_model_selection:
+        if (
+            self.model_configs.telegram_config is not None
+            and self.log_model_selection
+        ):
             exp_name = os.path.basename(self.exp_path)
             telegram_msg = (
                 f"Exp *{exp_name}* \n"
-                f"Model Sel. ended for outer fold *{outer_k+1}* \n"
+                f"Model Sel. ended for outer fold *{outer_k + 1}* \n"
                 f"Best config id: *{best_i}* \n"
-                f"Main score: avg *{best_avg_vl:.4f}* / std *{best_std_vl:.4f}*"
+                f"Main score: avg *{best_avg_vl:.4f}* "
+                f"/ std *{best_std_vl:.4f}*"
             )
             send_telegram_update(
-                self.telegram_bot_token, self.telegram_bot_chat_ID, telegram_msg
+                self.telegram_bot_token,
+                self.telegram_bot_chat_ID,
+                telegram_msg,
             )
 
         with open(osp.join(folder, self._WINNER_CONFIG), "w") as fp:
@@ -739,7 +843,9 @@ class RiskAssesser:
             training_scores, validation_scores, test_scores = [], [], []
             for i in range(self.final_training_runs):
 
-                final_run_exp_path = osp.join(outer_folder, f"final_run{i + 1}")
+                final_run_exp_path = osp.join(
+                    outer_folder, f"final_run{i + 1}"
+                )
                 final_run_torch_path = osp.join(
                     final_run_exp_path, f"run_{i + 1}_results.torch"
                 )
@@ -766,7 +872,8 @@ class RiskAssesser:
                 validation_scores.append(validation_score)
                 test_scores.append(test_score)
 
-                # this block may be unindented, *_score used only to retrieve keys
+                # this block may be unindented, *_score used only to retrieve
+                # keys
                 scores = [
                     (training_score, tr_res, training_scores),
                     (validation_score, vl_res, validation_scores),
@@ -778,7 +885,8 @@ class RiskAssesser:
                     (test_loss, te_res, test_losses),
                 ]
 
-                # this block may be unindented, set_score used only to retrieve keys
+                # this block may be unindented, set_score used only to retrieve
+                # keys
                 for res_type, res in [(LOSS, losses), (SCORE, scores)]:
                     for set_res_type, set_dict, set_results in res:
                         for key in set_res_type.keys():
@@ -788,26 +896,39 @@ class RiskAssesser:
                                 else ""
                             )
                             set_dict[key + suffix] = np.mean(
-                                [float(set_run[key]) for set_run in set_results]
+                                [
+                                    float(set_run[key])
+                                    for set_run in set_results
+                                ]
                             )
                             set_dict[key + f"{suffix}_{STD}"] = np.std(
-                                [float(set_run[key]) for set_run in set_results]
+                                [
+                                    float(set_run[key])
+                                    for set_run in set_results
+                                ]
                             )
 
         # Send telegram update
-        if self.model_configs.telegram_config is not None and self.log_final_runs:
+        if (
+            self.model_configs.telegram_config is not None
+            and self.log_final_runs
+        ):
             exp_name = os.path.basename(self.exp_path)
             telegram_msg = (
                 f"Exp *{exp_name}* \n"
-                f"Final runs ended for outer fold *{outer_k+1}* \n"
+                f"Final runs ended for outer fold *{outer_k + 1}* \n"
                 f"Main test score: avg *{scores[2][1][MAIN_SCORE]:.4f}* "
                 f'/ std *{scores[2][1][f"{MAIN_SCORE}_{STD}"]:.4f}*'
             )
             send_telegram_update(
-                self.telegram_bot_token, self.telegram_bot_chat_ID, telegram_msg
+                self.telegram_bot_token,
+                self.telegram_bot_chat_ID,
+                telegram_msg,
             )
 
-        with open(osp.join(outer_folder, self._OUTER_RESULTS_FILENAME), "w") as fp:
+        with open(
+            osp.join(outer_folder, self._OUTER_RESULTS_FILENAME), "w"
+        ) as fp:
 
             json.dump(
                 {
@@ -846,14 +967,18 @@ class RiskAssesser:
                 for k in outer_fold_results[
                     OUTER_TRAIN
                 ].keys():  # train keys are the same as valid and test keys
-                    # Do not want to average std of different final runs in different outer folds
+                    # Do not want to average std of different final runs in
+                    # different outer folds
                     if k[-3:] == STD:
                         continue
 
-                    # there may be different optimal losses for each outer fold, so we cannot always compute
-                    # the average over K outer folds of the same loss
-                    # this is not so problematic as one can always recover the average and standard loss values
-                    # across outer folds when we have the same loss for all outer folds using a jupyter notebook
+                    # there may be different optimal losses for each outer
+                    # fold, so we cannot always compute the average over
+                    # K outer folds of the same loss this is not so
+                    # problematic as one can always recover the average and
+                    # standard loss values across outer folds when we
+                    # have the same loss for all outer folds using
+                    # a jupyter notebook
                     if "_loss" in k:
                         continue
 
@@ -865,8 +990,12 @@ class RiskAssesser:
 
                     for results, set in outer_results:
                         set_results = np.array([res[k] for res in results])
-                        assessment_results[f"{AVG}_{set}_{k}"] = set_results.mean()
-                        assessment_results[f"{STD}_{set}_{k}"] = set_results.std()
+                        assessment_results[
+                            f"{AVG}_{set}_{k}"
+                        ] = set_results.mean()
+                        assessment_results[
+                            f"{STD}_{set}_{k}"
+                        ] = set_results.std()
 
         # Send telegram update
         if self.model_configs.telegram_config is not None:
@@ -874,11 +1003,15 @@ class RiskAssesser:
             telegram_msg = (
                 f"Exp *{exp_name}* \n"
                 f"Experiment has finished \n"
-                f'Test score: avg *{assessment_results[f"{AVG}_{TEST}_{MAIN_SCORE}"]:.4f}* '
-                f'/ std *{assessment_results[f"{STD}_{TEST}_{MAIN_SCORE}"]:.4f}*'
+                f'Test score: avg '
+                f'*{assessment_results[f"{AVG}_{TEST}_{MAIN_SCORE}"]:.4f}* '
+                f'/ std'
+                f' *{assessment_results[f"{STD}_{TEST}_{MAIN_SCORE}"]:.4f}*'
             )
             send_telegram_update(
-                self.telegram_bot_token, self.telegram_bot_chat_ID, telegram_msg
+                self.telegram_bot_token,
+                self.telegram_bot_chat_ID,
+                telegram_msg,
             )
 
         with open(

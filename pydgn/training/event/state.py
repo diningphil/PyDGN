@@ -3,8 +3,9 @@ import torch
 
 class State:
     """
-    Any object of this class contains training information that is handled and modified by a :class:`TrainingEngine`
-    as well as by the `EventHandler` objects implementing callbacks
+    Any object of this class contains training information that is handled and
+    modified by a :class:`TrainingEngine` as well as by the
+    `EventHandler` objects implementing callbacks
 
     Args:
         model (torch.nn.Module): the model
@@ -27,12 +28,15 @@ class State:
 
         # For dynamic graph learning
         self.time_step = None  # used to keep track of the time step
-        self.last_hidden_state = None  # used to store the hidden state to be fed to the model at the next time step
+        # used to store the hidden state to be fed to the model at the next
+        # time step
+        self.last_hidden_state = None
         self.num_timesteps_per_batch = None
 
     def __getitem__(self, name):
         """
-        Returns the value associated with argument `name`, otherwise returns :obj:`None`
+        Returns the value associated with argument `name`, otherwise returns
+        :obj:`None`
         """
         return getattr(self, name, None)
 
@@ -44,10 +48,12 @@ class State:
 
     def update(self, **values: dict):
         """
-        The method sets new attributes or updates existing ones using the key,value pairs in ``values``
+        The method sets new attributes or updates existing ones using the
+        key,value pairs in ``values``
 
         Args:
-            values: a dictionary of key,value pairs to store in the global state
+            values: a dictionary of key,value pairs to store in
+                the global state
         """
         for name, value in values.items():
             setattr(self, name, value)

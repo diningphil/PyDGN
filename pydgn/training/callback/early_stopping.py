@@ -10,14 +10,17 @@ from pydgn.training.util import atomic_save
 
 class EarlyStopper(EventHandler):
     """
-    EarlyStopper is the main event handler for optimizers. Just create a subclass that implements an early stopping
-    method.
+    EarlyStopper is the main event handler for optimizers. Just create a
+    subclass that implements an early stopping method.
 
     Args:
-        monitor (str): the metric to monitor. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
-        ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
-        mode (str): can be ``MIN`` or ``MAX`` (as defined in ``pydgn.static``)
-        checkpoint (bool): whether we are interested in the checkpoint of the "best" epoch or not
+        monitor (str): the metric to monitor. The format is
+            ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+            ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+        mode (str): can be ``MIN``
+            or ``MAX`` (as defined in ``pydgn.static``)
+        checkpoint (bool): whether we are interested in the
+            checkpoint of the "best" epoch or not
     """
 
     def __init__(self, monitor: str, mode: str, checkpoint: bool = False):
@@ -33,16 +36,21 @@ class EarlyStopper(EventHandler):
         else:
             raise NotImplementedError("Mode not understood by early stopper.")
 
-        assert TEST not in monitor, "Do not apply early stopping to the test set!"
+        assert (
+            TEST not in monitor
+        ), "Do not apply early stopping to the test set!"
 
     def on_epoch_end(self, state: State):
         """
-        At the end of an epoch, check that the validation score improves over the current best validation score.
-        If so, store the necessary info in a dictionary and save it into the "best_epoch_results" property of the state.
-        If it is time to stop, updates the stop_training field of the state.
+        At the end of an epoch, check that the validation score improves over
+        the current best validation score. If so, store the necessary info
+        in a dictionary and save it into the "best_epoch_results" property
+        of the state. If it is time to stop, updates the
+        `stop_training` field of the state.
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         # it is possible that we evaluate every `n` epochs
         if not (
@@ -60,9 +68,9 @@ class EarlyStopper(EventHandler):
         if not hasattr(state, BEST_EPOCH_RESULTS):
             state.update(best_epoch_results=state.epoch_results)
             state.best_epoch_results[BEST_EPOCH] = state.epoch
-            state.best_epoch_results[score_or_loss][self.monitor] = state.epoch_results[
-                score_or_loss
-            ][self.monitor]
+            state.best_epoch_results[score_or_loss][
+                self.monitor
+            ] = state.epoch_results[score_or_loss][self.monitor]
             state.best_epoch_results[MODEL_STATE] = copy.deepcopy(
                 state.model.state_dict()
             )
@@ -107,18 +115,23 @@ class EarlyStopper(EventHandler):
 
     def stop(self, state: State, score_or_loss: str, metric: str) -> bool:
         """
-        Returns true when the early stopping technique decides it is time to stop.
+        Returns true when the early stopping technique decides
+        it is time to stop.
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`): object holding
+                training information
             score_or_loss (str): whether to monitor scores or losses
-            metric (str): the metric to consider. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
-                          ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+            metric (str): the metric to consider. The format is
+                ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+                ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
 
         Returns:
             a boolean specifying whether training should be stopped or not
         """
-        raise NotImplementedError("Sublass EarlyStopper and implement this method!")
+        raise NotImplementedError(
+            "Sublass EarlyStopper and implement this method!"
+        )
 
 
 class PatienceEarlyStopper(EarlyStopper):
@@ -126,11 +139,14 @@ class PatienceEarlyStopper(EarlyStopper):
     Early Stopper that implements patience
 
     Args:
-        monitor (str): the metric to monitor. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
-        ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
-        mode (str): can be ``MIN`` or ``MAX`` (as defined in ``pydgn.static``)
+        monitor (str): the metric to monitor. The format is
+            ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+            ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+        mode (str): can be ``MIN`` or ``MAX``
+            (as defined in ``pydgn.static``)
         patience (int): the number of epochs of patience
-        checkpoint (bool): whether we are interested in the checkpoint of the "best" epoch or not
+        checkpoint (bool): whether we are interested in the checkpoint
+            of the "best" epoch or not
     """
 
     def __init__(self, monitor, mode, patience=30, checkpoint=False):
@@ -139,13 +155,16 @@ class PatienceEarlyStopper(EarlyStopper):
 
     def stop(self, state, score_or_loss, metric):
         """
-        Returns true when the number of epochs without improvement is greater than our patience parameter.
+        Returns true when the number of epochs without improvement
+        is greater than our patience parameter.
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
             score_or_loss (str): whether to monitor scores or losses
-            metric (str): the metric to consider. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
-                          ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+            metric (str): the metric to consider. The format is
+                ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+                ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
 
         Returns:
             a boolean specifying whether training should be stopped or not

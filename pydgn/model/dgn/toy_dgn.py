@@ -15,10 +15,19 @@ class ToyDGN(ModelInterface):
     """
 
     def __init__(
-        self, dim_node_features, dim_edge_features, dim_target, readout_class, config
+        self,
+        dim_node_features,
+        dim_edge_features,
+        dim_target,
+        readout_class,
+        config,
     ):
         super().__init__(
-            dim_node_features, dim_edge_features, dim_target, readout_class, config
+            dim_node_features,
+            dim_edge_features,
+            dim_target,
+            readout_class,
+            config,
         )
 
         num_layers = config["num_layers"]
@@ -78,10 +87,19 @@ class ToyDGNTemporal(ModelInterface):
     """
 
     def __init__(
-        self, dim_node_features, dim_edge_features, dim_target, readout_class, config
+        self,
+        dim_node_features,
+        dim_edge_features,
+        dim_target,
+        readout_class,
+        config,
     ):
         super().__init__(
-            dim_node_features, dim_edge_features, dim_target, readout_class, config
+            dim_node_features,
+            dim_edge_features,
+            dim_target,
+            readout_class,
+            config,
         )
 
         self.dim_embedding = 32
@@ -99,11 +117,14 @@ class ToyDGNTemporal(ModelInterface):
 
     def forward(self, snapshot: Union[Data, Batch], prev_state=None):
         """
-        Implements an Toy Temporal DGN with some DCRNN graph convolutional layers.
+        Implements an Toy Temporal DGN with some DCRNN graph
+        convolutional layers.
 
         Args:
-            snapshot (`Union[Data, Batch]`): a graph or batch of graphs at timestep t
-            prev_state (`torch.Tensor`): hidden state of the model (previous time step)
+            snapshot (`Union[Data, Batch]`): a graph or batch of graphs
+                at timestep t
+            prev_state (`torch.Tensor`): hidden state of the model
+                (previous time step)
 
         Returns:
             the output depends on the readout passed to the model as argument.

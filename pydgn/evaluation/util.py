@@ -14,15 +14,19 @@ def return_class_and_args(
     config: dict, key: str, return_class_name: bool = False
 ) -> Tuple[Callable[..., object], dict]:
     r"""
-    Returns the class and arguments associated to a specific key in the configuration file.
+    Returns the class and arguments associated to a specific key in the
+    configuration file.
 
     Args:
         config (dict): the configuration dictionary
-        key (str): a string representing a particular class in the configuration dictionary
-        return_class_name (bool): if ``True``, returns the class name as a string rather than the class object
+        key (str): a string representing a particular class in the
+            configuration dictionary
+        return_class_name (bool): if ``True``, returns the class name as a
+            string rather than the class object
 
     Returns:
-        a tuple (class, dict of arguments), or (None, None) if the key is not present in the config dictionary
+        a tuple (class, dict of arguments), or (None, None) if the key
+        is not present in the config dictionary
     """
     if key not in config or config[key] is None:
         return None, None
@@ -60,9 +64,12 @@ class ProgressManager:
         outer_folds (int): number of external folds for model assessment
         inner_folds (int): number of internal folds for model selection
         no_configs (int): number of possible configurations in model selection
-        final_runs (int): number of final runs per outer fold once the best model has been selected
-        show (bool): whether to show the progress bar or not. Default is ``True``
+        final_runs (int): number of final runs per outer fold once the
+            best model has been selected
+        show (bool): whether to show the progress bar or not.
+            Default is ``True``
     """
+
     # Possible vars of ``bar_format``:
     #       * ``l_bar, bar, r_bar``,
     #       * ``n, n_fmt, total, total_fmt``,
@@ -71,7 +78,10 @@ class ProgressManager:
     #       * ``rate, rate_fmt, rate_noinv``,
     #       * ``rate_noinv_fmt, rate_inv, rate_inv_fmt``,
     #       * ``postfix, unit_divisor, remaining, remaining_s``
-    def __init__(self, outer_folds, inner_folds, no_configs, final_runs, show=True):
+
+    def __init__(
+        self, outer_folds, inner_folds, no_configs, final_runs, show=True
+    ):
         self.ncols = 100
         self.outer_folds = outer_folds
         self.inner_folds = inner_folds
@@ -111,7 +121,8 @@ class ProgressManager:
             ascii=True,
             position=position,
             unit="config",
-            bar_format=" {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}",
+            bar_format=" {desc} {percentage:3.0f}%|"
+                       "{bar}|{n_fmt}/{total_fmt}{postfix}",
         )
         pbar.set_description(f"Out_{i + 1}/Inn_{j + 1}")
         mean = str(datetime.timedelta(seconds=0))
@@ -132,7 +143,8 @@ class ProgressManager:
             ascii=True,
             position=position,
             unit="config",
-            bar_format=" {desc} {percentage:3.0f}%|{bar}|{n_fmt}/{total_fmt}{postfix}",
+            bar_format=" {desc} {percentage:3.0f}%|"
+                       "{bar}|{n_fmt}/{total_fmt}{postfix}",
         )
         pbar.set_description(f"Final run {i + 1}")
         mean = str(datetime.timedelta(seconds=0))
@@ -149,7 +161,8 @@ class ProgressManager:
         \033[<N>A --> move cursor up N lines
         """
         print(
-            f'\033[F\033[A{"*" * ((self.ncols - 21) // 2 + 1)} Experiment Progress {"*" * ((self.ncols - 21) // 2)}\n'
+            f'\033[F\033[A{"*" * ((self.ncols - 21) // 2 + 1)} '
+            f'Experiment Progress {"*" * ((self.ncols - 21) // 2)}\n'
         )
 
     def show_footer(self):
@@ -182,18 +195,27 @@ class ProgressManager:
                 max_seconds = 0
                 mean_seconds = 0
 
-            mean_time = str(datetime.timedelta(seconds=mean_seconds)).split(".")[0]
-            min_time = str(datetime.timedelta(seconds=min_seconds)).split(".")[0]
-            max_time = str(datetime.timedelta(seconds=max_seconds)).split(".")[0]
-            pbar.set_postfix_str(f"min:{min_time}|avg:{mean_time}|max:{max_time}")
+            mean_time = str(datetime.timedelta(seconds=mean_seconds)).split(
+                "."
+            )[0]
+            min_time = str(datetime.timedelta(seconds=min_seconds)).split(
+                "."
+            )[0]
+            max_time = str(datetime.timedelta(seconds=max_seconds)).split(
+                "."
+            )[0]
+
+            pbar.set_postfix_str(
+                f"min:{min_time}|avg:{mean_time}|max:{max_time}"
+            )
 
             pbar.refresh()
         self.show_footer()
 
     def update_state(self, msg: dict):
         """
-        Updates the state of the progress bar (different from showing it on screen, see :func:`refresh`) once a message
-        is received
+        Updates the state of the progress bar (different from showing it
+        on screen, see :func:`refresh`) once a message is received
 
         Args:
             msg (dict): message with updates to be parsed
@@ -234,7 +256,9 @@ class ProgressManager:
                 self.pbars[position].update()
                 self.refresh()
             else:
-                raise Exception(f"Cannot parse type of message {type}, fix this.")
+                raise Exception(
+                    f"Cannot parse type of message {type}, fix this."
+                )
 
         except Exception as e:
             print(e)
@@ -242,13 +266,15 @@ class ProgressManager:
 
     def __enter__(self):
         """
-        Needed when Progress Manager is used as context manager. Does nothing besides returning self.
+        Needed when Progress Manager is used as context manager.
+        Does nothing besides returning self.
         """
         return self
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
         """
-        Needed when Progress Manager is used as context manager. Closes the progress bar.
+        Needed when Progress Manager is used as context manager.
+        Closes the progress bar.
         """
         for pbar in self.pbars:
             pbar.close()
@@ -257,18 +283,43 @@ class ProgressManager:
 """
 Various options for random search model selection
 """
-choice = lambda *args: random.choice(args)
-uniform = lambda *args: random.uniform(*args)
-normal = lambda *args: random.normalvariate(*args)
-randint = lambda *args: random.randint(*args)
+
+
+def choice(*args):
+    """
+    Implements a random choice between a list of values
+    """
+    return random.choice(args)
+
+
+def uniform(*args):
+    """
+    Implements a uniform sampling given an interval
+    """
+    return random.uniform(*args)
+
+
+def normal(*args):
+    """
+    Implements a univariate normal sampling given its parameters
+    """
+    return random.normalvariate(*args)
+
+
+def randint(*args):
+    """
+    Implements a random integer sampling in an interval
+    """
+    return random.randint(*args)
 
 
 def loguniform(*args):
-    """
+    r"""
     Performs a log-uniform random selection.
 
     Args:
-        *args: a tuple of (log min, log max, [base]) to use. Base 10 is used if the third argument is not available.
+        *args: a tuple of (log min, log max, [base]) to use. Base 10 is used
+            if the third argument is not available.
 
     Returns:
         a randomly chosen value

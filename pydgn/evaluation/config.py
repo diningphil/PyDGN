@@ -4,7 +4,8 @@ from collections import KeysView, ItemsView
 
 class Config:
     r"""
-    Simple class to manage the configuration dictionary as a Python object with fields.
+    Simple class to manage the configuration dictionary as a Python object
+    with fields.
 
     Args:
         config_dict (dict): the configuration dictionary
@@ -45,7 +46,8 @@ class Config:
 
     def get(self, key: str, default: object):
         """
-        Returns the key from the dictionary if present, otherwise the default value specified
+        Returns the key from the dictionary if present, otherwise the default
+        value specified
 
         Args:
             key (str): the key to look up in the dictionary

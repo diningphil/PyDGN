@@ -9,7 +9,8 @@ class Logger:
     Args:
         filepath (str): the path to the file where to write
         mode (str):  can be 'w' (write) or 'a' (append)
-        debug (bool): whether to print con screen (``True``)or to actually log on file (``False``)
+        debug (bool): whether to print con screen (``True``)or to
+            actually log on file (``False``)
 
     """
 

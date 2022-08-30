@@ -30,7 +30,9 @@ OUTER_TEST = "outer_test"
 DATA_SPLITTER_BASE_PATH = "pydgn.data.splitter."
 
 # ENGINE
-DEFAULT_ENGINE_CALLBACK = "pydgn.training.callback.engine_callback.EngineCallback"
+DEFAULT_ENGINE_CALLBACK = (
+    "pydgn.training.callback.engine_callback.EngineCallback"
+)
 
 # STATE
 TRAINING = "training"

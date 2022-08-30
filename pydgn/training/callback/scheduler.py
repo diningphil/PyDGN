@@ -8,25 +8,31 @@ from pydgn.training.event.state import State
 
 class Scheduler(EventHandler):
     """
-    Scheduler is the main event handler for schedulers. Just pass a PyTorch scheduler together with its arguments in the
-    configuration file.
+    Scheduler is the main event handler for schedulers. Just pass a PyTorch
+    scheduler together with its arguments in the configuration file.
 
     Args:
         scheduler_class_name (str): dotted path to class name of the scheduler
-        optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer to use. **This is automatically recovered by PyDGN when providing an optimizer**
+        optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer to
+            use. **This is automatically recovered by PyDGN when
+            providing an optimizer**
         kwargs: additional parameters for the specific scheduler to be used
 
     """
 
-    def __init__(self, scheduler_class_name: str, optimizer: Optimizer, **kwargs: dict):
+    def __init__(
+        self, scheduler_class_name: str, optimizer: Optimizer, **kwargs: dict
+    ):
         self.scheduler = s2c(scheduler_class_name)(optimizer, **kwargs)
 
     def on_fit_start(self, state: State):
         """
-        Loads the scheduler state if already present in the state_dict of a checkpoint
+        Loads the scheduler state if already present in the state_dict
+        of a checkpoint
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         if self.scheduler and state.scheduler_state is not None:
             self.scheduler.load_state_dict(state.scheduler_state)
@@ -36,7 +42,8 @@ class Scheduler(EventHandler):
         Updates the scheduler state with the current one for checkpointing
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         state.update(scheduler_state=self.scheduler.state_dict())
 
@@ -51,21 +58,26 @@ class EpochScheduler(Scheduler):
         Performs a scheduler's step at the end of the training epoch.
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         self.scheduler.step()
 
 
 class MetricScheduler(Scheduler):
     """
-    Implements a scheduler which uses variations in the metric of interest to modify the step size
+    Implements a scheduler which uses variations in the metric of interest
+    to modify the step size
 
     Args:
         scheduler_class_name (str): dotted path to class name of the scheduler
         use_loss (str): whether to monitor scores or losses
-        monitor (str): the metric to monitor. The format is ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
-                       ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
-        optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer to use. **This is automatically recovered by PyDGN when providing an optimizer**
+        monitor (str): the metric to monitor. The format is
+            ``[TRAINING|VALIDATION]_[METRIC NAME]``, where
+            ``TRAINING`` and ``VALIDATION`` are defined in ``pydgn.static``
+        optimizer (:class:`torch.optim.optimizer`): the Pytorch optimizer
+            to use. **This is automatically recovered by PyDGN when
+            providing an optimizer**
         kwargs: additional parameters for the specific scheduler to be used
     """
 
@@ -83,11 +95,13 @@ class MetricScheduler(Scheduler):
 
     def on_epoch_end(self, state: State):
         """
-        Updates the state of the scheduler according to a metric to monitor at each epoch.
-        Finally, loads the scheduler state if already present in the state_dict of a checkpoint
+        Updates the state of the scheduler according to a metric to monitor
+        at each epoch. Finally, loads the scheduler state if already present
+        in the state_dict of a checkpoint
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
 
         monitor_main_key = LOSSES if self.use_loss else SCORES

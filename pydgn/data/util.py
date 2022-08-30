@@ -13,7 +13,8 @@ from pydgn.experiment.util import s2c
 
 def get_or_create_dir(path: str) -> str:
     r"""
-    Creates directories associated to the specified path if they are missing, and it returns the path string.
+    Creates directories associated to the specified path if they are missing,
+    and it returns the path string.
 
     Args:
         path (str): the path
@@ -45,8 +46,8 @@ def filter_adj(
     edge_index: torch.Tensor, edge_attr: torch.Tensor, mask: torch.Tensor
 ) -> (torch.Tensor, Optional[torch.Tensor]):
     r"""
-    Adapted from https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/utils/dropout.html.
-    Does the same thing but with a different signature
+    Adapted from pytorch-geometric. Does the same thing but with
+    a different signature
 
     Args:
         edge_index (torch.Tensor): the usual PyG matrix of edge indices
@@ -54,7 +55,8 @@ def filter_adj(
         mask (torch.Tensor): boolean tensor with edges to filter
 
     Returns:
-        a tuple (filtered edge index, filtered edge attr or ``None`` if ``edge_attr`` is ``None``)
+        a tuple (filtered edge index, filtered edge attr or ``None``
+        if ``edge_attr`` is ``None``)
     """
     row, col = edge_index
     filtered_edge_index = row[mask], col[mask]
@@ -63,11 +65,13 @@ def filter_adj(
 
 def preprocess_data(options: dict):
     r"""
-    One of the main functions of the PyDGN library. Used to create the dataset and its associated files that ensure
-    the correct functioning of the data loading steps.
+    One of the main functions of the PyDGN library. Used to create the dataset
+    and its associated files that ensure the correct functioning of the
+    data loading steps.
 
     Args:
-        options (dict): a dictionary of dataset/splitter arguments as defined in the data configuration file used.
+        options (dict): a dictionary of dataset/splitter arguments as
+            defined in the data configuration file used.
 
     """
     data_info = options.pop("dataset")
@@ -95,7 +99,9 @@ def preprocess_data(options: dict):
 
     pre_filters = None
     pre_filters_opt = data_info.pop("pre_filter", None)
-    if pre_filters_opt is not None and check_argument(dataset_class, "pre_filter"):
+    if pre_filters_opt is not None and check_argument(
+        dataset_class, "pre_filter"
+    ):
         pre_filters = []
         for pre_filter in pre_filters_opt:
             pre_filter_class = s2c(pre_filter["class_name"])
@@ -118,7 +124,9 @@ def preprocess_data(options: dict):
     ################################
 
     dataset = dataset_class(**dataset_args)
-    assert hasattr(dataset, "name"), "Dataset instance should have a name attribute!"
+    assert hasattr(
+        dataset, "name"
+    ), "Dataset instance should have a name attribute!"
 
     # Store dataset additional arguments in a separate file
     kwargs_folder = osp.join(data_root, dataset.name)
@@ -140,7 +148,8 @@ def preprocess_data(options: dict):
     splits_dir = get_or_create_dir(osp.join(splits_root, dataset.name))
     splits_path = osp.join(
         splits_dir,
-        f"{dataset.name}_outer{splitter.n_outer_folds}_inner{splitter.n_inner_folds}.splits",
+        f"{dataset.name}_outer{splitter.n_outer_folds}"
+        f"_inner{splitter.n_inner_folds}.splits",
     )
 
     if not os.path.exists(splits_path):
@@ -159,13 +168,19 @@ def load_dataset(
     **kwargs: dict,
 ) -> DatasetInterface:
     r"""
-    Loads the dataset using the ``dataset_kwargs.pt`` file created when parsing the data config file.
+    Loads the dataset using the ``dataset_kwargs.pt`` file created when parsing
+    the data config file.
 
     Args:
         data_root (str): path of the folder that contains the dataset folder
-        dataset_name (str): name of the dataset (same as the name of the dataset folder that has been already created)
-        dataset_class (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]): the class of the dataset to instantiate with the parameters stored in the ``dataset_kwargs.pt`` file.
-        kwargs (dict): additional arguments to be passed to the dataset (potentially provided by a DataProvider)
+        dataset_name (str): name of the dataset (same as the name of the
+            dataset folder that has been already created)
+        dataset_class
+            (Callable[..., :class:`~pydgn.data.dataset.DatasetInterface`]):
+            the class of the dataset to instantiate with the parameters
+            stored in the ``dataset_kwargs.pt`` file.
+        kwargs (dict): additional arguments to be passed to the
+            dataset (potentially provided by a DataProvider)
 
     Returns:
         a :class:`~pydgn.data.dataset.DatasetInterface` object
@@ -195,10 +210,13 @@ def load_dataset(
 
 def to_lower_triangular(edge_index: torch.Tensor):
     r"""
-    Transform Pytorch Geometric undirected edge index into its "lower triangular counterpart"
+    Transform Pytorch Geometric undirected edge index into its
+    "lower triangular counterpart"
     """
     row, col = edge_index
     lower_tri_mask = row > col
     row, col = row[lower_tri_mask], col[lower_tri_mask]
-    lower_tri_edge_index = torch.cat((row.unsqueeze(0), col.unsqueeze(0)), dim=0)
+    lower_tri_edge_index = torch.cat(
+        (row.unsqueeze(0), col.unsqueeze(0)), dim=0
+    )
     return lower_tri_edge_index

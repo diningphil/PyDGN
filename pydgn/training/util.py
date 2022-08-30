@@ -7,8 +7,8 @@ from pydgn.static import *
 
 def atomic_save(data: dict, filepath: str):
     r"""
-    Atomically stores a dictionary that can be serialized by :func:`torch.save`,
-    exploiting the atomic :func:`os.replace`.
+    Atomically stores a dictionary that can be serialized by
+    :func:`torch.save`, exploiting the atomic :func:`os.replace`.
 
     Args:
         data (dict): the dictionary to be stored

@@ -19,12 +19,15 @@ class Experiment:
     Class that handles a single experiment.
 
     Args:
-        model_configuration (dict): the dictionary holding the experiment-specific configuration
+        model_configuration (dict): the dictionary holding the
+            experiment-specific configuration
         exp_path (str): path to the experiment folder
         exp_seed (int): the experiment's seed to use
     """
 
-    def __init__(self, model_configuration: dict, exp_path: str, exp_seed: int):
+    def __init__(
+        self, model_configuration: dict, exp_path: str, exp_seed: int
+    ):
         self.model_config = Config(model_configuration)
         self.exp_path = exp_path
         self.exp_seed = exp_seed
@@ -34,7 +37,8 @@ class Experiment:
         torch.cuda.manual_seed(self.exp_seed)
         random.seed(self.exp_seed)
 
-        # torch.use_deterministic_algorithms(True) for future versions of Pytorch
+        # torch.use_deterministic_algorithms(True) for future versions of
+        # Pytorch
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
 
@@ -42,14 +46,17 @@ class Experiment:
         config: Config, key: str
     ) -> Tuple[Callable[..., object], dict]:
         r"""
-        Returns the class and arguments associated to a specific key in the configuration file.
+        Returns the class and arguments associated to a specific key in the
+        configuration file.
 
         Args:
             config: the configuration dictionary
-            key: a string representing a particular class in the configuration dictionary
+            key: a string representing a particular class in the
+                configuration dictionary
 
         Returns:
-            a tuple (class, dict of arguments), or (None, None) if the key is not present in the config dictionary
+            a tuple (class, dict of arguments), or (None, None) if the key
+            is not present in the config dictionary
         """
         if key not in config or config[key] is None:
             return None, None
@@ -61,7 +68,9 @@ class Experiment:
                 config[key]["args"] if "args" in config[key] else {},
             )
         else:
-            raise NotImplementedError("Parameter has not been formatted properly")
+            raise NotImplementedError(
+                "Parameter has not been formatted properly"
+            )
 
     def _create_model(
         self,
@@ -72,17 +81,20 @@ class Experiment:
         config: Config,
     ) -> ModelInterface:
         r"""
-        Instantiates a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+        Instantiates a model that implements the
+        :class:`~pydgn.model.model.ModelInterface` interface
 
         Args:
             dim_node_features (int): number of node features
             dim_edge_features (int): number of edge features
             dim_target (int): target dimension
             readout_classname (str): string containing the model's class
-            config (:class:`~pydgn.evaluation.config.Config`): the configuration dictionary
+            config (:class:`~pydgn.evaluation.config.Config`):
+                the configuration dictionary
 
         Returns:
-            a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+            a model that implements the
+            :class:`~pydgn.model.model.ModelInterface` interface
         """
         model = s2c(config["model"])(
             dim_node_features=dim_node_features,
@@ -95,14 +107,16 @@ class Experiment:
         )
 
         # move to device
-        model.to(self.model_config.device)  # model .to() may not return anything
+        # model .to() may not return anything
+        model.to(self.model_config.device)
         return model
 
     def create_supervised_model(
         self, dim_node_features: int, dim_edge_features: int, dim_target: int
     ) -> ModelInterface:
         r"""
-        Instantiates a **supervised** model that implements the :class:`~pydgn.model.model.ModelInterface` interface,
+        Instantiates a **supervised** model that implements the
+        :class:`~pydgn.model.model.ModelInterface` interface,
         using the ``supervised_config`` field in the configuration file.
 
         Args:
@@ -111,7 +125,8 @@ class Experiment:
             dim_target (int): target dimension
 
         Returns:
-            a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+            a model that implements the
+            :class:`~pydgn.model.model.ModelInterface` interface
         """
         readout_classname = (
             self.model_config.supervised_config["readout"]
@@ -130,7 +145,8 @@ class Experiment:
         self, dim_node_features: int, dim_edge_features: int, dim_target: int
     ) -> ReadoutInterface:
         r"""
-        Instantiates an **supervised** readout that implements the :class:`~pydgn.model.model.ReadoutInterface` interface,
+        Instantiates an **supervised** readout that implements the
+        :class:`~pydgn.model.model.ReadoutInterface` interface,
         using the ``supervised_config`` field in the configuration file.
 
         Args:
@@ -139,7 +155,8 @@ class Experiment:
             dim_target (int): target dimension
 
         Returns:
-            a model that implements the :class:`~pydgn.model.model.ReadoutInterface` interface
+            a model that implements the
+            :class:`~pydgn.model.model.ReadoutInterface` interface
         """
         return s2c(self.model_config.supervised_config["readout"])(
             dim_node_features=dim_node_features,
@@ -152,7 +169,8 @@ class Experiment:
         self, dim_node_features: int, dim_edge_features: int, dim_target: int
     ) -> ModelInterface:
         r"""
-        Instantiates an **unsupervised** model that implements the :class:`~pydgn.model.model.ModelInterface` interface,
+        Instantiates an **unsupervised** model that implements the
+        :class:`~pydgn.model.model.ModelInterface` interface,
         using the ``unsupervised_config`` field in the configuration file.
 
         Args:
@@ -161,7 +179,8 @@ class Experiment:
             dim_target (int): target dimension
 
         Returns:
-            a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+            a model that implements the
+            :class:`~pydgn.model.model.ModelInterface` interface
         """
         readout_classname = (
             self.model_config.unsupervised_config["readout"]
@@ -185,8 +204,10 @@ class Experiment:
         prev_outputs_to_consider: List[int],
     ) -> ModelInterface:
         r"""
-        Instantiates a layer of an incremental architecture. It assumes the config file has a field ``layer_config``
-        and another ``layer_config.arbitrary_function_config`` that holds any kind of information for the arbitrary
+        Instantiates a layer of an incremental architecture.
+        It assumes the config file has a field ``layer_config``
+        and another ``layer_config.arbitrary_function_config``
+        that holds any kind of information for the arbitrary
         function of an incremental architecture
 
         Args:
@@ -194,10 +215,12 @@ class Experiment:
             dim_edge_features: input edge features
             dim_target: target size
             depth: current depth of the architecture
-            prev_outputs_to_consider: A list of previous layers to consider, e.g. [1,2] means the last two previous layers.
+            prev_outputs_to_consider: A list of previous layers to consider,
+                e.g., [1,2] means the last two previous layers.
 
         Returns:
-            a layer of a model that implements the :class:`~pydgn.model.model.ModelInterface` interface
+            a layer of a model that implements the
+            :class:`~pydgn.model.model.ModelInterface` interface
         """
         readout_classname = self.model_config.layer_config.get("readout", None)
         self.model_config.layer_config["depth"] = depth
@@ -221,16 +244,27 @@ class Experiment:
         reset_eval_model_hidden_state: bool,
     ) -> TrainingEngine:
         r"""
-        Utility that instantiates the training engine. It looks for pre-defined fields in the configuration file,
-        i.e. ``loss``, ``scorer``, ``optimizer``, ``scheduler``, ``gradient_clipper``, ``early_stopper`` and
-        ``plotter``, all of which should be classes implementing the :class:`~pydgn.training.event.handler.EventHandler` interface
+        Utility that instantiates the training engine. It looks for
+        pre-defined fields in the configuration file, i.e. ``loss``,
+        ``scorer``, ``optimizer``, ``scheduler``, ``gradient_clipper``,
+        ``early_stopper`` and ``plotter``, all of which should be classes
+        implementing the :class:`~pydgn.training.event.handler.EventHandler`
+        interface
 
         Args:
-            config (:class:`~pydgn.evaluation.config.Config`): the configuration dictionary
+            config (:class:`~pydgn.evaluation.config.Config`):
+                the configuration dictionary
             model: the  model that needs be trained
-            device (str): the string with the CUDA device to be used, or ``cpu``
-            evaluate_every (int): number of epochs after which to log information
-            reset_eval_model_hidden_state (bool): [temporal graph learning] Used when we want to reset the state after performing previous inference. It should be ``False`` when we are dealing with a single temporal graph sequence, because we don't want to reset the hidden state after processing the previous [training/validation] time steps.
+            device (str): the string with the CUDA device to be used,
+                or ``cpu``
+            evaluate_every (int): number of epochs after which to
+                log information
+            reset_eval_model_hidden_state (bool): [temporal graph learning]
+                Used when we want to reset the state after performing
+                previous inference. It should be ``False`` when we are
+                dealing with a single temporal graph sequence,
+                because we don't want to reset the hidden state after
+                processing the previous [training/validation] time steps.
 
         Returns:
             a :class:`~pydgn.training.engine.TrainingEngine` object
@@ -252,13 +286,17 @@ class Experiment:
 
         optim_class, optim_args = return_class_and_args(config, "optimizer")
         optimizer = (
-            optim_class(model=model, **optim_args) if optim_class is not None else None
+            optim_class(model=model, **optim_args)
+            if optim_class is not None
+            else None
         )
 
         sched_class, sched_args = return_class_and_args(config, "scheduler")
         if sched_args is not None:
             sched_args["optimizer"] = optimizer.optimizer
-        scheduler = sched_class(**sched_args) if sched_class is not None else None
+        scheduler = (
+            sched_class(**sched_args) if sched_class is not None else None
+        )
         # Remove the optimizer obj ow troubles when dumping the config file
         if sched_args is not None:
             sched_args.pop("optimizer", None)
@@ -267,7 +305,9 @@ class Experiment:
             config, "gradient_clipper"
         )
         grad_clipper = (
-            grad_clip_class(**grad_clip_args) if grad_clip_class is not None else None
+            grad_clip_class(**grad_clip_args)
+            if grad_clip_class is not None
+            else None
         )
 
         early_stop_class, early_stop_args = return_class_and_args(
@@ -310,9 +350,12 @@ class Experiment:
         )
         return engine
 
-    def create_supervised_engine(self, model: ModelInterface) -> TrainingEngine:
+    def create_supervised_engine(
+        self, model: ModelInterface
+    ) -> TrainingEngine:
         r"""
-        Instantiates the training engine by using the ``supervised_config`` key in the config file
+        Instantiates the training engine by using the ``supervised_config``
+        key in the config file
 
         Args:
             model: the  model that needs be trained
@@ -334,9 +377,12 @@ class Experiment:
             reset_eval_model_hidden_state,
         )
 
-    def create_unsupervised_engine(self, model: ModelInterface) -> TrainingEngine:
+    def create_unsupervised_engine(
+        self, model: ModelInterface
+    ) -> TrainingEngine:
         r"""
-        Instantiates the training engine by using the ``unsupervised_config`` key in the config file
+        Instantiates the training engine by using the ``unsupervised_config``
+        key in the config file
 
         Args:
             model: the  model that needs be trained
@@ -357,9 +403,12 @@ class Experiment:
             reset_eval_model_hidden_state,
         )
 
-    def create_incremental_engine(self, model: ModelInterface) -> TrainingEngine:
+    def create_incremental_engine(
+        self, model: ModelInterface
+    ) -> TrainingEngine:
         r"""
-        Instantiates the training engine by using the ``layer_config`` key in the config file
+        Instantiates the training engine by using the ``layer_config``
+        key in the config file
 
         Args:
             model: the  model that needs be trained
@@ -382,21 +431,25 @@ class Experiment:
 
     def run_valid(self, dataset_getter, logger) -> Tuple[dict, dict]:
         r"""
-        This function returns the training and validation results for a `model selection run`.
+        This function returns the training and validation results for a
+        `model selection run`.
         **Do not attempt to load the test set inside this method!**
         **If possible, rely on already available subclasses of this class**.
 
         Args:
-            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`):
+                a data provider
             logger (:class:`~pydgn.log.logger.Logger`): the logger
 
         Returns:
-            a tuple of training and test dictionaries. Each dictionary has two keys:
+            a tuple of training and test dictionaries.
+            Each dictionary has two keys:
 
             * ``LOSS`` (as defined in ``pydgn.static``)
             * ``SCORE`` (as defined in ``pydgn.static``)
 
-            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
+            For instance, training_results[SCORE] is a dictionary itself
+            with other fields to be used by the evaluator.
         """
         raise NotImplementedError("You must implement this function!")
 
@@ -404,20 +457,25 @@ class Experiment:
         self, dataset_getter: DataProvider, logger: Logger
     ) -> Tuple[dict, dict, dict]:
         """
-        This function returns the training, validation and test results for a `final run`.
-        **Do not use the test to train the model nor for early stopping reasons!**
+        This function returns the training, validation and test results
+        for a `final run`.
+        **Do not use the test to train the model nor for
+        early stopping reasons!**
         **If possible, rely on already available subclasses of this class**.
 
         Args:
-            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`):
+                a data provider
             logger (:class:`~pydgn.log.logger.Logger`): the logger
 
         Returns:
-            a tuple of training,validation,test dictionaries. Each dictionary has two keys:
+            a tuple of training,validation,test dictionaries.
+            Each dictionary has two keys:
 
             * ``LOSS`` (as defined in ``pydgn.static``)
             * ``SCORE`` (as defined in ``pydgn.static``)
 
-            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
+            For instance, training_results[SCORE] is a dictionary itself
+            with other fields to be used by the evaluator.
         """
         raise NotImplementedError("You must implement this function!")

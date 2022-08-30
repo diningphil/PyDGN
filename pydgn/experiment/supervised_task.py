@@ -9,23 +9,27 @@ class SupervisedTask(Experiment):
 
     def run_valid(self, dataset_getter, logger):
         r"""
-        This function returns the training and validation results for a `model selection run`.
+        This function returns the training and validation results
+        for a `model selection run`.
         **Do not attempt to load the test set inside this method!**
         **If possible, rely on already available subclasses of this class**.
 
         It implements a simple supervised training scheme.
 
         Args:
-            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`):
+                a data provider
             logger (:class:`~pydgn.log.logger.Logger`): the logger
 
         Returns:
-            a tuple of training and test dictionaries. Each dictionary has two keys:
+            a tuple of training and test dictionaries.
+            Each dictionary has two keys:
 
             * ``LOSS`` (as defined in ``pydgn.static``)
             * ``SCORE`` (as defined in ``pydgn.static``)
 
-            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
+            For instance, training_results[SCORE] is a dictionary itself
+            with other fields to be used by the evaluator.
         """
         batch_size = self.model_config.supervised_config["batch_size"]
         shuffle = (
@@ -51,7 +55,8 @@ class SupervisedTask(Experiment):
             dim_node_features, dim_edge_features, dim_target
         )
 
-        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        # Instantiate the engine (it handles the training loop and the
+        # inference phase by abstracting the specifics)
         supervised_training_engine = self.create_supervised_engine(model)
 
         (
@@ -78,23 +83,28 @@ class SupervisedTask(Experiment):
 
     def run_test(self, dataset_getter, logger):
         """
-        This function returns the training, validation and test results for a `final run`.
-        **Do not use the test to train the model nor for early stopping reasons!**
+        This function returns the training, validation and test results
+        for a `final run`.
+        **Do not use the test to train the model
+        nor for early stopping reasons!**
         **If possible, rely on already available subclasses of this class**.
 
         It implements a simple supervised training scheme.
 
         Args:
-            dataset_getter (:class:`~pydgn.data.provider.DataProvider`): a data provider
+            dataset_getter (:class:`~pydgn.data.provider.DataProvider`):
+                a data provider
             logger (:class:`~pydgn.log.logger.Logger`): the logger
 
         Returns:
-            a tuple of training,validation,test dictionaries. Each dictionary has two keys:
+            a tuple of training,validation,test dictionaries.
+            Each dictionary has two keys:
 
             * ``LOSS`` (as defined in ``pydgn.static``)
             * ``SCORE`` (as defined in ``pydgn.static``)
 
-            For instance, training_results[SCORE] is a dictionary itself with other fields to be used by the evaluator.
+            For instance, training_results[SCORE] is a dictionary itself with
+            other fields to be used by the evaluator.
         """
         batch_size = self.model_config.supervised_config["batch_size"]
         shuffle = (
@@ -114,7 +124,8 @@ class SupervisedTask(Experiment):
             batch_size=batch_size, shuffle=shuffle
         )
 
-        # Call this after the loaders: the datasets may need to be instantiated with additional parameters
+        # Call this after the loaders: the datasets may need to be instantiated
+        # with additional parameters
         dim_node_features = dataset_getter.get_dim_node_features()
         dim_edge_features = dataset_getter.get_dim_edge_features()
         dim_target = dataset_getter.get_dim_target()
@@ -124,7 +135,8 @@ class SupervisedTask(Experiment):
             dim_node_features, dim_edge_features, dim_target
         )
 
-        # Instantiate the engine (it handles the training loop and the inference phase by abstracting the specifics)
+        # Instantiate the engine (it handles the training loop and the
+        # inference phase by abstracting the specifics)
         supervised_training_engine = self.create_supervised_engine(model)
 
         (

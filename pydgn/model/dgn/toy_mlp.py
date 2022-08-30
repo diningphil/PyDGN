@@ -10,14 +10,24 @@ from pydgn.model.interface import ModelInterface
 
 class ToyMLP(ModelInterface):
     """
-    A toy MLP model used to test the library. Technically, a DGN that ignores the adjacency matrix.
+    A toy MLP model used to test the library. Technically,
+    a DGN that ignores the adjacency matrix.
     """
 
     def __init__(
-        self, dim_node_features, dim_edge_features, dim_target, readout_class, config
+        self,
+        dim_node_features,
+        dim_edge_features,
+        dim_target,
+        readout_class,
+        config,
     ):
         super().__init__(
-            dim_node_features, dim_edge_features, dim_target, readout_class, config
+            dim_node_features,
+            dim_edge_features,
+            dim_target,
+            readout_class,
+            config,
         )
 
         dim_embedding = config["dim_embedding"]

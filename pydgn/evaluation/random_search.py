@@ -7,10 +7,12 @@ from pydgn.static import *
 
 class RandomSearch(Grid):
     r"""
-    Class that implements random-search. It computes all possible configurations starting from a suitable config file.
+    Class that implements random-search. It computes all possible
+    configurations starting from a suitable config file.
 
     Args:
-        configs_dict (dict): the configuration dictionary specifying the different configurations to try
+        configs_dict (dict): the configuration dictionary specifying the
+            different configurations to try
     """
     __search_type__ = RANDOM_SEARCH
 
@@ -20,7 +22,8 @@ class RandomSearch(Grid):
 
     def _gen_helper(self, cfgs_dict):
         r"""
-        Takes a dictionary of key:list pairs and computes all possible combinations.
+        Takes a dictionary of key:list pairs and computes all possible
+        combinations.
 
         Returns:
             A list of al possible configurations in the form of dictionaries
@@ -35,7 +38,7 @@ class RandomSearch(Grid):
                 if type(values) in [str, int, float, bool, None]:
                     result[key] = values
                 # DICT CASE: call _dict_helper on this dict
-                elif type(values) == dict:
+                elif isinstance(values, dict):
                     result[key] = self._dict_helper(deepcopy(values))
 
             yield deepcopy(result)
@@ -51,14 +54,15 @@ class RandomSearch(Grid):
             return self._sampler_helper(configs)
 
         for key, values in configs.items():
-            if type(values) == dict:
+            if isinstance(values, dict):
                 configs[key] = self._dict_helper(configs[key])
 
         return configs
 
     def _sampler_helper(self, configs):
         r"""
-        Samples possible hyperparameter(s) and returns it (them, in this case as a dict)
+        Samples possible hyperparameter(s) and returns it
+        (them, in this case as a dict)
 
          Returns:
              A dictionary
@@ -67,7 +71,7 @@ class RandomSearch(Grid):
         sampler = s2c(method)
         sample = sampler(*args)
 
-        if type(sample) == dict:
+        if isinstance(sample, dict):
             return self._dict_helper(sample)
 
         return sample

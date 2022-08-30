@@ -30,7 +30,8 @@ class Plotter(EventHandler):
         Writes Training, Validation and (if any) Test metrics to Tensorboard
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         for k, v in state.epoch_results[LOSSES].items():
             loss_scalars = {}
@@ -63,7 +64,8 @@ class Plotter(EventHandler):
         Frees resources by closing the Tensorboard writer
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         self.writer.close()
 
@@ -78,7 +80,9 @@ class WandbPlotter(EventHandler):
         kwargs (dict): additional arguments that may depend on the plotter
     """
 
-    def __init__(self, exp_path: str, wandb_project, wandb_entity, **kwargs: dict):
+    def __init__(
+        self, exp_path: str, wandb_project, wandb_entity, **kwargs: dict
+    ):
         super().__init__()
         self.exp_path = exp_path
 
@@ -105,7 +109,8 @@ class WandbPlotter(EventHandler):
         Writes Training, Validation and (if any) Test metrics to WandB
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
 
         for k, v in state.epoch_results[LOSSES].items():
@@ -133,6 +138,7 @@ class WandbPlotter(EventHandler):
         Frees resources by closing the WandB writer
 
         Args:
-            state (:class:`~training.event.state.State`): object holding training information
+            state (:class:`~training.event.state.State`):
+                object holding training information
         """
         self._wandb.finish()

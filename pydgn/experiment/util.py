@@ -15,6 +15,7 @@ def s2c(class_name: str) -> Callable[..., object]:
     result = locate(class_name)
     if result is None:
         raise ImportError(
-            f"The (dotted) path '{class_name}' is unknown. Check your configuration."
+            f"The (dotted) path '{class_name}' is unknown. "
+            f"Check your configuration."
         )
     return result

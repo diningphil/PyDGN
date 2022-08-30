@@ -6,7 +6,8 @@ from pydgn.data.dataset import DatasetInterface
 
 class RandomSampler(sampler.RandomSampler):
     """
-    This sampler wraps the dataset and saves the random permutation applied to the samples, so that it will be available
+    This sampler wraps the dataset and saves the random permutation applied
+    to the samples, so that it will be available
     for further use (e.g. for saving graph embeddings in the original order).
     The permutation is saved in the 'permutation' attribute.
 

@@ -40,7 +40,8 @@ class Fold:
 
 class InnerFold(Fold):
     r"""
-    Simple extension of the Fold class that returns a dictionary with training and validation indices (model selection).
+    Simple extension of the Fold class that returns a dictionary with
+    training and validation indices (model selection).
     """
 
     def todict(self) -> dict:
@@ -48,14 +49,16 @@ class InnerFold(Fold):
         Creates a dictionary with the training/validation indices.
 
         Returns:
-            a dict with keys ``['train', 'val']`` associated with the respective indices
+            a dict with keys ``['train', 'val']`` associated with the
+            respective indices
         """
         return {"train": self.train_idxs, "val": self.val_idxs}
 
 
 class OuterFold(Fold):
     r"""
-    Simple extension of the Fold class that returns a dictionary with training and test indices (risk assessment)
+    Simple extension of the Fold class that returns a dictionary with training
+    and test indices (risk assessment)
     """
 
     def todict(self) -> dict:
@@ -63,15 +66,20 @@ class OuterFold(Fold):
         Creates a dictionary with the training/validation/test indices.
 
         Returns:
-            a dict with keys ``['train', 'val', 'test']`` associated with the respective indices
+            a dict with keys ``['train', 'val', 'test']``
+            associated with the respective indices
         """
-        return {"train": self.train_idxs, "val": self.val_idxs, "test": self.test_idxs}
+        return {
+            "train": self.train_idxs,
+            "val": self.val_idxs,
+            "test": self.test_idxs,
+        }
 
 
 class NoShuffleTrainTestSplit:
     r"""
-    Class that implements a very simple training/test split. Can be used to further split training data into training
-    and validation.
+    Class that implements a very simple training/test split. Can be used to
+    further split training data into training and validation.
 
     Args:
         test_ratio: percentage of data to use for evaluation.
@@ -80,7 +88,8 @@ class NoShuffleTrainTestSplit:
     def __init__(self, test_ratio):
         self.test_ratio = test_ratio
 
-    # Leave the arguments as they are. The parameter `y` is needed to implement the same interface as sklearn
+    # Leave the arguments as they are. The parameter `y` is needed to
+    # implement the same interface as sklearn
     def split(self, idxs, y=None):
         """
         Splits the data.
@@ -105,14 +114,21 @@ class Splitter:
     Class that generates and stores the data splits at dataset creation time.
 
     Args:
-        n_outer_folds (int): number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
-        n_inner_folds (int): number of inner folds (model selection). 1 means hold-out, >1 means k-fold
+        n_outer_folds (int): number of outer folds (risk assessment).
+            1 means hold-out, >1 means k-fold
+        n_inner_folds (int): number of inner folds (model selection).
+            1 means hold-out, >1 means k-fold
         seed (int): random seed for reproducibility (on the same machine)
-        stratify (bool): whether to apply stratification or not (should be true for classification tasks)
+        stratify (bool): whether to apply stratification or not
+            (should be true for classification tasks)
         shuffle (bool): whether to apply shuffle or not
-        inner_val_ratio  (float): percentage of validation set for hold_out model selection. Default is ``0.1``
-        outer_val_ratio  (float): percentage of validation set for hold_out model assessment (final training runs). Default is ``0.1``
-        test_ratio  (float): percentage of test set for hold_out model assessment. Default is ``0.1``
+        inner_val_ratio  (float): percentage of validation set for
+            hold_out model selection. Default is ``0.1``
+        outer_val_ratio  (float): percentage of validation set for
+            hold_out model assessment (final training runs).
+            Default is ``0.1``
+        test_ratio  (float): percentage of test set for
+            hold_out model assessment. Default is ``0.1``
     """
 
     def __init__(
@@ -146,12 +162,14 @@ class Splitter:
         Reads the entire dataset and returns the targets.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the dataset
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the dataset
 
         Returns:
-            a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
-            exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
-            first boolean value.
+            a tuple of two elements. The first element is a boolean, which
+            is ``True`` if target values exist or an exception has not
+            been thrown. The second value holds the actual targets or ``None``,
+            depending on the first boolean value.
         """
         if hasattr(dataset[0], "y") and dataset[0].y is not None:
             targets = torch.cat([d.y for d in dataset], dim=0).numpy()
@@ -205,14 +223,18 @@ class Splitter:
 
         return splitter
 
-    def _get_splitter(self, n_splits: int, stratified: bool, eval_ratio: float):
+    def _get_splitter(
+        self, n_splits: int, stratified: bool, eval_ratio: float
+    ):
         r"""
-        Instantiates the appropriate splitter to use depending on the situation.
+        Instantiates the appropriate splitter to use depending on the situation
 
         Args:
-              n_splits (int): the number of different splits to create
-              stratified (bool): whether or not to perform stratification. **Works with graph classification tasks only!**
-              eval_ratio (float): the amount of evaluation (validation/test) data to use in case ``n_splits==1`` (i.e., hold-out data split)
+            n_splits (int): the number of different splits to create
+            stratified (bool): whether or not to perform stratification.
+                **Works with graph classification tasks only!**
+            eval_ratio (float): the amount of evaluation (validation/test)
+                data to use in case ``n_splits==1`` (i.e., hold-out data split)
 
         Returns:
             a :class:`~pydgn.data.splitter.Splitter` object
@@ -220,7 +242,7 @@ class Splitter:
         if n_splits == 1:
             if not self.shuffle:
                 assert (
-                    stratified == False
+                    stratified is False
                 ), "Stratified not implemented when shuffle is False"
                 splitter = NoShuffleTrainTestSplit(test_ratio=eval_ratio)
             else:
@@ -238,22 +260,30 @@ class Splitter:
                     n_splits, shuffle=self.shuffle, random_state=self.seed
                 )
             else:
-                splitter = KFold(n_splits, shuffle=self.shuffle, random_state=self.seed)
+                splitter = KFold(
+                    n_splits, shuffle=self.shuffle, random_state=self.seed
+                )
         else:
             raise ValueError(f"'n_splits' must be >=1, got {n_splits}")
 
         return splitter
 
     def split(
-        self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray = None
+        self,
+        dataset: pydgn.data.dataset.DatasetInterface,
+        targets: np.ndarray = None,
     ):
         r"""
-        Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
-        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
+        Computes the splits and stores them in the list fields
+        ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy, torch, and
+        random for reproducibility.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
-            targets (np.ndarray]): targets used for stratification. Default is ``None``
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the Dataset object
+            targets (np.ndarray]): targets used for stratification.
+                Default is ``None``
         """
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
@@ -271,7 +301,9 @@ class Splitter:
             eval_ratio=self.test_ratio,
         )  # This is the true test (outer test)
 
-        for train_idxs, test_idxs in outer_splitter.split(outer_idxs, y=targets):
+        for train_idxs, test_idxs in outer_splitter.split(
+            outer_idxs, y=targets
+        ):
 
             assert set(train_idxs) == set(outer_idxs[train_idxs])
             assert set(test_idxs) == set(outer_idxs[test_idxs])
@@ -280,7 +312,9 @@ class Splitter:
             inner_idxs = outer_idxs[
                 train_idxs
             ]  # equals train_idxs because outer_idxs was ordered
-            inner_targets = targets[train_idxs] if targets is not None else None
+            inner_targets = (
+                targets[train_idxs] if targets is not None else None
+            )
 
             inner_splitter = self._get_splitter(
                 n_splits=self.n_inner_folds,
@@ -299,7 +333,9 @@ class Splitter:
 
                 # False if empty
                 assert not bool(
-                    set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs)
+                    set(inner_train_idxs)
+                    & set(inner_val_idxs)
+                    & set(test_idxs)
                 )
                 assert not bool(
                     set(inner_idxs[inner_train_idxs])
@@ -311,7 +347,9 @@ class Splitter:
 
             # Obtain outer val from outer train in an holdout fashion
             outer_val_splitter = self._get_splitter(
-                n_splits=1, stratified=stratified, eval_ratio=self.outer_val_ratio
+                n_splits=1,
+                stratified=stratified,
+                eval_ratio=self.outer_val_ratio,
             )
             outer_train_idxs, outer_val_idxs = list(
                 outer_val_splitter.split(inner_idxs, y=inner_targets)
@@ -342,7 +380,8 @@ class Splitter:
 
     def _splitter_args(self) -> dict:
         r"""
-        Returns a dict with all the splitter's arguments for subsequent re-loading at experiment time.
+        Returns a dict with all the splitter's arguments for subsequent
+        re-loading at experiment time.
 
         Returns:
             a dict containing all splitter's arguments.
@@ -360,7 +399,8 @@ class Splitter:
 
     def save(self, path: str):
         r"""
-        Saves the split as a dictionary into a ``torch`` file. The arguments of the dictionary are
+        Saves the split as a dictionary into a ``torch`` file. The arguments
+        of the dictionary are
         * seed (int)
         * splitter_class (str)
         * splitter_args (dict)
@@ -396,16 +436,18 @@ class Splitter:
 
 class TemporalSplitter(Splitter):
     r"""
-    Reads the entire dataset and returns the targets. In this case, each sample in the dataset represents
-    a temporal graph, so we get the classification value at the last time step. Use this method to stratify a dataset
-    of multiple temporal graphs.
+    Reads the entire dataset and returns the targets. In this case, each
+    sample in the dataset represents a temporal graph, so we get the
+    classification value at the last time step. Use this method to
+    stratify a dataset of multiple temporal graphs.
 
     Args:
         dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the dataset
 
     Returns:
-        a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
-        exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
+        a tuple of two elements. The first element is a boolean, which is
+        ``True`` if target values exist or an exception has not been thrown.
+        The second value holds the actual targets or ``None``, depending on the
         first boolean value.
     """
 
@@ -416,12 +458,14 @@ class TemporalSplitter(Splitter):
         Reads the entire dataset and returns the targets.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.TemporalDatasetInterface`): the temporal dataset
+            dataset (:class:`~pydgn.data.dataset.TemporalDatasetInterface`):
+                the temporal dataset
 
         Returns:
-            a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
-            exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
-            first boolean value.
+            a tuple of two elements. The first element is a boolean, which
+            is ``True`` if target values exist or an exception has not
+            been thrown. The second value holds the actual targets or
+            ``None``, depending on the first boolean value.
         """
         raise NotImplementedError(
             "You should subclass TemporalSplitter and implement this function!"
@@ -430,27 +474,33 @@ class TemporalSplitter(Splitter):
 
 class OGBGSplitter(Splitter):
     """
-    Splitter specific to OGBG Datasets, reuses the already given splits (hence it works only in hold-out mode).
+    Splitter specific to OGBG Datasets, reuses the already given splits
+    (hence it works only in hold-out mode).
     """
 
     def split(self, dataset: OGBGDatasetInterface, targets=None):
         r"""
-        Computes the OGBG splits according to those already provided by the authors of the datasets
-        and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
-        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
+        Computes the OGBG splits according to those already provided by
+        the authors of the datasets and stores them in the list fields
+        ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy,
+        torch, and random for reproducibility.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.OGBGDatasetInterface`): the Dataset object
-            targets (np.ndarray]): targets used for stratification. Default is ``None``
+            dataset (:class:`~pydgn.data.dataset.OGBGDatasetInterface`):
+                the Dataset object
+            targets (np.ndarray]): targets used for stratification.
+                Default is ``None``
         """
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
         torch.cuda.manual_seed(self.seed)
         random.seed(self.seed)
 
-        assert (
-            self.n_outer_folds == 1 and self.n_inner_folds == 1
-        ), "OGBGSplitter assumes you want to use the same splits as in the original dataset!"
+        assert self.n_outer_folds == 1 and self.n_inner_folds == 1, (
+            "OGBGSplitter assumes you want to use the same splits "
+            "as in the original dataset!"
+        )
         original_splits = dataset.get_idx_split()
 
         outer_train_indices = original_splits["train"].numpy().tolist()
@@ -478,11 +528,14 @@ class OGBGSplitter(Splitter):
 
 class SingleGraphSequenceSplitter(TemporalSplitter):
     """
-    Class for dynamic graphs that generates the splits at dataset creation time. It assumes that there is a single graph
-    sequence, so the split happens on time steps. What is more, `n_inner_folds` here will create an inner K-fold CV
-    split for model selection where, however, the training/validation split will not change (because there is no way
-    to split time steps in a different way). This allows for different initializations of the same model, evaluating
-    the avg performance on the VL set.
+    Class for dynamic graphs that generates the splits at dataset creation
+    time. It assumes that there is a single graph sequence, so the split
+    happens on time steps. What is more, `n_inner_folds` here will create an
+    inner K-fold CV split for model selection where, however, the
+    training/validation split will not change (because there is no way to
+    split time steps in a different way). This allows for different
+    initializations of the same model, evaluating the avg performance
+    on the VL set.
     """
 
     def __init__(
@@ -506,12 +559,14 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
             outer_val_ratio,
             test_ratio,
         )
-        assert (
-            n_outer_folds == 1
-        ), "SingleGraphSequenceSplitter does not allow more than one outer fold, as the graph sequence is unique."
-        assert (
-            not shuffle
-        ), "SingleGraphSequenceSplitter does not allow to shuffle the time steps of the unique graph sequence."
+        assert n_outer_folds == 1, (
+            "SingleGraphSequenceSplitter does not allow more than "
+            "one outer fold, as the graph sequence is unique."
+        )
+        assert not shuffle, (
+            "SingleGraphSequenceSplitter does not allow to shuffle "
+            "the time steps of the unique graph sequence."
+        )
         assert not stratify, "You cannot stratify a single graph sequence."
 
     def get_targets(
@@ -521,12 +576,14 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
         Reads the entire dataset and returns the targets.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the dataset
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the dataset
 
         Returns:
-            a tuple of two elements. The first element is a boolean, which is ``True`` if target values exist or an
-            exception has not been thrown. The second value holds the actual targets or ``None``, depending on the
-            first boolean value.
+            a tuple of two elements. The first element is a boolean, which is
+            ``True`` if target values exist or an exception has not been
+            thrown. The second value holds the actual targets or
+            ``None``, depending on the first boolean value.
         """
         try:
             targets = np.array([d.targets[-1].item() for d in dataset])
@@ -535,15 +592,21 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
             return False, None
 
     def split(
-        self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray = None
+        self,
+        dataset: pydgn.data.dataset.DatasetInterface,
+        targets: np.ndarray = None,
     ):
         r"""
-        Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
-        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
+        Computes the splits and stores them in the list fields
+        ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy, torch,
+        and random for reproducibility.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
-            targets (np.ndarray]): targets used for stratification. Default is ``None``
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the Dataset object
+            targets (np.ndarray]): targets used for stratification.
+                Default is ``None``
         """
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
@@ -570,11 +633,17 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
             train_idxs
         ]  # equals train_idxs because outer_idxs was ordered
 
-        inner_splitter = NoShuffleTrainTestSplit(test_ratio=self.inner_val_ratio)
+        inner_splitter = NoShuffleTrainTestSplit(
+            test_ratio=self.inner_val_ratio
+        )
 
-        # Repeat the very same inner split for n_inner_folds, as there is no way to split differently.
-        # This allows for different initializations of the same model, evaluating the avg performance on the VL set.
-        inner_train_idxs, inner_val_idxs = inner_splitter.split(inner_idxs, y=None)[0]
+        # Repeat the very same inner split for n_inner_folds, as there is no
+        # way to split differently.
+        # This allows for different initializations of the same model,
+        # evaluating the avg performance on the VL set.
+        inner_train_idxs, inner_val_idxs = inner_splitter.split(
+            inner_idxs, y=None
+        )[0]
         for _ in range(self.n_inner_folds):
             inner_fold = InnerFold(
                 train_idxs=inner_idxs[inner_train_idxs].tolist(),
@@ -585,20 +654,28 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
         self.inner_folds.append(inner_fold_splits)
 
         # Obtain outer val from outer train in an holdout fashion
-        outer_val_splitter = NoShuffleTrainTestSplit(test_ratio=self.outer_val_ratio)
-        outer_train_idxs, outer_val_idxs = outer_val_splitter.split(inner_idxs, y=None)[
-            0
-        ]
+        outer_val_splitter = NoShuffleTrainTestSplit(
+            test_ratio=self.outer_val_ratio
+        )
+        outer_train_idxs, outer_val_idxs = outer_val_splitter.split(
+            inner_idxs, y=None
+        )[0]
 
         # False if empty
-        assert not bool(set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs))
+        assert not bool(
+            set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs)
+        )
         assert not bool(
             set(inner_idxs[inner_train_idxs])
             & set(inner_idxs[inner_val_idxs])
             & set(test_idxs)
         )
-        assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
-        assert not bool(set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs))
+        assert not bool(
+            set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs)
+        )
+        assert not bool(
+            set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs)
+        )
         assert not bool(
             set(inner_idxs[outer_train_idxs])
             & set(inner_idxs[outer_val_idxs])
@@ -615,42 +692,60 @@ class SingleGraphSequenceSplitter(TemporalSplitter):
 
 class SingleGraphSplitter(Splitter):
     r"""
-    A splitter for a single graph dataset that randomly splits nodes into training/validation/test
+    A splitter for a single graph dataset that randomly splits nodes into
+    training/validation/test
 
     Args:
-        n_outer_folds (int): number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
-        n_inner_folds (int): number of inner folds (model selection). 1 means hold-out, >1 means k-fold
+        n_outer_folds (int): number of outer folds (risk assessment).
+            1 means hold-out, >1 means k-fold
+        n_inner_folds (int): number of inner folds (model selection).
+            1 means hold-out, >1 means k-fold
         seed (int): random seed for reproducibility (on the same machine)
-        stratify (bool): whether to apply stratification or not (should be true for classification tasks)
+        stratify (bool): whether to apply stratification or not
+            (should be true for classification tasks)
         shuffle (bool): whether to apply shuffle or not
-        inner_val_ratio  (float): percentage of validation set for hold_out model selection. Default is ``0.1``
-        outer_val_ratio  (float): percentage of validation set for hold_out model assessment (final training runs). Default is ``0.1``
-        test_ratio  (float): percentage of test set for hold_out model assessment. Default is ``0.1``
+        inner_val_ratio  (float): percentage of validation set for
+            hold_out model selection. Default is ``0.1``
+        outer_val_ratio  (float): percentage of validation set for
+            hold_out model assessment (final training runs).
+            Default is ``0.1``
+        test_ratio  (float): percentage of test set for
+            hold_out model assessment. Default is ``0.1``
     """
 
     def split(
-        self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray = None
+        self,
+        dataset: pydgn.data.dataset.DatasetInterface,
+        targets: np.ndarray = None,
     ):
         r"""
-        Compared with the superclass version, the only difference is that the range of indices spans across the number
-        of nodes of the single graph taken into consideration.
+        Compared with the superclass version, the only difference is that the
+        range of indices spans across the number of nodes of the single
+        graph taken into consideration.
+
         Args:
-            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
-            targets (np.ndarray]): targets used for stratification. Default is ``None``
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the Dataset object
+            targets (np.ndarray]): targets used for stratification.
+                Default is ``None``
         """
-        assert len(dataset) == 1, "This class works only with single graph datasets"
+        assert (
+            len(dataset) == 1
+        ), "This class works only with single graph datasets"
         idxs = range(dataset.data.x.shape[0])
         stratified = self.stratify
         outer_idxs = np.array(idxs)
 
-        # TODO all this code below could be reused from the original splitter
+        # all this code below could be reused from the original splitter
         outer_splitter = self._get_splitter(
             n_splits=self.n_outer_folds,
             stratified=stratified,
             eval_ratio=self.test_ratio,
         )  # This is the true test (outer test)
 
-        for train_idxs, test_idxs in outer_splitter.split(outer_idxs, y=targets):
+        for train_idxs, test_idxs in outer_splitter.split(
+            outer_idxs, y=targets
+        ):
 
             assert set(train_idxs) == set(outer_idxs[train_idxs])
             assert set(test_idxs) == set(outer_idxs[test_idxs])
@@ -659,7 +754,9 @@ class SingleGraphSplitter(Splitter):
             inner_idxs = outer_idxs[
                 train_idxs
             ]  # equals train_idxs because outer_idxs was ordered
-            inner_targets = targets[train_idxs] if targets is not None else None
+            inner_targets = (
+                targets[train_idxs] if targets is not None else None
+            )
 
             inner_splitter = self._get_splitter(
                 n_splits=self.n_inner_folds,
@@ -678,7 +775,9 @@ class SingleGraphSplitter(Splitter):
 
                 # False if empty
                 assert not bool(
-                    set(inner_train_idxs) & set(inner_val_idxs) & set(test_idxs)
+                    set(inner_train_idxs)
+                    & set(inner_val_idxs)
+                    & set(test_idxs)
                 )
                 assert not bool(
                     set(inner_idxs[inner_train_idxs])
@@ -690,7 +789,9 @@ class SingleGraphSplitter(Splitter):
 
             # Obtain outer val from outer train in an holdout fashion
             outer_val_splitter = self._get_splitter(
-                n_splits=1, stratified=stratified, eval_ratio=self.outer_val_ratio
+                n_splits=1,
+                stratified=stratified,
+                eval_ratio=self.outer_val_ratio,
             )
             outer_train_idxs, outer_val_idxs = list(
                 outer_val_splitter.split(inner_idxs, y=inner_targets)
@@ -722,24 +823,38 @@ class SingleGraphSplitter(Splitter):
 
 class LinkPredictionSingleGraphSplitter(Splitter):
     r"""
-    Class that inherits from :class:`~pydgn.data.splitter.Splitter` and computes link splits for link classification tasks.
-    **IMPORTANT:** This class implements **bootstrapping** rather than k-fold cross-validation, so different
-    outer test sets may have overlapping indices.
+    Class that inherits from :class:`~pydgn.data.splitter.Splitter` and
+    computes link splits for link classification tasks.
+    **IMPORTANT:** This class implements **bootstrapping** rather
+    than k-fold cross-validation, so different outer test sets may have
+    overlapping indices.
 
     **Does not support edge attributes at the moment.**
 
     Args:
-        n_outer_folds (int): number of outer folds (risk assessment). 1 means hold-out, >1 means k-fold
-        n_inner_folds (int): number of inner folds (model selection). 1 means hold-out, >1 means k-fold
+        n_outer_folds (int): number of outer folds (risk assessment).
+            1 means hold-out, >1 means k-fold
+        n_inner_folds (int): number of inner folds (model selection).
+            1 means hold-out, >1 means k-fold
         seed (int): random seed for reproducibility (on the same machine)
-        stratify (bool): whether to apply stratification or not (should be true for classification tasks)
+        stratify (bool): whether to apply stratification or not
+            (should be true for classification tasks)
         shuffle (bool): whether to apply shuffle or not
-        inner_val_ratio  (float): percentage of validation set for hold_out model selection. Default is ``0.1``
-        outer_val_ratio  (float): percentage of validation set for hold_out model assessment (final training runs). Default is ``0.1``
-        test_ratio  (float): percentage of test set for hold_out model assessment. Default is ``0.1``
-        undirected (bool): whether or not the graph is undirected. Default is ``False``
-        avoid_opposite_negative_edges (bool): whether or not to **avoid** creating negative edges that are opposite to existing edges Default is ``True``
-        run_checks (bool): whether or not to run correctness checks. Creates a full adjacency matrix, can be memory intensive.
+        inner_val_ratio  (float): percentage of validation set for
+            hold_out model selection. Default is ``0.1``
+        outer_val_ratio  (float): percentage of validation set for
+            hold_out model assessment (final training runs).
+            Default is ``0.1``
+        test_ratio  (float): percentage of test set for
+            hold_out model assessment. Default is ``0.1``
+        undirected (bool): whether or not the graph is undirected.
+            Default is ``False``
+        avoid_opposite_negative_edges (bool): whether or not to **avoid**
+            creating negative edges that are opposite
+            to existing edges Default is ``True``
+        run_checks (bool): whether or not to run correctness checks.
+            Creates a full adjacency matrix,
+            can be memory intensive.
     """
 
     def __init__(
@@ -781,10 +896,12 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         neg_test_edges,
     ):
         """
-        Runs additional memory-intensive checks to ensure the edge split is ok and does not contain overlaps.
+        Runs additional memory-intensive checks to ensure the edge split is ok
+        and does not contain overlaps.
         """
         print(
-            f"Inner splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {pos_val_edges.shape}, {neg_val_edges.shape}"
+            f"Inner splits: {pos_train_edges.shape}, {neg_train_edges.shape}, "
+            f"{pos_val_edges.shape}, {neg_val_edges.shape}"
         )
 
         # First: check positive edges perfectly reconstruct adjacency matrix
@@ -795,11 +912,13 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         A_pos += to_dense_adj(pos_test_edges, max_num_nodes=N)[0, :, :]
 
         # It is also a way to check that positive edges do not overlap
-        # If I do not call to_undirected to val and test edges when undirected==True, this won't hold
+        # If I do not call to_undirected to val and test edges when
+        # undirected==True, this won't hold
         # assert torch.all(A == A_pos)
 
         # Second: check edges do not overlap
-        # Can be done by checking the sum of positive and negative adj matrices holds values smaller or equal than 1.
+        # Can be done by checking the sum of positive and negative adj matrices
+        # holds values smaller or equal than 1.
 
         # TEST: check negative links are separate from positive links
         A_neg = to_dense_adj(neg_train_edges, max_num_nodes=N)[0, :, :]
@@ -858,40 +977,61 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                 else test_edges
             )
 
-        # Use the permuted elements to recover the associated train/val/test edge attributes
-        # TODO: If undirected, train_attr should be doubled according to train edges and the logic of to_undirected!
-        train_attr = None  # edge_attr[train_elements].tolist() if edge_attr is not None else None
+        # Use the permuted elements to recover the associated train/val/test
+        # edge attributes
+        # TODO: If undirected, train_attr should be doubled according to train
+        # edges and the logic of to_undirected!
+        # edge_attr[train_elements].tolist() if edge_attr is not None else None
+        train_attr = None
         val_attr = (
-            None  # edge_attr[val_elements].tolist() if edge_attr is not None else None
+            # edge_attr[val_elements].tolist() if edge_attr is not None else No
+            None
         )
         test_attr = (
-            None  # edge_attr[test_elements].tolist() if edge_attr is not None else None
+            # edge_attr[test_elements].tolist() if edge_attr is not None else N
+            None
         )
 
-        return train_edges, train_attr, val_edges, val_attr, test_edges, test_attr
+        return (
+            train_edges,
+            train_attr,
+            val_edges,
+            val_attr,
+            test_edges,
+            test_attr,
+        )
 
     def split(
-        self, dataset: pydgn.data.dataset.DatasetInterface, targets: np.ndarray = None
+        self,
+        dataset: pydgn.data.dataset.DatasetInterface,
+        targets: np.ndarray = None,
     ):
         r"""
-        Computes the splits and stores them in the list fields ``self.outer_folds`` and ``self.inner_folds``.
-        Links are selected at random: this means outer test folds will overlap almost surely with if test_ratio is 10% of the total samples.
-        The recommended procedure here is to use the outer folds to do bootstrapping rather than k-fold cross-validation.
-        Idea taken from: https://arxiv.org/pdf/1811.05868.pdf
-        IMPORTANT: calling split() sets the seed of numpy, torch, and random for reproducibility.
+        Computes the splits and stores them in the list fields
+        ``self.outer_folds`` and ``self.inner_folds``.
+        Links are selected at random: this means outer test folds will
+        overlap almost surely with if test_ratio is 10% of the total samples.
+        The recommended procedure here is to use the outer folds to do
+        bootstrapping rather than k-fold cross-validation. Idea taken
+        from: https://arxiv.org/pdf/1811.05868.pdf .
+        IMPORTANT: calling split() sets the seed of numpy, torch,
+        and random for reproducibility.
 
         Args:
-            dataset (:class:`~pydgn.data.dataset.DatasetInterface`): the Dataset object
-            targets (np.ndarray]): targets used for stratification. Default is ``None``
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the Dataset object
+            targets (np.ndarray]): targets used for stratification.
+                Default is ``None``
         """
         np.random.seed(self.seed)
         torch.manual_seed(self.seed)
         torch.cuda.manual_seed(self.seed)
         random.seed(self.seed)
 
-        assert (
-            len(dataset) == 1
-        ), f"LinkPredictionSingleGraphSplitter works on single graph dataset only! Here we have {len(dataset)}"
+        assert len(dataset) == 1, (
+            f"LinkPredictionSingleGraphSplitter works on single graph "
+            f"dataset only! Here we have {len(dataset)}"
+        )
         edge_index = dataset.data.edge_index
         edge_attr = dataset.data.edge_attr
         num_nodes = dataset.data.x.shape[0]
@@ -927,14 +1067,17 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         original_edge_index = edge_index
 
         # Add self loops to prevent negative edges from being self loops
-        original_edge_index_plus_selfloops, _ = add_self_loops(original_edge_index)
+        original_edge_index_plus_selfloops, _ = add_self_loops(
+            original_edge_index
+        )
 
         for outer_k in range(self.n_outer_folds):
             print(f"Processing splits for outer fold n {outer_k + 1}")
 
             # Create positive train and test edges for outer fold
             print(
-                f"Split positive edges from edge index of shape {original_edge_index.shape[1]}"
+                f"Split positive edges from edge index of shape "
+                f"{original_edge_index.shape[1]}"
             )
             (
                 pos_train_edges,
@@ -944,20 +1087,29 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                 pos_test_edges,
                 test_attr,
             ) = self.train_val_test_edge_split(
-                original_edge_index, edge_attr, outer_val_ratio, test_ratio, num_nodes
+                original_edge_index,
+                edge_attr,
+                outer_val_ratio,
+                test_ratio,
+                num_nodes,
             )
 
             ###
-            # Generate NEGATIVE training/validation/test edges for each fold using the original edge_index
+            # Generate NEGATIVE training/validation/test edges for each
+            # fold using the original edge_index
             ###
 
-            # We generate directed negative edges of the same number as true edges
+            # We generate directed negative edges of the same number as true
+            # edges
             num_neg_samples = original_edge_index.shape[1]
 
-            # Note: negative edges are directed, but can be considered as undirected if the loss/score is symmetric
+            # Note: negative edges are directed, but can be considered as
+            # undirected if the loss/score is symmetric
             if self.avoid_opposite_negative_edges:
-                # We generate symmetric edges to avoid sampling an opposite edge as negative
-                # Remember that negative sampling without additional args samples directed edges, so we are good
+                # We generate symmetric edges to avoid sampling an opposite
+                # edge as negative
+                # Remember that negative sampling without additional args
+                # samples directed edges, so we are good
                 negative_edge_index = negative_sampling(
                     to_undirected(original_edge_index_plus_selfloops),
                     num_nodes=num_nodes,
@@ -970,7 +1122,8 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                     num_neg_samples=num_neg_samples,
                 )
 
-            # Negative edges are directed, and it does not make sense to double them.
+            # Negative edges are directed, and it does not make sense to double
+            # them.
             tmp_undirected = self.undirected
             self.undirected = False
             (
@@ -991,13 +1144,17 @@ class LinkPredictionSingleGraphSplitter(Splitter):
 
             if self.run_checks:
                 print(
-                    f"Outer splits: {pos_train_edges.shape}, {neg_train_edges.shape}, {outer_pos_val_edges.shape}, {outer_neg_val_edges.shape}, {pos_test_edges.shape}, {neg_test_edges.shape}"
+                    f"Outer splits: {pos_train_edges.shape}, "
+                    f"{neg_train_edges.shape}, {outer_pos_val_edges.shape}, "
+                    f"{outer_neg_val_edges.shape}, {pos_test_edges.shape}, "
+                    f"{neg_test_edges.shape}"
                 )
 
             inner_fold_splits = []
             for inner_k in range(self.n_inner_folds):
 
-                # Do not need to create additional negative edges here! Just split what we already have
+                # Do not need to create additional negative edges here! Just
+                # split what we already have
 
                 # Create positive train and validation edges for outer fold
                 (
@@ -1015,7 +1172,8 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                     num_nodes=num_nodes,
                 )
 
-                # Negative edges are directed, and it does not make sense to double them.
+                # Negative edges are directed, and it does not make sense to
+                # double them.
                 tmp_undirected = self.undirected
                 self.undirected = False
                 # Create negative train and validation edges for outer fold
@@ -1027,7 +1185,11 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                     _,
                     _,
                 ) = self.train_val_test_edge_split(
-                    neg_train_edges, None, inner_val_ratio, 0.0, num_nodes=num_nodes
+                    neg_train_edges,
+                    None,
+                    inner_val_ratio,
+                    0.0,
+                    num_nodes=num_nodes,
                 )
                 self.undirected = tmp_undirected
 
@@ -1047,7 +1209,8 @@ class LinkPredictionSingleGraphSplitter(Splitter):
 
                 if self.run_checks:
                     print(
-                        "Running additional checks: disable this option after testing the function"
+                        "Running additional checks: disable this option after "
+                        "testing the function"
                     )
                     self._run_checks(
                         A,
@@ -1059,12 +1222,13 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                         neg_test_edges,
                     )
 
-            # Finally, check we are not creating positive links for some mistake
+            # Finally, check we are not creating positive links for some
+            # mistake
             if self.run_checks:
                 A = to_dense_adj(edge_index)[0]
-                neg_A = to_dense_adj(negative_edge_index, max_num_nodes=A.shape[0])[
-                    0, :, :
-                ]
+                neg_A = to_dense_adj(
+                    negative_edge_index, max_num_nodes=A.shape[0]
+                )[0, :, :]
                 assert torch.all(A + neg_A <= 1.0)
 
             self.inner_folds.append(inner_fold_splits)
@@ -1080,13 +1244,18 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                     outer_val_attr,
                     outer_neg_val_edges.tolist(),
                 ),
-                test_idxs=(pos_test_edges.tolist(), test_attr, neg_test_edges.tolist()),
+                test_idxs=(
+                    pos_test_edges.tolist(),
+                    test_attr,
+                    neg_test_edges.tolist(),
+                ),
             )
             self.outer_folds.append(outer_fold)
 
     def _splitter_args(self):
         r"""
-        Compared to the superclass version, adds two boolean arguments `undirected` and `avoid_opposite_negative_edges`.
+        Compared to the superclass version, adds two boolean arguments
+        `undirected` and `avoid_opposite_negative_edges`.
 
         Returns:
             a dict containing all splitter's arguments.
@@ -1095,7 +1264,8 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         splitter_args.update(
             {
                 "undirected": self.undirected,
-                "avoid_opposite_negative_edges": self.avoid_opposite_negative_edges,
+                "avoid_opposite_negative_edges":
+                    self.avoid_opposite_negative_edges,
             }
         )
         return splitter_args
