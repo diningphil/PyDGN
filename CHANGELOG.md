@@ -11,6 +11,9 @@
 
 ## [1.2.4]
 
+### Fixed
+
+- Minor check in splitter
 
 ## [1.2.3] Added support for single graph tasks
 
