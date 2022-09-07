@@ -302,7 +302,7 @@ class Splitter:
         )  # This is the true test (outer test)
 
         for train_idxs, test_idxs in outer_splitter.split(
-            outer_idxs, y=targets
+            outer_idxs, y=targets if stratified else None
         ):
 
             assert set(train_idxs) == set(outer_idxs[train_idxs])
@@ -323,7 +323,7 @@ class Splitter:
             )  # The inner "test" is, instead, the validation set
 
             for inner_train_idxs, inner_val_idxs in inner_splitter.split(
-                inner_idxs, y=inner_targets
+                inner_idxs, y=inner_targets if stratified else None
             ):
                 inner_fold = InnerFold(
                     train_idxs=inner_idxs[inner_train_idxs].tolist(),
