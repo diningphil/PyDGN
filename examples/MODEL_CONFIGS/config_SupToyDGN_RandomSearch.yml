@@ -1,8 +1,8 @@
 # Dataset and Splits
 data_root: DATA
 dataset_class: pydgn.data.dataset.TUDatasetInterface
-dataset_name:  PROTEINS
-data_splits_file:  examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits
+dataset_name:  NCI1
+data_splits_file:  examples/DATA_SPLITS/CHEMICAL/NCI1/NCI1_outer10_inner1.splits
 
 
 # Hardware

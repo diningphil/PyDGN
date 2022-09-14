@@ -48,7 +48,7 @@ using `bash` instead of `source`!
 
 #### Build dataset and data splits
 
-    pydgn-dataset --config-file examples/DATA_CONFIGS/config_PROTEINS.yml
+    pydgn-dataset --config-file examples/DATA_CONFIGS/config_NCI1.yml
 
 #### Train
 

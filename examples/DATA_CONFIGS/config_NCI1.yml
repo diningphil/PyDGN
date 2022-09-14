@@ -1,0 +1,18 @@
+splitter:
+  root: examples/DATA_SPLITS/CHEMICAL
+  class_name: pydgn.data.splitter.Splitter
+  args:
+    n_outer_folds: 10
+    n_inner_folds: 1
+    seed: 42
+    stratify: True
+    shuffle: True
+    inner_val_ratio: 0.1
+    outer_val_ratio: 0.1
+    test_ratio: 0.1
+dataset:
+  root: DATA/
+  class_name: pydgn.data.dataset.TUDataset
+  args:
+    root: DATA/
+    name: NCI1
