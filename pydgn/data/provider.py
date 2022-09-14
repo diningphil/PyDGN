@@ -216,9 +216,13 @@ class DataProvider:
         assert (
             self.exp_seed is not None
         ), "DataLoader's seed has not been specified! Is this a bug?"
-        kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
-            worker_id, self.exp_seed
-        )
+
+        # no need to set worker seed in map-stye dataset, see pytorch doc about reproducibility
+        # this would also cause transforms based on random sampling to behave in the same way every time
+        # kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
+        #     worker_id, self.exp_seed
+        # )
+
         kwargs.update(self.data_loader_args)
 
         if shuffle is True:
@@ -512,9 +516,12 @@ class SingleGraphSequenceDataProvider(DataProvider):
         assert (
             self.exp_seed is not None
         ), "DataLoader seed has not been specified! Is this a bug?"
-        kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
-            worker_id, self.exp_seed
-        )
+
+        # no need to set worker seed in map-stye dataset, see pytorch doc about reproducibility
+        # this would also cause transforms based on random sampling to behave in the same way every time
+        # kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
+        #     worker_id, self.exp_seed
+        # )
 
         # Using Pytorch default DataLoader instead of PyG, to return list of
         # graphs
@@ -638,9 +645,13 @@ class SingleGraphDataProvider(DataProvider):
         assert (
             self.exp_seed is not None
         ), "DataLoader's seed has not been specified! Is this a bug?"
-        kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
-            worker_id, self.exp_seed
-        )
+
+        # no need to set worker seed in map-stye dataset, see pytorch doc about reproducibility
+        # this would also cause transforms based on random sampling to behave in the same way every time
+        # kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
+        #     worker_id, self.exp_seed
+        # )
+
         kwargs.update(self.data_loader_args)
 
         if shuffle is True:
@@ -956,9 +967,13 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         assert (
             self.exp_seed is not None
         ), "DataLoader seed has not been specified! Is this a bug?"
-        kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
-            worker_id, self.exp_seed
-        )
+
+        # no need to set worker seed in map-stye dataset, see pytorch doc about reproducibility
+        # this would also cause transforms based on random sampling to behave in the same way every time
+        # kwargs["worker_init_fn"] = lambda worker_id: seed_worker(
+        #     worker_id, self.exp_seed
+        # )
+
         kwargs.update(self.data_loader_args)
 
         # Single graph dataset, shuffle does not make sense (unless we know how
