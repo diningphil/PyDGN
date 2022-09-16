@@ -11,7 +11,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Interrogate](https://github.com/diningphil/PyDGN/blob/master/badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
 
-#### Read the [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
+## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
 This is a Python library to easily experiment
 with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S0893608020302197) (DGNs). It provides
