@@ -3,6 +3,7 @@ from typing import Tuple
 
 import numpy as np
 import torch
+from networkx import is_directed
 from sklearn.model_selection import (
     StratifiedKFold,
     StratifiedShuffleSplit,
@@ -14,6 +15,7 @@ from torch_geometric.utils import (
     to_undirected,
     to_dense_adj,
     add_self_loops,
+    is_undirected,
 )
 
 import pydgn.data.dataset
@@ -157,7 +159,7 @@ class Splitter:
 
     def get_targets(
         self, dataset: pydgn.data.dataset.DatasetInterface
-    ) -> (bool, np.ndarray):
+    ) -> Tuple[bool, np.ndarray]:
         r"""
         Reads the entire dataset and returns the targets.
 
@@ -852,9 +854,6 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         avoid_opposite_negative_edges (bool): whether or not to **avoid**
             creating negative edges that are opposite
             to existing edges Default is ``True``
-        run_checks (bool): whether or not to run correctness checks.
-            Creates a full adjacency matrix,
-            can be memory intensive.
     """
 
     def __init__(
@@ -869,7 +868,6 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         test_ratio: float = 0.1,
         undirected: bool = False,
         avoid_opposite_negative_edges: bool = True,
-        run_checks=False,
     ):
         super().__init__(
             n_outer_folds,
@@ -881,51 +879,8 @@ class LinkPredictionSingleGraphSplitter(Splitter):
             outer_val_ratio,
             test_ratio,
         )
-        self.run_checks = run_checks
         self.undirected = undirected
         self.avoid_opposite_negative_edges = avoid_opposite_negative_edges
-
-    @staticmethod
-    def _run_checks(
-        A,
-        pos_train_edges,
-        neg_train_edges,
-        pos_val_edges,
-        neg_val_edges,
-        pos_test_edges,
-        neg_test_edges,
-    ):
-        """
-        Runs additional memory-intensive checks to ensure the edge split is ok
-        and does not contain overlaps.
-        """
-        print(
-            f"Inner splits: {pos_train_edges.shape}, {neg_train_edges.shape}, "
-            f"{pos_val_edges.shape}, {neg_val_edges.shape}"
-        )
-
-        # First: check positive edges perfectly reconstruct adjacency matrix
-        N = A.shape[0]
-        # TEST: restore A with partitioned positive links
-        A_pos = to_dense_adj(pos_train_edges, max_num_nodes=N)[0, :, :]
-        A_pos += to_dense_adj(pos_val_edges, max_num_nodes=N)[0, :, :]
-        A_pos += to_dense_adj(pos_test_edges, max_num_nodes=N)[0, :, :]
-
-        # It is also a way to check that positive edges do not overlap
-        # If I do not call to_undirected to val and test edges when
-        # undirected==True, this won't hold
-        # assert torch.all(A == A_pos)
-
-        # Second: check edges do not overlap
-        # Can be done by checking the sum of positive and negative adj matrices
-        # holds values smaller or equal than 1.
-
-        # TEST: check negative links are separate from positive links
-        A_neg = to_dense_adj(neg_train_edges, max_num_nodes=N)[0, :, :]
-        A_neg += to_dense_adj(neg_val_edges, max_num_nodes=N)[0, :, :]
-        A_neg += to_dense_adj(neg_test_edges, max_num_nodes=N)[0, :, :]
-
-        assert torch.all((A_neg + A_pos) <= 1.0)
 
     def train_val_test_edge_split(
         self, edge_index, edge_attr, val_ratio, test_ratio, num_nodes
@@ -958,39 +913,33 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         val_edges = edge_index[:, val_elements]
         test_edges = edge_index[:, test_elements]
 
+        if edge_attr is not None:
+            train_attr = edge_attr[train_elements]
+            val_attr = edge_attr[val_elements]
+            test_attr = edge_attr[test_elements]
+        else:
+            train_attr = None
+            val_attr = None
+            test_attr = None
+
         # Restore training edges as undirected for training
         # and double validation and test edges to maintain proportions
         if self.undirected:
-            train_edges = (
-                to_undirected(train_edges, num_nodes=num_nodes)
+            train_edges, train_attr = (
+                to_undirected(train_edges, train_attr, num_nodes=num_nodes)
                 if train_edges.shape[1] > 0
                 else train_edges
             )
-            val_edges = (
-                to_undirected(val_edges, num_nodes=num_nodes)
+            val_edges, val_attr = (
+                to_undirected(val_edges, val_attr, num_nodes=num_nodes)
                 if val_edges.shape[1] > 0
                 else val_edges
             )
-            test_edges = (
-                to_undirected(test_edges, num_nodes=num_nodes)
+            test_edges, test_attr = (
+                to_undirected(test_edges, test_attr, num_nodes=num_nodes)
                 if test_edges.shape[1] > 0
                 else test_edges
             )
-
-        # Use the permuted elements to recover the associated train/val/test
-        # edge attributes
-        # TODO: If undirected, train_attr should be doubled according to train
-        # edges and the logic of to_undirected!
-        # edge_attr[train_elements].tolist() if edge_attr is not None else None
-        train_attr = None
-        val_attr = (
-            # edge_attr[val_elements].tolist() if edge_attr is not None else No
-            None
-        )
-        test_attr = (
-            # edge_attr[test_elements].tolist() if edge_attr is not None else N
-            None
-        )
 
         return (
             train_edges,
@@ -1036,16 +985,14 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         edge_attr = dataset.data.edge_attr
         num_nodes = dataset.data.x.shape[0]
 
-        if self.undirected and self.run_checks:
-            A = to_dense_adj(edge_index)[0]
-            assert torch.all(
-                A == A.transpose(1, 0)
+        if self.undirected:
+            assert is_undirected(
+                edge_index
             ), "Passed undirected == True with a non-symmetric adj matrix"
-        elif not self.undirected and self.run_checks:
-            A = to_dense_adj(edge_index)[0]
-            assert torch.any(
-                A != A.transpose(1, 0)
-            ), "Passed undirected == False with a symmetric adj matrix"
+        elif not self.undirected:
+            assert not is_undirected(
+                edge_index
+            ), "Passed undirected == False with a non-symmetric adj matrix"
 
         inner_val_ratio = (
             self.inner_val_ratio
@@ -1072,13 +1019,13 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         )
 
         for outer_k in range(self.n_outer_folds):
-            print(f"Processing splits for outer fold n {outer_k + 1}")
+            # print(f"Processing splits for outer fold n {outer_k + 1}")
 
             # Create positive train and test edges for outer fold
-            print(
-                f"Split positive edges from edge index of shape "
-                f"{original_edge_index.shape[1]}"
-            )
+            # print(
+            #     f"Split positive edges from edge index of shape "
+            #     f"{original_edge_index.shape[1]}"
+            # )
             (
                 pos_train_edges,
                 train_attr,
@@ -1142,14 +1089,6 @@ class LinkPredictionSingleGraphSplitter(Splitter):
             )
             self.undirected = tmp_undirected
 
-            if self.run_checks:
-                print(
-                    f"Outer splits: {pos_train_edges.shape}, "
-                    f"{neg_train_edges.shape}, {outer_pos_val_edges.shape}, "
-                    f"{outer_neg_val_edges.shape}, {pos_test_edges.shape}, "
-                    f"{neg_test_edges.shape}"
-                )
-
             inner_fold_splits = []
             for inner_k in range(self.n_inner_folds):
 
@@ -1207,30 +1146,6 @@ class LinkPredictionSingleGraphSplitter(Splitter):
                 )
                 inner_fold_splits.append(inner_fold)
 
-                if self.run_checks:
-                    print(
-                        "Running additional checks: disable this option after "
-                        "testing the function"
-                    )
-                    self._run_checks(
-                        A,
-                        inner_pos_train_edges,
-                        inner_neg_train_edges,
-                        inner_pos_val_edges,
-                        inner_neg_val_edges,
-                        pos_test_edges,
-                        neg_test_edges,
-                    )
-
-            # Finally, check we are not creating positive links for some
-            # mistake
-            if self.run_checks:
-                A = to_dense_adj(edge_index)[0]
-                neg_A = to_dense_adj(
-                    negative_edge_index, max_num_nodes=A.shape[0]
-                )[0, :, :]
-                assert torch.all(A + neg_A <= 1.0)
-
             self.inner_folds.append(inner_fold_splits)
 
             outer_fold = OuterFold(
@@ -1264,8 +1179,7 @@ class LinkPredictionSingleGraphSplitter(Splitter):
         splitter_args.update(
             {
                 "undirected": self.undirected,
-                "avoid_opposite_negative_edges":
-                    self.avoid_opposite_negative_edges,
+                "avoid_opposite_negative_edges": self.avoid_opposite_negative_edges,
             }
         )
         return splitter_args

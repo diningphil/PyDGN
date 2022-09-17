@@ -630,9 +630,7 @@ class TrainingEngine(EventDispatcher):
                     # Log performances
                     msg = (
                         f"Epoch: {epoch + 1}, TR loss: {train_loss} "
-                        f"TR score: {train_score}"
-                        + val_msg_str
-                        + test_msg_str
+                        f"TR score: {train_score}" + val_msg_str + test_msg_str
                     )
                     log(msg, logger)
 

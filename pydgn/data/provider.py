@@ -880,7 +880,7 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         )
         y = dataset.data.y
 
-        # Use indices to change edge_index and provide an y
+        # Use indices to change edge_index and provide a y
         train, eval = indices
         pos_train_edges, train_attr, neg_train_edges = train
         pos_train_edges = torch.tensor(pos_train_edges, dtype=torch.long)
@@ -920,21 +920,21 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         while not done:
             if batch_size == 0:
                 # Full batch
-                pos_batch_end = -1
-                neg_batch_end = -1
+                pos_batch_end = permuted_pos_eval_edges.shape[1]
+                neg_batch_end = permuted_neg_eval_edges.shape[1]
             else:
                 # Create subgraph
                 pos_batch_end = (
                     batch_start + batch_size
                     if (batch_start + batch_size)
                     < permuted_pos_eval_edges.shape[1]
-                    else -1
+                    else permuted_pos_eval_edges.shape[1]
                 )
                 neg_batch_end = (
                     batch_start + batch_size
                     if (batch_start + batch_size)
                     < permuted_neg_eval_edges.shape[1]
-                    else -1
+                    else permuted_neg_eval_edges.shape[1]
                 )
 
             batch_pos_edge_indices = permuted_pos_eval_edges[
@@ -951,8 +951,9 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
             batch_start += batch_size
 
             if (
-                pos_batch_end == -1 or neg_batch_end == -1
-            ):  # to ensure balancing
+                pos_batch_end == permuted_pos_eval_edges.shape[1]
+                and neg_batch_end == permuted_neg_eval_edges.shape[1]
+            ):
                 done = True
 
             # create data object and append to list

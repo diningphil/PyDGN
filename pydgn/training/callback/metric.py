@@ -732,8 +732,8 @@ class AdditiveLoss(Metric):
         else:
             epoch_res = {
                 loss.name: loss.compute_metric(
-                    torch.cat(self.y_true[l.name], dim=0),
-                    torch.cat(self.y_pred[l.name], dim=0),
+                    torch.cat(self.y_true[loss.name], dim=0),
+                    torch.cat(self.y_pred[loss.name], dim=0),
                 )
                 for loss in self.losses
             }

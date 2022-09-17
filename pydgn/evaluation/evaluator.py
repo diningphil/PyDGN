@@ -1003,9 +1003,9 @@ class RiskAssesser:
             telegram_msg = (
                 f"Exp *{exp_name}* \n"
                 f"Experiment has finished \n"
-                f'Test score: avg '
+                f"Test score: avg "
                 f'*{assessment_results[f"{AVG}_{TEST}_{MAIN_SCORE}"]:.4f}* '
-                f'/ std'
+                f"/ std"
                 f' *{assessment_results[f"{STD}_{TEST}_{MAIN_SCORE}"]:.4f}*'
             )
             send_telegram_update(

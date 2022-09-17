@@ -12,7 +12,6 @@ splitter:
     test_ratio: 0.1  # in this case test_ratio will always be used and will apply to the number of total edges
     undirected: True  # we need to know if the graph is undirected or not to create proper random splits
     avoid_opposite_negative_edges: True  # Useful for losses/scores that consider the direction. Has an effect when the graph is directed.
-    run_checks: True  # in case you want to debug the first time. Computes full adj matrix, be careful.
 dataset:
   root: DATA/
   class_name: pydgn.data.dataset.PlanetoidDatasetInterface

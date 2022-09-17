@@ -1,0 +1,111 @@
+# Dataset and Splits
+data_root: DATA
+dataset_class: pydgn.data.dataset.TUDatasetInterface
+dataset_name:  PROTEINS
+data_splits_file:  tests/evaluation/PROTEINS_outer10_inner10.splits
+
+
+# Hardware
+device:  cpu
+max_cpus:  4
+max_gpus: 0
+gpus_per_task:  1
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 0
+    pin_memory: False
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: TEST
+exp_name: TEST_GRID
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: True
+evaluate_every: 1
+final_training_runs: 1
+
+
+grid:
+  supervised_config:
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
+    checkpoint: True
+    shuffle: True
+    batch_size: 32
+    epochs: 3
+
+    # Model specific arguments #
+
+    dim_embedding: 5
+    num_layers:
+      - 3
+      - 5
+    aggregation: mean
+
+    # ------------------------ #
+
+    # Optimizer (with an example - 3 possible alternatives)
+    optimizer:
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adam
+          lr:
+            - 0.01
+            - 0.001
+          weight_decay: 0.
+      - class_name: pydgn.training.callback.optimizer.Optimizer
+        args:
+          optimizer_class_name: torch.optim.Adagrad
+          lr:
+            - 0.01
+          weight_decay: 0.
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric (with an example of Additive Loss)
+    loss:
+      - class_name: pydgn.training.callback.metric.AdditiveLoss
+        args:
+          loss_1: pydgn.training.callback.metric.MulticlassClassification
+          loss_2: pydgn.training.callback.metric.MulticlassClassification
+
+
+    # Score metric (with an example of Multi Score)
+    scorer:
+      - class_name: pydgn.training.callback.metric.MultiScore
+        args:
+          main_scorer: pydgn.training.callback.metric.MulticlassAccuracy
+          my_second_metric: pydgn.training.callback.metric.ToyMetric
+
+    # Readout (optional)
+    readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional, with an example of "patience" early stopping on the validation score)
+    early_stopper:
+      - class_name:
+          - pydgn.training.callback.early_stopping.PatienceEarlyStopper
+        args:
+          patience:
+            - 10
+          # SYNTAX: (train_,validation_)[name_of_the_scorer_or_loss_to_monitor] -> we can use MAIN_LOSS or MAIN_SCORE
+          monitor: validation_main_score
+          mode: max  # is best the `max` or the `min` value we are monitoring?
+          checkpoint: True  # store the best checkpoint
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

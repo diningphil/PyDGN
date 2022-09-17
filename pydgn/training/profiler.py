@@ -158,9 +158,11 @@ class Profiler:
             ):
                 total_time_experiment += total_elapsed
                 seconds_elapsed = datetime.timedelta(seconds=total_elapsed)
-                profile_str += f"\t {callback_name} --> " \
-                               f"Avg: {avg_elapsed} s, " \
-                               f"Total: {str(seconds_elapsed)} \n"
+                profile_str += (
+                    f"\t {callback_name} --> "
+                    f"Avg: {avg_elapsed} s, "
+                    f"Total: {str(seconds_elapsed)} \n"
+                )
             profile_str += "\n"
 
         total_time = datetime.timedelta(seconds=total_time_experiment)

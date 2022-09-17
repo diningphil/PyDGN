@@ -14,6 +14,7 @@
 ### Fixed
 
 - Minor check in splitter
+- Minor fix in link prediction splitter, one evaluation link was being left out
 - Removed setting random seed for map-style dataset. It was not useful (see Torch doc on reproducibility) and could cause transforms based on random sampling (e.g. negative sampling) to behave always in the same way
 
 ## [1.2.3] Added support for single graph tasks

@@ -1,0 +1,98 @@
+# Dataset and Splits
+data_root: DATA
+dataset_class: pydgn.data.dataset.TUDatasetInterface
+dataset_name:  PROTEINS
+data_splits_file:  examples/DATA_SPLITS/CHEMICAL/PROTEINS/PROTEINS_outer10_inner1.splits
+
+
+# Hardware
+device:  cpu
+max_cpus:  4
+max_gpus: 0
+gpus_per_task:  1
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 0
+    pin_memory: False
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: TEST
+exp_name: TEST_RANDOM
+experiment: pydgn.experiment.supervised_task.SupervisedTask
+higher_results_are_better: True
+evaluate_every: 1
+final_training_runs: 1
+
+
+num_samples: 10  # number of random searches to try
+random:
+  supervised_config:
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
+    checkpoint: True
+    shuffle: True
+    batch_size:
+      sample_method: pydgn.evaluation.util.choice
+      args:
+        - 32
+        - 64
+    epochs: 10
+
+    # Model specific arguments #
+
+    dim_embedding: 5
+    num_layers:
+      sample_method: pydgn.evaluation.util.randint
+      args:
+        - 1  # min
+        - 5  # max
+    aggregation: mean
+
+    # ------------------------ #
+
+    # Optimizer
+    optimizer:
+      sample_method: pydgn.evaluation.util.choice
+      args:
+        - class_name: pydgn.training.callback.optimizer.Optimizer
+          args:
+            optimizer_class_name: torch.optim.Adam
+            lr:
+              sample_method: pydgn.evaluation.util.normal
+              # sample from normal distribution each time
+              args:
+                - 0.001  # mu
+                - 0.0001  # sigma
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric
+    loss: pydgn.training.callback.metric.MulticlassClassification
+
+    # Score metric
+    scorer: pydgn.training.callback.metric.MulticlassAccuracy
+
+    # Readout (optional)
+    readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional, with an example of "patience" early stopping on the validation score)
+    early_stopper: null
+
+    # Plotter of metrics
+    plotter: null

@@ -122,7 +122,7 @@ class ProgressManager:
             position=position,
             unit="config",
             bar_format=" {desc} {percentage:3.0f}%|"
-                       "{bar}|{n_fmt}/{total_fmt}{postfix}",
+            "{bar}|{n_fmt}/{total_fmt}{postfix}",
         )
         pbar.set_description(f"Out_{i + 1}/Inn_{j + 1}")
         mean = str(datetime.timedelta(seconds=0))
@@ -144,7 +144,7 @@ class ProgressManager:
             position=position,
             unit="config",
             bar_format=" {desc} {percentage:3.0f}%|"
-                       "{bar}|{n_fmt}/{total_fmt}{postfix}",
+            "{bar}|{n_fmt}/{total_fmt}{postfix}",
         )
         pbar.set_description(f"Final run {i + 1}")
         mean = str(datetime.timedelta(seconds=0))
@@ -198,12 +198,12 @@ class ProgressManager:
             mean_time = str(datetime.timedelta(seconds=mean_seconds)).split(
                 "."
             )[0]
-            min_time = str(datetime.timedelta(seconds=min_seconds)).split(
-                "."
-            )[0]
-            max_time = str(datetime.timedelta(seconds=max_seconds)).split(
-                "."
-            )[0]
+            min_time = str(datetime.timedelta(seconds=min_seconds)).split(".")[
+                0
+            ]
+            max_time = str(datetime.timedelta(seconds=max_seconds)).split(".")[
+                0
+            ]
 
             pbar.set_postfix_str(
                 f"min:{min_time}|avg:{mean_time}|max:{max_time}"
