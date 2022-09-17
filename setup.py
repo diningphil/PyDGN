@@ -28,7 +28,7 @@ setuptools.setup(
     python_requires=">=3.8,<3.10",
     install_requires=[
         "PyYAML >= 5.4",
-        "networkx >= 2.3",
+        "networkx >= 2.5",
         "requests >= 2.22.0",
         "matplotlib >= 3.3.4",
         "seaborn >= 0.9.0",
@@ -36,7 +36,8 @@ setuptools.setup(
         "tqdm >= 4.47.0",
         "ogb >= 1.3.3",
         "aioredis >= 1.3.1",
-        "ray >= 1.5.2",
+        "protobuf==3.20.0",
+        "ray >= 1.12.0",
         "gpustat >= 0.6.0",
         "torch >= 1.10.2",
         "torch-geometric >= 2.0.3",
