@@ -798,6 +798,8 @@ class ToyIterableDataset(IterableDatasetInterface):
         url_indices: Optional[List] = None,
         **kwargs,
     ):
+        self.num_files = 5
+        self.url_indices = [f"{i}" for i in range(self.num_files)]
         super().__init__(
             root, name, transform, pre_transform, url_indices, **kwargs
         )
@@ -816,7 +818,7 @@ class ToyIterableDataset(IterableDatasetInterface):
         The list of file names that must be present in order to skip
         downloading.
         """
-        return [f"fake_processed_{i}.pt" for i in range(100)]
+        return [f"fake_processed_{i}.pt" for i in range(self.num_files)]
 
     @property
     def dim_node_features(self) -> int:
@@ -852,7 +854,7 @@ class ToyIterableDataset(IterableDatasetInterface):
         Creates a fake dataset and stores it to the :obj:`self.processed_dir`
         folder. Each file will contain a list of 10 fake graphs.
         """
-        for i in range(100):
+        for i in range(len(self)):
             fake_graphs = []
             for g in range(10):
                 fake_graphs.append(

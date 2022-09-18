@@ -17,16 +17,18 @@ def test_dataset_creation():
 
 
 @pytest.mark.dependency(depends=["test_dataset_creation"])
-def test_experiment_completion():
-    config = {}
-    config[CONFIG_FILE] = "tests/integration/exp_config.yml"
-    config[DEBUG] = True
+def test_grid_experiment_completion_debug():
 
     class MockConfig:
         def __init__(self, d):
             for key in d.keys():
                 setattr(self, key, d[key])
 
-    config = MockConfig(config)
-    evaluation(config)
+    for debug in [True, False]:
+        config = {}
+        config[CONFIG_FILE] = "tests/integration/exp_config.yml"
+        config[DEBUG] = debug
+        config = MockConfig(config)
+        evaluation(config)
+        rmtree("tests/integration/debug/RESULTS")
     rmtree("tests/integration/debug")

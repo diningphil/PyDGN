@@ -1,0 +1,76 @@
+{
+    "outer_k": 6,
+    "inner_k": 0,
+    "exp_seed": 3831882064,
+    "supervised_config": {
+        "model": "pydgn.model.dgn.toy_dgn.ToyDGN",
+        "checkpoint": false,
+        "shuffle": true,
+        "batch_size": 32,
+        "epochs": 3,
+        "dim_embedding": 5,
+        "num_layers": 2,
+        "aggregation": "mean",
+        "optimizer": {
+            "class_name": "pydgn.training.callback.optimizer.Optimizer",
+            "args": {
+                "optimizer_class_name": "torch.optim.Adam",
+                "lr": 0.01,
+                "weight_decay": 0.0
+            }
+        },
+        "scheduler": {
+            "class_name": "pydgn.training.callback.scheduler.EpochScheduler",
+            "args": {
+                "scheduler_class_name": "torch.optim.lr_scheduler.StepLR",
+                "step_size": 0.95,
+                "gamma": 0.1
+            }
+        },
+        "loss": {
+            "class_name": "pydgn.training.callback.metric.AdditiveLoss",
+            "args": {
+                "loss_1": "pydgn.training.callback.metric.MulticlassClassification",
+                "loss_2": "pydgn.training.callback.metric.MulticlassClassification"
+            }
+        },
+        "scorer": {
+            "class_name": "pydgn.training.callback.metric.MultiScore",
+            "args": {
+                "main_scorer": "pydgn.training.callback.metric.MulticlassAccuracy",
+                "my_second_metric": "pydgn.training.callback.metric.ToyMetric"
+            }
+        },
+        "readout": "pydgn.model.readout.graph_readout.LinearGraphReadout",
+        "engine": "pydgn.training.engine.TrainingEngine",
+        "gradient_clipper": {
+            "class_name": "pydgn.training.callback.gradient_clipping.GradientClipper",
+            "args": {
+                "clip_value": 100
+            }
+        },
+        "early_stopper": {
+            "class_name": "pydgn.training.callback.early_stopping.PatienceEarlyStopper",
+            "args": {
+                "patience": 1,
+                "monitor": "validation_main_score",
+                "mode": "max",
+                "checkpoint": false
+            }
+        },
+        "plotter": "pydgn.training.callback.plotter.Plotter"
+    },
+    "dataset": "mock_dataset",
+    "dataset_getter": "pydgn.data.provider.DataProvider",
+    "data_loader": "torch_geometric.loader.DataLoader",
+    "data_loader_args": {
+        "num_workers": 0,
+        "pin_memory": false
+    },
+    "dataset_class": "tests.data.test_data_splitter.FakeGraphClassificationDataset",
+    "data_root": "tests/integration/debug/DATA/",
+    "device": "cpu",
+    "experiment": "pydgn.experiment.supervised_task.SupervisedTask",
+    "higher_results_are_better": true,
+    "evaluate_every": 1
+}

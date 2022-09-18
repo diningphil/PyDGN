@@ -1,0 +1,4 @@
+[run]
+omit =
+    # omit code for models, as these are irrelevant to our library
+    pydgn/model/*

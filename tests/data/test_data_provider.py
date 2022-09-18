@@ -1,4 +1,5 @@
 from copy import deepcopy
+from shutil import rmtree
 from unittest.mock import patch
 
 import pytest
@@ -6,11 +7,12 @@ import torch
 from torch_geometric.loader import DataLoader
 from torch_geometric.utils import sort_edge_index
 
-from pydgn.data.dataset import DatasetInterface
+from pydgn.data.dataset import DatasetInterface, ToyIterableDataset
 from pydgn.data.provider import (
     DataProvider,
     SingleGraphDataProvider,
     LinkPredictionSingleGraphDataProvider,
+    IterableDataProvider,
 )
 from pydgn.data.splitter import (
     Splitter,
@@ -439,3 +441,120 @@ def test_LinkPredictionSingleGraphDataProvider(link_prediction_dataset):
                             assert pos_edge_idx.tolist() == pos_list.tolist()
 
                             assert neg_edge_idx.tolist() == neg_list.tolist()
+
+
+def mock_get_iterable_splitter(cls, **kwargs):
+    """
+    Instantiates a splitter and generates random splits
+    """
+    if cls.splitter is None:
+        splitter = Splitter(
+            n_outer_folds=cls.outer_folds,
+            n_inner_folds=cls.inner_folds,
+            seed=0,
+            stratify=False,
+            shuffle=True,
+            outer_val_ratio=0.1,
+        )
+        dataset = cls._get_dataset()
+        splitter.split(dataset, None)
+        cls.splitter = splitter
+        return cls.splitter
+
+    return cls.splitter
+
+
+def mock_get_iterable_dataset(cls, **kwargs):
+    """
+    Returns the dataset stored in the object (see main test)
+    """
+    data_root = "tests/data/debug/DATA"
+
+    if "url_indices" in kwargs:
+        indices = kwargs["url_indices"]
+        return ToyIterableDataset(data_root, "toy", url_indices=indices)
+    return ToyIterableDataset(data_root, "toy")
+
+
+@patch.object(IterableDataProvider, "_get_dataset", mock_get_iterable_dataset)
+@patch.object(
+    IterableDataProvider, "_get_splitter", mock_get_iterable_splitter
+)
+def test_IterableDataProvider():
+    """
+    Check that the data provider returns the correct data associated
+    with different data splits
+    """
+    data_root = "tests/data/debug/DATA"
+    batch_size = 32
+    for outer_folds in [1, 3]:
+        for inner_folds in [1, 3]:
+            for shuffle in [False, True]:
+                provider = IterableDataProvider(
+                    data_root,
+                    None,
+                    DatasetInterface,
+                    "",
+                    DataLoader,
+                    {},
+                    outer_folds=outer_folds,
+                    inner_folds=inner_folds,
+                )
+                provider.dataset = ToyIterableDataset(data_root, "toy")
+                provider.set_exp_seed(0)
+
+                for o in range(outer_folds):
+                    provider.set_outer_k(o)
+                    for i in range(inner_folds):
+                        provider.set_inner_k(i)
+
+                        inner_train_loader = provider.get_inner_train(
+                            shuffle=shuffle, batch_size=batch_size
+                        )
+
+                        assert len(inner_train_loader.dataset) == len(
+                            set(
+                                provider._get_splitter()
+                                .inner_folds[o][i]
+                                .train_idxs
+                            )
+                        )
+
+                        inner_val_loader = provider.get_inner_val(
+                            shuffle=shuffle, batch_size=batch_size
+                        )
+
+                        assert len(inner_val_loader.dataset) == len(
+                            set(
+                                provider._get_splitter()
+                                .inner_folds[o][i]
+                                .val_idxs
+                            )
+                        )
+
+                    provider.set_inner_k(None)
+
+                    outer_train_loader = provider.get_outer_train(
+                        shuffle=shuffle, batch_size=batch_size
+                    )
+
+                    assert len(outer_train_loader.dataset) == len(
+                        set(provider._get_splitter().outer_folds[o].train_idxs)
+                    )
+
+                    outer_val_loader = provider.get_outer_val(
+                        shuffle=shuffle, batch_size=batch_size
+                    )
+
+                    assert len(outer_val_loader.dataset) == len(
+                        set(provider._get_splitter().outer_folds[o].val_idxs)
+                    )
+
+                    outer_test_loader = provider.get_outer_test(
+                        shuffle=shuffle, batch_size=batch_size
+                    )
+
+                    assert len(outer_test_loader.dataset) == len(
+                        set(provider._get_splitter().outer_folds[o].test_idxs)
+                    )
+    rmtree(data_root)

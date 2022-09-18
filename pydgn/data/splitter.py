@@ -18,8 +18,8 @@ from torch_geometric.utils import (
     is_undirected,
 )
 
-import pydgn.data.dataset
-from pydgn.data.dataset import OGBGDatasetInterface
+import pydgn
+from pydgn.data.dataset import OGBGDatasetInterface, IterableDatasetInterface
 from pydgn.data.util import to_lower_triangular
 from pydgn.experiment.util import s2c
 
@@ -173,16 +173,17 @@ class Splitter:
             been thrown. The second value holds the actual targets or ``None``,
             depending on the first boolean value.
         """
+        try:
+            _ = hasattr(dataset[0], "y")
+        except NotImplementedError as e:
+            assert issubclass(dataset.__class__, IterableDatasetInterface)
+            return False, False
+
         if hasattr(dataset[0], "y") and dataset[0].y is not None:
             targets = torch.cat([d.y for d in dataset], dim=0).numpy()
             return True, targets
         else:
             return False, None
-        # try:
-        #     targets = np.array([d.y.item() for d in dataset])
-        #     return True, targets
-        # except Exception:
-        #     return False, None
 
     @classmethod
     def load(cls, path: str):
