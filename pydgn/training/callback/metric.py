@@ -28,6 +28,7 @@ class Metric(Module, EventHandler):
             such as micro AP/F1 scores. Default is ``True``.
         force_cpu (bool): Whether or not to move all predictions to cpu
             before computing the epoch-wise loss/score. Default is ``True``.
+        device (bool): The device used. Default is 'cpu'.
     """
 
     def __init__(
@@ -36,6 +37,7 @@ class Metric(Module, EventHandler):
         reduction: str = "mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
     ):
         super().__init__()
         self.batch_metrics = None
@@ -43,6 +45,7 @@ class Metric(Module, EventHandler):
         self.reduction = reduction
         self.accumulate_over_epoch = accumulate_over_epoch
         self.force_cpu = force_cpu
+        self.device = device
         self.y_pred, self.y_true = None, None
 
         # Keeps track of how many times on_compute_metrics has been called
@@ -412,7 +415,10 @@ class MultiScore(Metric):
             such as micro AP/F1 scores. Default is ``True``.
         force_cpu (bool): Whether or not to move all predictions to cpu
             before computing the epoch-wise loss/score. Default is ``True``.
-
+        device (bool): The device used. Default is 'cpu'.
+        main_scorer (:class:`~pydgn.training.callback.metric.Metric`): the
+            score on which final results are computed.
+        extra_scorers (dict): dictionary of other metrics to consider.
     """
 
     def __init__(
@@ -421,6 +427,7 @@ class MultiScore(Metric):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
         main_scorer=None,
         **extra_scorers
     ):
@@ -428,7 +435,7 @@ class MultiScore(Metric):
         assert not use_as_loss, "MultiScore cannot be used as loss"
         assert main_scorer is not None, "You have to provide a main scorer"
         super().__init__(
-            use_as_loss, reduction, accumulate_over_epoch, force_cpu
+            use_as_loss, reduction, accumulate_over_epoch, force_cpu, device
         )
         self.scores = [self._istantiate_scorer(main_scorer)] + [
             self._istantiate_scorer(score) for score in extra_scorers.values()
@@ -645,6 +652,7 @@ class AdditiveLoss(Metric):
             such as micro AP/F1 scores. Default is ``True``.
         force_cpu (bool): Whether or not to move all predictions to cpu
             before computing the epoch-wise loss/score. Default is ``True``.
+        device (bool): The device used. Default is 'cpu'.
         losses (dict): dictionary of metrics to add together
     """
 
@@ -654,11 +662,12 @@ class AdditiveLoss(Metric):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
         **losses: dict
     ):
         assert use_as_loss, "Additive loss can only be used as a loss"
         super().__init__(
-            use_as_loss, reduction, accumulate_over_epoch, force_cpu
+            use_as_loss, reduction, accumulate_over_epoch, force_cpu, device
         )
         self.losses = [
             self._instantiate_loss(loss) for loss in losses.values()
@@ -767,6 +776,7 @@ class AdditiveLoss(Metric):
         in state.
 
         Args:
+            state (:class:`~training.event.state.State`):
             state (:class:`~training.event.state.State`):
                 object holding training information
         """
@@ -900,12 +910,14 @@ class Classification(Metric):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
     ):
         super().__init__(
             use_as_loss=use_as_loss,
             reduction=reduction,
             accumulate_over_epoch=accumulate_over_epoch,
             force_cpu=force_cpu,
+            device=device,
         )
         self.metric = None
 
@@ -969,12 +981,14 @@ class Regression(Metric):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
     ):
         super().__init__(
             use_as_loss=use_as_loss,
             reduction=reduction,
             accumulate_over_epoch=accumulate_over_epoch,
             force_cpu=force_cpu,
+            device=device,
         )
         self.metric = None
 
@@ -1038,12 +1052,14 @@ class MulticlassClassification(Classification):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
     ):
         super().__init__(
             use_as_loss=use_as_loss,
             reduction=reduction,
             accumulate_over_epoch=accumulate_over_epoch,
             force_cpu=force_cpu,
+            device=device,
         )
         self.metric = CrossEntropyLoss(reduction=reduction)
 
@@ -1067,12 +1083,14 @@ class MeanSquareError(Regression):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
     ):
         super().__init__(
             use_as_loss=use_as_loss,
             reduction=reduction,
             accumulate_over_epoch=accumulate_over_epoch,
             force_cpu=force_cpu,
+            device=device,
         )
         self.metric = MSELoss(reduction=reduction)
 
@@ -1096,12 +1114,14 @@ class MeanAverageError(Regression):
         reduction="mean",
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
+        device: str = "cpu",
     ):
         super().__init__(
             use_as_loss=use_as_loss,
             reduction=reduction,
             accumulate_over_epoch=accumulate_over_epoch,
             force_cpu=force_cpu,
+            device=device,
         )
         self.metric = L1Loss(reduction=reduction)
 

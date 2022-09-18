@@ -383,9 +383,7 @@ def test_LinkPredictionSingleGraphDataProvider(link_prediction_dataset):
                         )
 
                         outer_pos_train_edges, _, outer_neg_train_edges = (
-                            provider._get_splitter()
-                            .outer_folds[o]
-                            .train_idxs
+                            provider._get_splitter().outer_folds[o].train_idxs
                         )
 
                         outer_val_loader = provider.get_outer_val(
@@ -393,9 +391,7 @@ def test_LinkPredictionSingleGraphDataProvider(link_prediction_dataset):
                         )
 
                         outer_pos_val_edges, _, outer_neg_val_edges = (
-                            provider._get_splitter()
-                            .outer_folds[o]
-                            .val_idxs
+                            provider._get_splitter().outer_folds[o].val_idxs
                         )
 
                         outer_test_loader = provider.get_outer_test(
@@ -403,26 +399,24 @@ def test_LinkPredictionSingleGraphDataProvider(link_prediction_dataset):
                         )
 
                         outer_pos_test_edges, _, outer_neg_test_edges = (
-                            provider._get_splitter()
-                            .outer_folds[o]
-                            .test_idxs
+                            provider._get_splitter().outer_folds[o].test_idxs
                         )
 
                         for loader, pos_list, neg_list in [
                             (
-                                    outer_train_loader,
-                                    outer_pos_train_edges,
-                                    outer_neg_train_edges,
+                                outer_train_loader,
+                                outer_pos_train_edges,
+                                outer_neg_train_edges,
                             ),
                             (
-                                    outer_val_loader,
-                                    outer_pos_val_edges,
-                                    outer_neg_val_edges,
+                                outer_val_loader,
+                                outer_pos_val_edges,
+                                outer_neg_val_edges,
                             ),
                             (
-                                    outer_test_loader,
-                                    outer_pos_test_edges,
-                                    outer_neg_test_edges,
+                                outer_test_loader,
+                                outer_pos_test_edges,
+                                outer_neg_test_edges,
                             ),
                         ]:
                             pos_edge_idx = torch.cat(
@@ -442,10 +436,6 @@ def test_LinkPredictionSingleGraphDataProvider(link_prediction_dataset):
                             neg_edge_idx = sort_edge_index(neg_edge_idx)
                             neg_list = sort_edge_index(neg_list)
 
-                            assert (
-                                    pos_edge_idx.tolist() == pos_list.tolist()
-                            )
+                            assert pos_edge_idx.tolist() == pos_list.tolist()
 
-                            assert (
-                                    neg_edge_idx.tolist() == neg_list.tolist()
-                            )
+                            assert neg_edge_idx.tolist() == neg_list.tolist()

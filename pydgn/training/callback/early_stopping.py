@@ -1,4 +1,4 @@
-import copy
+from copy import deepcopy
 import operator
 from pathlib import Path
 
@@ -66,12 +66,12 @@ class EarlyStopper(EventHandler):
         metric_to_compare = state.epoch_results[score_or_loss][self.monitor]
 
         if not hasattr(state, BEST_EPOCH_RESULTS):
-            state.update(best_epoch_results=state.epoch_results)
+            state.update(best_epoch_results=deepcopy(state.epoch_results))
             state.best_epoch_results[BEST_EPOCH] = state.epoch
             state.best_epoch_results[score_or_loss][
                 self.monitor
             ] = state.epoch_results[score_or_loss][self.monitor]
-            state.best_epoch_results[MODEL_STATE] = copy.deepcopy(
+            state.best_epoch_results[MODEL_STATE] = deepcopy(
                 state.model.state_dict()
             )
             state.best_epoch_results[OPTIMIZER_STATE] = state[
@@ -89,12 +89,12 @@ class EarlyStopper(EventHandler):
             best_metric = state.best_epoch_results[score_or_loss][self.monitor]
 
             if self.operator(metric_to_compare, best_metric):
-                state.update(best_epoch_results=state.epoch_results)
+                state.update(best_epoch_results=deepcopy(state.epoch_results))
                 state.best_epoch_results[BEST_EPOCH] = state.epoch
                 state.best_epoch_results[score_or_loss][
                     self.monitor
                 ] = metric_to_compare
-                state.best_epoch_results[MODEL_STATE] = copy.deepcopy(
+                state.best_epoch_results[MODEL_STATE] = deepcopy(
                     state.model.state_dict()
                 )
                 state.best_epoch_results[OPTIMIZER_STATE] = state[

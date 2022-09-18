@@ -271,6 +271,7 @@ class Experiment:
         """
 
         loss_class, loss_args = return_class_and_args(config, "loss")
+        loss_args.update(device=device)
         loss = (
             loss_class(use_as_loss=True, **loss_args)
             if loss_class is not None
@@ -278,6 +279,7 @@ class Experiment:
         )
 
         scorer_class, scorer_args = return_class_and_args(config, "scorer")
+        scorer_args.update(device=device)
         scorer = (
             scorer_class(use_as_loss=False, **scorer_args)
             if scorer_class is not None

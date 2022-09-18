@@ -1,0 +1,18 @@
+splitter:
+  root: tests/integration/debug/DATA_SPLITS/
+  class_name: pydgn.data.splitter.Splitter
+  args:
+    n_outer_folds: 10
+    n_inner_folds: 1
+    seed: 42
+    stratify: True
+    shuffle: True
+    inner_val_ratio: 0.1
+    outer_val_ratio: 0.1
+    test_ratio: 0.1
+dataset:
+  root: tests/integration/debug/DATA/
+  class_name: tests.data.test_data_splitter.FakeGraphClassificationDataset
+  args:
+    root: tests/integration/debug/DATA/
+    name: mock_dataset

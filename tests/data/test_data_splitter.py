@@ -13,53 +13,53 @@ from pydgn.data.splitter import (
 )
 
 
+class FakeGraphClassificationDataset(DatasetInterface):
+    def __init__(self, root=None, name="mock_dataset"):
+        super().__init__(root, name)
+        self.num_samples = 1000
+        self.feats = 10
+        self.classes = 3
+        self.data = []
+
+        for s in range(self.num_samples):
+            num_nodes = int(torch.randint(low=2, high=100, size=(1,)))
+            x = torch.rand((num_nodes, self.feats))
+            y = torch.randint(self.classes, (1,))
+            edge_index = torch.randint(num_nodes, (2, num_nodes * 2))
+            edge_attr = torch.rand(edge_index.shape[1])
+
+            self.data.append(
+                Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
+            )
+
+    def get(self, idx: int) -> Data:
+        return self.data[idx]
+
+    @property
+    def dim_node_features(self) -> int:
+        return self.data[0].x.shape[1]
+
+    @property
+    def dim_edge_features(self) -> int:
+        return 1
+
+    @property
+    def dim_target(self) -> int:
+        return self.classes
+
+    def len(self) -> int:
+        return len(self)
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+
 @pytest.fixture
 def graph_classification_dataset():
     """
     Builds a random dataset for graph classification
     """
-
-    class FakeDataset(DatasetInterface):
-        def __init__(self):
-            super().__init__(None, None)
-            self.num_samples = 1000
-            self.feats = 10
-            self.classes = 3
-            self.data = []
-
-            for s in range(self.num_samples):
-                num_nodes = int(torch.randint(low=2, high=100, size=(1,)))
-                x = torch.rand((num_nodes, self.feats))
-                y = torch.randint(self.classes, (1,))
-                edge_index = torch.randint(num_nodes, (2, num_nodes * 2))
-                edge_attr = torch.rand(edge_index.shape[1])
-
-                self.data.append(
-                    Data(x=x, edge_index=edge_index, edge_attr=edge_attr, y=y)
-                )
-
-        def get(self, idx: int) -> Data:
-            return self.data[idx]
-
-        @property
-        def dim_node_features(self) -> int:
-            return self.data[0].x.shape[1]
-
-        @property
-        def dim_edge_features(self) -> int:
-            return 1
-
-        @property
-        def dim_target(self) -> int:
-            return self.classes
-
-        def len(self) -> int:
-            return len(self)
-
-        def __len__(self) -> int:
-            return len(self.data)
-
-    return FakeDataset()
+    return FakeGraphClassificationDataset()
 
 
 @pytest.fixture

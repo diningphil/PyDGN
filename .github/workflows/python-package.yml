@@ -8,6 +8,7 @@ on:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  workflow_call:
 
 jobs:
   build:
@@ -20,20 +21,38 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install flake8 pytest
-        pip install -r requirements.txt
-        pip install -r requirements_torch_geometric.txt
+        python -m pip install flake8 pytest coverage coverage-badge
+        pip install -r .github/requirements.txt
+        pip install -r .github/requirements_torch_geometric.txt
+
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --max-line-length=79 --show-source --statistics
+
     - name: Test with pytest
       run: |
-        pytest
+        coverage run -m pytest tests/
+        coverage-badge -o badges/coverage_badge.svg
+
+    - name: Commit files
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add badges/coverage_badge.svg
+        git diff --exit-code || git commit -m "Update coverage_badge.svg" -a
+
+    - name: Push changes
+      if: success()
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}

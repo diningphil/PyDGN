@@ -10,6 +10,7 @@
 [![Downloads](https://static.pepy.tech/personalized-badge/pydgn?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pydgn)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Interrogate](https://github.com/diningphil/PyDGN/blob/master/badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
+[![Coverage](https://github.com/diningphil/PyDGN/blob/master/badges/coverage_badge.svg)]()
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
@@ -36,7 +37,7 @@ Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-compariso
 
 We assume **git** and **Miniconda/Anaconda** are installed. Then you can use the script below to install `pydgn` in a controlled and separate environment (this is up to you):
 
-    source setup/install.sh [<your_cuda_version>]
+    source setup/create_environment.sh [<your_cuda_version>]
     pip install pydgn
 
 Where `<your_cuda_version>` is an optional argument that (as of 2/3/22) can be either `cpu`, `cu102` or `cu113` for Pytorch >= 1.10.2

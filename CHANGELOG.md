@@ -15,7 +15,12 @@
 
 - Minor check in splitter
 - Minor fix in link prediction splitter, one evaluation link was being left out
+- Minor fix in early stopper, `epoch_results` dict was overwritten after applying early stopping. Does not affect performances since the field is re-initialized the subsequent epoch by the training engine.
 - Removed setting random seed for map-style dataset. It was not useful (see Torch doc on reproducibility) and could cause transforms based on random sampling (e.g. negative sampling) to behave always in the same way
+
+### Changed
+
+- Changed semantics of gradient clipper, as there are not many alternatives out there
 
 ## [1.2.3] Added support for single graph tasks
 
