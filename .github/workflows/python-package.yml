@@ -42,7 +42,10 @@ jobs:
     - name: Test with pytest
       run: |
         coverage run -m pytest tests/
-        coverage-badge -o badges/coverage_badge.svg
+
+    - name: Coverage badge
+      run: |
+        coverage-badge -fo badges/coverage_badge.svg
 
     - name: Commit files
       run: |
