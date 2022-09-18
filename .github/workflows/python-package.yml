@@ -39,13 +39,11 @@ jobs:
         # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --max-line-length=79 --show-source --statistics
 
-    - name: Test with pytest
+    - name: Pytest and Coverage badge
       run: |
         coverage run -m pytest tests/
-
-    - name: Coverage badge
-      run: |
-        coverage-badge -fo badges/coverage_badge.svg
+        rm badges/coverage_badge.svg
+        coverage-badge -o badges/coverage_badge.svg
 
     - name: Commit files
       run: |
