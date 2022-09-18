@@ -42,6 +42,7 @@ jobs:
     - name: Pytest and Coverage badge
       run: |
         coverage run -m pytest tests/
+        coverage report -m
         rm badges/coverage_badge.svg
         coverage-badge -o badges/coverage_badge.svg
 
