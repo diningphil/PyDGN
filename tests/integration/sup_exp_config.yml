@@ -31,7 +31,7 @@ seed: 42
 
 # Experiment
 result_folder: tests/integration/debug/RESULTS
-exp_name: test_full_experiment
+exp_name: test_full_experiment_sup
 experiment: pydgn.experiment.supervised_task.SupervisedTask
 higher_results_are_better: True
 evaluate_every: 1

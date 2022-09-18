@@ -5,7 +5,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.utils import to_dense_adj, coalesce
 
-from pydgn.data.dataset import DatasetInterface
+from pydgn.data.dataset import DatasetInterface, OGBGDatasetInterface
 from pydgn.data.splitter import (
     Splitter,
     SingleGraphSplitter,

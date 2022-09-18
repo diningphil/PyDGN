@@ -180,6 +180,7 @@ def evaluation(options: argparse.Namespace):
     risk_assesser.risk_assessment(debug=debug)
     ray.shutdown()
 
+
 def get_args() -> argparse.Namespace:
     """
     Processes CLI arguments (i.e., the config file location and debug option)

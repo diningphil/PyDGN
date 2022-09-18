@@ -557,4 +557,4 @@ def test_IterableDataProvider():
                     assert len(outer_test_loader.dataset) == len(
                         set(provider._get_splitter().outer_folds[o].test_idxs)
                     )
-    rmtree(data_root)
+    rmtree('tests/data/debug/')

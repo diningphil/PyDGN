@@ -1,0 +1,153 @@
+# Telegram Bot
+# telegram_config_file: telegram_config.yml
+
+
+# Dataset and Splits
+data_root: tests/integration/debug/DATA/
+dataset_class: tests.data.test_data_splitter.FakeGraphClassificationDataset
+dataset_name:  mock_dataset
+data_splits_file:  tests/integration/debug/DATA_SPLITS/mock_dataset/mock_dataset_outer10_inner1.splits
+
+
+# Hardware
+device:  cpu
+max_cpus:  4
+max_gpus: 0
+gpus_per_task:  1
+
+
+# Data Loading
+dataset_getter: pydgn.data.provider.DataProvider
+data_loader:
+  class_name: torch_geometric.loader.DataLoader
+  args:
+    num_workers : 0
+    pin_memory: False
+
+
+# Reproducibility
+seed: 42
+
+
+# Experiment
+result_folder: tests/integration/debug/RESULTS
+exp_name: test_full_experiment_semisup
+experiment: pydgn.experiment.semi_supervised_task.SemiSupervisedTask
+higher_results_are_better: True
+evaluate_every: 1
+final_training_runs: 3
+
+
+num_samples: 3  # number of random searches to try
+random:
+  unsupervised_config:
+    model: pydgn.model.dgn.toy_dgn.ToyDGN
+    checkpoint: False
+    shuffle: True
+    batch_size:
+      sample_method: pydgn.evaluation.util.choice
+      args:
+        - 32
+        - 64
+    epochs: 10
+
+    # Model specific arguments #
+
+    dim_embedding: 5
+    num_layers:
+      sample_method: pydgn.evaluation.util.randint
+      args:
+        - 1  # min
+        - 5  # max
+    aggregation: mean
+
+    # ------------------------ #
+
+    # Optimizer
+    optimizer:
+      sample_method: pydgn.evaluation.util.choice
+      args:
+        - class_name: pydgn.training.callback.optimizer.Optimizer
+          args:
+            optimizer_class_name: torch.optim.Adam
+            lr:
+              sample_method: pydgn.evaluation.util.normal
+              # sample from normal distribution each time
+              args:
+                - 0.001  # mu
+                - 0.0001  # sigma
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric (with an example of Additive Loss)
+    loss: pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy loss
+
+    # Score metric (with an example of Multi Score)
+    scorer: pydgn.training.callback.metric.ToyUnsupervisedMetric  # dummy score
+
+    # Readout (optional)
+    readout: pydgn.model.readout.graph_readout.LinearGraphReadout
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional)
+    early_stopper: null
+
+    # Plotter of metrics
+    plotter: null
+
+  supervised_config: # supervised config to classify/predict values associated with unsup. node/graph embeddings
+    model: pydgn.model.dgn.toy_mlp.ToyMLP
+    checkpoint: False
+    shuffle: True
+    batch_size: 32
+    epochs: 10
+
+    # Model specific arguments #
+
+    dim_embedding: 10
+
+    # ------------------------ #
+
+    # Optimizer (with an example - 3 possible alternatives)
+    optimizer:
+      sample_method: pydgn.evaluation.util.choice
+      args:
+        - class_name: pydgn.training.callback.optimizer.Optimizer
+          args:
+            optimizer_class_name: torch.optim.Adam
+            lr:
+              sample_method: pydgn.evaluation.util.normal
+              # sample from normal distribution each time
+              args:
+                - 0.001  # mu
+                - 0.0001  # sigma
+
+    # Scheduler (optional)
+    scheduler: null
+
+    # Loss metric (with an example of Additive Loss)
+    loss: pydgn.training.callback.metric.MulticlassClassification
+
+    # Score metric (with an example of Multi Score)
+    scorer: pydgn.training.callback.metric.MulticlassAccuracy
+
+    # Readout (optional)
+    readout: null
+
+    # Training engine
+    engine: pydgn.training.engine.TrainingEngine
+
+    # Gradient clipper (optional)
+    gradient_clipper: null
+
+    # Early stopper (optional)
+    early_stopper: null
+
+    # Plotter of metrics
+    plotter: pydgn.training.callback.plotter.Plotter

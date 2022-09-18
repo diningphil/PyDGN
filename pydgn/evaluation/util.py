@@ -40,7 +40,9 @@ def return_class_and_args(
             config[key]["args"] if "args" in config[key] else {},
         )
     else:
-        raise NotImplementedError("Parameter has not been formatted properly")
+        raise NotImplementedError(
+            f"Parameter {key} " f"has not been formatted properly"
+        )
 
 
 def clear_screen():
