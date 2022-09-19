@@ -2,14 +2,11 @@
 
 ### TODO (decreasing priority):
 
-
-- Add unit test
-- Add integration tests
 - Improve handling of `len()` method in datasets
 - Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
 
-## [1.2.4]
+## [1.2.4] Minor fixes + tests for main functionalities
 
 ### Fixed
 
