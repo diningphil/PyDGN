@@ -36,7 +36,7 @@ setuptools.setup(
         "tqdm >= 4.47.0",
         "ogb >= 1.3.3",
         "aioredis >= 1.3.1",
-        "protobuf==3.20.0",
+        "protobuf==3.20.2",
         "ray >= 1.12.0",
         "gpustat >= 0.6.0",
         "torch >= 1.10.2",
