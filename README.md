@@ -10,6 +10,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Interrogate](https://github.com/diningphil/PyDGN/blob/master/badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
 [![Coverage](https://github.com/diningphil/PyDGN/blob/master/badges/coverage_badge.svg)]()
+<img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" width="72">
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
