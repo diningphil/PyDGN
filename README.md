@@ -25,7 +25,7 @@ If you happen to use or modify this code, **please consider citing our tutorial 
 Graphs*](https://www.sciencedirect.com/science/article/pii/S0893608020302197), Neural Networks, 2020.
 DOI: `10.1016/j.neunet.2020.06.006`.
 
-In addition, if you are interested in a rigorous evaluation of Deep Graph Networks, which kick-started this library, check this out:
+In addition, if you are interested in a rigorous evaluation of specific Deep Graph Networks, which kick-started this library, check this out:
 
 [Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph
 Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning
