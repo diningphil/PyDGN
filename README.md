@@ -19,7 +19,7 @@ automatic management of data splitting, loading and common experimental settings
 selection and risk assessment procedures, by trying many different configurations in parallel (CPU or GPU).
 
 ## Cite
-If you happen to use or modify this code, **please remember to cite our tutorial paper**:
+If you happen to use or modify this code, **please consider citing our tutorial paper**:
 
 [Bacciu Davide, Errica Federico, Micheli Alessio, Podda Marco: *A Gentle Introduction to Deep Learning for
 Graphs*](https://www.sciencedirect.com/science/article/pii/S0893608020302197), Neural Networks, 2020.
