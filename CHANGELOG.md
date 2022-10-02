@@ -6,6 +6,14 @@
 - Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
 
+## [1.2.5] Reverting to previous Ray version
+
+### Changed
+
+- Ray 2.0.0 seems to have a problem with killing `IDLE` processes and releasing their resources, i.e. OOM on GPU. 
+  We are reverting to a version that we were using before and did not have this problem.
+
+
 ## [1.2.4] Minor fixes + tests for main functionalities
 
 ### Fixed

@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.2.4"
+__version__ = "1.2.5"
 
 URL = "https://pydgn.readthedocs.io/en/latest/"
 
@@ -37,7 +37,8 @@ setuptools.setup(
         "ogb >= 1.3.3",
         "aioredis >= 1.3.1",
         "protobuf==3.20.2",
-        "ray >= 1.12.0",
+        "aiohttp == 3.7",
+        "ray == 1.5.2",
         "gpustat >= 0.6.0",
         "torch >= 1.10.2",
         "torch-geometric >= 2.0.3",
