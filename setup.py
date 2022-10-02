@@ -37,7 +37,7 @@ setuptools.setup(
         "ogb >= 1.3.3",
         "aioredis >= 1.3.1",
         "protobuf==3.20.2",
-        "aiohttp == 3.7",
+        "aiohttp == 3.7.4",
         "ray == 1.5.2",
         "gpustat >= 0.6.0",
         "torch >= 1.10.2",
