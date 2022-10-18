@@ -23,6 +23,7 @@ model.interface
 
 .. automodule:: pydgn.model.interface
    :members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 

@@ -24,6 +24,7 @@ training.engine
 
 .. automodule:: pydgn.training.engine
    :members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 
@@ -32,6 +33,7 @@ training.profiler
 
 .. automodule:: pydgn.training.profiler
    :members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 
@@ -40,6 +42,7 @@ training.util
 
 .. automodule:: pydgn.training.util
    :members:
+   :private-members:
    :undoc-members:
    :show-inheritance:
 

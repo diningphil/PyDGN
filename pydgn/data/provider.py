@@ -830,8 +830,8 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
     def _get_splitter(self):
         """
         Instantiates the splitter with the parameters stored in the file
-        ``self.splits_filepath``. Only works with
-         `~pydgn.data.splitter.LinkPredictionSingleGraphSplitter`.
+            ``self.splits_filepath``. Only works with
+            `~pydgn.data.splitter.LinkPredictionSingleGraphSplitter`.
 
         Returns:
             a :class:`~pydgn.data.splitter.Splitter` object
