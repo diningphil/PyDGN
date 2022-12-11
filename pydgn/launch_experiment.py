@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+from typing import Optional
 
 import gpustat
 import yaml
@@ -8,7 +9,7 @@ import yaml
 from pydgn.static import *
 
 
-def set_gpus(num_gpus):
+def set_gpus(num_gpus: int, gpus_subset: Optional[str] = None):
     """
     Sets the visible GPUS for the experiments according to the availability
     in terms of memory. Prioritize GPUs with less memory usage.
@@ -16,9 +17,26 @@ def set_gpus(num_gpus):
     and ``CUDA_VISIBLE_DEVICES`` to the ordered list of GPU indices.
 
     Args:
-        num_gpus: maximum number of GPUs to use when
+        num_gpus (int): maximum number of GPUs to use when
             launching experiments in parallel
+        gpus_subset (str): specifies a subset of GPU indices
+            that the library should use as a string of comma-separated indices.
+            Useful if one wants to specify specific GPUs on which to run
+            the experiments, regardless of memory constraints
     """
+    if (gpus_subset is not None) and (
+        num_gpus > len(gpus_subset)
+    ):
+        raise Exception(
+            f"The user asked to use {num_gpus} GPUs but only a valid subset of"
+            f" {len(gpus_subset)} GPUs are provided. "
+            f"Please adjust the {str(MAX_GPUS)} and the "
+            f"{str(GPUS_SUBSET)} parameters in the configuration file."
+        )
+
+    if gpus_subset is not None:
+        gpus_subset = gpus_subset.split(',')
+
     try:
         selected = []
 
@@ -36,7 +54,12 @@ def set_gpus(num_gpus):
                     ),
                     stats,
                 )
-                if str(res[0]) not in selected
+                if (str(res[0]) not in selected)
+                and (
+                    str(res[0]) in gpus_subset
+                    if gpus_subset is not None
+                    else True
+                )
             ]
 
             if len(ids_mem) == 0:
@@ -48,6 +71,9 @@ def set_gpus(num_gpus):
             # print(f"{i}-th best is {bestGPU} with mem {bestMem}")
             selected.append(str(bestGPU))
 
+        if gpus_subset is not None:
+            print(f"The user specified the following "
+                  f"GPUs to use: {gpus_subset}")
         print("Setting GPUs to: {}".format(",".join(selected)))
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(selected)
@@ -92,8 +118,15 @@ def evaluation(options: argparse.Namespace):
     else:
         # We will choose the GPU with least ratio of memory usage
         max_gpus = configs_dict[MAX_GPUS]
+        # Optionally, use a specific subset of gpus
+        gpus_subset = configs_dict.get(GPUS_SUBSET, None)
         # Choose which GPUs to use
-        set_gpus(max_gpus)
+        try:
+            set_gpus(max_gpus, gpus_subset)
+        except Exception as e:
+            print("An exception occurred while setting the GPUs:")
+            print(e)
+
         gpus_per_task = configs_dict[GPUS_PER_TASK]
 
     # we probably don't need this anymore, but keep it commented in case
@@ -209,3 +242,6 @@ def main():
         evaluation(options)
     except Exception as e:
         raise e
+
+if __name__ == "__main__":
+    main()
