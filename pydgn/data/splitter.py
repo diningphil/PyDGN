@@ -732,6 +732,11 @@ class SingleGraphSplitter(Splitter):
             targets (np.ndarray]): targets used for stratification.
                 Default is ``None``
         """
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
+
         assert (
             len(dataset) == 1
         ), "This class works only with single graph datasets"
