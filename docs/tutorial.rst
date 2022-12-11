@@ -119,6 +119,7 @@ explanation of each field as a comment:
     max_cpus:  # > 1 for parallelism
     max_gpus: # > 0 for gpu usage (device must be cuda though)
     gpus_per_task:  # percentage of gpus to allocate for each task
+    gpus_subset: # optional, comma-separated list of gpu indices, e.g. 0,2. Used to force a particular subset of GPUs being used.
 
 
     # Data Loading
@@ -243,6 +244,7 @@ Here we can define how many resources to allocate to parallelize different exper
     max_cpus:  8
     max_gpus: 2
     gpus_per_task:  0.5
+
 
 
 Data Loading

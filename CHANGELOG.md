@@ -6,6 +6,15 @@
 - Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
 
+## [1.2.6] Minor changes
+
+- You can now specify a specific subset of gpus to use in the configuration file.
+  
+  Just add the optional field `gpus_subset: 1,2,3` if you want to only use GPUs with index 1,2 and 3.
+
+
+
+
 ## [1.2.5] Reverting to previous Ray version
 
 ### Changed

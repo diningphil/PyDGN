@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.2.5"
+__version__ = "1.2.6"
 
 URL = "https://pydgn.readthedocs.io/en/latest/"
 
@@ -36,7 +36,8 @@ setuptools.setup(
         "tqdm >= 4.47.0",
         "ogb >= 1.3.3",
         "aioredis >= 1.3.1",
-        "protobuf==3.20.2",
+        "prometheus-client == 0.13.1",
+        "protobuf == 3.20.0",
         "aiohttp == 3.7",
         "ray == 1.5.2",
         "gpustat >= 0.6.0",
