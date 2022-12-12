@@ -15,6 +15,7 @@
 ### Changed
 
 - New setup script that uses `venv` instead of `conda` to prepare the environment. 
+- Updates to tests to make the fake datasets compatible with PyG 2.1.0
 
 ### Fixed
 

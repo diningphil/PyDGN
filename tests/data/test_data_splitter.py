@@ -1,3 +1,4 @@
+import shutil
 from typing import Union, List, Tuple
 
 import pytest
@@ -14,7 +15,25 @@ from pydgn.data.splitter import (
 
 
 class FakeGraphClassificationDataset(DatasetInterface):
-    def __init__(self, root=None, name="mock_dataset"):
+    @property
+    def raw_file_names(self) -> Union[str, List[str], Tuple]:
+        return []
+
+    @property
+    def processed_file_names(self) -> Union[str, List[str], Tuple]:
+        return []
+
+    def download(self):
+        pass
+
+    def process(self):
+        pass
+
+    def __init__(
+        self,
+        root="tests/tmp/DATA_graph_classification_dataset",
+        name="mock_dataset",
+    ):
         super().__init__(root, name)
         self.num_samples = 1000
         self.feats = 10
@@ -69,8 +88,24 @@ def node_classification_dataset():
     """
 
     class FakeDataset(DatasetInterface):
+        @property
+        def raw_file_names(self) -> Union[str, List[str], Tuple]:
+            return []
+
+        @property
+        def processed_file_names(self) -> Union[str, List[str], Tuple]:
+            return []
+
+        def download(self):
+            pass
+
+        def process(self):
+            pass
+
         def __init__(self):
-            super().__init__(None, None)
+            super().__init__(
+                "tests/tmp/DATA_node_classification_dataset", None
+            )
             self.feats = 10
             self.classes = 3
 
@@ -115,8 +150,22 @@ def link_prediction_dataset():
     """
 
     class FakeDataset(DatasetInterface):
+        @property
+        def raw_file_names(self) -> Union[str, List[str], Tuple]:
+            return []
+
+        @property
+        def processed_file_names(self) -> Union[str, List[str], Tuple]:
+            return []
+
+        def download(self):
+            pass
+
+        def process(self):
+            pass
+
         def __init__(self):
-            super().__init__(None, None)
+            super().__init__("tests/tmp/DATA_link_prediction_dataset", None)
             self.feats = 10
             self.classes = 3
 
@@ -251,6 +300,7 @@ def test_node_graph_split_overlap(node_and_graph_task_input):
                             assert len(outer_train_idxs) + len(
                                 outer_val_idxs
                             ) + len(outer_test_idxs) == len(dataset)
+    shutil.rmtree("tests/tmp")
 
 
 # To each task its own splitter
@@ -384,3 +434,4 @@ def test_link_split_overlap(link_task_input):
                                 outer_pos_test_edges,
                                 outer_neg_test_edges,
                             )
+    shutil.rmtree("tests/tmp")

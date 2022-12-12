@@ -3,6 +3,7 @@ import os
 from torch.utils.data import DataLoader
 from torch_geometric.data import Batch
 
+from pydgn.data.sampler import RandomSampler
 from pydgn.experiment.experiment import Experiment
 from pydgn.static import LOSS, SCORE
 
@@ -132,10 +133,18 @@ class SemiSupervisedTask(Experiment):
 
         # Instantiate the Embedding Dataset for supervised learning
         train_loader = DataLoader(
-            train_data_list, batch_size, shuffle, collate_fn=collate_fn
+            train_data_list,
+            batch_size,
+            sampler=RandomSampler(train_data_list) if shuffle else None,
+            shuffle=shuffle if not shuffle else None,
+            collate_fn=collate_fn,
         )
         val_loader = DataLoader(
-            val_data_list, batch_size, shuffle, collate_fn=collate_fn
+            val_data_list,
+            batch_size,
+            sampler=RandomSampler(val_data_list) if shuffle else None,
+            shuffle=shuffle if not shuffle else None,
+            collate_fn=collate_fn,
         )
 
         # Change exp path to allow Stop & Resume
@@ -285,13 +294,25 @@ class SemiSupervisedTask(Experiment):
 
         # Instantiate the Embedding Dataset for supervised learning
         train_loader = DataLoader(
-            train_data_list, batch_size, shuffle, collate_fn=collate_fn
+            train_data_list,
+            batch_size,
+            sampler=RandomSampler(train_data_list) if shuffle else None,
+            shuffle=shuffle if not shuffle else None,
+            collate_fn=collate_fn,
         )
         val_loader = DataLoader(
-            val_data_list, batch_size, shuffle, collate_fn=collate_fn
+            val_data_list,
+            batch_size,
+            sampler=RandomSampler(val_data_list) if shuffle else None,
+            shuffle=shuffle if not shuffle else None,
+            collate_fn=collate_fn,
         )
         test_loader = DataLoader(
-            test_data_list, batch_size, shuffle, collate_fn=collate_fn
+            test_data_list,
+            batch_size,
+            sampler=RandomSampler(test_data_list) if shuffle else None,
+            shuffle=shuffle if not shuffle else None,
+            collate_fn=collate_fn,
         )
 
         # Change exp path to allow Stop & Resume

@@ -104,7 +104,9 @@ random:
   supervised_config: # supervised config to classify/predict values associated with unsup. node/graph embeddings
     model: pydgn.model.dgn.toy_mlp.ToyMLP
     checkpoint: False
-    shuffle: True
+    shuffle:
+      - True
+      - False
     batch_size: 32
     epochs: 10
 
