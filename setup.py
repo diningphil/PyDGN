@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.2.6"
+__version__ = "1.3.0"
 
 URL = "https://pydgn.readthedocs.io/en/latest/"
 
@@ -35,14 +35,10 @@ setuptools.setup(
         "tensorboard >= 2.1.1",
         "tqdm >= 4.47.0",
         "ogb >= 1.3.3",
-        "aioredis >= 1.3.1",
-        "prometheus-client == 0.13.1",
-        "protobuf == 3.20.0",
-        "aiohttp == 3.7",
-        "ray == 1.5.2",
+        "ray == 2.1.0",
         "gpustat >= 0.6.0",
-        "torch >= 1.10.2",
-        "torch-geometric >= 2.0.3",
+        "torch >= 1.13.0",
+        "torch-geometric >= 2.2.0",
         "torch-geometric-temporal >= 0.52.0",
         "wandb >= 0.12.15",
     ],

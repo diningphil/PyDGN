@@ -24,9 +24,7 @@ def set_gpus(num_gpus: int, gpus_subset: Optional[str] = None):
             Useful if one wants to specify specific GPUs on which to run
             the experiments, regardless of memory constraints
     """
-    if (gpus_subset is not None) and (
-        num_gpus > len(gpus_subset)
-    ):
+    if (gpus_subset is not None) and (num_gpus > len(gpus_subset)):
         raise Exception(
             f"The user asked to use {num_gpus} GPUs but only a valid subset of"
             f" {len(gpus_subset)} GPUs are provided. "
@@ -35,7 +33,7 @@ def set_gpus(num_gpus: int, gpus_subset: Optional[str] = None):
         )
 
     if gpus_subset is not None:
-        gpus_subset = gpus_subset.split(',')
+        gpus_subset = gpus_subset.split(",")
 
     try:
         selected = []
@@ -72,8 +70,10 @@ def set_gpus(num_gpus: int, gpus_subset: Optional[str] = None):
             selected.append(str(bestGPU))
 
         if gpus_subset is not None:
-            print(f"The user specified the following "
-                  f"GPUs to use: {gpus_subset}")
+            print(
+                f"The user specified the following "
+                f"GPUs to use: {gpus_subset}"
+            )
         print("Setting GPUs to: {}".format(",".join(selected)))
         os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
         os.environ["CUDA_VISIBLE_DEVICES"] = ",".join(selected)
@@ -242,6 +242,7 @@ def main():
         evaluation(options)
     except Exception as e:
         raise e
+
 
 if __name__ == "__main__":
     main()

@@ -32,7 +32,7 @@ class EngineCallback(EventHandler):
             state (:class:`~training.event.state.State`): object holding
                 training information
         """
-        data = state.loader_iterable.next()
+        data = next(state.loader_iterable)
         state.update(batch_input=data)
 
     def on_forward(self, state: State):

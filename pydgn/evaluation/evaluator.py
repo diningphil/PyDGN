@@ -47,6 +47,9 @@ def send_telegram_update(bot_token: str, bot_chat_ID: str, bot_message: str):
 @ray.remote(
     num_cpus=1,
     num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)),
+    max_calls=1
+    # max_calls=1 --> the worker automatically exits after executing the task
+    # (thereby releasing the GPU resources).
 )
 def run_valid(
     experiment_class: Callable[..., Experiment],
@@ -95,6 +98,9 @@ def run_valid(
 @ray.remote(
     num_cpus=1,
     num_gpus=float(os.environ.get(PYDGN_RAY_NUM_GPUS_PER_TASK, default=1)),
+    max_calls=1
+    # max_calls=1 --> the worker automatically exits after executing the task
+    # (thereby releasing the GPU resources).
 )
 def run_test(
     experiment_class: Callable[..., Experiment],

@@ -6,13 +6,34 @@
 - Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
 
+## [1.3.0] Pytorch 1.13.0, PyG 2.2.0 support + minor fixes
+
+### Added
+
+- TODO: weighted additive loss
+
+### Changed
+
+- New setup script that uses `venv` instead of `conda` to prepare the environment. 
+
+  Solves an issue we have when installing torch_geometric from conda (segmentation fault when importing).
+
+### Fixed
+
+- IDLE ray workers not deallocating GPUs
+
+- Now we sort the data list returned by training engine as if samples were not shuffled.
+
+  Meaning the returned data list is consistent with the original ordering of the dataset.
+
+
 ## [1.2.6] Minor changes
+
+### Added
 
 - You can now specify a specific subset of gpus to use in the configuration file.
   
   Just add the optional field `gpus_subset: 1,2,3` if you want to only use GPUs with index 1,2 and 3.
-
-
 
 
 ## [1.2.5] Reverting to previous Ray version

@@ -1,51 +1,29 @@
 # default pytorch version
-PYTORCH_VERSION=1.10.2
-PYTORCH_GEOMETRIC_VERSION=2.0.3
+PYTHON=python3.8
+PYTORCH_VERSION=1.13.0
+PYTORCH_GEOMETRIC_VERSION=2.2.0
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
 CUDA_VERSION=${1:-cpu}
 
 # create virtual environment and activate it
-conda create --name pydgn python=3.8 -y
-conda activate pydgn
+$PYTHON -m pip install --user virtualenv
+$PYTHON -m venv ~/.venv/pydgn
+source ~/.venv/pydgn/bin/activate
+
+pip install build wheel
 
 # install pytorch
 if [[ "$CUDA_VERSION" == "cpu" ]]; then
-  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cpuonly -c pytorch -y
-elif [[ "$CUDA_VERSION" == 'cu102' ]]; then
-  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=10.2 -c pytorch -y
-elif [[ "$CUDA_VERSION" == 'cu113' ]]; then
-  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=11.3 -c pytorch -c nvidia -y
+  pip3 install torch==${PYTORCH_VERSION} torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cpu
+elif [[ "$CUDA_VERSION" == 'cu116' ]]; then
+  pip3 install torch==${PYTORCH_VERSION} torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
+elif [[ "$CUDA_VERSION" == 'cu117' ]]; then
+  pip3 install torch==${PYTORCH_VERSION} torchvision torchaudio
 fi
 
-conda install jupyter -y
+pip install pyg-lib torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric==${PYTORCH_GEOMETRIC_VERSION} -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
 
-conda install pyg==${PYTORCH_GEOMETRIC_VERSION} -c pyg -c conda-forge -c rusty1s -c conda-forge
+pip install jupyter
 
 echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"
-
-## default pytorch version
-#PYTORCH_VERSION=1.13.0
-#PYTORCH_GEOMETRIC_VERSION=2.2.0
-#
-## set CUDA variable (defaults to cpu if no argument is provided to the script)
-#CUDA_VERSION=${1:-cpu}
-#
-## create virtual environment and activate it
-#conda create --name pydgn python=3.8 -y
-#conda activate pydgn
-#
-## install pytorch
-#if [[ "$CUDA_VERSION" == "cpu" ]]; then
-#  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cpuonly -c pytorch -y
-#elif [[ "$CUDA_VERSION" == 'cu116' ]]; then
-#  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=11.6 -c pytorch -c nvidia -y
-#elif [[ "$CUDA_VERSION" == 'cu117' ]]; then
-#  conda install pytorch==${PYTORCH_VERSION} torchvision torchaudio cudatoolkit=11.7 -c pytorch -c nvidia -y
-#fi
-#
-#conda install jupyter -y
-#
-#conda install pyg==${PYTORCH_GEOMETRIC_VERSION} -c pyg -c conda-forge -c rusty1s -c conda-forge
-#
-#echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"

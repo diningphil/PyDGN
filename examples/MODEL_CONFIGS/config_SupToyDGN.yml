@@ -10,7 +10,7 @@ data_splits_file:  examples/DATA_SPLITS/CHEMICAL/NCI1/NCI1_outer10_inner1.splits
 
 
 # Hardware
-device:  cuda
+device:  cpu
 max_cpus:  4
 max_gpus: 1
 gpus_per_task:  1

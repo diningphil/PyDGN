@@ -95,7 +95,7 @@ GPUS_PER_TASK = "gpus_per_task"
 HIGHER_RESULTS_ARE_BETTER = "higher_results_are_better"
 MAX_CPUS = "max_cpus"
 MAX_GPUS = "max_gpus"
-GPUS_SUBSET = 'gpus_subset'
+GPUS_SUBSET = "gpus_subset"
 MODEL = "model"
 RESULT_FOLDER = "result_folder"
 

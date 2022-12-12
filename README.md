@@ -30,7 +30,7 @@ Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-compariso
 
 ## Installation:
 
-We assume **git** and **Miniconda/Anaconda** are installed. Then you can use the script below to install `pydgn` in a controlled and separate environment (this is up to you):
+We assume **git** is installed. Then you can use the script below to install `pydgn` in a controlled and separate environment (this is up to you):
 
     source setup/create_environment.sh [<your_cuda_version>]
     pip install pydgn
