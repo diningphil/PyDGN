@@ -35,6 +35,7 @@ setuptools.setup(
         "tensorboard >= 2.1.1",
         "tqdm >= 4.47.0",
         "ogb >= 1.3.3",
+        "protobuf == 3.20.3",
         "ray == 2.1.0",
         "gpustat >= 0.6.0",
         "torch >= 1.13.0",
