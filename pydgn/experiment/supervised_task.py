@@ -62,7 +62,7 @@ class SupervisedTask(Experiment):
         (
             train_loss,
             train_score,
-            _,
+            _,  # check the ordering is correct
             val_loss,
             val_score,
             _,

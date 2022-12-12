@@ -45,6 +45,10 @@ class DataProvider:
     special, but here is where the i-th element of a dataset could be
     pre-processed before constructing the mini-batches.
 
+    IMPORTANT: if the dataset is to be shuffled, you MUST use a
+    :class:`pydgn.data.sampler.RandomSampler` object to determine the
+    permutation.
+
     Args:
         data_root (str): the path of the root folder in which data is stored
         splits_filepath (str): the filepath of the splits. with additional
@@ -508,6 +512,9 @@ class SingleGraphSequenceDataProvider(DataProvider):
             :class:`torch_geometric.loader.DataLoader`] object
         """
         shuffle = kwargs.pop("shuffle", False)
+        assert not shuffle, (
+            "Shuffle cannot be True with a single graph " "sequence dataset."
+        )
         batch_size = kwargs.pop("batch_size", 1)
 
         dataset: TemporalDatasetInterface = self._get_dataset(**kwargs)

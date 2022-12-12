@@ -1,7 +1,7 @@
 # default pytorch version
 PYTHON=python3.8
 PYTORCH_VERSION=1.13.0
-PYTORCH_GEOMETRIC_VERSION=2.2.0
+PYTORCH_GEOMETRIC_VERSION=2.1.0
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
 CUDA_VERSION=${1:-cpu}
@@ -11,7 +11,7 @@ $PYTHON -m pip install --user virtualenv
 $PYTHON -m venv ~/.venv/pydgn
 source ~/.venv/pydgn/bin/activate
 
-pip install build wheel
+pip install build wheel black
 
 # install pytorch
 if [[ "$CUDA_VERSION" == "cpu" ]]; then
@@ -25,5 +25,7 @@ fi
 pip install pyg-lib torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric==${PYTORCH_GEOMETRIC_VERSION} -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
 
 pip install jupyter
+#pip install pydgn
+python -m build && pip uninstall pydgn && pip install dist/pydgn-1.3.0-py3-none-any.whl
 
 echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"

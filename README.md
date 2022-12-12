@@ -30,15 +30,18 @@ Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-compariso
 
 ## Installation:
 
-We assume **git** is installed. Then you can use the script below to install `pydgn` in a controlled and separate environment (this is up to you):
+We assume **git** is installed. Optionally, you can use the script below to install `pydgn` in a controlled and separate environment (this is up to you):
 
     source setup/create_environment.sh [<your_cuda_version>]
-    pip install pydgn
 
-Where `<your_cuda_version>` is an optional argument that (as of 2/3/22) can be either `cpu`, `cu102` or `cu113` for Pytorch >= 1.10.2
+Where `<your_cuda_version>` is an optional argument that (as of 12/12/22) can be either `cpu`, `cu116` or `cu117` for Pytorch >= 1.10.2
 If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment
 named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command
 using `bash` instead of `source`!
+
+Alternatively, if Pytorch (>=1.13.0) and Pytorch Geometric (>=2.0.3) are already installed, you can just run
+    
+    pip install pydgn
 
 ## Quickstart:
 

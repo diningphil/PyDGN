@@ -6,6 +6,7 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
+import pydgn
 from pydgn.log.logger import Logger
 from pydgn.model.interface import ModelInterface
 from pydgn.static import *
@@ -28,6 +29,22 @@ def log(msg, logger: Logger):
     """
     if logger is not None:
         logger.log(msg)
+
+
+def reorder(obj: List[object], perm: List[int]):
+    """
+    Reorders a list of objects in ascending order according to the indices
+    defined in permutation argument.
+
+    Args:
+        obj (List[object]): the list of objects
+        perm (List[int]): the permutation
+
+    Returns:
+        The reordered list of objects
+    """
+    assert len(obj) == len(perm) and len(obj) > 0
+    return [y for (x, y) in sorted(zip(perm, obj))]
 
 
 class TrainingEngine(EventDispatcher):
@@ -466,6 +483,24 @@ class TrainingEngine(EventDispatcher):
         # Needed by the experimental evaluation framework
         main_score_name = self.score_fun.get_main_metric_name()
         score[MAIN_SCORE] = score[main_score_name]
+
+        # If samples been shuffled by the data loader, i.e., in the
+        # last inference phase of the engine, use PyDGN RandomSampler to
+        # recover the permutation and store the embedding data list as in
+        # the original split. This way we recover the same order of the
+        # [train/val/test] idx list in the split file. This is useful for
+        # subsequent experiments that use the data list and must be
+        # consistent, and it is better in general to avoid confusion.
+        if data_list is not None and loader.sampler is not None:
+            assert isinstance(
+                loader.sampler, pydgn.data.sampler.RandomSampler
+            ), (
+                "Training Engine requires a pydgn.data.sampler.RandomSampler"
+                " as the sampler of the loader when shuffle=True. Please see"
+                " the documentation of DataProvider and the "
+                "_get_loader method."
+            )
+            data_list = reorder(data_list, loader.sampler.permutation)
 
         return loss, score, data_list
 

@@ -6,7 +6,7 @@
 - Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
 
-## [1.3.0] Pytorch 1.13.0, PyG 2.2.0 support + minor fixes
+## [1.3.0] Support for Pytorch 1.13.0, CUDA 11.6, CUDA 11.7, PyG 2.1.0 support + minor fixes
 
 ### Added
 
@@ -16,8 +16,6 @@
 
 - New setup script that uses `venv` instead of `conda` to prepare the environment. 
 
-  Solves an issue we have when installing torch_geometric from conda (segmentation fault when importing).
-
 ### Fixed
 
 - IDLE ray workers not deallocating GPUs
@@ -25,6 +23,11 @@
 - Now we sort the data list returned by training engine as if samples were not shuffled.
 
   Meaning the returned data list is consistent with the original ordering of the dataset.
+
+#### Comments
+
+We tried to provide support for creating an environment with PyG 2.2.0, but importing the library seems to cause
+`segmentation fault` in certain cases. Therefore, we will wait until the issue is fixed and then update the script.
 
 
 ## [1.2.6] Minor changes
