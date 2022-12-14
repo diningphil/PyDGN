@@ -25,7 +25,9 @@ jobs:
         path: 'pydgn'
         badge-location: 'badges/interrogate_badge.svg'
 
+
     - name: Commit files
+      if: github.event_name == 'push'
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
@@ -33,7 +35,7 @@ jobs:
         git diff --exit-code || git commit -m "Update interrogate_badge.svg" -a
 
     - name: Push changes
-      if: success()
+      if: github.event_name == 'push' && success()
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

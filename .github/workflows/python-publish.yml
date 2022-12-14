@@ -14,11 +14,11 @@ on:
 
 jobs:
 
-  test-package:
-    uses: diningphil/PyDGN/.github/workflows/python-package.yml@master
+  tests-and-coverage:
+    uses: diningphil/PyDGN/.github/workflows/python-test-and-coverage.yml@master
 
   deploy:
-    needs: test-package
+    needs: tests-and-coverage
 
     runs-on: ubuntu-latest
 
