@@ -76,6 +76,13 @@ grid:
         args:
           loss_1: pydgn.training.callback.metric.MulticlassClassification
           loss_2: pydgn.training.callback.metric.MulticlassClassification
+          losses_weights:
+            Multiclass Classification:
+              - 1.
+              - 0.
+          accumulate_over_epoch:
+            - True
+            - False
 
 
     # Score metric (with an example of Multi Score)
