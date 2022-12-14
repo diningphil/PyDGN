@@ -34,12 +34,12 @@ We assume **git** is installed. Optionally, you can use the script below to inst
 
     source setup/create_environment.sh [<your_cuda_version>]
 
-Where `<your_cuda_version>` is an optional argument that (as of 12/12/22) can be either `cpu`, `cu116` or `cu117` for Pytorch >= 1.10.2
+Where `<your_cuda_version>` is an optional argument that (as of 12/12/22) can be either `cpu`, `cu116` or `cu117` for Pytorch 1.13.0
 If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment
 named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command
 using `bash` instead of `source`!
 
-Alternatively, if Pytorch (>=1.13.0) and Pytorch Geometric (>=2.0.3) are already installed, you can just run
+Alternatively, if Pytorch (<=1.13.0) and Pytorch Geometric (<=2.1.0) are already installed, you can just run
     
     pip install pydgn
 

@@ -6,11 +6,15 @@
 - Add temporal learning example configs
 - Add Multi-GPU processing for single experiment
 
-## [1.3.0] Support for Pytorch 1.13.0, CUDA 11.6, CUDA 11.7, PyG 2.1.0 support + minor fixes
+
+## [1.3.1] Weighted Loss implementation
 
 ### Added
 
-- TODO: weighted additive loss
+- You can specify weights for losse in `AdditiveLoss` by passing a dictionary of (loss name, loss weight) entries as an argument.
+
+
+## [1.3.0] Support for Pytorch 1.13.0, CUDA 11.6, CUDA 11.7, PyG 2.1.0 support + minor fixes
 
 ### Changed
 

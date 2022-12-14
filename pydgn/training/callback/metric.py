@@ -429,7 +429,7 @@ class MultiScore(Metric):
         force_cpu: bool = True,
         device: str = "cpu",
         main_scorer=None,
-        **extra_scorers
+        **extra_scorers,
     ):
 
         assert not use_as_loss, "MultiScore cannot be used as loss"
@@ -653,6 +653,8 @@ class AdditiveLoss(Metric):
         force_cpu (bool): Whether or not to move all predictions to cpu
             before computing the epoch-wise loss/score. Default is ``True``.
         device (bool): The device used. Default is 'cpu'.
+        losses_weights: (dict): dictionary of (loss_name, loss_weight) that
+            specifies the weight to apply to each loss to be summed.
         losses (dict): dictionary of metrics to add together
     """
 
@@ -663,15 +665,30 @@ class AdditiveLoss(Metric):
         accumulate_over_epoch: bool = True,
         force_cpu: bool = True,
         device: str = "cpu",
-        **losses: dict
+        losses_weights: dict = None,
+        **losses: dict,
     ):
         assert use_as_loss, "Additive loss can only be used as a loss"
         super().__init__(
             use_as_loss, reduction, accumulate_over_epoch, force_cpu, device
         )
+
+        self.losses_weights = losses_weights
         self.losses = [
             self._instantiate_loss(loss) for loss in losses.values()
         ]
+
+        if self.losses_weights is not None:
+            for loss in self.losses:
+                # check that a weight exists for each loss
+                assert loss.name in self.losses_weights, (
+                    "You have to specify a weight for each loss! "
+                    f"We could not find the weight for {loss.name} "
+                    f"in the dict."
+                )
+        else:
+            # all losses are simply added together
+            self.losses_weights = {loss.name: 1. for loss in self.losses}
 
     @property
     def name(self) -> str:
@@ -744,6 +761,7 @@ class AdditiveLoss(Metric):
                     torch.cat(self.y_true[loss.name], dim=0),
                     torch.cat(self.y_pred[loss.name], dim=0),
                 )
+                * self.losses_weights[loss.name]
                 for loss in self.losses
             }
             additive_epoch_loss = 0.0
@@ -792,6 +810,7 @@ class AdditiveLoss(Metric):
                     torch.cat(self.y_true[loss.name], dim=0),
                     torch.cat(self.y_pred[loss.name], dim=0),
                 )
+                * self.losses_weights[loss.name]
                 for loss in self.losses
             }
             additive_epoch_loss = 0.0
@@ -838,7 +857,10 @@ class AdditiveLoss(Metric):
         """
         loss_sum = 0.0
         for loss in self.losses:
-            single_loss = loss.compute_metric(targets, predictions)
+            single_loss = (
+                loss.compute_metric(targets, predictions)
+                * self.losses_weights[loss.name]
+            )
             loss_sum += single_loss
         return loss_sum
 
@@ -889,7 +911,10 @@ class AdditiveLoss(Metric):
             y_pred_batch, y_true_batch = loss.get_predictions_and_targets(
                 targets, *outputs
             )
-            single_loss = loss.compute_metric(y_true_batch, y_pred_batch)
+            single_loss = (
+                loss.compute_metric(y_true_batch, y_pred_batch)
+                * self.losses_weights[loss.name]
+            )
 
             res[loss.name] = single_loss
             loss_sum += single_loss
