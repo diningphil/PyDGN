@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from networkx import is_directed
+
 from sklearn.model_selection import (
     StratifiedKFold,
     StratifiedShuffleSplit,
