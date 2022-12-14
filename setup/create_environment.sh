@@ -25,7 +25,6 @@ fi
 pip install pyg-lib torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric==${PYTORCH_GEOMETRIC_VERSION} -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html
 
 pip install jupyter
-#pip install pydgn
-python -m build && pip uninstall pydgn && pip install dist/pydgn-1.3.0-py3-none-any.whl
+pip install pydgn
 
 echo "Done. Remember to append the CUDA lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"
