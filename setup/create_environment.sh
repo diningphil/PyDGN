@@ -28,4 +28,4 @@ pip install jupyter
 #pip install pydgn
 python -m build && pip uninstall pydgn && pip install dist/pydgn-1.3.0-py3-none-any.whl
 
-echo "Done. Remember to append the anaconda/miniconda lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"
+echo "Done. Remember to append the CUDA lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"
