@@ -1,24 +1,25 @@
 # Changelog
 
-### TODO (decreasing priority):
-
-- Improve handling of `len()` method in datasets
-- Add temporal learning example configs
-- Add Multi-GPU processing for single experiment
-
-
 ## [1.3.1] Weighted Loss implementation
 
 ### Added
 
-- You can specify weights for losse in `AdditiveLoss` by passing a dictionary of (loss name, loss weight) entries as an argument.
+- You can specify weights for loss in `AdditiveLoss` by passing a dictionary of (loss name, loss weight) entries as an argument.
+  See the documentation of `AdditiveLoss` for more info or the example in `examples/MODEL_CONFIGS/config_SupToyDGN.yml`.
 
+### Fixed
 
-## [1.3.0] Support for Pytorch 1.13.0, CUDA 11.6, CUDA 11.7, PyG 2.1.0 support + minor fixes
+- Better handling of `len()` in `TUDatasetInterface`
 
 ### Changed
 
-- New setup script that uses `venv` instead of `conda` to prepare the environment. 
+- Package requirements now specify an upper bound on some packages, including Pytorch and PyG to ensure compatibility. Better be safe than sorry :)
+
+
+## [1.3.0] Support for Pytorch 1.13.0, CUDA 11.6, CUDA 11.7, PyG 2.1.0, Ray 2.1.0, support + minor fixes
+
+### Changed
+
 - Updates to tests to make the fake datasets compatible with PyG 2.1.0
 
 ### Fixed

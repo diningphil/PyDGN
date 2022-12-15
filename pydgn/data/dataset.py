@@ -205,9 +205,7 @@ class DatasetInterface(torch_geometric.data.dataset.Dataset):
         Note: we need to implement both `len` and `__len__` to comply with
         PyG interface
         """
-        raise NotImplementedError(
-            "You should subclass DatasetInterface and implement this method"
-        )
+        return len(self)
 
     def __len__(self) -> int:
         r"""
