@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.3.1"
+__version__ = "1.3.0.post1"
 
 URL = "https://pydgn.readthedocs.io/en/latest/"
 
@@ -31,7 +31,7 @@ setuptools.setup(
         "requests >= 2.22.0",
         "tensorboard >= 2.1.1",
         "tqdm >= 4.47.0",
-        "ogb >= 1.3.3",
+        "ogb <= 1.3.3, < 1.4.0",
         "protobuf == 3.20.3",
         "click <= 8.0.4",
         "ray == 2.1.0",

@@ -688,7 +688,7 @@ class AdditiveLoss(Metric):
                 )
         else:
             # all losses are simply added together
-            self.losses_weights = {loss.name: 1. for loss in self.losses}
+            self.losses_weights = {loss.name: 1.0 for loss in self.losses}
 
     @property
     def name(self) -> str:
