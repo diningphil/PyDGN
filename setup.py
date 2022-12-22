@@ -29,7 +29,7 @@ setuptools.setup(
     install_requires=[
         "PyYAML >= 5.4",
         "requests >= 2.22.0",
-        "tensorboard >= 2.1.1",
+        "tensorboard <= 2.11.0",
         "tqdm >= 4.47.0",
         "ogb <= 1.3.3, < 1.4.0",
         "protobuf == 3.20.3",
