@@ -56,6 +56,6 @@ jobs:
 
     - name: Push changes
       if: github.event_name == 'push' && success()
-      uses: ad-m/github-push-action@main
+      uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
