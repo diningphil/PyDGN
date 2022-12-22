@@ -15,7 +15,7 @@ on:
 jobs:
 
   tests-and-coverage:
-    uses: diningphil/PyDGN/.github/workflows/python-test-and-coverage.yml@master
+    uses: diningphil/PyDGN/.github/workflows/python-test-and-coverage.yml@main
 
   deploy:
     needs: tests-and-coverage
