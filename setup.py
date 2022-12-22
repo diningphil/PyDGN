@@ -36,7 +36,7 @@ setuptools.setup(
         "click <= 8.0.4",
         "ray == 2.1.0",
         "gpustat >= 1.0.0",
-        "torch <= 1.13.0",
+        "torch <= 1.13.0+*",
         "torch-geometric <= 2.1.0.post1",
         "torch-geometric-temporal <= 0.54.0",
         "wandb >= 0.12.15",
