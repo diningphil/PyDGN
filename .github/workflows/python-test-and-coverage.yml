@@ -5,9 +5,9 @@ name: Test Python versions
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
   workflow_call:
 
 jobs:
@@ -56,6 +56,6 @@ jobs:
 
     - name: Push changes
       if: github.event_name == 'push' && success()
-      uses: ad-m/github-push-action@master
+      uses: ad-m/github-push-action@main
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}

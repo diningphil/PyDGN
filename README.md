@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/diningphil/PyDGN/blob/master/docs/_static/pydgn-logo.png"  width="300"/>
+  <img src="https://github.com/diningphil/PyDGN/blob/main/docs/_static/pydgn-logo.png"  width="300"/>
 </p>
 
 # PyDGN: a research library for Deep Graph Networks 
@@ -8,8 +8,8 @@
 [![Python Package](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml/badge.svg)](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml)
 [![Downloads](https://static.pepy.tech/personalized-badge/pydgn?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pydgn)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Interrogate](https://github.com/diningphil/PyDGN/blob/master/badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
-[![Coverage](https://github.com/diningphil/PyDGN/blob/master/badges/coverage_badge.svg)]()
+[![Interrogate](https://github.com/diningphil/PyDGN/blob/main/badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
+[![Coverage](https://github.com/diningphil/PyDGN/blob/main/badges/coverage_badge.svg)]()
 <img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" width="72">
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
@@ -56,7 +56,7 @@ Alternatively, if Pytorch (<=1.13.0) and Pytorch Geometric (<=2.1.0) are already
 And we are up and running!
 
 <p align="center">
-  <img src="https://github.com/diningphil/PyDGN/blob/master/docs/_static/exp_gui.png"  width="600"/>
+  <img src="https://github.com/diningphil/PyDGN/blob/main/docs/_static/exp_gui.png"  width="600"/>
 </p>
 
 To debug your code you can add `--debug` to the command above, but the "GUI" will be disabled.
