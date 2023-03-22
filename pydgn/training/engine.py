@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, List, Union, Tuple, Optional
 
 import torch
+from torch.utils.data import SequentialSampler
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
@@ -492,15 +493,17 @@ class TrainingEngine(EventDispatcher):
         # subsequent experiments that use the data list and must be
         # consistent, and it is better in general to avoid confusion.
         if data_list is not None and loader.sampler is not None:
-            assert isinstance(
-                loader.sampler, pydgn.data.sampler.RandomSampler
-            ), (
-                "Training Engine requires a pydgn.data.sampler.RandomSampler"
-                " as the sampler of the loader when shuffle=True. Please see"
-                " the documentation of DataProvider and the "
-                "_get_loader method."
-            )
-            data_list = reorder(data_list, loader.sampler.permutation)
+            # if SequentialSampler then shuffle was false
+            if not isinstance(loader.sampler, SequentialSampler):
+                assert isinstance(
+                    loader.sampler, pydgn.data.sampler.RandomSampler
+                ), (
+                    "Training Engine requires a pydgn.data.sampler."
+                    "RandomSampler as the sampler of the loader when "
+                    "shuffle=True. Please see the documentation of "
+                    "DataProvider and the _get_loader method."
+                )
+                data_list = reorder(data_list, loader.sampler.permutation)
 
         return loss, score, data_list
 

@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.3.0.post2"
+__version__ = "1.3.1"
 
 URL = "https://pydgn.readthedocs.io/en/latest/"
 

@@ -42,7 +42,9 @@ grid:
   supervised_config:
     model: pydgn.model.dgn.toy_dgn.ToyDGN
     checkpoint: False
-    shuffle: True
+    shuffle:
+      - True
+      - False
     batch_size: 32
     epochs: 3
 
