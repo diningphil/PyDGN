@@ -10,6 +10,7 @@
 ### Fixed
 
 - Better handling of `len()` in `TUDatasetInterface`
+- Fixed minor bug when shuffle was set to false that triggered an assertion in training engine
 
 ### Changed
 
