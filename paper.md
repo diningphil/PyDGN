@@ -8,8 +8,8 @@ tags:
 authors:
   - name: Federico Errica
     orcid: 0000-0001-5181-2904
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 1 # (Multiple affiliations must be quoted)
+    corresponding: true
+    affiliation: 1
   - name: Davide Bacciu
     orcid: 0000-0001-5213-2468
     affiliation: 2
