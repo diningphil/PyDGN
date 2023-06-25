@@ -29,3 +29,7 @@ If you want to contribute to the development of PyDGN, please feel free to open 
 - how well is your code documented (we'd like to keep 100% documentation percentage)
 - which tests you have implemented to check the correct functioning of your code
 - a simple example using the new feature (you can store data/model configurations in the `examples` folder)
+
+# Seeking Support
+
+If you need support to use the library, please open a blank issue and describe your needs. We will do our best to assist you as quick as possible. Also, if possible please let's avoid emails so that everyone can benefit from the discussion.
