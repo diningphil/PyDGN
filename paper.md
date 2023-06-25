@@ -8,7 +8,6 @@ tags:
 authors:
   - name: Federico Errica
     orcid: 0000-0001-5181-2904
-    # equal-contrib: false
     corresponding: true # (This is how to denote the corresponding author)
     affiliation: 1 # (Multiple affiliations must be quoted)
   - name: Davide Bacciu
@@ -16,7 +15,6 @@ authors:
     affiliation: 2
   - name: Alessio Micheli
     orcid: 0000-0001-5764-5238
-    # equal-contrib: false # (This is how you can denote equal contributions between multiple authors)
     affiliation: 2
 affiliations:
  - name: NEC Laboratories Europe, Germany
