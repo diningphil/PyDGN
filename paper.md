@@ -1,5 +1,5 @@
 ---
-title: PyDGN: a Python Library for Flexible and Reproducible Research on Deep Learning for Graphs'
+title: 'PyDGN: a Python Library for Flexible and Reproducible Research on Deep Learning for Graphs'
 tags:
   - Python
   - Machine Learning
