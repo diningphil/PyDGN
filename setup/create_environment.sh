@@ -1,5 +1,5 @@
 # default pytorch version
-PYTHON=python3.8
+PYTHON=python3.10
 PYTORCH_VERSION=1.13.0
 PYTORCH_GEOMETRIC_VERSION=2.1.0.post1
 
