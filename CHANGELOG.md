@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.4.0] Support for Python 3.8-3.11
+## [1.4.1] Support for Python 3.8-3.11
 
 ### Changed
 
