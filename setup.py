@@ -34,7 +34,7 @@ setuptools.setup(
         "ogb <= 1.3.3, < 1.4.0",
         "protobuf == 3.20.3",
         "click <= 8.0.4",
-        "ray == 2.1.0",
+        "ray == 2.6.0",
         "gpustat >= 1.0.0",
         "torch <= 1.13.0",
         "torch-geometric <= 2.1.0.post1",
