@@ -1,5 +1,4 @@
 import json
-from collections import KeysView, ItemsView
 
 
 class Config:
@@ -58,7 +57,7 @@ class Config:
         """
         return self.config_dict.get(key, default)
 
-    def keys(self) -> KeysView:
+    def keys(self):
         r"""
         Invokes the `keys()` method of the configuration dictionary
 
@@ -67,7 +66,7 @@ class Config:
         """
         return self.config_dict.keys()
 
-    def items(self) -> ItemsView:
+    def items(self):
         r"""
         Invokes the `items()` method of the configuration dictionary
 
