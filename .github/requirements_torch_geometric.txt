@@ -1,11 +1,2 @@
--f https://data.pyg.org/whl/torch-1.13.0+cpu.html
-torch-scatter==2.1.0
--f https://data.pyg.org/whl/torch-1.13.0+cpu.html
-torch-sparse==0.6.15
--f https://data.pyg.org/whl/torch-1.13.0+cpu.html
-torch-cluster==1.6.0
--f https://data.pyg.org/whl/torch-1.13.0+cpu.html
-torch-spline-conv==1.2.1
--f https://data.pyg.org/whl/torch-1.13.0+cpu.html
-torch-geometric==2.1.0.post1
-torch-geometric-temporal>=0.52.0
+torch-geometric==2.3.0
+torch-geometric-temporal==0.54.0
