@@ -1,6 +1,6 @@
 import setuptools
 
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 
 URL = "https://pydgn.readthedocs.io/en/latest/"
 
@@ -25,7 +25,7 @@ setuptools.setup(
         "License :: OSI Approved :: BSD License",
         "Operating System :: POSIX :: Linux",
     ],
-    python_requires=">=3.8,<3.10",
+    python_requires=">=3.8,<=3.11",
     install_requires=[
         "PyYAML == 6.0",
         "requests >= 2.22.0",
