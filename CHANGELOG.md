@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.4.0] Support for Python 3.8-3.11
+
+### Changed
+
+- Commented the single temporal graph learning example to remove the dependency from torch-geometric package. The code to support temporal learning stays.
+- Removed the configuration sample for the temporal setting
+- PyG requirements is <= 2.3.0, so we can remove all the other dependencies
+- Modified the `setup/create_environment.sh` file to use Python 3.9 and PyG 2.3.0
+
 ## [1.3.1] Weighted Loss implementation
 
 ### Added

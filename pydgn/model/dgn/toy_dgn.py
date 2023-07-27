@@ -4,7 +4,7 @@ import torch
 from torch import nn
 from torch_geometric.data import Batch, Data
 from torch_geometric.nn import SAGEConv
-from torch_geometric_temporal import DCRNN
+# from torch_geometric_temporal import DCRNN
 
 from pydgn.model.interface import ModelInterface
 
@@ -81,66 +81,66 @@ class ToyDGN(ModelInterface):
         return self.readout(node_embs, batch, **dict(edge_index=edge_index))
 
 
-class ToyDGNTemporal(ModelInterface):
-    """
-    Simple Temporal Deep Graph Network that can be used to test the library
-    """
-
-    def __init__(
-        self,
-        dim_node_features,
-        dim_edge_features,
-        dim_target,
-        readout_class,
-        config,
-    ):
-        super().__init__(
-            dim_node_features,
-            dim_edge_features,
-            dim_target,
-            readout_class,
-            config,
-        )
-
-        self.dim_embedding = 32
-        filter_size = 1
-
-        self.model = DCRNN(dim_node_features, self.dim_embedding, filter_size)
-        self.linear = nn.Linear(self.dim_embedding, self.dim_embedding)
-
-        self.readout = readout_class(
-            dim_node_features=self.dim_embedding,
-            dim_edge_features=dim_edge_features,
-            dim_target=dim_target,
-            config=config,
-        )
-
-    def forward(self, snapshot: Union[Data, Batch], prev_state=None):
-        """
-        Implements an Toy Temporal DGN with some DCRNN graph
-        convolutional layers.
-
-        Args:
-            snapshot (`Union[Data, Batch]`): a graph or batch of graphs
-                at timestep t
-            prev_state (`torch.Tensor`): hidden state of the model
-                (previous time step)
-
-        Returns:
-            the output depends on the readout passed to the model as argument.
-        """
-        # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
-        # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
-        x, edge_index, mask = (
-            snapshot.x,
-            snapshot.edge_index,
-            snapshot.time_prediction_mask,
-        )
-
-        h = self.model(x, edge_index, H=prev_state)
-        h = torch.relu(h)
-
-        # Node predictors assume the embedding is in field "x"
-        out, _ = self.readout(h, snapshot.batch)
-
-        return out, h
+# class ToyDGNTemporal(ModelInterface):
+#     """
+#     Simple Temporal Deep Graph Network that can be used to test the library
+#     """
+#
+#     def __init__(
+#         self,
+#         dim_node_features,
+#         dim_edge_features,
+#         dim_target,
+#         readout_class,
+#         config,
+#     ):
+#         super().__init__(
+#             dim_node_features,
+#             dim_edge_features,
+#             dim_target,
+#             readout_class,
+#             config,
+#         )
+#
+#         self.dim_embedding = 32
+#         filter_size = 1
+#
+#         self.model = DCRNN(dim_node_features, self.dim_embedding, filter_size)
+#         self.linear = nn.Linear(self.dim_embedding, self.dim_embedding)
+#
+#         self.readout = readout_class(
+#             dim_node_features=self.dim_embedding,
+#             dim_edge_features=dim_edge_features,
+#             dim_target=dim_target,
+#             config=config,
+#         )
+#
+#     def forward(self, snapshot: Union[Data, Batch], prev_state=None):
+#         """
+#         Implements an Toy Temporal DGN with some DCRNN graph
+#         convolutional layers.
+#
+#         Args:
+#             snapshot (`Union[Data, Batch]`): a graph or batch of graphs
+#                 at timestep t
+#             prev_state (`torch.Tensor`): hidden state of the model
+#                 (previous time step)
+#
+#         Returns:
+#             the output depends on the readout passed to the model as argument.
+#         """
+#         # snapshot.x: Tensor of size (num_nodes_t x node_ft_size)
+#         # snapshot.edge_index: Adj of size (num_nodes_t x num_nodes_t)
+#         x, edge_index, mask = (
+#             snapshot.x,
+#             snapshot.edge_index,
+#             snapshot.time_prediction_mask,
+#         )
+#
+#         h = self.model(x, edge_index, H=prev_state)
+#         h = torch.relu(h)
+#
+#         # Node predictors assume the embedding is in field "x"
+#         out, _ = self.readout(h, snapshot.batch)
+#
+#         return out, h
