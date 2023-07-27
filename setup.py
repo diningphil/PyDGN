@@ -27,7 +27,7 @@ setuptools.setup(
     ],
     python_requires=">=3.8,<3.10",
     install_requires=[
-        "PyYAML >= 6.0",
+        "PyYAML == 6.0",
         "requests >= 2.22.0",
         "tensorboard <= 2.11.0",
         "tqdm >= 4.47.0",
