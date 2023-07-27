@@ -1,2 +1,1 @@
 torch-geometric==2.3.0
-torch-geometric-temporal==0.54.0

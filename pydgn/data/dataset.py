@@ -10,7 +10,7 @@ from ogb.graphproppred import PygGraphPropPredDataset
 from ogb.utils.url import decide_download, download_url, extract_zip
 from torch_geometric.data import InMemoryDataset, Data, Batch
 from torch_geometric.datasets import TUDataset, Planetoid
-from torch_geometric_temporal import ChickenpoxDatasetLoader
+# from torch_geometric_temporal import ChickenpoxDatasetLoader
 
 
 class ZipDataset(torch.utils.data.Dataset):
@@ -865,76 +865,76 @@ class ToyIterableDataset(IterableDatasetInterface):
             torch.save(fake_graphs, self.processed_paths[i])
 
 
-class ChickenpoxDatasetInterface(TemporalDatasetInterface):
-    r"""
-    Class that acts as wrapper to Pytorch Geometric Temporal Chickenpox dataset
-
-    Args:
-        root (Union[str,Path]): root data folder
-        name (str): name of the dataset
-        lags: (how many original timesteps to aggregate into
-            a single time step)
-        kwargs: optional additional parameters to `ChickenpoxDatasetLoader`
-            (from PyG Temporal)
-    """
-
-    def __init__(self, root, name, lags=4, **kwargs):
-        super().__init__(root, name, **kwargs)
-
-        self.lags = lags
-        self.dataset = ChickenpoxDatasetLoader().get_dataset(lags=lags)
-
-    def get_mask(self, data):
-        """
-        Computes the mask of time steps for which we need to make a prediction.
-        In this case data is a Data object containing a snapshot of a
-        single graph sequence, and the task is node classification
-        at each time step
-
-        Args:
-            data: the data object
-
-        Returns:
-            A tensor indicating the time-steps at which we expect predictions
-        """
-        mask = torch.ones((1, 1))  # time_steps x 1
-        return mask
-
-    @property
-    def dim_node_features(self) -> int:
-        r"""
-        Specifies the number of node features (after pre-processing, but in
-        the end it depends on the model that is implemented).
-        """
-        return self.dataset.features[0].shape[1]
-
-    @property
-    def dim_edge_features(self) -> int:
-        r"""
-        Specifies the number of edge features (after pre-processing, but in
-        the end it depends on the model that is implemented).
-        """
-        return 0
-
-    @property
-    def dim_target(self) -> int:
-        r"""
-        Specifies the dimension of each target vector.
-        """
-        return 1
-
-    def len(self):
-        r"""
-        Returns the number of graphs stored in the dataset.
-        Note: we need to implement both `len` and `__len__` to comply with
-        PyG interface
-        """
-        return len(self)
-
-    def __len__(self):
-        r"""
-        Returns the number of graphs stored in the dataset.
-        Note: we need to implement both `len` and `__len__` to comply with
-        PyG interface
-        """
-        return len(self.dataset.features)  # see DynamicGraphTemporalSignal
+# class ChickenpoxDatasetInterface(TemporalDatasetInterface):
+#     r"""
+#     Class that acts as wrapper to Pytorch Geometric Temporal Chickenpox dataset
+#
+#     Args:
+#         root (Union[str,Path]): root data folder
+#         name (str): name of the dataset
+#         lags: (how many original timesteps to aggregate into
+#             a single time step)
+#         kwargs: optional additional parameters to `ChickenpoxDatasetLoader`
+#             (from PyG Temporal)
+#     """
+#
+#     def __init__(self, root, name, lags=4, **kwargs):
+#         super().__init__(root, name, **kwargs)
+#
+#         self.lags = lags
+#         self.dataset = ChickenpoxDatasetLoader().get_dataset(lags=lags)
+#
+#     def get_mask(self, data):
+#         """
+#         Computes the mask of time steps for which we need to make a prediction.
+#         In this case data is a Data object containing a snapshot of a
+#         single graph sequence, and the task is node classification
+#         at each time step
+#
+#         Args:
+#             data: the data object
+#
+#         Returns:
+#             A tensor indicating the time-steps at which we expect predictions
+#         """
+#         mask = torch.ones((1, 1))  # time_steps x 1
+#         return mask
+#
+#     @property
+#     def dim_node_features(self) -> int:
+#         r"""
+#         Specifies the number of node features (after pre-processing, but in
+#         the end it depends on the model that is implemented).
+#         """
+#         return self.dataset.features[0].shape[1]
+#
+#     @property
+#     def dim_edge_features(self) -> int:
+#         r"""
+#         Specifies the number of edge features (after pre-processing, but in
+#         the end it depends on the model that is implemented).
+#         """
+#         return 0
+#
+#     @property
+#     def dim_target(self) -> int:
+#         r"""
+#         Specifies the dimension of each target vector.
+#         """
+#         return 1
+#
+#     def len(self):
+#         r"""
+#         Returns the number of graphs stored in the dataset.
+#         Note: we need to implement both `len` and `__len__` to comply with
+#         PyG interface
+#         """
+#         return len(self)
+#
+#     def __len__(self):
+#         r"""
+#         Returns the number of graphs stored in the dataset.
+#         Note: we need to implement both `len` and `__len__` to comply with
+#         PyG interface
+#         """
+#         return len(self.dataset.features)  # see DynamicGraphTemporalSignal
