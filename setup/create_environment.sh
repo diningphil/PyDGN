@@ -1,7 +1,7 @@
 # default pytorch version
-PYTHON=python3.8
+PYTHON=python3.9
 PYTORCH_VERSION=1.13.0
-PYTORCH_GEOMETRIC_VERSION=2.1.0.post1
+PYTORCH_GEOMETRIC_VERSION=2.3.0
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
 CUDA_VERSION=${1:-cpu}
