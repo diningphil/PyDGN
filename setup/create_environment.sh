@@ -31,5 +31,6 @@ pip install torch-geometric==${PYTORCH_GEOMETRIC_VERSION}
 
 pip install jupyter
 pip install pydgn
+pip install --upgrade ogb  # ow we get annoying warnings
 
 echo "Done. Remember to append the CUDA lib path to the LD_LIBRARY_PATH variable using the export command in the .bashrc file"

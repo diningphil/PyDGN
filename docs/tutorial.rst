@@ -447,6 +447,25 @@ And we get:
 .. image:: _static/tensorboard.png
    :width: 600
 
+
+Filtering Configurations for Successive Analyses
+-----------------------
+
+You can use some utilities we provide to focus on a specific set of configurations after your experiments are terminated.
+Assuming you run `pydgn-train --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml` inside the PyDGN repo, you can
+then do something like
+
+.. code-block:: python3
+
+    from pydgn.evaluation.util import retrieve_experiments, filter_experiments
+
+    configs = retrieve_experiments('RESULTS/supervised_grid_search_toy_NCI1/MODEL_ASSESSMENT/OUTER_FOLD_1/MODEL_SELECTION/')
+    print(len(configs))  # will return 16
+
+    filtered_configs = filter_experiments(configs, logic='OR', parameters={'Multiclass Classification': 1, 'lr': 0.001})
+    print(len(filtered_configs))  # will return 12
+
+
 Telegram Bot
 -----------------------
 
