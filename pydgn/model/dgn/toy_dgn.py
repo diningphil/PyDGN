@@ -4,6 +4,7 @@ import torch
 from torch import nn
 from torch_geometric.data import Batch, Data
 from torch_geometric.nn import SAGEConv
+
 # from torch_geometric_temporal import DCRNN
 
 from pydgn.model.interface import ModelInterface

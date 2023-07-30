@@ -1,8 +1,9 @@
 import datetime
+import json
 import math
 import os
 import random
-from typing import Tuple, Callable
+from typing import Tuple, Callable, List
 
 import tqdm
 
@@ -333,3 +334,117 @@ def loguniform(*args):
     log_max = math.log(log_max) / math.log(base)
 
     return base ** (random.uniform(log_min, log_max))
+
+
+def retrieve_experiments(model_selection_folder) -> List[dict]:
+    """
+    Once the experiments are done, retrieves the config_results.json files of
+     all configurations in a specific model selection folder, and returns them
+     as a list of dictionaries
+
+    :param model_selection_folder: path to the folder of a model selection,
+        that is, your_results_path/..../MODEL_SELECTION/
+    :return: a list of dictionaries, one per configuration, each with an extra
+        key "exp_folder" which identifies the config folder.
+    """
+    config_directory = os.path.join(model_selection_folder)
+
+    folder_names = []
+    for _, dirs, _ in os.walk(config_directory):
+        for d in dirs:
+            if "config" in d:
+                folder_names.append(os.path.join(config_directory, d))
+        break  # do not recursively explore subfolders
+
+    configs = []
+    for cf in folder_names:
+        exp_info = json.load(
+            open(os.path.join(cf, "config_results.json"), "rb")
+        )
+        exp_config = exp_info[CONFIG]
+
+        exp_config["exp_folder"] = cf
+        configs.append(exp_config)
+
+    return configs
+
+
+def filter_experiments(
+    config_list: List[dict], logic: bool = "AND", parameters: dict = {}
+):
+    """
+    Filters the list of configurations returned by the method ``retrieve_experiments`` according to a dictionary.
+    The dictionary contains the keys and values of the configuration files you are looking for.
+
+    If you specify more then one key/value pair to look for, then the `logic` parameter specifies whether you want to filter
+    using the AND or OR rule.
+
+    For a key, you can specify more than one possible value you are interested in by passing a list as the value, for instance
+    {'device': 'cpu', 'lr': [0.1, 0.01]}
+
+    Args:
+        config_list: The list of configuration files
+        logic: if ``AND``, a configuration is selected iff all conditions are satisfied. If ``OR``, a config is selected when at least
+            one of the criteria is met.
+        parameters: dictionary with parameters used to filter the configurations
+
+    Returns:
+        a list of filtered configurations like the one in input
+    """
+
+    def _finditem(obj, key):
+        if key in obj:
+            return obj[key]
+
+        for k, v in obj.items():
+            if isinstance(v, dict):
+                item = _finditem(v, key)
+                if item is not None:
+                    return item
+
+        return None
+
+    assert logic in ["AND", "OR"], "logic can only be AND/OR case sensitive"
+
+    filtered_config_list = []
+
+    for config in config_list:
+        keep = True if logic == "AND" else False
+
+        for k, v in parameters.items():
+
+            cf_v = _finditem(config, k)
+            assert cf_v is not None, (
+                f"Key {k} not found in the " f"configuration, check your input"
+            )
+
+            if type(v) == list:
+                assert len(v) > 0, (
+                    f'the list of values for key "{k}" cannot be'
+                    f" empty, consider removing this key"
+                )
+
+                # the user specified a list of acceptable values
+                # it is sufficient that one of them is present to return True
+                if cf_v in v and logic == "OR":
+                    keep = True
+                    break
+
+                if cf_v not in v and logic == "AND":
+                    keep = False
+                    break
+
+            else:
+
+                if v == cf_v and logic == "OR":
+                    keep = True
+                    break
+
+                if v != cf_v and logic == "AND":
+                    keep = False
+                    break
+
+        if keep:
+            filtered_config_list.append(config)
+
+    return filtered_config_list
