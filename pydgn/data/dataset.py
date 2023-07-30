@@ -10,6 +10,7 @@ from ogb.graphproppred import PygGraphPropPredDataset
 from ogb.utils.url import decide_download, download_url, extract_zip
 from torch_geometric.data import InMemoryDataset, Data, Batch
 from torch_geometric.datasets import TUDataset, Planetoid
+
 # from torch_geometric_temporal import ChickenpoxDatasetLoader
 
 
