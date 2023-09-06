@@ -892,13 +892,13 @@ class LinkPredictionSingleGraphDataProvider(DataProvider):
         pos_train_edges, train_attr, neg_train_edges = train
         pos_train_edges = torch.tensor(pos_train_edges, dtype=torch.long)
         train_attr = (
-            torch.tensor(train_attr) if train_attr is not None else None
+            train_attr.clone() if train_attr is not None else None
         )
         neg_train_edges = torch.tensor(neg_train_edges, dtype=torch.long)
 
         pos_eval_edges, eval_attr, neg_eval_edges = eval
         pos_eval_edges = torch.tensor(pos_eval_edges, dtype=torch.long)
-        eval_attr = torch.tensor(eval_attr) if eval_attr is not None else None
+        eval_attr = eval_attr.clone() if eval_attr is not None else None
         neg_eval_edges = torch.tensor(neg_eval_edges, dtype=torch.long)
 
         # The code below works because we are working with a single graph!

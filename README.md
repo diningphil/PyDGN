@@ -8,8 +8,8 @@
 [![Python Package](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml/badge.svg)](https://github.com/diningphil/PyDGN/actions/workflows/python-publish.yml)
 [![Downloads](https://static.pepy.tech/personalized-badge/pydgn?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pydgn)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Interrogate](https://github.com/diningphil/PyDGN/blob/main/badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
-[![Coverage](https://github.com/diningphil/PyDGN/blob/main/badges/coverage_badge.svg)]()
+[![Interrogate](https://github.com/diningphil/PyDGN/blob/main/.badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
+[![Coverage](https://github.com/diningphil/PyDGN/blob/main/.badges/coverage_badge.svg)]()
 <img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" width="72">
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
@@ -30,16 +30,7 @@ Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-compariso
 
 ## Installation:
 
-We assume **git** is installed. Optionally, you can use the script below to install `pydgn` in a controlled and separate environment (this is up to you):
-
-    source setup/create_environment.sh [<your_cuda_version>]
-
-Where `<your_cuda_version>` is an optional argument that (as of 12/12/22) can be either `cpu`, `cu116` or `cu117` for Pytorch 1.13.0
-If you do not provide a cuda version, the script will default to `cpu`. The script will create a virtual environment
-named `pydgn`, with all the required packages needed to run our code. **Important:** do NOT run this command
-using `bash` instead of `source`!
-
-Alternatively, if Pytorch (<=1.13.0) and Pytorch Geometric (<=2.3.0) are already installed, you can just run
+Simply run
     
     pip install pydgn
 
