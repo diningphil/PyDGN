@@ -1,6 +1,6 @@
 # default pytorch version
-PYTHON=python3.8
-PYTORCH_VERSION=1.13.0
+PYTHON=python3.11
+PYTORCH_VERSION=2.0.0
 PYTORCH_GEOMETRIC_VERSION=2.3.0  #  since 2.3.0, all other packages are not anymore necessary
 
 # set CUDA variable (defaults to cpu if no argument is provided to the script)
@@ -24,6 +24,8 @@ elif [[ "$CUDA_VERSION" == 'cu116' ]]; then
   pip install torch==${PYTORCH_VERSION} torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu116
 elif [[ "$CUDA_VERSION" == 'cu117' ]]; then
   pip install torch==${PYTORCH_VERSION} torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu117
+elif [[ "$CUDA_VERSION" == 'cu118' ]]; then
+  pip install torch==${PYTORCH_VERSION} torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu118
 fi
 
 # pip install pyg-lib torch-scatter torch-sparse torch-cluster torch-spline-conv torch-geometric==${PYTORCH_GEOMETRIC_VERSION} -f https://data.pyg.org/whl/torch-${PYTORCH_VERSION}+${CUDA_VERSION}.html

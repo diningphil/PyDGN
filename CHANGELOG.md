@@ -2,10 +2,18 @@
 
 ## [1.4.2] 
 
+### Changed
+
+- Refactored the toml file of the library to remove legacy files `setup.py` and `setup.cfg`
+
 ### Added
 
 - Utility functions in `pydgn.evaluation.util` to retrieve configuration files in a model selection folder and filter them for post-hoc analyses. 
 - Updated tutorial in documentation accordingly
+
+### Fixed
+
+- Solved some deprecation warnings when using `torch.tensor` to clone an existing tensor in DataProvider
 
 ## [1.4.1] Support for Python 3.8-3.11
 

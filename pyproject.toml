@@ -1,6 +1,39 @@
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel",
-]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "pydgn"
+version = "1.4.2"
+description = "A Python Package for Deep Graph Networks"
+authors = [ { name="Federico Errica", email="f.errica@protonmail.com" } ]
+readme = "README.md"
+keywords = ["deep-graph-networks", "evaluation-framework", "deep-learning-for-graphs"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: POSIX :: Linux",
+]
+requires-python = ">=3.8"
+
+dependencies = [
+    "PyYAML>=5.4",
+    "requests>=2.22.0",
+    "tensorboard>=2.11.0",
+    "tqdm>=4.47.0",
+    "ogb>=1.2.0",
+    "ray>=2.6.0",
+    "gpustat>=1.0.0",
+    "torch>=2.0.0",
+    "torch-geometric>=2.3.0",
+    "wandb>=0.12.15",
+]
+
+
+[project.urls]
+"Homepage" = "https://pydgn.readthedocs.io/en/latest/"
+
+
+[project.scripts]
+pydgn-dataset = "pydgn.build_dataset:main"
+pydgn-train = "pydgn.launch_experiment:main"
