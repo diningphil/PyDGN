@@ -95,12 +95,10 @@ The interaction between all components of a training pipeline is perhaps the tri
 class LogMSE(pydgn.training.callback.metric.MeanSquareError):
  
     @property
-    def name(self) -> str:
+    def name(self):
         return "LOG Mean Square Error"
 
-    def compute_metric(
-        self, targets: torch.Tensor, predictions: torch.Tensor
-    ) -> torch.tensor:
+    def compute_metric(self, targets, predictions):
         mse_metric = super().compute_metric(targets, predictions)
         return torch.log(mse_metric)
 ```
