@@ -1,4 +1,4 @@
-bot_token: [YOUR TOKEN]
+ot_token: [YOUR TOKEN]
 bot_chat_ID: [YOUR CHAT ID]
 
 log_model_selection: True  # logs the best config for each outer fold (validation score)

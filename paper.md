@@ -73,6 +73,7 @@ splitter:
 ### Experiment templates
 
 We define an abstract interface for each experiment that consists of two methods, _run_valid_ and _run_test_. The first is called during the model selection, and the second is called during risk assessment of the model. This should act as a reminder that the user cannot access the test data when performing a model-selection procedure (that is, _run_valid_), thus reducing the chances of test data leakage. Our library ships with two standard experiments, an end-to-end training on a single task and two-step training where first we compute unsupervised node/graph embeddings and then apply a supervised predictor on top of them to solve a downstream task. These two implementations cover most use cases and ensure that the different data splits are used in the correct way.
+
 ### Implementing models
 To implement a DGN in our library, it is sufficient to adhere to a very simple interface that specifies initialization arguments and the type of output for the prediction step. The user wraps the interface around a `PyG` model to have it immediately working. This strategy allows the user to focus entirely on the development of the model regardless of all the code necessary to run the training pipeline, akin to what happens in [@2020_you_design_2020]. The library will automatically provide the current hyper-parameter configuration to be evaluated to the model in the form of a dictionary `config`. To create a new model, the user simply has to subclass `ModuleInterface` and implement the two methods
 
@@ -90,7 +91,7 @@ class MyModel(pydgn.model.interface.ModelInterface):
 where `data` is a PyG `Batch` object containing a batch of input graphs.
 
 ### Training via publish-subscribe
-The interaction between all components of a training pipeline is perhaps the trickiest part to implement in any machine learning project. One false step, and nothing works. PYDGN's training engine implements all boilerplate code regarding the training loop, and it relies on the publish-subscribe design pattern to trigger the execution of callbacks at specific points in the training procedure. Every metric, early stopping, scheduler, gradient clipper, optimizer, data fetcher, and stats plotter implements some of these callbacks; when a callback is triggered, a shared state object is passed as argument to allow communication between the different components of the training process. For instance, extending the MeanSquaredError loss to compute its logarithm is as easy as doing
+The interaction between all components of a training pipeline is perhaps the trickiest part to implement in any machine learning project. One false step, and nothing works. PyDGN's training engine implements all boilerplate code regarding the training loop, and it relies on the publish-subscribe design pattern to trigger the execution of callbacks at specific points in the training procedure. Every metric, early stopping, scheduler, gradient clipper, optimizer, data fetcher, and stats plotter implements some of these callbacks; when a callback is triggered, a shared state object is passed as argument to allow communication between the different components of the training process. For instance, extending the MeanSquaredError loss to compute its logarithm is as easy as doing
 ```python
 class LogMSE(pydgn.training.callback.metric.MeanSquareError):
  
