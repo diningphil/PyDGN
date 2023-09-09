@@ -23,10 +23,8 @@ dependencies = [
     "tqdm>=4.47.0",
     "ogb>=1.2.0",
     "ray>=2.6.0",
-    "gpustat>=1.0.0",
     "torch>=2.0.0",
     "torch-geometric>=2.3.0",
-    "wandb>=0.12.15",
 ]
 
 
