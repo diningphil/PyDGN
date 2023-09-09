@@ -1,10 +1,7 @@
 PyYAML
-requests
 tensorboard
 tqdm
 ogb
 ray
-gpustat
-wandb
 torch
 torch-geometric>=2.3.0

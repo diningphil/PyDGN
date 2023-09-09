@@ -18,15 +18,12 @@ requires-python = ">=3.8"
 
 dependencies = [
     "PyYAML>=5.4",
-    "requests>=2.22.0",
     "tensorboard>=2.11.0",
     "tqdm>=4.47.0",
     "ogb>=1.2.0",
     "ray>=2.6.0",
-    "gpustat>=1.0.0",
     "torch>=2.0.0",
     "torch-geometric>=2.3.0",
-    "wandb>=0.12.15",
 ]
 
 

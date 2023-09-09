@@ -3,7 +3,6 @@ import os
 import sys
 from typing import Optional
 
-import gpustat
 import yaml
 
 from pydgn.static import *
@@ -24,6 +23,14 @@ def set_gpus(num_gpus: int, gpus_subset: Optional[str] = None):
             Useful if one wants to specify specific GPUs on which to run
             the experiments, regardless of memory constraints
     """
+    try:
+        import gpustat
+    except ImportError:
+        raise ImportError(
+            "Expected use of CUDA but gpustat is not installed."
+            "Run `pip install gpustat` to install it."
+        )
+
     if (gpus_subset is not None) and (num_gpus > len(gpus_subset)):
         raise Exception(
             f"The user asked to use {num_gpus} GPUs but only a valid subset of"
