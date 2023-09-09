@@ -27,8 +27,8 @@ def set_gpus(num_gpus: int, gpus_subset: Optional[str] = None):
         import gpustat
     except ImportError:
         raise ImportError(
-            "Expected use of CUDA but gpustat is not installed."
-            "Run `pip install gpustat` to install it."
+            "Expected use of CUDA but gpustat is not installed. "
+            "Please run `pip install gpustat` to install it."
         )
 
     if (gpus_subset is not None) and (num_gpus > len(gpus_subset)):
@@ -133,6 +133,7 @@ def evaluation(options: argparse.Namespace):
         except Exception as e:
             print("An exception occurred while setting the GPUs:")
             print(e)
+            exit(0)
 
         gpus_per_task = configs_dict[GPUS_PER_TASK]
 
