@@ -1,5 +1,4 @@
 PyYAML
-requests
 tensorboard
 tqdm
 ogb
