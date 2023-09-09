@@ -119,6 +119,6 @@ In summary, PyDGN's configuration files and event-based design pattern enhance i
 
 # Acknowledgements
 
-We acknowledge contributions from Antonio Carta, Danilo Numeroso, Daniele Castellana, Alessio Gravina, Francesco Landolfi, and support from Marco Podda during the genesis of this project. 
+We acknowledge contributions from Antonio Carta, Danilo Numeroso, Daniele Castellana, Alessio Gravina, Francesco Landolfi, and support from Marco Podda during the genesis of this project. The authors would like to thank the reviewer Ido Ben-Yair for the constructive feedback that greatly improved the paper and the installation procedure.
 
 # References
