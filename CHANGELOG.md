@@ -1,5 +1,12 @@
 # Changelog
 
+
+## [1.4.3] 
+
+### Changed
+
+- Removed as many dependencies as possible 
+
 ## [1.4.2] 
 
 ### Changed
