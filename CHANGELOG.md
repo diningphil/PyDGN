@@ -3,6 +3,13 @@
 
 ## [1.4.3] 
 
+### Fixed
+
+- Removed loading of optimizer's state when evaluating the best checkpoint or the last epoch of a training run, since we only need to perform inference. This might cause problems in corner-case situations (e.g., at the end of a training where one dynamically changes the architecture at every epoch).
+- Updated dependencies in toml file
+
+## [1.4.3] 
+
 ### Changed
 
 - Removed as many dependencies as possible 
