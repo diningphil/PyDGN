@@ -691,7 +691,6 @@ class TrainingEngine(EventDispatcher):
                 ber = self.state.best_epoch_results
                 # Restore the model according to the best validation score!
                 self.model.load_state_dict(ber[MODEL_STATE])
-                self.optimizer.load_state_dict(ber[OPTIMIZER_STATE])
             else:
                 self.state.update(best_epoch_results={BEST_EPOCH: epoch})
                 ber = self.state.best_epoch_results
