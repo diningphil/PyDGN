@@ -10,7 +10,6 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Interrogate](https://github.com/diningphil/PyDGN/blob/main/.badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
 [![Coverage](https://github.com/diningphil/PyDGN/blob/main/.badges/coverage_badge.svg)]()
-<img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white" width="72">
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
@@ -28,8 +27,9 @@ Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 
 Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
 
-## Installation (Linux only):
+## Installation:
 
+Automated tests passing on Windows, Linux, and MacOS.
 Simply run
     
     pip install pydgn
