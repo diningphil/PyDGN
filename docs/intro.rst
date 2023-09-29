@@ -30,8 +30,10 @@ For instance, subclassing an :class:`~pydgn.training.event.handler.EventHandler`
 However, we believe reading boilerplate code is far easier than writing your own, and it reduces the risks of doing something wrong (and if you find a bug please tell us!)
 
 
-Installation (Linux only):
+Installation:
 *******************
+
+Automated tests passing on Windows, Linux and MacOS.
 
 The recommended way to install the library is to follow the steps to install ``torch`` and ``torch_geometric`` prior to installing PyDGN.
 
