@@ -30,18 +30,12 @@ For instance, subclassing an :class:`~pydgn.training.event.handler.EventHandler`
 However, we believe reading boilerplate code is far easier than writing your own, and it reduces the risks of doing something wrong (and if you find a bug please tell us!)
 
 
-Installation:
+Installation (Linux only):
 *******************
 
 The recommended way to install the library is to follow the steps to install ``torch`` and ``torch_geometric`` prior to installing PyDGN.
 
-You can automatically create a Conda environment (assuming you have conda or miniconda installed) using
-
-.. code-block:: python
-
-    source setup/install.sh [<your_cuda_version>]
-
-where ``[<your_cuda_version>]`` can be ``cpu``, ``cu102``, ``cu113``. Then, install the library with
+Then simply run
 
 .. code-block:: python
 
