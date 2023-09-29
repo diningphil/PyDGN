@@ -28,7 +28,7 @@ Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 
 Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
 
 
-## Installation:
+## Installation (Linux only):
 
 Simply run
     
