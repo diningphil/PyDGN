@@ -12,7 +12,7 @@ keywords = ["deep-graph-networks", "evaluation-framework", "deep-learning-for-gr
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: BSD License",
-    "Operating System :: POSIX :: Linux",
+    "Operating System :: OS Independent",
 ]
 requires-python = ">=3.8"
 
