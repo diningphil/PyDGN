@@ -29,7 +29,7 @@ Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-compariso
 
 ## Installation:
 
-Automated tests passing on Windows, Linux, and MacOS.
+Automated tests passing on Windows, Linux, and MacOS. Requires at least Python 3.8.
 
 Simply run
     
