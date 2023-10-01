@@ -10,6 +10,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Interrogate](https://github.com/diningphil/PyDGN/blob/main/.badges/interrogate_badge.svg)](https://interrogate.readthedocs.io/en/latest/)
 [![Coverage](https://github.com/diningphil/PyDGN/blob/main/.badges/coverage_badge.svg)]()
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.05713/status.svg)](https://doi.org/10.21105/joss.05713)
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
@@ -18,14 +19,22 @@ with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S08
 automatic management of data splitting, loading and common experimental settings. It also handles both model
 selection and risk assessment procedures, by trying many different configurations in parallel (CPU or GPU).
 
-## Reference
+## Citing this work
 
-If you are interested in a rigorous evaluation of *specific* Deep Graph Networks, which kick-started this library, check this out:
+If you used this library for your project, please consider citing us:
 
-[Errica Federico, Podda Marco, Bacciu Davide, Micheli Alessio: *A Fair Comparison of Graph Neural Networks for Graph
-Classification*](https://openreview.net/pdf?id=HygDF6NFPB). *Proceedings of the 8th International Conference on Learning
-Representations (ICLR 2020).* [Code](https://github.com/diningphil/gnn-comparison)
-
+    @article{pydgn,
+      author = {Errica, Federico and Bacciu, Davide and Micheli, Alessio},
+      doi = {10.21105/joss.05713},
+      journal = {Journal of Open Source Software},
+      month = oct,
+      number = {90},
+      pages = {5713},
+      title = {{PyDGN: a Python Library for Flexible and Reproducible Research on Deep Learning for Graphs}},
+      url = {https://joss.theoj.org/papers/10.21105/joss.05713},
+      volume = {8},
+      year = {2023}
+    }
 
 ## Installation:
 
