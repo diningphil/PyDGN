@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.0] PyDGN - Journal of Open Source Software
+
+This is the release that adheres to the changes requested by JOSS reviewers. 
+
+### Changed
+
+- The package setup information is now entirely contained in `pyproject.toml`
+- PyDGN is now system independent, automatically tested on Windows, Linux and macOS systems using GitHub Actions
+- Simplified installation instructions
+- Removed as many dependencies as possible
+- Introduced a PR template
 
 ## [1.4.3] 
 
