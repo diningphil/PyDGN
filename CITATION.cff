@@ -1,0 +1,44 @@
+cff-version: "1.2.0"
+authors:
+- family-names: Errica
+  given-names: Federico
+  orcid: "https://orcid.org/0000-0001-5181-2904"
+- family-names: Bacciu
+  given-names: Davide
+  orcid: "https://orcid.org/0000-0001-5213-2468"
+- family-names: Micheli
+  given-names: Alessio
+  orcid: "https://orcid.org/0000-0001-5764-5238"
+contact:
+- family-names: Errica
+  given-names: Federico
+  orcid: "https://orcid.org/0000-0001-5181-2904"
+doi: 10.5281/zenodo.8396373
+message: If you use this software, please cite our article in the
+  Journal of Open Source Software.
+preferred-citation:
+  authors:
+  - family-names: Errica
+    given-names: Federico
+    orcid: "https://orcid.org/0000-0001-5181-2904"
+  - family-names: Bacciu
+    given-names: Davide
+    orcid: "https://orcid.org/0000-0001-5213-2468"
+  - family-names: Micheli
+    given-names: Alessio
+    orcid: "https://orcid.org/0000-0001-5764-5238"
+  date-published: 2023-10-01
+  doi: 10.21105/joss.05713
+  issn: 2475-9066
+  issue: 90
+  journal: Journal of Open Source Software
+  publisher:
+    name: Open Journals
+  start: 5713
+  title: "PyDGN: a Python Library for Flexible and Reproducible Research
+    on Deep Learning for Graphs"
+  type: article
+  url: "https://joss.theoj.org/papers/10.21105/joss.05713"
+  volume: 8
+title: "PyDGN: a Python Library for Flexible and Reproducible Research
+  on Deep Learning for Graphs"
