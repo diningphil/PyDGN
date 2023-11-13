@@ -96,7 +96,12 @@ grid:
     readout: pydgn.model.readout.graph_readout.LinearGraphReadout
 
     # Training engine
-    engine: pydgn.training.engine.TrainingEngine
+    engine:
+      - class_name: pydgn.training.engine.TrainingEngine
+        args:
+          eval_training:  # whether to re-compute epoch loss/scores after training or use those obtained while the model is being trained with mini-batches
+            - False  # default behavior since 1.5.1, saves some compute time as we are generally interested in validation scores
+            - True  # re-evaluates on training set after each training epoch, might not change much loss/score values and causes overhead
 
     # Gradient clipper (optional)
     gradient_clipper: null
