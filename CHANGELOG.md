@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.5.1] New default behavior - more efficient training
+
+### Changed - PLEASE READ
+
+From now on, the default behavior of the training engine is to display **training** loss/scores computed **during the epoch**. In the past, at the end of each epoch we always re-evaluated the trained model on the entire training set, but this is often not interesting as early stopping typically acts on the validation set. The behavior can be enabled again by specifying it in the config file, that is:
+
+      engine:
+      - class_name: pydgn.training.engine.TrainingEngine
+        args:
+          eval_training:  # whether to re-compute epoch loss/scores after training or use those obtained while the model is being trained with mini-batches
+            - True  # re-evaluates on training set after each training epoch, might not change much loss/score values and causes overhead
+
+The default value will be `False` from now on to save compute time.
+
 ## [1.5.0] PyDGN - Journal of Open Source Software
 
 This is the release that adheres to the changes requested by JOSS reviewers. 

@@ -333,6 +333,7 @@ class Experiment:
         engine_callback = s2c(
             engine_args.get("engine_callback", DEFAULT_ENGINE_CALLBACK)
         )
+        eval_training = engine_args.get("eval_training", False)
 
         engine = engine_class(
             engine_callback=engine_callback,
@@ -347,6 +348,7 @@ class Experiment:
             plotter=plotter,
             exp_path=self.exp_path,
             evaluate_every=evaluate_every,
+            eval_training=eval_training,
             store_last_checkpoint=store_last_checkpoint,
             reset_eval_model_hidden_state=reset_eval_model_hidden_state,
         )

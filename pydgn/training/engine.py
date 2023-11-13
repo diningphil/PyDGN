@@ -96,8 +96,10 @@ class TrainingEngine(EventDispatcher):
             the plotter to be used. Default is ``None``.
         exp_path (str): the path of the experiment folder.
             Default is ``None`` but it is always instantiated.
-        evaluate_every(int): the frequency of logging epoch results.
+        evaluate_every (int): the frequency of logging epoch results.
             Default is ``1``.
+        eval_training (bool): whether to re-evaluate loss and scores on the
+            training set after a training epoch. Defaults to False.
         store_last_checkpoint (bool): whether to store a checkpoint at
             the end of each epoch. Allows to resume training from last epoch.
             Default is ``False``.
@@ -123,6 +125,7 @@ class TrainingEngine(EventDispatcher):
         plotter: Plotter = None,
         exp_path: str = None,
         evaluate_every: int = 1,
+        eval_training: bool = False,
         store_last_checkpoint: bool = False,
         reset_eval_model_hidden_state: bool = True,
     ):
@@ -140,6 +143,7 @@ class TrainingEngine(EventDispatcher):
         self.plotter = plotter
         self.exp_path = exp_path
         self.evaluate_every = evaluate_every
+        self.eval_training = eval_training
         self.store_last_checkpoint = store_last_checkpoint
         self.training = False
 
@@ -587,25 +591,31 @@ class TrainingEngine(EventDispatcher):
                 self._dispatch(EventHandler.ON_EPOCH_START, self.state)
 
                 self.state.update(set=TRAINING)
-                _, _, _ = self._train(train_loader)
+                train_loss, train_score, _ = self._train(train_loader)
 
                 # Update state with epoch results
                 epoch_results = {LOSSES: {}, SCORES: {}}
 
-                # [temporal] Initialize the hidden state of the model
-                # again before inference
-                self.state.update(last_hidden_state=None)
+                if self.eval_training:
+                    # needs to reset the temporal state in any case since
+                    # we restart the inference from the training set
+                    # otherwise we keep the temporal hidden state as it is
+
+                    # [temporal] Initialize the hidden state of the model
+                    # again before inference
+                    self.state.update(last_hidden_state=None)
 
                 if (
                     (epoch + 1) >= self.evaluate_every
                     and (epoch + 1) % self.evaluate_every == 0
                 ) or epoch == 0:
 
-                    # Compute training output (necessary because on_backward
-                    # has been called)
-                    train_loss, train_score, _ = self.infer(
-                        train_loader, TRAINING
-                    )
+                    if self.eval_training:
+                        # Compute training output (necessary because on_backward
+                        # has been called)
+                        train_loss, train_score, _ = self.infer(
+                            train_loader, TRAINING
+                        )
 
                     if self.reset_eval_model_hidden_state:
                         self.state.update(last_hidden_state=None)
