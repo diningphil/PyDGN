@@ -1,4 +1,5 @@
 PyYAML
+tqdm
 tensorboard
 tqdm
 ogb
