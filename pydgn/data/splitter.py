@@ -437,6 +437,131 @@ class Splitter:
         print("Done.")
 
 
+class SameInnerSplitSplitter(Splitter):
+    r"""
+    Splitter subclass that can be used to have multiple training runs of the
+    same configuration at model selection time. It is not meant to be combined
+    with a double-nested CV, for which the different inner splits are already
+    enough to gauge the training stability of each configuration.
+    """
+    def split(
+        self,
+        dataset: pydgn.data.dataset.DatasetInterface,
+        targets: np.ndarray = None,
+    ):
+        r"""
+        Computes the splits and stores them in the list fields
+        ``self.outer_folds`` and ``self.inner_folds``.
+        IMPORTANT: calling split() sets the seed of numpy, torch, and
+        random for reproducibility.
+
+        Args:
+            dataset (:class:`~pydgn.data.dataset.DatasetInterface`):
+                the Dataset object
+            targets (np.ndarray]): targets used for stratification.
+                Default is ``None``
+        """
+        np.random.seed(self.seed)
+        torch.manual_seed(self.seed)
+        torch.cuda.manual_seed(self.seed)
+        random.seed(self.seed)
+
+        idxs = range(len(dataset))
+
+        stratified = self.stratify
+        outer_idxs = np.array(idxs)
+
+        outer_splitter = self._get_splitter(
+            n_splits=self.n_outer_folds,
+            stratified=stratified,
+            eval_ratio=self.test_ratio,
+        )  # This is the true test (outer test)
+
+        for train_idxs, test_idxs in outer_splitter.split(
+            outer_idxs, y=targets if stratified else None
+        ):
+
+            assert set(train_idxs) == set(outer_idxs[train_idxs])
+            assert set(test_idxs) == set(outer_idxs[test_idxs])
+
+            inner_fold_splits = []
+            inner_idxs = outer_idxs[
+                train_idxs
+            ]  # equals train_idxs because outer_idxs was ordered
+            inner_targets = (
+                targets[train_idxs] if targets is not None else None
+            )
+
+            inner_splitter = self._get_splitter(
+                n_splits=self.n_inner_folds,
+                stratified=stratified,
+                eval_ratio=self.inner_val_ratio,
+            )  # The inner "test" is, instead, the validation set
+
+            for inner_train_idxs, inner_val_idxs in inner_splitter.split(
+                inner_idxs, y=inner_targets if stratified else None
+            ):
+                inner_fold = InnerFold(
+                    train_idxs=inner_idxs[inner_train_idxs].tolist(),
+                    val_idxs=inner_idxs[inner_val_idxs].tolist(),
+                )
+
+                # False if empty
+                assert not bool(
+                    set(inner_train_idxs)
+                    & set(inner_val_idxs)
+                    & set(test_idxs)
+                )
+                assert not bool(
+                    set(inner_idxs[inner_train_idxs])
+                    & set(inner_idxs[inner_val_idxs])
+                    & set(test_idxs)
+                )
+
+                # we ignore the different inner splits and use only the first
+                # one to be reused multiple times (effectively simulating
+                # multiple training runs of the same configuration on the same
+                # training/validation data split
+                for _ in range(self.n_inner_folds):
+                    inner_fold_splits.append(inner_fold)
+                break
+
+            self.inner_folds.append(inner_fold_splits)
+
+            # Obtain outer val from outer train in an holdout fashion
+            outer_val_splitter = self._get_splitter(
+                n_splits=1,
+                stratified=stratified,
+                eval_ratio=self.outer_val_ratio,
+            )
+            outer_train_idxs, outer_val_idxs = list(
+                outer_val_splitter.split(inner_idxs, y=inner_targets)
+            )[0]
+
+            # False if empty
+            assert not bool(
+                set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs)
+            )
+            assert not bool(
+                set(outer_train_idxs) & set(outer_val_idxs) & set(test_idxs)
+            )
+            assert not bool(
+                set(inner_idxs[outer_train_idxs])
+                & set(inner_idxs[outer_val_idxs])
+                & set(test_idxs)
+            )
+
+            np.random.shuffle(outer_train_idxs)
+            np.random.shuffle(outer_val_idxs)
+            np.random.shuffle(test_idxs)
+            outer_fold = OuterFold(
+                train_idxs=inner_idxs[outer_train_idxs].tolist(),
+                val_idxs=inner_idxs[outer_val_idxs].tolist(),
+                test_idxs=outer_idxs[test_idxs].tolist(),
+            )
+            self.outer_folds.append(outer_fold)
+
+
 class TemporalSplitter(Splitter):
     r"""
     Reads the entire dataset and returns the targets. In this case, each

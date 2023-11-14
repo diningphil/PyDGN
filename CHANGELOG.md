@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.5.2] Some Improvements
+
+### Added
+
+- Implemented a convenient tqdm progress bar in debug mode to track speed of training and evaluation.
+- Created a new splitter class, `SameInnerSplitSplitter`, which allows you to average the validation scores of the 
+same model selection configuration over multiple runs without changing the inner data split. Cannot be combined with a
+double/nested CV approach, for which you should use the base `Splitter` class to generate different inner data splits.
+- Trying out a helper mechanism to print to terminal information about the experiment that broke (if any) 
+when you are not in debug mode.
+
 ## [1.5.1] New default behavior - more efficient training
 
 ### Changed - PLEASE READ

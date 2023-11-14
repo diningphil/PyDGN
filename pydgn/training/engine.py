@@ -6,6 +6,7 @@ import torch
 from torch.utils.data import SequentialSampler
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 import pydgn
 from pydgn.log.logger import Logger
@@ -146,6 +147,7 @@ class TrainingEngine(EventDispatcher):
         self.eval_training = eval_training
         self.store_last_checkpoint = store_last_checkpoint
         self.training = False
+        self.logger = None
 
         # For dynamic graph learning
         self.reset_eval_model_hidden_state = reset_eval_model_hidden_state
@@ -421,7 +423,11 @@ class TrainingEngine(EventDispatcher):
         self.state.update(loader_iterable=iter(loader))
 
         # Loop over data
-        for id_batch in range(len(loader)):
+        for id_batch in tqdm(range(len(loader)),
+                             desc=f'Epoch {self.state.epoch+1}, {self.state.set} set',
+                             unit='batch',
+                             disable=not self.logger.debug,
+                             leave=False):
             self.state.update(id_batch=id_batch)
             # EngineCallback will store fetched data in state.batch_input
             self._dispatch(EventHandler.ON_FETCH_DATA, self.state)
@@ -544,6 +550,7 @@ class TrainingEngine(EventDispatcher):
              validation_loss, validation_score, validation_embeddings,
              test_loss, test_score, test_embeddings)
         """
+        self.logger = logger
 
         try:
             # Initialize variables

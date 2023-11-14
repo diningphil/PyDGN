@@ -86,10 +86,16 @@ def run_valid(
     """
     if not osp.exists(fold_results_torch_path):
         start = time.time()
-        experiment = experiment_class(config, fold_exp_folder, exp_seed)
-        train_res, val_res = experiment.run_valid(dataset_getter, logger)
-        elapsed = time.time() - start
-        torch.save((train_res, val_res, elapsed), fold_results_torch_path)
+        try:
+            experiment = experiment_class(config, fold_exp_folder, exp_seed)
+            train_res, val_res = experiment.run_valid(dataset_getter, logger)
+            elapsed = time.time() - start
+            torch.save((train_res, val_res, elapsed), fold_results_torch_path)
+        except Exception as e:
+            print(f'There has been an issue with configuration '
+                  f'in {fold_exp_folder}!')
+            print(e)
+            elapsed = -1
     else:
         _, _, elapsed = torch.load(fold_results_torch_path)
     return dataset_getter.outer_k, dataset_getter.inner_k, config_id, elapsed
@@ -138,17 +144,21 @@ def run_test(
         a tuple with outer fold id, final run id, and time elapsed
     """
     if not osp.exists(final_run_torch_path):
-        start = time.time()
-        experiment = experiment_class(
-            best_config[CONFIG], final_run_exp_path, exp_seed
-        )
-        res = experiment.run_test(dataset_getter, logger)
-        elapsed = time.time() - start
-
-        train_res, val_res, test_res = res
-        torch.save(
-            (train_res, val_res, test_res, elapsed), final_run_torch_path
-        )
+        try:
+            start = time.time()
+            experiment = experiment_class(
+                best_config[CONFIG], final_run_exp_path, exp_seed
+            )
+            res = experiment.run_test(dataset_getter, logger)
+            elapsed = time.time() - start
+            train_res, val_res, test_res = res
+            torch.save(
+                (train_res, val_res, test_res, elapsed), final_run_torch_path
+            )
+        except Exception as e:
+            print(f'There has been an issue in {final_run_exp_path}!')
+            print(e)
+            elapse = -1
     else:
         res = torch.load(final_run_torch_path)
         elapsed = res[-1]
