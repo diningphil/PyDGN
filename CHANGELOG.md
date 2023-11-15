@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.3] Minor fix
+
+### Fixed
+
+- training loss and score not showing on tensorboard
+
+### Added
+
 ## [1.5.2] Some Improvements
 
 ### Added
