@@ -623,6 +623,15 @@ class TrainingEngine(EventDispatcher):
                         train_loss, train_score, _ = self.infer(
                             train_loader, TRAINING
                         )
+                    else:
+                        # Add the main loss we want to return as a special key
+                        main_loss_name = self.loss_fun.get_main_metric_name()
+                        train_loss[MAIN_LOSS] = train_loss[main_loss_name]
+
+                        # Add the main score we want to return as a special key
+                        # Needed by the experimental evaluation framework
+                        main_score_name = self.score_fun.get_main_metric_name()
+                        train_score[MAIN_SCORE] = train_score[main_score_name]
 
                     if self.reset_eval_model_hidden_state:
                         self.state.update(last_hidden_state=None)
