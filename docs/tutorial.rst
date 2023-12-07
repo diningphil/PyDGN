@@ -348,13 +348,13 @@ Once our experiment configuration file is ready, we can launch an experiment usi
 
 .. code-block:: bash
 
-    pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
+    pydgn-train --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml
 
 or
 
 .. code-block:: bash
 
-    pydgn-dataset --config-file examples/MODEL_CONFIGS/config_SemiSupToyDGN.yml
+    pydgn-train --config-file examples/MODEL_CONFIGS/config_SemiSupToyDGN.yml
 
 
 And we are up and running!
