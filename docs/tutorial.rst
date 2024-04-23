@@ -449,7 +449,7 @@ And we get:
 
 
 Filtering Configurations for Post-processing of Results
------------------------
+----------------------------------------------------------
 
 You can use some utilities we provide to focus on a specific set of configurations after your experiments are terminated.
 Assuming you run `pydgn-train --config-file examples/MODEL_CONFIGS/config_SupToyDGN.yml` inside the PyDGN repo, you can
@@ -460,10 +460,49 @@ then do something like
     from pydgn.evaluation.util import retrieve_experiments, filter_experiments
 
     configs = retrieve_experiments('RESULTS/supervised_grid_search_toy_NCI1/MODEL_ASSESSMENT/OUTER_FOLD_1/MODEL_SELECTION/')
-    print(len(configs))  # will return 16
+    print(len(configs))  # will return 32
 
     filtered_configs = filter_experiments(configs, logic='OR', parameters={'Multiclass Classification': 1, 'lr': 0.001})
-    print(len(filtered_configs))  # will return 12
+    print(len(filtered_configs))  # will return 24
+
+
+
+Loading Model for Inspection in a Notebook
+----------------------------------------------
+
+We provide utilities to use your model immediately after experiments end to run additional analyses. Here's how:
+
+.. code-block:: python3
+
+    from pydgn.evaluation.util import *
+
+    config = retrieve_best_configuration('RESULTS/supervised_grid_search_toy_NCI1/MODEL_ASSESSMENT/OUTER_FOLD_1/MODEL_SELECTION/')
+    splits_filepath = 'examples/DATA_SPLITS/CHEMICAL/NCI1/NCI1_outer10_inner1.splits'
+    device = 'cpu'
+
+    # instantiate dataset
+    dataset = instantiate_dataset_from_config(config)
+
+    # instantiate model
+    model = instantiate_model_from_config(config, dataset, config_type="supervised_config")
+
+    # load model's checkpoint, assuming the best configuration has been loaded
+    checkpoint_location = 'RESULTS/supervised_grid_search_toy_NCI1/MODEL_ASSESSMENT/OUTER_FOLD_1/final_run1/best_checkpoint.pth'
+    load_checkpoint(checkpoint_location, model, device=device)
+
+    # you can now call the forward method of your model
+    y, embeddings = model(dataset[0])
+
+    # ------------------------------------------------------------------ #
+    # OPTIONAL: you can also instantiate a DataProvider to load TR/VL/TE splits specific to each fold
+    data_provider = instantiate_data_provider_from_config(config, splits_filepath)
+    # select outer fold 1 (indices start from 0)
+    data_provider.set_outer_k(0)
+    # select inner fold 1 (indices start from 0)
+    data_provider.set_inner_k(0)
+
+    # Please refer to the DataProvider documentation to use it properly.
+    # ------------------------------------------------------------------ #
 
 
 Telegram Bot
