@@ -13,3 +13,5 @@ Many thanks to **Alessio Gravina** ([Github](https://github.com/gravins)
 /[Homepage](http://pages.di.unipi.it/gravina/)) for his invaluable help on the temporal graph implementation.
 
 Many thanks to **Francesco Landolfi** ([Github](https://github.com/flandolfi)) for the suggestions on how to make this library more user-friendly!
+
+Many thanks to **Henrik Christiansen** ([Github](https://github.com/christiansenh)) for his help with the post-processing of results!

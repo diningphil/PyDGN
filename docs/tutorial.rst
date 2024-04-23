@@ -448,7 +448,7 @@ And we get:
    :width: 600
 
 
-Filtering Configurations for Successive Analyses
+Filtering Configurations for Post-processing of Results
 -----------------------
 
 You can use some utilities we provide to focus on a specific set of configurations after your experiments are terminated.

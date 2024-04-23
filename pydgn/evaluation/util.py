@@ -5,9 +5,12 @@ import os
 import random
 from typing import Tuple, Callable, List
 
+import torch
 import tqdm
 
+from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
+from pydgn.model.interface import ModelInterface
 from pydgn.static import *
 
 
@@ -349,6 +352,9 @@ def retrieve_experiments(model_selection_folder) -> List[dict]:
     """
     config_directory = os.path.join(model_selection_folder)
 
+    if not os.path.exists(config_directory):
+        raise FileNotFoundError(f"Directory not found: {config_directory}")
+
     folder_names = []
     for _, dirs, _ in os.walk(config_directory):
         for d in dirs:
@@ -448,3 +454,81 @@ def filter_experiments(
             filtered_config_list.append(config)
 
     return filtered_config_list
+
+
+def retrieve_best_configuration(model_selection_folder) -> dict:
+    """
+    Once the experiments are done, retrieves the winning configuration from
+     a specific model selection folder, and returns it as a dictionaries
+
+    :param model_selection_folder: path to the folder of a model selection,
+        that is, your_results_path/..../MODEL_SELECTION/
+    :return: a dictionary with info about the best configuration
+    """
+    config_directory = os.path.join(model_selection_folder)
+
+    if not os.path.exists(config_directory):
+        raise FileNotFoundError(f"Directory not found: {config_directory}")
+
+    best_config = json.load(
+        open(os.path.join(config_directory, "winner_config.json"), "rb")
+    )
+    return best_config
+
+
+def instantiate_dataset_from_config(config: dict) -> DatasetInterface:
+    """
+    Instantiate a dataset from a configuration file.
+    :param config (dict): the configuration file
+    :return: an instance of DatasetInterface, i.e., the dataset
+    """
+    data_root = config[CONFIG][DATA_ROOT]
+    dataset_name = config[CONFIG][DATASET]
+    dataset_class = s2c(config[CONFIG][DATASET_CLASS])
+
+    return dataset_class(data_root, dataset_name)
+
+
+def instantiate_model_from_config(config: dict,
+                                  dataset: DatasetInterface,
+                                  config_type: str = "supervised_config") -> ModelInterface:
+    """
+    Instantiate a model from a configuration file.
+    :param config (dict): the configuration file
+    :param dataset (DatasetInterface): the dataset used in the experiment
+    :param config_type (str): the type of model in ["supervised_config", "unsupervised_config"],
+        as written on the YAML experiment configuration file. Defaults to "supervised_config"
+    :return: an instance of ModelInterface, i.e., the model
+    """
+    config_ = config[CONFIG][config_type]
+    readout_class = s2c(config_["readout"])
+
+    model_class = s2c(config_[MODEL])
+    model = model_class(dataset.dim_node_features,
+                        dataset.dim_edge_features,
+                        dataset.dim_target,
+                        readout_class,
+                        config=config_)
+
+    return model
+
+
+def load_checkpoint(checkpoint_path: str, model: ModelInterface,
+                    device: torch.device):
+    """
+    Load a checkpoint from a checkpoint file into a model.
+    :param checkpoint_path: the checkpoint file path
+    :param model (ModelInterface): the model
+    :param device (torch.device): the device, e.g, "cpu" or "cuda"
+    """
+    ckpt_dict = torch.load(
+        checkpoint_path, map_location="cpu" if device == "cpu" else None
+    )
+    model_state = ckpt_dict[MODEL_STATE]
+
+    # Needed only when moving from cpu to cuda (due to changes in config
+    # file). Move all parameters to cuda.
+    for param in model_state.keys():
+        model_state[param] = model_state[param].to(device)
+
+    model.load_state_dict(model_state)
