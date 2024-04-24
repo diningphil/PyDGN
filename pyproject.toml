@@ -2,9 +2,6 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["pydgn"]
-
 [project]
 name = "pydgn"
 version = "1.5.4"
