@@ -21,7 +21,8 @@ jobs:
         exclude:
           - os: macos-latest
             python-version: ["3.8", "3.9"]
-            architecture: "arm64"
+            arch: 'arm64'
+
 
     steps:
     - uses: actions/checkout@v4
