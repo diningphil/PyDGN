@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+import torch
 from torch.utils.tensorboard import SummaryWriter
 
 from pydgn.static import *
@@ -14,16 +15,28 @@ class Plotter(EventHandler):
 
     Args:
         exp_path (str): path where to store the Tensorboard logs
+        store_on_disk (bool): whether to store all metrics on disk.
+            Defaults to False
         kwargs (dict): additional arguments that may depend on the plotter
     """
 
-    def __init__(self, exp_path: str, **kwargs: dict):
+    def __init__(self,
+                 exp_path: str,
+                 store_on_disk: bool = False,
+                 **kwargs: dict):
         super().__init__()
         self.exp_path = exp_path
+        self.store_on_disk = store_on_disk
 
         if not os.path.exists(Path(self.exp_path, TENSORBOARD)):
             os.makedirs(Path(self.exp_path, TENSORBOARD))
         self.writer = SummaryWriter(log_dir=Path(self.exp_path, "tensorboard"))
+
+        self.stored_metrics = {"losses": {}, "scores": {}}
+        self.stored_metrics_path = Path(self.exp_path, "metrics_data.torch")
+        if os.path.exists(self.stored_metrics_path):
+            self.stored_metrics = torch.load(self.stored_metrics_path)
+
 
     def on_epoch_end(self, state: State):
         """
@@ -46,6 +59,13 @@ class Plotter(EventHandler):
 
             self.writer.add_scalars(loss_name, loss_scalars, state.epoch)
 
+            if self.store_on_disk:
+                t = "losses"
+                if not k in self.stored_metrics[t]:
+                    self.stored_metrics[t][k] = [v.item()]
+                else:
+                    self.stored_metrics[t][k].append(v.item())
+
         for k, v in state.epoch_results[SCORES].items():
             score_scalars = {}
             # Remove training/validation/test prefix (coupling with Engine)
@@ -58,6 +78,20 @@ class Plotter(EventHandler):
                 score_scalars[f"{TEST}"] = v
 
             self.writer.add_scalars(score_name, score_scalars, state.epoch)
+
+            if self.store_on_disk:
+                t = "scores"
+                if not k in self.stored_metrics[t]:
+                    self.stored_metrics[t][k] = [v.item()]
+                else:
+                    self.stored_metrics[t][k].append(v.item())
+
+        if self.store_on_disk:
+            try:
+                torch.save(self.stored_metrics, self.stored_metrics_path)
+            except RuntimeError as e:
+                print(e)
+
 
     def on_fit_end(self, state: State):
         """

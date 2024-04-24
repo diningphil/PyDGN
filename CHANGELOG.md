@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.6] Storing metrics on disk
+
+### Added
+
+- You can now store metrics trend across epochs using `Plotter`. Just pass the argument `store_on_disk=True` in the configuration file of the experiment.
+
 ## [1.5.5] 
 
 ### Fixed
