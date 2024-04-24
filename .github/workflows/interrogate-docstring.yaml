@@ -13,11 +13,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        node-version: '20'
 
     - name: Set up Python 3.11
       uses: actions/setup-python@v4
       with:
         python-version: 3.11
+        node-version: '20'
 
     - name: Python Interrogate Check
       uses: diningphil/python-interrogate-check@main
