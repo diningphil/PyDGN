@@ -65,6 +65,30 @@ To stop the computation, use ``CTRL-C`` to send a ``SIGINT`` signal, and conside
 all Ray processes. **Warning:** ``ray stop`` stops **all** ray processes you have launched, including those of other
 experiments in progress, if any.
 
+### Using the Trained Models
+
+It's very easy to load the model from the experiments (see also the [Tutorial](https://pydgn.readthedocs.io/en/latest/tutorial.html)):
+
+    from pydgn.evaluation.util import *
+
+    config = retrieve_best_configuration('RESULTS/supervised_grid_search_toy_NCI1/MODEL_ASSESSMENT/OUTER_FOLD_1/MODEL_SELECTION/')
+    splits_filepath = 'examples/DATA_SPLITS/CHEMICAL/NCI1/NCI1_outer10_inner1.splits'
+    device = 'cpu'
+
+    # instantiate dataset
+    dataset = instantiate_dataset_from_config(config)
+
+    # instantiate model
+    model = instantiate_model_from_config(config, dataset, config_type="supervised_config")
+
+    # load model's checkpoint, assuming the best configuration has been loaded
+    checkpoint_location = 'RESULTS/supervised_grid_search_toy_NCI1/MODEL_ASSESSMENT/OUTER_FOLD_1/final_run1/best_checkpoint.pth'
+    load_checkpoint(checkpoint_location, model, device=device)
+
+    # you can now call the forward method of your model
+    y, embeddings = model(dataset[0])
+
+
 ## Projects using PyDGN
 
 - [Infinite Contextual Graph Markov Model (ICML 2022)](https://github.com/diningphil/iCGMM)

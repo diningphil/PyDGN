@@ -1,10 +1,18 @@
 # Changelog
 
-## [1.5.4] New post-processing tutorial
+## [1.5.5] 
+
+### Fixed
+
+- TOML project to comply with latest releases of `macos` and `coverage` package
+- `pydgn-train` and `pydgn-dataset` not being found in version `1.5.4`
+
+## [1.5.4] New post-processing tutorial (yanked)
 
 ### Added
 
-- TODO
+- Utilities to load model, dataset, data providers, and checkpoints from the experiments folder
+- Tutorials on README and documentation on how to use them.
 
 ## [1.5.3] Minor fix
 
