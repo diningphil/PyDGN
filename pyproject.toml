@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pydgn"
-version = "1.5.4"
+version = "1.5.5"
 description = "A Python Package for Deep Graph Networks"
 authors = [ { name="Federico Errica", email="f.errica@protonmail.com" } ]
 readme = "README.md"
