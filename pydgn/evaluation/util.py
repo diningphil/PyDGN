@@ -506,7 +506,7 @@ def instantiate_data_provider_from_config(config: dict,
     dataset_name = config[CONFIG][DATASET]
     dataset_class = s2c(config[CONFIG][DATASET_CLASS])
     dataset_getter = s2c(config[CONFIG][DATASET_GETTER])
-    dl_class, dl_args = return_class_and_args(config[CONFIG], DATASET_LOADER)
+    dl_class, dl_args = return_class_and_args(config[CONFIG], DATA_LOADER)
 
     return dataset_getter(
         data_root=data_root,
