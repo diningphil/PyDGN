@@ -7,6 +7,7 @@ from typing import Tuple, Callable, List
 
 import torch
 import tqdm
+from pydgn.data.provider import DataProvider
 
 from pydgn.data.dataset import DatasetInterface
 from pydgn.experiment.util import s2c
@@ -342,8 +343,8 @@ def loguniform(*args):
 def retrieve_experiments(model_selection_folder) -> List[dict]:
     """
     Once the experiments are done, retrieves the config_results.json files of
-     all configurations in a specific model selection folder, and returns them
-     as a list of dictionaries
+    all configurations in a specific model selection folder, and returns them
+    as a list of dictionaries
 
     :param model_selection_folder: path to the folder of a model selection,
         that is, your_results_path/..../MODEL_SELECTION/
@@ -367,7 +368,7 @@ def retrieve_experiments(model_selection_folder) -> List[dict]:
         exp_info = json.load(
             open(os.path.join(cf, "config_results.json"), "rb")
         )
-        exp_config = exp_info[CONFIG]
+        exp_config = exp_info
 
         exp_config["exp_folder"] = cf
         configs.append(exp_config)
@@ -459,7 +460,7 @@ def filter_experiments(
 def retrieve_best_configuration(model_selection_folder) -> dict:
     """
     Once the experiments are done, retrieves the winning configuration from
-     a specific model selection folder, and returns it as a dictionaries
+    a specific model selection folder, and returns it as a dictionaries
 
     :param model_selection_folder: path to the folder of a model selection,
         that is, your_results_path/..../MODEL_SELECTION/
@@ -489,6 +490,36 @@ def instantiate_dataset_from_config(config: dict) -> DatasetInterface:
     return dataset_class(data_root, dataset_name)
 
 
+def instantiate_data_provider_from_config(config: dict,
+                                          splits_filepath: str,
+                                          n_outer_folds: int,
+                                          n_inner_folds: int) -> DataProvider:
+    """
+    Instantiate a data provider from a configuration file.
+    :param config (dict): the configuration file
+    :param splits_filepath (str): the path to data splits file
+    :param n_outer_folds (int): the number of outer folds
+    :param n_inner_folds (int): the number of inner folds
+    :return: an instance of DataProvider, i.e., the data provider
+    """
+    data_root = config[CONFIG][DATA_ROOT]
+    dataset_name = config[CONFIG][DATASET]
+    dataset_class = s2c(config[CONFIG][DATASET_CLASS])
+    dataset_getter = s2c(config[CONFIG][DATASET_GETTER])
+    dl_class, dl_args = return_class_and_args(config[CONFIG], DATA_LOADER)
+
+    return dataset_getter(
+        data_root=data_root,
+        splits_filepath=splits_filepath,
+        dataset_class=dataset_class,
+        dataset_name=dataset_name,
+        data_loader_class=dl_class,
+        data_loader_args=dl_args,
+        outer_folds=n_outer_folds,
+        inner_folds=n_inner_folds
+    )
+
+
 def instantiate_model_from_config(config: dict,
                                   dataset: DatasetInterface,
                                   config_type: str = "supervised_config") -> ModelInterface:
@@ -501,7 +532,9 @@ def instantiate_model_from_config(config: dict,
     :return: an instance of ModelInterface, i.e., the model
     """
     config_ = config[CONFIG][config_type]
-    readout_class = s2c(config_["readout"])
+
+    readout_str = config_.get(READOUT)
+    readout_class = s2c(readout_str) if readout_str is not None else None
 
     model_class = s2c(config_[MODEL])
     model = model_class(dataset.dim_node_features,

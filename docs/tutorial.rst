@@ -495,11 +495,20 @@ We provide utilities to use your model immediately after experiments end to run 
 
     # ------------------------------------------------------------------ #
     # OPTIONAL: you can also instantiate a DataProvider to load TR/VL/TE splits specific to each fold
+
     data_provider = instantiate_data_provider_from_config(config, splits_filepath)
     # select outer fold 1 (indices start from 0)
     data_provider.set_outer_k(0)
     # select inner fold 1 (indices start from 0)
     data_provider.set_inner_k(0)
+
+    # set exp seet for workers (does not affect inference)
+    data_provider.set_exp_seed(42)  # any seed
+
+    # load loaders associated with final runs of outer 1 split
+    train_loader = data_provider.get_outer_train()
+    val_loader = data_provider.get_outer_train()
+    test_loader = data_provider.get_outer_train()
 
     # Please refer to the DataProvider documentation to use it properly.
     # ------------------------------------------------------------------ #
