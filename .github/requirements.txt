@@ -5,4 +5,5 @@ tqdm
 ogb
 ray
 torch
+numpy
 torch-geometric>=2.3.0
