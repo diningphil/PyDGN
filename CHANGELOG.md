@@ -6,6 +6,11 @@
 
 - Experiment retrieval routines not working as expected when loading checkpoint of a specific configuration rather than the best one.
 - Added function `instantiate_data_provider_from_config` that was somehow missing (see tutorials)
+
+## Changed
+
+- Dropping tests on MacOS 13, as they are causing too many problems since recent changes.
+
 ## [1.5.6] Storing metrics on disk
 
 ### Added
