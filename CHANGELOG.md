@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.7] Improving experiment retrieval routines
+
+## Fixed
+
+- Experiment retrieval routines not working as expected when loading checkpoint of a specific configuration rather than the best one.
+- Added function `instantiate_data_provider_from_config` that was somehow missing (see tutorials)
 ## [1.5.6] Storing metrics on disk
 
 ### Added
