@@ -1,4 +1,9 @@
 # Changelog
+## [1.5.8] Minor fix
+
+## Fixed
+
+- Minor fix in `filter_experiments`
 
 ## [1.5.7] Improving experiment retrieval routines
 

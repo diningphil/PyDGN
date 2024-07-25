@@ -401,15 +401,15 @@ def filter_experiments(
 
     def _finditem(obj, key):
         if key in obj:
-            return obj[key]
+            return obj[key], True
 
         for k, v in obj.items():
             if isinstance(v, dict):
-                item = _finditem(v, key)
-                if item is not None:
-                    return item
+                item, found = _finditem(v, key)
+                if found:
+                    return item, True
 
-        return None
+        return None, False
 
     assert logic in ["AND", "OR"], "logic can only be AND/OR case sensitive"
 
@@ -420,8 +420,8 @@ def filter_experiments(
 
         for k, v in parameters.items():
 
-            cf_v = _finditem(config, k)
-            assert cf_v is not None, (
+            cf_v, found = _finditem(config, k)
+            assert found, (
                 f"Key {k} not found in the " f"configuration, check your input"
             )
 
