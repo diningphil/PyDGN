@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 import torch
+from pydgn.training.util import atomic_save
 from torch.utils.tensorboard import SummaryWriter
 
 from pydgn.static import *
@@ -33,7 +34,7 @@ class Plotter(EventHandler):
         self.writer = SummaryWriter(log_dir=Path(self.exp_path, "tensorboard"))
 
         self.stored_metrics = {"losses": {}, "scores": {}}
-        self.stored_metrics_path = Path(self.exp_path, "metrics_data.torch")
+        self.stored_metrics_path = Path(self.exp_path, "metrics_data.pt")
         if os.path.exists(self.stored_metrics_path):
             self.stored_metrics = torch.load(self.stored_metrics_path)
 
@@ -87,11 +88,7 @@ class Plotter(EventHandler):
                     self.stored_metrics[t][k].append(v.item())
 
         if self.store_on_disk:
-            try:
-                torch.save(self.stored_metrics, self.stored_metrics_path)
-            except RuntimeError as e:
-                print(e)
-
+            atomic_save(self.stored_metrics, self.stored_metrics_path)
 
     def on_fit_end(self, state: State):
         """
