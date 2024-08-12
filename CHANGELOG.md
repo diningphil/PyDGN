@@ -1,4 +1,10 @@
 # Changelog
+## [1.5.9] Minor fix
+
+## Changed
+  - Replaced torch.save with atomic_save of PyDGN to handle cases where metrics data storage corrupted the file
+
+
 ## [1.5.8] Minor fix
 
 ## Fixed
