@@ -340,7 +340,8 @@ def loguniform(*args):
     return base ** (random.uniform(log_min, log_max))
 
 
-def retrieve_experiments(model_selection_folder) -> List[dict]:
+def retrieve_experiments(model_selection_folder,
+                         skip_results_not_found : bool =False) -> List[dict]:
     """
     Once the experiments are done, retrieves the config_results.json files of
     all configurations in a specific model selection folder, and returns them
@@ -348,6 +349,9 @@ def retrieve_experiments(model_selection_folder) -> List[dict]:
 
     :param model_selection_folder: path to the folder of a model selection,
         that is, your_results_path/..../MODEL_SELECTION/
+    :param skip_results_not_found: whether to skip an experiment if a
+        `config_results.json` file has not been produced yet. Useful when
+        analyzing experiments while others still run.
     :return: a list of dictionaries, one per configuration, each with an extra
         key "exp_folder" which identifies the config folder.
     """
@@ -365,8 +369,12 @@ def retrieve_experiments(model_selection_folder) -> List[dict]:
 
     configs = []
     for cf in folder_names:
+        config_results_path = os.path.join(cf, "config_results.json")
+        if not os.path.exists(config_results_path) and skip_results_not_found:
+            continue
+
         exp_info = json.load(
-            open(os.path.join(cf, "config_results.json"), "rb")
+            open(config_results_path, "rb")
         )
         exp_config = exp_info
 

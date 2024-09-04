@@ -91,6 +91,7 @@ grid:
         args:
           main_scorer: pydgn.training.callback.metric.MulticlassAccuracy
           my_second_metric: pydgn.training.callback.metric.ToyMetric
+          gpu_mem: pydgn.training.callback.metric.AllocatedGPUMemory
 
     # Readout (optional)
     readout: pydgn.model.readout.graph_readout.LinearGraphReadout

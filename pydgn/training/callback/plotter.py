@@ -173,3 +173,4 @@ class WandbPlotter(EventHandler):
                 object holding training information
         """
         self._wandb.finish()
+
