@@ -1,4 +1,15 @@
 # Changelog
+
+## [1.6.0]
+
+## Added
+  - We can now pass arguments to `pydgn.training.callback.metric.Metric` objects to create arbitrary behavior
+
+
+## Changed
+  - Added possibility to skip unfinished experiments when calling `pydgn.evaluation.util.retrieve_experiments`. See documentation for more information.
+
+
 ## [1.5.9] Minor fix
 
 ## Changed
