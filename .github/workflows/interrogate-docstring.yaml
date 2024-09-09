@@ -27,6 +27,8 @@ jobs:
       with:
         path: 'pydgn'
         badge-location: '.badges/interrogate_badge.svg'
+        ignore-module: True
+        inputs: -i
 
 
     - name: Commit files
