@@ -14,6 +14,9 @@ on:
 
 jobs:
 
+  interrogate-docstring:
+    uses: diningphil/PyDGN/.github/workflows/interrogate-docstring.yaml@main
+
   tests-and-coverage:
     uses: diningphil/PyDGN/.github/workflows/python-test-and-coverage.yml@main
 
