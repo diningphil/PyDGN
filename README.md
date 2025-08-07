@@ -14,6 +14,9 @@
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
+## [❗❗ 2025 Update: PyDGN is now considered legacy; users are encouraged to switch to MLWiz❗❗](https://github.com/diningphil/mlwiz)
+
+
 This is a Python library to easily experiment
 with [Deep Graph Networks](https://www.sciencedirect.com/science/article/pii/S0893608020302197) (DGNs). It provides
 automatic management of data splitting, loading and common experimental settings. It also handles both model
