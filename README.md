@@ -14,7 +14,7 @@
 
 ## [Documentation](https://pydgn.readthedocs.io/en/latest/index.html)
 
-## [❗❗ 2025 Update: PyDGN is now considered legacy; users are encouraged to switch to MLWiz❗❗](https://github.com/diningphil/mlwiz)
+## [❗2025 Update: development efforts are moving to MLWiz❗](https://github.com/diningphil/mlwiz)
 
 
 This is a Python library to easily experiment
